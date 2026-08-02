@@ -16,7 +16,7 @@ classifiers = [
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
 ]
-dependencies = []
+dependencies = ["typer>=0.27.0"]
 
 [dependency-groups]
 dev = ["pytest>=8.0.0", "ruff>=0.3.0"]
@@ -24,7 +24,7 @@ dev = ["pytest>=8.0.0", "ruff>=0.3.0"]
 [project.optional-dependencies]
 
 [project.scripts]
-main = "python_boilerplate.main:main"
+main = "pymedia.main:main"
 
 [build-system]
 requires = ["hatchling"]
