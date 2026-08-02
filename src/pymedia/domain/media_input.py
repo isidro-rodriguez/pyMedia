@@ -8,16 +8,6 @@ from pymedia.utils import parse_fraction, to_float, to_int
 
 
 @dataclass(frozen=True)
-class Audio:
-    codec: str | None = None
-    sample_rate: int | None = None
-    channels: int | None = None
-    channel_layout: str | None = None
-    bit_rate: int | None = None
-    language: str | None = None
-
-
-@dataclass(frozen=True)
 class Video:
     codec: str | None = None
     width: int | None = None
@@ -26,6 +16,16 @@ class Video:
     bit_rate: int | None = None
     pix_fmt: str | None = None
     aspect_ratio: str | None = None
+
+
+@dataclass(frozen=True)
+class Audio:
+    codec: str | None = None
+    sample_rate: int | None = None
+    channels: int | None = None
+    channel_layout: str | None = None
+    bit_rate: int | None = None
+    language: str | None = None
 
 
 @dataclass(frozen=True)

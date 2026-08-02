@@ -9,6 +9,8 @@ from typing import Annotated
 
 import typer
 
+from pymedia.domain.config import Config
+
 app = typer.Typer()
 
 
@@ -41,30 +43,35 @@ def encode(
         print(f"Rotando {path}: {rotate}º")
     if transcode:
         print(f"Recodificando {path}")
+    config = Config.load()
 
 
 @app.command()
 def join(path: Path) -> None:
     """Une los vídeos en el orden aportado"""
     print("Unión")
+    # TODO: implementar join
 
 
 @app.command()
 def split(path: Path) -> None:
     """Separa un vídeo en los puntos de corte indicados"""
     print("División")
+    # TODO: implementar split
 
 
 @app.command()
 def gif(path: Path) -> None:
     """Genera un gif animado del vídeo aportado"""
     print("Animando gif")
+    # TODO: implementar gif
 
 
 @app.command()
 def config() -> None:
     """Accede a la configuración de pyMedia"""
     print("Editando configuración")
+    # TODO: implementar edición del config
 
 
 if __name__ == "__main__":

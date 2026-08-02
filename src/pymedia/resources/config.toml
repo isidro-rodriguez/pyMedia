@@ -1,0 +1,27 @@
+# +-------------+------------------------------------+--------------------+
+# |             |             Vídeo                  |       Audio        |
+# |  Perfiles   +-------+--------+-----+-------------+---------+----------+
+# |             | Códec | Preset | CRF | pix_fmt     | Códec   | bit rate |
+# +-------------+-------+--------+-----+-------------+---------+----------+
+# | Rápido      | h264  |  fast  |  22 | yuv420p     | aac     |     160k |
+# | Equilibrado | hevc  |  slow  |  24 | yuv420p10le | aac     |     128k |
+# | Máximo      | av1   |     4  |  32 | yuv420p10le | libopus |      96k |
+# +-------------+-------+--------+-----+-------------+---------+----------+
+# - Rápido: transcodifica rápido sin esperar mucho
+# - Equilibrado: ocupa un 40% menos que con h264, pero tarda el triple
+# - Máximo: ocupa un 12% menos que hevc, pero es mucho más lento
+
+[transcode]
+video_codec = "hevc"
+video_preset = "slow"
+video_crf = "24"
+video_pix_fmt = "yuv420p10le"
+audio_codec = "aac"
+audio_bit_rate = "128k"
+
+[conflictive_join]
+resize_to = "min_height"    # min_height | max_height
+fps = "min"                 # min | max
+channels = "stereo"         # stereo | mono
+pix_fmt = "yuv420p"         # yuv420p | yuv420p10le
+confirm_transcode = true
