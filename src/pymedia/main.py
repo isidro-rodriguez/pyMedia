@@ -5,11 +5,21 @@
 # > pymedia ACTIONS path      # Genera comando ffmpeg y lo ejecuta por CLI
 # > pymedia OPERATION ACTIONS path
 from pathlib import Path
-from typing import Annotated
 
 import typer
 
+from pymedia.cli_params import (
+    CropOption,
+    GyrateOption,
+    PathArgument,
+    PathsArgument,
+    RemuxOption,
+    ScaleOption,
+    TrimPointsOption,
+)
+from pymedia.commands.transcode import transcode
 from pymedia.domain.config import Config
+from pymedia.domain.transcoding_pipeline import TranscodingPipeline
 
 app = typer.Typer()
 
@@ -23,38 +33,46 @@ def tui(ctx: typer.Context) -> None:
 
 
 @app.command()
-def encode(
-    path: list[Path],
-    scale: Annotated[
-        int, typer.Option("--scale", "-s", help="Redimensiona vídeo.")
-    ] = 0,
-    crop: Annotated[str, typer.Option("--crop", "-c", help="Recorta la imagen.")] = "",
-    rotate: Annotated[int, typer.Option("--rotate", "-g", help="Gira el vídeo.")] = 0,
-    transcode: Annotated[
-        bool, typer.Option("--transcode", "-t", help="Transcodifica el vídeo.")
-    ] = False,
+def recode(
+    paths: PathsArgument,
+    crop: CropOption = None,
+    scale: ScaleOption = None,
+    gyrate: GyrateOption = None,
+    remux: RemuxOption = False,
 ) -> None:
-    """Recodifica los vídeos basándose en las acciones propuestas"""
-    if scale:
-        print(f"Redimensionando {path} a {scale}")
-    if crop:
-        print(f"Cortando {path} a {crop}")
-    if rotate:
-        print(f"Rotando {path}: {rotate}º")
-    if transcode:
-        print(f"Recodificando {path}")
+    """
+    Transcodifica con las opciones elegidas (requiere al menos una opción)
+    """
+    if crop is None and scale is None and gyrate is None and remux is False:
+        print("Se requiere al menos una opción.")
+        return
     config = Config.load()
+    pipeline = TranscodingPipeline(crop=crop, gyrate=gyrate, remux=remux, scale=scale)
+    transcode(paths, config, pipeline)
 
 
 @app.command()
-def join(path: Path) -> None:
+def join(
+    paths: PathsArgument,
+    crop: CropOption = None,
+    scale: ScaleOption = None,
+    gyrate: GyrateOption = None,
+    remux: RemuxOption = False,
+) -> None:
     """Une los vídeos en el orden aportado"""
     print("Unión")
     # TODO: implementar join
 
 
 @app.command()
-def split(path: Path) -> None:
+def split(
+    trim_points: TrimPointsOption,
+    path: PathArgument,
+    crop: CropOption = None,
+    scale: ScaleOption = None,
+    gyrate: GyrateOption = None,
+    remux: RemuxOption = False,
+) -> None:
     """Separa un vídeo en los puntos de corte indicados"""
     print("División")
     # TODO: implementar split
