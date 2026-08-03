@@ -47,7 +47,9 @@ def recode(
         print("Se requiere al menos una opción.")
         return
     config = Config.load()
-    pipeline = TranscodingPipeline(crop=crop, gyrate=gyrate, remux=remux, scale=scale)
+    if scale:
+        resize_to = scale.value
+    pipeline = TranscodingPipeline(crop=crop, gyrate=gyrate, remux=remux, scale=resize_to)
     transcode(paths, config, pipeline)
 
 

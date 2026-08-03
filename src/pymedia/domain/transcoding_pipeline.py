@@ -50,6 +50,9 @@ class TranscodingPipeline:
             return False
         if media.video.height is None:
             return False
+        if self.scale is None:
+            return False
         if self.scale >= media.video.height:
+            print(f"{self.scale} >= {media.video.height}")
             return False
         return True

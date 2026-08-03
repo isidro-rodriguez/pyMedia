@@ -1,0 +1,1165 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Python Cheatsheet</title>
+<style>
+  :root {
+    --bg: #f8f9fa;
+    --bg-card: #ffffff;
+    --bg-code: #1e1e2e;
+    --text: #2d3436;
+    --text-muted: #636e72;
+    --accent: #3776ab;
+    --accent-light: #4a90d9;
+    --border: #dfe6e9;
+    --green: #00b894;
+    --orange: #e17055;
+    --purple: #6c5ce7;
+    --red: #d63031;
+    --yellow: #fdcb6e;
+    --sidebar-w: 260px;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+  }
+  /* Sidebar */
+  #sidebar {
+    position: fixed; top: 0; left: 0;
+    width: var(--sidebar-w); height: 100vh;
+    background: var(--bg-card); border-right: 1px solid var(--border);
+    overflow-y: auto; padding: 1rem 0;
+  }
+  #sidebar h1 {
+    font-size: 1.3rem; text-align: center; color: var(--accent);
+    padding: 0.5rem 1rem 1rem; border-bottom: 1px solid var(--border);
+  }
+  #sidebar a {
+    display: block; padding: 0.4rem 1rem;
+    text-decoration: none; color: var(--text-muted);
+    font-size: 0.875rem; transition: all 0.15s;
+  }
+  #sidebar a:hover { background: var(--bg); color: var(--accent); }
+  #sidebar a.active { background: var(--accent); color: #fff; }
+  /* Search */
+  #search-box {
+    display: block; width: calc(100% - 2rem);
+    margin: 0 1rem 1rem; padding: 0.5rem 0.75rem;
+    border: 1px solid var(--border); border-radius: 6px;
+    font-size: 0.85rem; outline: none;
+  }
+  #search-box:focus { border-color: var(--accent); }
+  /* Main */
+  #main {
+    margin-left: var(--sidebar-w); padding: 2rem 3rem; max-width: 900px;
+  }
+  .section {
+    background: var(--bg-card); border-radius: 8px;
+    padding: 1.5rem; margin-bottom: 1.5rem;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+  }
+  .section h2 {
+    color: var(--accent); font-size: 1.25rem;
+    margin-bottom: 0.75rem; padding-bottom: 0.5rem;
+    border-bottom: 2px solid var(--border);
+  }
+  .section p { margin-bottom: 0.75rem; color: var(--text-muted); }
+  /* Code blocks */
+  .code-wrapper { position: relative; margin: 0.75rem 0; }
+  pre {
+    background: var(--bg-code); color: #cdd6f4;
+    padding: 1rem 1.2rem; border-radius: 8px;
+    overflow-x: auto; font-size: 0.85rem; line-height: 1.5;
+  }
+  code { font-family: 'Fira Code', 'Consolas', 'Monaco', monospace; }
+  .copy-btn {
+    position: absolute; top: 0.5rem; right: 0.5rem;
+    background: rgba(255,255,255,0.1); color: #cdd6f4;
+    border: none; border-radius: 4px;
+    padding: 0.25rem 0.6rem; font-size: 0.75rem;
+    cursor: pointer; transition: all 0.15s;
+  }
+  .copy-btn:hover { background: rgba(255,255,255,0.2); }
+  .copy-btn.copied { background: var(--green); color: #fff; }
+  /* Syntax highlighting */
+  .kw { color: #cba6f7; font-weight: 600; }       /* keyword: purple */
+  .str { color: #a6e3a1; }                         /* string: green */
+  .num { color: #fab387; }                         /* number: orange */
+  .com { color: #6c7086; font-style: italic; }     /* comment: gray */
+  .fn  { color: #89b4fa; }                         /* function: blue */
+  .cls { color: #f9e2af; }                         /* class: yellow */
+  .dec { color: #f38ba8; }                         /* decorator: red */
+  .op  { color: #94e2d5; }                         /* operator: teal */
+  /* Tables */
+  table { width: 100%; border-collapse: collapse; margin: 0.75rem 0; }
+  th, td { padding: 0.5rem 0.75rem; text-align: left; border-bottom: 1px solid var(--border); }
+  th { color: var(--accent); font-size: 0.85rem; }
+  td { font-size: 0.85rem; }
+  /* Badges */
+  .badge {
+    display: inline-block; padding: 0.1rem 0.5rem;
+    border-radius: 4px; font-size: 0.7rem; font-weight: 600;
+    margin-left: 0.5rem; vertical-align: middle;
+  }
+  .badge-new { background: var(--green); color: #fff; }
+  .badge-adv { background: var(--purple); color: #fff; }
+  /* Responsive */
+  @media (max-width: 768px) {
+    #sidebar { width: 100%; height: auto; position: relative; }
+    #main { margin-left: 0; padding: 1rem; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ==================== SIDEBAR ==================== -->
+<nav id="sidebar">
+  <h1>🐍 Python Cheatsheet</h1>
+  <input type="text" id="search-box" placeholder="🔍 Buscar..." oninput="filterSections()">
+  <a href="#variables">Variables y tipos</a>
+  <a href="#control-flujo">Control de flujo</a>
+  <a href="#funciones">Funciones</a>
+  <a href="#estructuras">Estructuras de datos</a>
+  <a href="#comprehensions">Comprehensions</a>
+  <a href="#fstrings">F-strings</a>
+  <a href="#archivos">Archivos</a>
+  <a href="#errores">Manejo de errores</a>
+  <a href="#oop">OOP: Clases</a>
+  <a href="#dataclasses">Dataclasses</a>
+  <a href="#decoradores">Decoradores</a>
+  <a href="#generadores">Generadores</a>
+  <a href="#type-hints">Type hints</a>
+  <a href="#modulos">Módulos y paquetes</a>
+  <a href="#json">JSON</a>
+  <a href="#regex">Expresiones regulares</a>
+  <a href="#async">Async / Await</a>
+  <a href="#operadores">Operadores útiles</a>
+  <a href="#builtins">Builtins frecuentes</a>
+  <a href="#buenas-practicas">Buenas prácticas</a>
+  <a href="#entornos">Entornos y uv</a>
+</nav>
+
+<!-- ==================== MAIN ==================== -->
+<div id="main">
+
+<!-- ==================== VARIABLES ==================== -->
+<section class="section" id="variables" data-title="Variables y tipos">
+  <h2>Variables y tipos de datos</h2>
+  <p>Python es de tipado dinámico. Los tipos principales son <code>int</code>, <code>float</code>, <code>str</code>, <code>bool</code> y <code>None</code>.</p>
+  <div class="code-wrapper">
+    <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+    <pre><code><span class="kw">nombre</span>: <span class="cls">str</span> = <span class="str">"Ana"</span>
+<span class="kw">edad</span>: <span class="cls">int</span> = <span class="num">30</span>
+<span class="kw">precio</span>: <span class="cls">float</span> = <span class="num">9.99</span>
+<span class="kw">es_activo</span>: <span class="cls">bool</span> = <span class="kw">True</span>
+<span class="kw">nulo</span>: <span class="cls">None</span> = <span class="kw">None</span>
+
+<span class="com"># Conversión entre tipos</span>
+<span class="fn">int</span>(<span class="str">"42"</span>)       <span class="com"># 42</span>
+<span class="fn">str</span>(<span class="num">42</span>)          <span class="com"># "42"</span>
+<span class="fn">float</span>(<span class="str">"3.14"</span>)    <span class="com"># 3.14</span>
+<span class="fn">bool</span>(<span class="num">0</span>)          <span class="com"># False (0, "", [], None son falsy)</span>
+<span class="fn">list</span>(<span class="str">"abc"</span>)      <span class="com"># ['a', 'b', 'c']</span></code></pre>
+  </div>
+  <table>
+    <tr><th>Tipo</th><th>Ejemplo</th><th>Métodos útiles</th></tr>
+    <tr><td><code>str</code></td><td><code>"hola"</code></td><td><code>.upper()</code>, <code>.lower()</code>, <code>.strip()</code>, <code>.split()</code>, <code>.replace()</code></td></tr>
+    <tr><td><code>int</code></td><td><code>42</code></td><td><code>abs()</code>, <code>divmod()</code>, <code>pow()</code></td></tr>
+    <tr><td><code>float</code></td><td><code>3.14</code></td><td><code>round()</code>, <code>is_integer()</code></td></tr>
+    <tr><td><code>bool</code></td><td><code>True</code></td><td><code>and</code>, <code>or</code>, <code>not</code></td></tr>
+  </table>
+</section>
+
+<!-- ==================== CONTROL DE FLUJO ==================== -->
+<section class="section" id="control-flujo" data-title="Control de flujo">
+  <h2>Control de flujo</h2>
+  <div class="code-wrapper">
+    <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+    <pre><code><span class="com"># if / elif / else</span>
+<span class="kw">if</span> edad >= <span class="num">18</span>:
+    <span class="fn">print</span>(<span class="str">"Adulto"</span>)
+<span class="kw">elif</span> edad >= <span class="num">13</span>:
+    <span class="fn">print</span>(<span class="str">"Adolescente"</span>)
+<span class="kw">else</span>:
+    <span class="fn">print</span>(<span class="str">"Niño"</span>)
+
+<span class="com"># for con range</span>
+<span class="kw">for</span> i <span class="kw">in</span> <span class="fn">range</span>(<span class="num">5</span>):       <span class="com"># 0, 1, 2, 3, 4</span>
+    <span class="fn">print</span>(i)
+
+<span class="com"># for con enumerate</span>
+<span class="kw">for</span> i, val <span class="kw">in</span> <span class="fn">enumerate</span>([<span class="str">"a"</span>, <span class="str">"b"</span>]):
+    <span class="fn">print</span>(i, val)   <span class="com"># 0 a / 1 b</span>
+
+<span class="com"># while</span>
+<span class="kw">while</span> edad > <span class="num">0</span>:
+    edad -= <span class="num">1</span>
+
+<span class="com"># break / continue</span>
+<span class="kw">for</span> i <span class="kw">in</span> <span class="fn">range</span>(<span class="num">10</span>):
+    <span class="kw">if</span> i == <span class="num">3</span>: <span class="kw">continue</span>  <span class="com"># salta el 3</span>
+    <span class="kw">if</span> i == <span class="num">7</span>: <span class="kw">break</span>     <span class="com"># termina en 7</span>
+    <span class="fn">print</span>(i)</code></pre>
+  </div>
+  <h3 style="margin:1rem 0 0.5rem;color:var(--accent);">Match / Case <span class="badge badge-new">3.10+</span></h3>
+  <div class="code-wrapper">
+    <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+    <pre><code><span class="kw">def</span> <span class="fn">responder</span>(comando):
+    <span class="kw">match</span> comando:
+        <span class="kw">case</span> <span class="str">"hola"</span>:
+            <span class="kw">return</span> <span class="str">"¡Hola!"</span>
+        <span class="kw">case</span> <span class="str">"adios"</span>:
+            <span class="kw">return</span> <span class="str">"¡Chao!"</span>
+        <span class="kw">case</span> _:
+            <span class="kw">return</span> <span class="str">"No entiendo"</span></code></pre>
+  </div>
+</section>
+
+<!-- ==================== FUNCIONES ==================== -->
+<section class="section" id="funciones" data-title="Funciones">
+  <h2>Funciones</h2>
+  <div class="code-wrapper">
+    <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+    <pre><code><span class="com"># Función básica con valor por defecto</span>
+<span class="kw">def</span> <span class="fn">saludar</span>(nombre: <span class="cls">str</span>, saludo: <span class="cls">str</span> = <span class="str">"Hola"</span>) -> <span class="cls">str</span>:
+    <span class="kw">return</span> <span class="str">f"{saludo}, {nombre}"</span>
+
+<span class="fn">print</span>(<span class="fn">saludar</span>(<span class="str">"Mundo"</span>))        <span class="com"># Hola, Mundo</span>
+<span class="fn">print</span>(<span class="fn">saludar</span>(<span class="str">"Ana"</span>, <span class="str">"Hi"</span>))     <span class="com"># Hi, Ana</span>
+
+<span class="com"># *args (argumentos posicionales variables)</span>
+<span class="kw">def</span> <span class="fn">sumar_todo</span>(*args):
+    <span class="kw">return</span> <span class="fn">sum</span>(args)
+
+<span class="fn">sumar_todo</span>(<span class="num">1</span>, <span class="num">2</span>, <span class="num">3</span>, <span class="num">4</span>)  <span class="com"># 10</span>
+
+<span class="com"># **kwargs (argumentos con nombre variables)</span>
+<span class="kw">def</span> <span class="fn">configurar</span>(**kwargs):
+    <span class="kw">for</span> k, v <span class="kw">in</span> kwargs.items():
+        <span class="fn">print</span>(<span class="str">f"{k} = {v}"</span>)
+
+<span class="fn">configurar</span>(host=<span class="str">"localhost"</span>, port=<span class="num">8080</span>)
+
+<span class="com"># Lambda (función anónima)</span>
+cuadrado = <span class="kw">lambda</span> x: x ** <span class="num">2</span>
+<span class="fn">print</span>(cuadrado(<span class="num">5</span>))  <span class="com"># 25</span>
+
+<span class="com"># Función como argumento</span>
+nums = [<span class="num">1</span>, <span class="num">2</span>, <span class="num">3</span>, <span class="num">4</span>]
+pares = <span class="fn">list</span>(<span class="fn">filter</span>(<span class="kw">lambda</span> x: x % <span class="num">2</span> == <span class="num">0</span>, nums))
+<span class="fn">print</span>(pares)  <span class="com"># [2, 4]</span></code></pre>
+  </div>
+</section>
+
+<!-- ==================== ESTRUCTURAS ==================== -->
+<section class="section" id="estructuras" data-title="Estructuras de datos">
+  <h2>Estructuras de datos</h2>
+
+  <h3 style="margin:0.5rem 0;color:var(--accent);">Listas</h3>
+  <div class="code-wrapper">
+    <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+    <pre><code>lista = [<span class="num">1</span>, <span class="num">2</span>, <span class="num">3</span>]
+lista.append(<span class="num">4</span>)          <span class="com"># [1, 2, 3, 4]</span>
+lista.insert(<span class="num">0</span>, <span class="num">0</span>)      <span class="com"># [0, 1, 2, 3, 4]</span>
+lista.pop()               <span class="com"># 4 (elimina y devuelve el último)</span>
+lista.remove(<span class="num">2</span>)          <span class="com"># elimina el valor 2</span>
+lista[<span class="num">0</span>]                 <span class="com"># primer elemento</span>
+lista[-<span class="num">1</span>]                <span class="com"># último elemento</span>
+lista[<span class="num">1</span>:<span class="num">3</span>]               <span class="com"># slice: [1, 2]</span>
+lista[::-<span class="num">1</span>]              <span class="com"># invertida</span>
+<span class="fn">len</span>(lista)               <span class="com"># longitud</span>
+<span class="num">3</span> <span class="kw">in</span> lista               <span class="com"># True (pertenencia)</span></code></pre>
+  </div>
+
+  <h3 style="margin:0.5rem 0;color:var(--accent);">Diccionarios</h3>
+  <div class="code-wrapper">
+    <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+    <pre><code>d = {<span class="str">"nombre"</span>: <span class="str">"Ana"</span>, <span class="str">"edad"</span>: <span class="num">30</span>}
+d[<span class="str">"nombre"</span>]              <span class="com"># "Ana"</span>
+d.get(<span class="str">"otra"</span>, <span class="str">"default"</span>)  <span class="com"># "default" (sin error)</span>
+d[<span class="str">"email"</span>] = <span class="str">"a@b.com"</span>   <span class="com"># añadir clave</span>
+d.pop(<span class="str">"edad"</span>)             <span class="com"># 30 (elimina y devuelve)</span>
+d.keys()                  <span class="com"># dict_keys(['nombre', 'email'])</span>
+d.values()                <span class="com"># dict_values(['Ana', 'a@b.com'])</span>
+d.items()                 <span class="com"># dict_items([('nombre', 'Ana'), ...])</span>
+
+<span class="com"># Merge de dicts (3.9+)</span>
+d1 = {<span class="str">"a"</span>: <span class="num">1</span>}
+d2 = {<span class="str">"b"</span>: <span class="num">2</span>}
+fusion = d1 | d2          <span class="com"># {'a': 1, 'b': 2}</span></code></pre>
+  </div>
+
+  <h3 style="margin:0.5rem 0;color:var(--accent);">Sets (conjuntos)</h3>
+  <div class="code-wrapper">
+    <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+    <pre><code>conj = {<span class="num">1</span>, <span class="num">2</span>, <span class="num">3</span>}
+conj.add(<span class="num">4</span>)
+conj.discard(<span class="num">2</span>)          <span class="com"># elimina sin error si no existe</span>
+a = {<span class="num">1</span>, <span class="num">2</span>, <span class="num">3</span>}
+b = {<span class="num">3</span>, <span class="num">4</span>, <span class="num">5</span>}
+a & b                     <span class="com"># {3} intersección</span>
+a | b                     <span class="com"># {1,2,3,4,5} unión</span>
+a - b                     <span class="com"># {1,2} diferencia</span></code></pre>
+  </div>
+
+  <h3 style="margin:0.5rem 0;color:var(--accent);">Tuplas</h3>
+  <div class="code-wrapper">
+    <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+    <pre><code>t = (<span class="num">1</span>, <span class="num">2</span>, <span class="num">3</span>)
+a, b, c = t              <span class="com"># unpacking: a=1, b=2, c=3</span>
+a, *resto = t            <span class="com"># a=1, resto=[2,3]</span>
+t[<span class="num">0</span>]                     <span class="com"># 1 (inmutable)</span></code></pre>
+  </div>
+
+  <h3 style="margin:0.5rem 0;color:var(--accent);">collections <span class="badge badge-adv">avanzado</span></h3>
+  <div class="code-wrapper">
+    <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+    <pre><code><span class="kw">from</span> collections <span class="kw">import</span> Counter, defaultdict, deque
+
+<span class="com"># Counter: cuenta ocurrencias</span>
+c = <span class="fn">Counter</span>(<span class="str">"abracadabra"</span>)
+c[<span class="str">"a"</span>]  <span class="com"># 5</span>
+c.most_common(<span class="num">2</span>)  <span class="com"># [('a', 5), ('b', 2)]</span>
+
+<span class="com"># defaultdict: valor por defecto</span>
+dd = <span class="fn">defaultdict</span>(list)
+dd[<span class="str">"frutas"</span>].append(<span class="str">"manzana"</span>)  <span class="com"># sin KeyError</span>
+
+<span class="com"># deque: cola eficiente</span>
+dq = <span class="fn">deque</span>([<span class="num">1</span>, <span class="num">2</span>, <span class="num">3</span>])
+dq.appendleft(<span class="num">0</span>)   <span class="com"># [0, 1, 2, 3]</span>
+dq.popleft()        <span class="com"># 0</span></code></pre>
+  </div>
+</section>
+
+<!-- ==================== COMPREHENSIONS ==================== -->
+<section class="section" id="comprehensions" data-title="Comprehensions">
+  <h2>Comprehensions</h2>
+  <div class="code-wrapper">
+    <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+    <pre><code><span class="com"># List comprehension</span>
+cuadrados = [x**<span class="num">2</span> <span class="kw">for</span> x <span class="kw">in</span> <span class="fn">range</span>(<span class="num">10</span>)]
+pares = [x <span class="kw">for</span> x <span class="kw">in</span> <span class="fn">range</span>(<span class="num">20</span>) <span class="kw">if</span> x % <span class="num">2</span> == <span class="num">0</span>]
+
+<span class="com"># Dict comprehension</span>
+cuadrados_dict = {x: x**<span class="num">2</span> <span class="kw">for</span> x <span class="kw">in</span> <span class="fn">range</span>(<span class="num">5</span>)}
+<span class="com"># {0: 0, 1: 1, 2: 4, 3: 9, 4: 16}</span>
+
+<span class="com"># Set comprehension</span>
+unicos = {x % <span class="num">3</span> <span class="kw">for</span> x <span class="kw">in</span> [<span class="num">1</span>, <span class="num">2</span>, <span class="num">3</span>, <span class="num">4</span>, <span class="num">5</span>, <span class="num">6</span>]}
+<span class="com"># {0, 1, 2}</span>
+
+<span class="com"># Con condicional (if/else)</span>
+clasif = [<span class="str">"par"</span> <span class="kw">if</span> x % <span class="num">2</span> == <span class="num">0</span> <span class="kw">else</span> <span class="str">"impar"</span> <span class="kw">for</span> x <span class="kw">in</span> <span class="fn">range</span>(<span class="num">5</span>)]
+<span class="com"># ['impar', 'par', 'impar', 'par', 'impar']</span>
+
+<span class="com"># Anidada (matriz transpuesta)</span>
+matriz = [[<span class="num">1</span>, <span class="num">2</span>], [<span class="num">3</span>, <span class="num">4</span>]]
+trans = [[fila[i] <span class="kw">for</span> fila <span class="kw">in</span> matriz] <span class="kw">for</span> i <span class="kw">in</span> <span class="fn">range</span>(<span class="num">2</span>)]
+<span class="com"># [[1, 3], [2, 4]]</span></code></pre>
+  </div>
+</section>
+
+<!-- ==================== F-STRINGS ==================== -->
+<section class="section" id="fstrings" data-title="F-strings">
+  <h2>F-strings y formato</h2>
+  <div class="code-wrapper">
+    <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+    <pre><code>nombre = <span class="str">"Ana"</span>
+edad = <span class="num">30</span>
+pi = <span class="num">3.14159</span>
+
+<span class="com"># Básico</span>
+<span class="fn">print</span>(<span class="str">f"{nombre} tiene {edad} años"</span>)
+
+<span class="com"># Alineación</span>
+<span class="fn">print</span>(<span class="str">f"{nombre:>10}"</span>)    <span class="com"># derecha, 10 chars</span>
+<span class="fn">print</span>(<span class="str">f"{nombre:<10}"</span>)    <span class="com"># izquierda</span>
+<span class="fn">print</span>(<span class="str">f"{nombre:^10}"</span>)    <span class="com"># centrado</span>
+
+<span class="com"># Formato numérico</span>
+<span class="fn">print</span>(<span class="str">f"{pi:.2f}"</span>)        <span class="com"># 3.14 (2 decimales)</span>
+<span class="fn">print</span>(<span class="str">f"{1000:,.2f}"</span>)     <span class="com"># 1,000.00 (separador miles)</span>
+<span class="fn">print</span>(<span class="str">f"{42:08d}"</span>)        <span class="com"># 00000042 (padding con ceros)</span>
+<span class="fn">print</span>(<span class="str">f"{255:#x}"</span>)        <span class="com"># 0xff (hexadecimal)</span>
+<span class="fn">print</span>(<span class="str">f"{255:b}"</span>)         <span class="com"># 11111111 (binario)</span>
+
+<span class="com"># Expresiones</span>
+<span class="fn">print</span>(<span class="str">f"{len(nombre) = }"</span>)  <span class="com"># len(nombre) = 3 (3.8+)</span>
+
+<span class="com"># Fechas</span>
+<span class="kw">from</span> datetime <span class="kw">import</span> datetime
+ahora = datetime.now()
+<span class="fn">print</span>(<span class="str">f"{ahora:%Y-%m-%d %H:%M}"</span>)  <span class="com"># 2025-01-15 14:30</span></code></pre>
+  </div>
+</section>
+
+<!-- ==================== ARCHIVOS ==================== -->
+<section class="section" id="archivos" data-title="Archivos">
+  <h2>Archivos</h2>
+  <div class="code-wrapper">
+    <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+    <pre><code><span class="com"># Lectura</span>
+<span class="kw">with</span> <span class="fn">open</span>(<span class="str">"archivo.txt"</span>, <span class="str">"r"</span>, encoding=<span class="str">"utf-8"</span>) <span class="kw">as</span> f:
+    contenido = f.read()       <span class="com"># todo el archivo</span>
+    <span class="com"># o línea por línea:</span>
+    <span class="kw">for</span> linea <span class="kw">in</span> f:
+        <span class="fn">print</span>(linea.strip())
+
+<span class="com"># Escritura</span>
+<span class="kw">with</span> <span class="fn">open</span>(<span class="str">"salida.txt"</span>, <span class="str">"w"</span>, encoding=<span class="str">"utf-8"</span>) <span class="kw">as</span> f:
+    f.write(<span class="str">"Hola mundo\n"</span>)
+
+<span class="com"># Añadir (append)</span>
+<span class="kw">with</span> <span class="fn">open</span>(<span class="str">"log.txt"</span>, <span class="str">"a"</span>, encoding=<span class="str">"utf-8"</span>) <span class="kw">as</span> f:
+    f.write(<span class="str">"Nueva línea\n"</span>)</code></pre>
+  </div>
+  <h3 style="margin:1rem 0 0.5rem;color:var(--accent);">pathlib (recomendado sobre os.path)</h3>
+  <div class="code-wrapper">
+    <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+    <pre><code><span class="kw">from</span> pathlib <span class="kw">import</span> Path
+
+ruta = Path(<span class="str">"src"</span>) / <span class="str">"mi_modulo"</span> / <span class="str">"main.py"</span>
+ruta.exists()              <span class="com"># True/False</span>
+ruta.is_file()             <span class="com"># True si es archivo</span>
+ruta.is_dir()              <span class="com"># True si es directorio</span>
+ruta.read_text(encoding=<span class="str">"utf-8"</span>)   <span class="com"># lee contenido</span>
+ruta.write_text(<span class="str">"Hola"</span>, encoding=<span class="str">"utf-8"</span>)  <span class="com"># escribe</span>
+ruta.parent                <span class="com"># directorio padre</span>
+ruta.stem                  <span class="com"># "main" (sin extensión)</span>
+ruta.suffix                <span class="com"># ".py"</span>
+ruta.name                  <span class="com"># "main.py"</span>
+
+<span class="com"># Listar archivos</span>
+<span class="kw">for</span> p <span class="kw">in</span> Path(<span class="str">"."</span>).glob(<span class="str">"*.py"</span>):
+    <span class="fn">print</span>(p)
+
+<span class="com"># Crear directorio</span>
+Path(<span class="str">"nuevo/dir"</span>).mkdir(parents=<span class="kw">True</span>, exist_ok=<span class="kw">True</span>)</code></pre>
+  </div>
+</section>
+
+<!-- ==================== ERRORES ==================== -->
+<section class="section" id="errores" data-title="Manejo de errores">
+  <h2>Manejo de errores</h2>
+  <div class="code-wrapper">
+    <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+    <pre><code><span class="kw">try</span>:
+    resultado = <span class="num">10</span> / <span class="num">0</span>
+<span class="kw">except</span> <span class="cls">ZeroDivisionError</span> <span class="kw">as</span> e:
+    <span class="fn">print</span>(<span class="str">f"Error: {e}"</span>)
+<span class="kw">except</span> <span class="cls">Exception</span> <span class="kw">as</span> e:
+    <span class="fn">print</span>(<span class="str">f"Error inesperado: {e}"</span>)
+<span class="kw">else</span>:
+    <span class="fn">print</span>(<span class="str">"Todo bien (sin errores)"</span>)
+<span class="kw">finally</span>:
+    <span class="fn">print</span>(<span class="str">"Siempre se ejecuta"</span>)</code></pre>
+  </div>
+  <h3 style="margin:1rem 0 0.5rem;color:var(--accent);">Excepción personalizada</h3>
+  <div class="code-wrapper">
+    <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+    <pre><code><span class="kw">class</span> <span class="cls">MiError</span>(<span class="cls">Exception</span>):
+    <span class="str">"""Excepción personalizada de la app."""</span>
+    <span class="kw">def</span> <span class="fn">__init__</span>(self, mensaje: <span class="cls">str</span>, codigo: <span class="cls">int</span> = <span class="num">0</span>):
+        <span class="kw">super</span>().<span class="fn">__init__</span>(mensaje)
+        self.codigo = codigo
+
+<span class="kw">raise</span> <span class="cls">MiError</span>(<span class="str">"Algo salió mal"</span>, codigo=<span class="num">42</span>)</code></pre>
+  </div>
+  <table>
+    <tr><th>Excepción</th><th>Cuándo</th></tr>
+    <tr><td><code>ValueError</code></td><td>Valor inválido (ej. <code>int("abc")</code>)</td></tr>
+    <tr><td><code>TypeError</code></td><td>Tipo incorrecto</td></tr>
+    <tr><td><code>KeyError</code></td><td>Clave no existe en dict</td></tr>
+    <tr><td><code>IndexError</code></td><td>Índice fuera de rango</td></tr>
+    <tr><td><code>AttributeError</code></td><td>Atributo no existe</td></tr>
+    <tr><td><code>FileNotFoundError</code></td><td>Archivo no encontrado</td></tr>
+  </table>
+</section>
+
+<!-- ==================== OOP ==================== -->
+<section class="section" id="oop" data-title="OOP Clases">
+  <h2>Programación orientada a objetos</h2>
+  <div class="code-wrapper">
+    <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+    <pre><code><span class="kw">class</span> <span class="cls">Persona</span>:
+    <span class="str">"""Representa una persona."""</span>
+
+    <span class="kw">def</span> <span class="fn">__init__</span>(self, nombre: <span class="cls">str</span>, edad: <span class="cls">int</span>):
+        self.nombre = nombre
+        self.edad = edad
+
+    <span class="kw">def</span> <span class="fn">saludar</span>(self) -> <span class="cls">str</span>:
+        <span class="kw">return</span> <span class="str">f"Hola, soy {self.nombre}"</span>
+
+    <span class="kw">def</span> <span class="fn">__str__</span>(self) -> <span class="cls">str</span>:
+        <span class="kw">return</span> <span class="str">f"Persona({self.nombre}, {self.edad})"</span>
+
+    <span class="kw">def</span> <span class="fn">__repr__</span>(self) -> <span class="cls">str</span>:
+        <span class="kw">return</span> <span class="str">f"Persona(nombre='{self.nombre}', edad={self.edad})"</span>
+
+p = <span class="cls">Persona</span>(<span class="str">"Ana"</span>, <span class="num">30</span>)
+<span class="fn">print</span>(p.saludar())  <span class="com"># Hola, soy Ana</span>
+<span class="fn">print</span>(p)            <span class="com"># Persona(Ana, 30) -> __str__</span></code></pre>
+  </div>
+  <h3 style="margin:1rem 0 0.5rem;color:var(--accent);">Herencia</h3>
+  <div class="code-wrapper">
+    <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+    <pre><code><span class="kw">class</span> <span class="cls">Empleado</span>(<span class="cls">Persona</span>):
+    <span class="kw">def</span> <span class="fn">__init__</span>(self, nombre: <span class="cls">str</span>, edad: <span class="cls">int</span>, salario: <span class="cls">float</span>):
+        <span class="kw">super</span>().<span class="fn">__init__</span>(nombre, edad)  <span class="com"># llamar al padre</span>
+        self.salario = salario
+
+    <span class="kw">def</span> <span class="fn">saludar</span>(self) -> <span class="cls">str</span>:  <span class="com"># override</span>
+        <span class="kw">return</span> <span class="str">f"{super().saludar()}, gano {self.salario}€"</span>
+
+emp = <span class="cls">Empleado</span>(<span class="str">"Juan"</span>, <span class="num">25</span>, <span class="num">2500.0</span>)</code></pre>
+  </div>
+  <h3 style="margin:1rem 0 0.5rem;color:var(--accent);">@property</h3>
+  <div class="code-wrapper">
+    <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+    <pre><code><span class="kw">class</span> <span class="cls">Circulo</span>:
+    <span class="kw">def</span> <span class="fn">__init__</span>(self, radio: <span class="cls">float</span>):
+        self._radio = radio
+
+    @property
+    <span class="kw">def</span> <span class="fn">area</span>(self) -> <span class="cls">float</span>:
+        <span class="kw">return</span> <span class="num">3.14159</span> * self._radio ** <span class="num">2</span>
+
+    @property
+    <span class="kw">def</span> <span class="fn">radio</span>(self) -> <span class="cls">float</span>:
+        <span class="kw">return</span> self._radio
+
+    @radio.setter
+    <span class="kw">def</span> <span class="fn">radio</span>(self, valor: <span class="cls">float</span>):
+        <span class="kw">if</span> valor < <span class="num">0</span>:
+            <span class="kw">raise</span> <span class="cls">ValueError</span>(<span class="str">"El radio no puede ser negativo"</span>)
+        self._radio = valor
+
+c = <span class="cls">Circulo</span>(<span class="num">5</span>)
+c.area    <span class="com"># 78.54 (como atributo, sin paréntesis)</span>
+c.radio = <span class="num">10</span>  <span class="com"># usa el setter</span></code></pre>
+  </div>
+</section>
+
+<!-- ==================== DATACLASSES ==================== -->
+<section class="section" id="dataclasses" data-title="Dataclasses">
+  <h2>Dataclasses <span class="badge badge-new">3.7+</span></h2>
+  <p>Boilerplate mínimo para clases de datos. Genera <code>__init__</code>, <code>__repr__</code>, <code>__eq__</code> automáticamente.</p>
+  <div class="code-wrapper">
+    <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+    <pre><code><span class="kw">from</span> dataclasses <span class="kw">import</span> dataclass, field
+
+@dataclass
+<span class="kw">class</span> <span class="cls">Producto</span>:
+    nombre: <span class="cls">str</span>
+    precio: <span class="cls">float</span>
+    stock: <span class="cls">int</span> = <span class="num">0</span>
+    tags: list[<span class="cls">str</span>] = field(default_factory=list)
+
+    <span class="kw">def</span> <span class="fn">total</span>(self) -> <span class="cls">float</span>:
+        <span class="kw">return</span> self.precio * self.stock
+
+p = <span class="cls">Producto</span>(<span class="str">"Laptop"</span>, <span class="num">999.99</span>, stock=<span class="num">5</span>)
+<span class="fn">print</span>(p)           <span class="com"># Producto(nombre='Laptop', precio=999.99, stock=5, tags=[])</span>
+<span class="fn">print</span>(p.total())    <span class="com"># 4999.95</span>
+
+<span class="com"># frozen: inmutable (como tupla con tipos)</span>
+@dataclass(frozen=<span class="kw">True</span>)
+<span class="kw">class</span> <span class="cls">Punto</span>:
+    x: <span class="cls">float</span>
+    y: <span class="cls">float</span></code></pre>
+  </div>
+</section>
+
+<!-- ==================== DECORADORES ==================== -->
+<section class="section" id="decoradores" data-title="Decoradores">
+  <h2>Decoradores</h2>
+  <div class="code-wrapper">
+    <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+    <pre><code><span class="com"># Decorador básico</span>
+<span class="kw">def</span> <span class="fn">mi_decorador</span>(func):
+    <span class="kw">def</span> <span class="fn">wrapper</span>(*args, **kwargs):
+        <span class="fn">print</span>(<span class="str">"Antes"</span>)
+        resultado = <span class="fn">func</span>(*args, **kwargs)
+        <span class="fn">print</span>(<span class="str">"Después"</span>)
+        <span class="kw">return</span> resultado
+    <span class="kw">return</span> wrapper
+
+@mi_decorador
+<span class="kw">def</span> <span class="fn">saludar</span>():
+    <span class="fn">print</span>(<span class="str">"Hola"</span>)
+
+<span class="fn">saludar</span>()  <span class="com"># Antes / Hola / Después</span></code></pre>
+  </div>
+  <h3 style="margin:1rem 0 0.5rem;color:var(--accent);">Con functools.wraps (preserva metadatos)</h3>
+  <div class="code-wrapper">
+    <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+    <pre><code><span class="kw">from</span> functools <span class="kw">import</span> wraps
+
+<span class="kw">def</span> <span class="fn">timer</span>(func):
+    <span class="kw">import</span> time
+    @wraps(func)
+    <span class="kw">def</span> <span class="fn">wrapper</span>(*args, **kwargs):
+        inicio = time.perf_counter()
+        resultado = <span class="fn">func</span>(*args, **kwargs)
+        fin = time.perf_counter()
+        <span class="fn">print</span>(<span class="str">f"{func.__name__} tardó {fin - inicio:.4f}s"</span>)
+        <span class="kw">return</span> resultado
+    <span class="kw">return</span> wrapper
+
+@timer
+<span class="kw">def</span> <span class="fn">procesar</span>(data):
+    <span class="com"># ... proceso ...</span>
+    <span class="kw">pass</span></code></pre>
+  </div>
+  <h3 style="margin:1rem 0 0.5rem;color:var(--accent);">Decorador con argumentos</h3>
+  <div class="code-wrapper">
+    <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+    <pre><code><span class="kw">def</span> <span class="fn">repetir</span>(veces: <span class="cls">int</span>):
+    <span class="kw">def</span> <span class="fn">decorador</span>(func):
+        @wraps(func)
+        <span class="kw">def</span> <span class="fn">wrapper</span>(*args, **kwargs):
+            <span class="kw">for</span> _ <span class="kw">in</span> <span class="fn">range</span>(veces):
+                resultado = <span class="fn">func</span>(*args, **kwargs)
+            <span class="kw">return</span> resultado
+        <span class="kw">return</span> wrapper
+    <span class="kw">return</span> decorador
+
+@repetir(veces=<span class="num">3</span>)
+<span class="kw">def</span> <span class="fn">gritar</span>():
+    <span class="fn">print</span>(<span class="str">"¡AHHH!"</span>)</code></pre>
+  </div>
+</section>
+
+<!-- ==================== GENERADORES ==================== -->
+<section class="section" id="generadores" data-title="Generadores">
+  <h2>Generadores e iteradores</h2>
+  <div class="code-wrapper">
+    <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+    <pre><code><span class="com"># Generador con yield</span>
+<span class="kw">def</span> <span class="fn">generador_pares</span>(n: <span class="cls">int</span>):
+    <span class="kw">for</span> i <span class="kw">in</span> <span class="fn">range</span>(n):
+        <span class="kw">if</span> i % <span class="num">2</span> == <span class="num">0</span>:
+            <span class="kw">yield</span> i
+
+<span class="kw">for</span> par <span class="kw">in</span> <span class="fn">generador_pares</span>(<span class="num">10</span>):
+    <span class="fn">print</span>(par)  <span class="com"># 0, 2, 4, 6, 8</span>
+
+<span class="com"># Generador infinito</span>
+<span class="kw">def</span> <span class="fn">contador</span>():
+    n = <span class="num">0</span>
+    <span class="kw">while</span> <span class="kw">True</span>:
+        <span class="kw">yield</span> n
+        n += <span class="num">1</span>
+
+<span class="com"># Expresión generadora (perezosa, usa paréntesis)</span>
+gen = (x**<span class="num">2</span> <span class="kw">for</span> x <span class="kw">in</span> <span class="fn">range</span>(<span class="num">1000000</span>))  <span class="com"># no ocupa memoria</span>
+<span class="fn">next</span>(gen)  <span class="com"># 0</span>
+<span class="fn">next</span>(gen)  <span class="com"># 1</span></code></pre>
+  </div>
+  <h3 style="margin:1rem 0 0.5rem;color:var(--accent);">itertools</h3>
+  <div class="code-wrapper">
+    <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+    <pre><code><span class="kw">from</span> itertools <span class="kw">import</span> chain, combinations, permutations, product, islice
+
+<span class="com"># chain: encadenar iterables</span>
+<span class="fn">list</span>(<span class="fn">chain</span>([<span class="num">1</span>, <span class="num">2</span>], [<span class="num">3</span>, <span class="num">4</span>]))  <span class="com"># [1, 2, 3, 4]</span>
+
+<span class="com"># product: producto cartesiano</span>
+<span class="fn">list</span>(<span class="fn">product</span>(<span class="str">"AB"</span>, <span class="str">"12"</span>))  <span class="com"># [('A','1'), ('A','2'), ('B','1'), ('B','2')]</span>
+
+<span class="com"># combinations / permutations</span>
+<span class="fn">list</span>(<span class="fn">combinations</span>([<span class="num">1</span>, <span class="num">2</span>, <span class="num">3</span>], <span class="num">2</span>))  <span class="com"># [(1,2), (1,3), (2,3)]</span>
+<span class="fn">list</span>(<span class="fn">permutations</span>([<span class="num">1</span>, <span class="num">2</span>], <span class="num">2</span>))   <span class="com"># [(1,2), (2,1)]</span>
+
+<span class="com"># islice: slice de iterador</span>
+<span class="fn">list</span>(<span class="fn">islice</span>(<span class="fn">range</span>(<span class="num">100</span>), <span class="num">5</span>, <span class="num">10</span>))  <span class="com"># [5, 6, 7, 8, 9]</span></code></pre>
+  </div>
+</section>
+
+<!-- ==================== TYPE HINTS ==================== -->
+<section class="section" id="type-hints" data-title="Type hints">
+  <h2>Type hints <span class="badge badge-adv">avanzado</span></h2>
+  <div class="code-wrapper">
+    <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+    <pre><code><span class="kw">from</span> typing <span class="kw">import</span> Optional, Union, Literal, Callable, Any
+<span class="kw">from</span> collections.abc <span class="kw">import</span> Sequence
+
+<span class="com"># Básicos (3.9+: usar list/dict/tuple directos)</span>
+<span class="kw">def</span> <span class="fn">procesar</span>(nombres: list[<span class="cls">str</span>], limite: <span class="cls">int</span> | <span class="cls">None</span> = <span class="kw">None</span>) -> list[<span class="cls">str</span>]:
+    resultado = [n.upper() <span class="kw">for</span> n <span class="kw">in</span> nombres]
+    <span class="kw">return</span> resultado[:limite] <span class="kw">if</span> limite <span class="kw">else</span> resultado
+
+<span class="com"># Union (3.9) o | (3.10+)</span>
+<span class="kw">def</span> <span class="fn">buscar</span>(id: <span class="cls">int</span> | <span class="cls">str</span>) -> dict | <span class="cls">None</span>: ...
+
+<span class="com"># Literal: valores específicos</span>
+<span class="kw">def</span> <span class="fn">set_modo</span>(modo: <span class="cls">Literal</span>[<span class="str">"claro"</span>, <span class="str">"oscuro"</span>]) -> <span class="kw">None</span>: ...
+
+<span class="com"># Callable: función como argumento</span>
+<span class="kw">def</span> <span class="fn">aplicar</span>(fn: <span class="cls">Callable</span>[[<span class="cls">int</span>], <span class="cls">int</span>], x: <span class="cls">int</span>) -> <span class="cls">int</span>:
+    <span class="kw">return</span> <span class="fn">fn</span>(x)
+
+<span class="com"># TypedDict: dict con claves tipadas</span>
+<span class="kw">from</span> typing <span class="kw">import</span> TypedDict
+
+<span class="kw">class</span> <span class="cls">Usuario</span>(<span class="cls">TypedDict</span>):
+    nombre: <span class="cls">str</span>
+    edad: <span class="cls">int</span>
+    email: <span class="cls">str</span>
+
+<span class="com"># Protocol: tipado estructural (duck typing tipado)</span>
+<span class="kw">from</span> typing <span class="kw">import</span> Protocol
+
+<span class="kw">class</span> <span class="cls">Reproducible</span>(<span class="cls">Protocol</span>):
+    <span class="kw">def</span> <span class="fn">play</span>(self) -> <span class="cls">None</span>: ...
+
+<span class="com"># TypeVar: genéricos</span>
+<span class="kw">from</span> typing <span class="kw">import</span> TypeVar
+
+T = <span class="cls">TypeVar</span>(<span class="str">"T"</span>)
+
+<span class="kw">def</span> <span class="fn">primero</span>(items: list[T]) -> T:
+    <span class="kw">return</span> items[<span class="num">0</span>]</code></pre>
+  </div>
+</section>
+
+<!-- ==================== MÓDULOS ==================== -->
+<section class="section" id="modulos" data-title="Módulos y paquetes">
+  <h2>Módulos y paquetes</h2>
+  <div class="code-wrapper">
+    <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+    <pre><code><span class="com"># Importar módulo completo</span>
+<span class="kw">import</span> math
+math.sqrt(<span class="num">16</span>)  <span class="com"># 4.0</span>
+
+<span class="com"># Importar con alias</span>
+<span class="kw">import</span> numpy <span class="kw">as</span> np
+
+<span class="com"># Importar específico</span>
+<span class="kw">from</span> pathlib <span class="kw">import</span> Path
+
+<span class="com"># Importar todo (no recomendado)</span>
+<span class="kw">from</span> os <span class="kw">import</span> *  <span class="com"># evita esto</span>
+
+<span class="com"># __name__ guard: ejecutar solo si es script principal</span>
+<span class="kw">if</span> __name__ == <span class="str">"__main__"</span>:
+    <span class="fn">main</span>()
+
+<span class="com"># Estructura de paquete:</span>
+<span class="com"># mi_paquete/</span>
+<span class="com">#   __init__.py      <- hace que sea un paquete</span>
+<span class="com">#   modulo_a.py</span>
+<span class="com">#   subpaquete/</span>
+<span class="com">#     __init__.py</span>
+<span class="com">#     modulo_b.py</span>
+
+<span class="com"># Importar desde paquete</span>
+<span class="kw">from</span> mi_paquete <span class="kw">import</span> modulo_a
+<span class="kw">from</span> mi_paquete.subpaquete <span class="kw">import</span> modulo_b</code></pre>
+  </div>
+</section>
+
+<!-- ==================== JSON ==================== -->
+<section class="section" id="json" data-title="JSON">
+  <h2>JSON y serialización</h2>
+  <div class="code-wrapper">
+    <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+    <pre><code><span class="kw">import</span> json
+
+<span class="com"># Python dict -> JSON string</span>
+data = {<span class="str">"nombre"</span>: <span class="str">"Ana"</span>, <span class="str">"edad"</span>: <span class="num">30</span>, <span class="str">"hobbies"</span>: [<span class="str">"leer"</span>, <span class="str">"viajar"</span>]}
+json_str = json.dumps(data, indent=<span class="num">2</span>, ensure_ascii=<span class="kw">False</span>)
+<span class="fn">print</span>(json_str)
+
+<span class="com"># JSON string -> Python dict</span>
+data2 = json.loads(json_str)
+
+<span class="com"># Leer archivo JSON</span>
+<span class="kw">with</span> <span class="fn">open</span>(<span class="str">"data.json"</span>, encoding=<span class="str">"utf-8"</span>) <span class="kw">as</span> f:
+    data = json.load(f)
+
+<span class="com"># Escribir archivo JSON</span>
+<span class="kw">with</span> <span class="fn">open</span>(<span class="str">"data.json"</span>, <span class="str">"w"</span>, encoding=<span class="str">"utf-8"</span>) <span class="kw">as</span> f:
+    json.dump(data, f, indent=<span class="num">2</span>, ensure_ascii=<span class="kw">False</span>)</code></pre>
+  </div>
+</section>
+
+<!-- ==================== REGEX ==================== -->
+<section class="section" id="regex" data-title="Expresiones regulares">
+  <h2>Expresiones regulares (re)</h2>
+  <div class="code-wrapper">
+    <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+    <pre><code><span class="kw">import</span> re
+
+<span class="com"># Buscar patrón</span>
+texto = <span class="str">"Mi email es ana@example.com y mi tlf es 555-1234"</span>
+
+<span class="com"># search: primera coincidencia</span>
+m = re.search(<span class="str">r"\b\d{3}-\d{4}\b"</span>, texto)
+<span class="kw">if</span> m:
+    <span class="fn">print</span>(m.group())  <span class="com"># 555-1234</span>
+
+<span class="com"># findall: todas las coincidencias</span>
+emails = re.findall(<span class="str">r"\b[\w.]+@[\w.]+\b"</span>, texto)
+<span class="com"># ['ana@example.com']</span>
+
+<span class="com"># sub: reemplazar</span>
+limpio = re.sub(<span class="str">r"\d"</span>, <span class="str">"#"</span>, texto)
+<span class="com"># "Mi email es ana@example.com y mi tlf es ###-####"</span>
+
+<span class="com"># split: dividir por patrón</span>
+partes = re.split(<span class="str">r"[,;\s]+"</span>, <span class="str">"a, b; c d"</span>)
+<span class="com"># ['a', 'b', 'c', 'd']</span>
+
+<span class="com"># Grupos nombrados</span>
+m = re.search(<span class="str">r"(?P<usuario>\w+)@(?P<dominio>\w+\.\w+)"</span>, texto)
+m.group(<span class="str">"usuario"</span>)   <span class="com"># ana</span>
+m.group(<span class="str">"dominio"</span>)   <span class="com"># example.com</span>
+
+<span class="com"># Compilar patrón (reutilizar)</span>
+patron = re.compile(<span class="str">r"^\d{4}-\d{2}-\d{2}$"</span>)
+patron.match(<span class="str">"2025-01-15"</span>)  <span class="com"># Match object</span></code></pre>
+  </div>
+  <table>
+    <tr><th>Patrón</th><th>Significado</th></tr>
+    <tr><td><code>\d</code></td><td>Dígito (0-9)</td></tr>
+    <tr><td><code>\w</code></td><td>Carácter de palabra (A-Z, a-z, 0-9, _)</td></tr>
+    <tr><td><code>\s</code></td><td>Espacio en blanco</td></tr>
+    <tr><td><code>.</code></td><td>Cualquier carácter</td></tr>
+    <tr><td><code>+</code></td><td>1 o más</td></tr>
+    <tr><td><code>*</code></td><td>0 o más</td></tr>
+    <tr><td><code>?</code></td><td>0 o 1 (opcional)</td></tr>
+    <tr><td><code>{n,m}</code></td><td>Entre n y m repeticiones</td></tr>
+    <tr><td><code>^</code> / <code>$</code></td><td>Inicio / fin de string</td></tr>
+    <tr><td><code>\b</code></td><td>Límite de palabra</td></tr>
+  </table>
+</section>
+
+<!-- ==================== ASYNC ==================== -->
+<section class="section" id="async" data-title="Async Await">
+  <h2>Async / Await <span class="badge badge-adv">avanzado</span></h2>
+  <div class="code-wrapper">
+    <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+    <pre><code><span class="kw">import</span> asyncio
+
+<span class="kw">async def</span> <span class="fn">tarea</span>(nombre: <span class="cls">str</span>, segundos: <span class="cls">float</span>):
+    <span class="fn">print</span>(<span class="str">f"{nombre} inicia"</span>)
+    <span class="kw">await</span> asyncio.sleep(segundos)
+    <span class="fn">print</span>(<span class="str">f"{nombre} termina ({segundos}s)"</span>)
+    <span class="kw">return</span> nombre
+
+<span class="com"># Ejecutar una coroutine</span>
+<span class="kw">async def</span> <span class="fn">main</span>():
+    <span class="com"># Concurrente: ambas corren a la vez</span>
+    resultados = <span class="kw">await</span> asyncio.gather(
+        <span class="fn">tarea</span>(<span class="str">"A"</span>, <span class="num">2</span>),
+        <span class="fn">tarea</span>(<span class="str">"B"</span>, <span class="num">1</span>),
+    )
+    <span class="fn">print</span>(resultados)  <span class="com"># ['A', 'B'] (en orden de llamada)</span>
+
+asyncio.run(<span class="fn">main</span>())
+<span class="com"># A inicia / B inicia / B termina (1s) / A termina (2s)</span></code></pre>
+  </div>
+  <h3 style="margin:1rem 0 0.5rem;color:var(--accent);">asyncio.create_task</h3>
+  <div class="code-wrapper">
+    <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+    <pre><code><span class="kw">async def</span> <span class="fn">main</span>():
+    <span class="com"># Crear tarea (se ejecuta en background)</span>
+    t = asyncio.create_task(<span class="fn">tarea</span>(<span class="str">"C"</span>, <span class="num">3</span>))
+
+    <span class="com"># Hacer otras cosas...</span>
+    <span class="kw">await</span> asyncio.sleep(<span class="num">1</span>)
+    <span class="fn">print</span>(<span class="str">"Haciendo algo..."</span>)
+
+    <span class="com"># Esperar a que termine</span>
+    resultado = <span class="kw">await</span> t
+    <span class="fn">print</span>(<span class="str">f"Resultado: {resultado}"</span>)</code></pre>
+  </div>
+</section>
+
+<!-- ==================== OPERADORES ==================== -->
+<section class="section" id="operadores" data-title="Operadores útiles">
+  <h2>Operadores útiles</h2>
+  <div class="code-wrapper">
+    <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+    <pre><code><span class="com"># Walrus operator := (3.8+)</span>
+<span class="kw">if</span> (n := <span class="fn">len</span>(lista)) > <span class="num">10</span>:
+    <span class="fn">print</span>(<span class="str">f"Lista larga: {n} elementos"</span>)
+
+<span class="com"># En while</span>
+<span class="kw">while</span> (linea := f.readline()) != <span class="str">""</span>:
+    <span class="fn">print</span>(linea)
+
+<span class="com"># Unpacking extendido</span>
+a, *resto, ultimo = [<span class="num">1</span>, <span class="num">2</span>, <span class="num">3</span>, <span class="num">4</span>, <span class="num">5</span>]
+<span class="com"># a=1, resto=[2,3,4], ultimo=5</span>
+
+<span class="com"># Swap sin temporal</span>
+a, b = b, a
+
+<span class="com"># Merge de diccionarios</span>
+d1 = {<span class="str">"a"</span>: <span class="num">1</span>}
+d2 = {<span class="str">"b"</span>: <span class="num">2</span>}
+fusionado = {**d1, **d2}  <span class="com"># {'a': 1, 'b': 2}</span>
+
+<span class="com"># Operador | para dicts (3.9+)</span>
+fusionado = d1 | d2
+
+<span class="com"># Comparación encadenada</span>
+<span class="kw">if</span> <span class="num">0</span> < edad < <span class="num">120</span>:
+    <span class="fn">print</span>(<span class="str">"Edad válida"</span>)
+
+<span class="com"># Ternario</span>
+mensaje = <span class="str">"par"</span> <span class="kw">if</span> x % <span class="num">2</span> == <span class="num">0</span> <span class="kw">else</span> <span class="str">"impar"</span></code></pre>
+  </div>
+</section>
+
+<!-- ==================== BUILTINS ==================== -->
+<section class="section" id="builtins" data-title="Builtins frecuentes">
+  <h2>Builtins frecuentes</h2>
+  <div class="code-wrapper">
+    <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+    <pre><code><span class="fn">abs</span>(-<span class="num">5</span>)              <span class="com"># 5</span>
+<span class="fn">all</span>([<span class="kw">True</span>, <span class="kw">True</span>])      <span class="com"># True (todos verdaderos)</span>
+<span class="fn">any</span>([<span class="kw">False</span>, <span class="kw">True</span>])      <span class="com"># True (al menos uno)</span>
+<span class="fn">enumerate</span>(lista)      <span class="com"># (0, 'a'), (1, 'b')...</span>
+<span class="fn">len</span>(lista)             <span class="com"># longitud</span>
+<span class="fn">max</span>(lista)             <span class="com"># máximo</span>
+<span class="fn">min</span>(lista)             <span class="com"># mínimo</span>
+<span class="fn">sorted</span>(lista)          <span class="com"># nueva lista ordenada</span>
+<span class="fn">sum</span>(lista)             <span class="com"># suma de elementos</span>
+<span class="fn">zip</span>(l1, l2)            <span class="com"># (a1,b1), (a2,b2)...</span>
+<span class="fn">map</span>(fn, lista)         <span class="com"># aplica fn a cada elemento</span>
+<span class="fn">filter</span>(fn, lista)      <span class="com"># filtra donde fn devuelve True</span>
+<span class="fn">reversed</span>(lista)        <span class="com"># iterador invertido</span>
+<span class="fn">round</span>(<span class="num">3.14159</span>, <span class="num">2</span>)      <span class="com"># 3.14</span>
+<span class="fn">type</span>(obj)             <span class="com"># tipo del objeto</span>
+<span class="fn">isinstance</span>(x, <span class="cls">int</span>)     <span class="com"># True si x es int</span>
+<span class="fn">dir</span>(obj)               <span class="com"># lista atributos y métodos</span>
+<span class="fn">help</span>(obj)              <span class="com"># documentación</span>
+<span class="fn">id</span>(obj)                <span class="com"># identidad (dirección memoria)</span></code></pre>
+  </div>
+  <h3 style="margin:1rem 0 0.5rem;color:var(--accent);">sorted con key</h3>
+  <div class="code-wrapper">
+    <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+    <pre><code>usuarios = [{<span class="str">"nombre"</span>: <span class="str">"Ana"</span>, <span class="str">"edad"</span>: <span class="num">30</span>}, {<span class="str">"nombre"</span>: <span class="str">"Juan"</span>, <span class="str">"edad"</span>: <span class="num">25</span>}]
+
+<span class="com"># Ordenar por edad</span>
+ordenados = <span class="fn">sorted</span>(usuarios, key=<span class="kw">lambda</span> u: u[<span class="str">"edad"</span>])
+
+<span class="com"># Ordenar por edad descendente</span>
+ordenados = <span class="fn">sorted</span>(usuarios, key=<span class="kw">lambda</span> u: u[<span class="str">"edad"</span>], reverse=<span class="kw">True</span>)
+
+<span class="com"># Ordenar por múltiples criterios</span>
+ordenados = <span class="fn">sorted</span>(usuarios, key=<span class="kw">lambda</span> u: (u[<span class="str">"edad"</span>], u[<span class="str">"nombre"</span>]))
+
+<span class="com"># operator.itemgetter (más rápido que lambda)</span>
+<span class="kw">from</span> operator <span class="kw">import</span> itemgetter
+ordenados = <span class="fn">sorted</span>(usuarios, key=<span class="fn">itemgetter</span>(<span class="str">"edad"</span>))</code></pre>
+  </div>
+</section>
+
+<!-- ==================== BUENAS PRÁCTICAS ==================== -->
+<section class="section" id="buenas-practicas" data-title="Buenas prácticas">
+  <h2>Buenas prácticas</h2>
+
+  <h3 style="margin:0.5rem 0;color:var(--accent);">PEP 8 (estilo)</h3>
+  <table>
+    <tr><th>Regla</th><th>Convención</th></tr>
+    <tr><td>Variables/funciones</td><td><code>snake_case</code></td></tr>
+    <tr><td>Clases</td><td><code>PascalCase</code></td></tr>
+    <tr><td>Constantes</td><td><code>UPPER_SNAKE</code></td></tr>
+    <tr><td>Métodos privados</td><td><code>_prefijo_guion</code></td></tr>
+    <tr><td>Indentación</td><td>4 espacios (no tabs)</td></tr>
+    <tr><td>Línea máxima</td><td>88 chars (configurable)</td></tr>
+    <tr><td>Imports</td><td>Orden: stdlib → terceros → locales</td></tr>
+  </table>
+
+  <h3 style="margin:1rem 0 0.5rem;color:var(--accent);">Docstrings</h3>
+  <div class="code-wrapper">
+    <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+    <pre><code><span class="kw">def</span> <span class="fn">calcular_total</span>(precio: <span class="cls">float</span>, cantidad: <span class="cls">int</span>, descuento: <span class="cls">float</span> = <span class="num">0</span>) -> <span class="cls">float</span>:
+    <span class="str">"""Calcula el total con descuento aplicado.
+
+    Args:
+        precio: Precio unitario del producto.
+        cantidad: Número de unidades.
+        descuento: Porcentaje de descuento (0-100). Por defecto 0.
+
+    Returns:
+        El total calculado tras aplicar el descuento.
+
+    Raises:
+        ValueError: Si el descuento no está entre 0 y 100.
+    """</span>
+    <span class="kw">if</span> <span class="kw">not</span> <span class="num">0</span> <= descuento <= <span class="num">100</span>:
+        <span class="kw">raise</span> <span class="cls">ValueError</span>(<span class="str">"Descuento debe estar entre 0 y 100"</span>)
+    subtotal = precio * cantidad
+    <span class="kw">return</span> subtotal * (<span class="num">1</span> - descuento / <span class="num">100</span>)</code></pre>
+  </div>
+
+  <h3 style="margin:1rem 0 0.5rem;color:var(--accent);">Context managers (with)</h3>
+  <div class="code-wrapper">
+    <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+    <pre><code><span class="kw">from</span> contextlib <span class="kw">import</span> contextmanager
+
+@contextmanager
+<span class="kw">def</span> <span class="fn">temporizador</span>():
+    <span class="kw">import</span> time
+    inicio = time.perf_counter()
+    <span class="kw">try</span>:
+        <span class="kw">yield</span>  <span class="com"># código del bloque with</span>
+    <span class="kw">finally</span>:
+        fin = time.perf_counter()
+        <span class="fn">print</span>(<span class="str">f"Tardó {fin - inicio:.4f}s"</span>)
+
+<span class="kw">with</span> <span class="fn">temporizador</span>():
+    <span class="com"># código a medir</span>
+    <span class="fn">sum</span>(<span class="fn">range</span>(<span class="num">1000000</span>))</code></pre>
+  </div>
+</section>
+
+<!-- ==================== ENTORNOS ==================== -->
+<section class="section" id="entornos" data-title="Entornos y uv">
+  <h2>Entornos virtuales y uv</h2>
+  <div class="code-wrapper">
+    <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+    <pre><code><span class="com"># === uv (recomendado, rápido) ===</span>
+
+<span class="com"># Crear proyecto nuevo</span>
+uv init mi_proyecto
+
+<span class="com"># Añadir dependencia</span>
+uv add requests
+uv add <span class="str">"pydantic>=2.0"</span>
+
+<span class="com"># Añadir dependencia de desarrollo</span>
+uv add --dev ruff pytest
+
+<span class="com"># Ejecutar script</span>
+uv run python main.py
+uv run pytest
+
+<span class="com"># Sincronizar entorno (instala todo desde pyproject.toml)</span>
+uv sync
+
+<span class="com"># Eliminar dependencia</span>
+uv remove requests
+
+<span class="com"># === venv nativo (alternativa) ===</span>
+python -m venv .venv
+
+<span class="com"># Activar (Windows)</span>
+.venv\Scripts\activate
+
+<span class="com"># Activar (Linux/Mac)</span>
+source .venv/bin/activate
+
+<span class="com"># === pyproject.toml (estructura mínima) ===</span>
+<span class="com">#
+# [project]
+# name = "mi-app"
+# version = "0.1.0"
+# requires-python = ">=3.12"
+# dependencies = ["requests", "pydantic"]
+#
+# [dependency-groups]
+# dev = ["ruff", "pytest"]
+#</span></code></pre>
+  </div>
+  <h3 style="margin:1rem 0 0.5rem;color:var(--accent);">ruff (format + lint)</h3>
+  <div class="code-wrapper">
+    <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+    <pre><code><span class="com"># Formatear código</span>
+uv run ruff format .
+
+<span class="com"># Lint (revisar errores de estilo)</span>
+uv run ruff check .
+
+<span class="com"># Lint y auto-corregir</span>
+uv run ruff check --fix .
+
+<span class="com"># Configurar en pyproject.toml:</span>
+<span class="com">#
+# [tool.ruff]
+# line-length = 88
+# target-version = "py312"
+#
+# [tool.ruff.lint]
+# select = ["E", "F", "I", "UP", "B", "SIM"]
+#</span></code></pre>
+  </div>
+</section>
+
+</div><!-- /main -->
+
+<!-- ==================== JAVASCRIPT ==================== -->
+<script>
+  // Copiar código
+  function copyCode(btn) {
+    const pre = btn.parentElement.querySelector('pre');
+    const text = pre.textContent;
+    navigator.clipboard.writeText(text).then(() => {
+      btn.textContent = '✓ Copiado';
+      btn.classList.add('copied');
+      setTimeout(() => {
+        btn.textContent = 'Copiar';
+        btn.classList.remove('copied');
+      }, 1500);
+    });
+  }
+
+  // Buscador: filtra secciones por texto
+  function filterSections() {
+    const query = document.getElementById('search-box').value.toLowerCase();
+    const sections = document.querySelectorAll('.section');
+    const links = document.querySelectorAll('#sidebar a');
+
+    sections.forEach(sec => {
+      const text = sec.textContent.toLowerCase();
+      const title = sec.getAttribute('data-title').toLowerCase();
+      const match = text.includes(query) || title.includes(query);
+      sec.style.display = match ? '' : 'none';
+    });
+
+    // Ocultar enlaces del sidebar cuya sección no es visible
+    links.forEach(link => {
+      const id = link.getAttribute('href').slice(1);
+      const sec = document.getElementById(id);
+      if (sec) {
+        link.style.display = sec.style.display === 'none' ? 'none' : '';
+      }
+    });
+  }
+
+  // Resaltar enlace activo en sidebar al hacer scroll
+  const sections = document.querySelectorAll('.section');
+  const navLinks = document.querySelectorAll('#sidebar a');
+
+  window.addEventListener('scroll', () => {
+    let current = '';
+    sections.forEach(sec => {
+      const top = sec.offsetTop - 100;
+      if (window.scrollY >= top) {
+        current = sec.getAttribute('id');
+      }
+    });
+    navLinks.forEach(link => {
+      link.classList.remove('active');
+      if (link.getAttribute('href') === '#' + current) {
+        link.classList.add('active');
+      }
+    });
+  });
+</script>
+
+</body>
+</html>
+]]>

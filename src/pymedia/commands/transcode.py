@@ -9,23 +9,23 @@ from pymedia.ffmpeg.transcode_cmd import transcode_cmd
 
 
 def transcode(
-    path: list[Path], config: Config, transcoding_pipeline: TranscodingPipeline
+    paths: list[Path], config: Config, transcoding_pipeline: TranscodingPipeline
 ) -> None:
 
-    for p in path:
+    for p in paths:
         try:
             media: MediaInput = load(p)
         except (ValueError, subprocess.CalledProcessError, JSONDecodeError, OSError):
-            print(f"Formato inválido: {p}")
+            print(f"Probe indica formato inválido: {p}")
             continue
 
         try:
             transcoding_pipeline.validate(media)
         except ValueError:
-            print(f"Formato inválido: {p}")
+            print(f"Formato no pasa verificación: {p}")
             continue
 
-        cmd = transcode_cmd(p, config, transcoding_pipeline)
+        cmd = transcode_cmd(p, config, media, transcoding_pipeline)
         if cmd is None:
             print(f"Parámetros inválidos: {p}")
             continue

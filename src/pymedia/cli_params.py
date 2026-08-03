@@ -27,11 +27,13 @@ class ScaleMode(int, Enum):
 def _validate_path(path: Path) -> Path | None:
     if not path.is_file():
         raise typer.BadParameter(f"{path} no es un archivo")
+    return path
 
 
 def _validate_path_list(path_list: list[Path]) -> list[Path] | None:
     for path in path_list:
         _validate_path(path)
+    return path_list
 
 
 PathArgument = Annotated[
@@ -82,7 +84,6 @@ RemuxOption = Annotated[
 
 
 TrimPointsOption = Annotated[
-    # TODO: validar formato, hora, tiempos iguales o mayores a la duración
     str,
     typer.Option(
         "--trim-points",

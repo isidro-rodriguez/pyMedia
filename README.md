@@ -59,7 +59,7 @@ uv lock
 │       └── main.py          # Lógica del punto de entrada
 ├── tests/
 │   └── test_main.py         # Pruebas unitarias con pytest
-├── AGENTS.md                # Reglas de conducta y guía para agentes IA
+├── .clinerules.md                # Reglas de conducta y guía para agentes IA
 ├── pyproject.toml           # Configuración del proyecto, scripts, ruff y pytest
 └── README.md                # Guía de uso y comandos del proyecto
 ```
