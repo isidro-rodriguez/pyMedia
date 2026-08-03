@@ -1,6 +1,12 @@
 from dataclasses import dataclass
 
 from pymedia.cli_params import GyrateMode, ScaleMode
+from pymedia.domain.errors import (
+    CropExceedsResolutionError,
+    InvalidCropFormatError,
+    InvalidScaleError,
+    NoVideoStreamError,
+)
 from pymedia.domain.media_input import MediaInput
 from pymedia.utils import parse_crop
 
@@ -51,7 +57,9 @@ class TranscodingPipeline:
 
         parsed = parse_crop(self.crop)
         if parsed is None:
-            raise ValueError("Formato de crop inválido. Esperado: IZQ,DER,ARRIBA,ABAJO")
+            raise InvalidCropFormatError(
+                "Formato de crop inválido. Esperado: IZQ,DER,ARRIBA,ABAJO"
+            )
 
         left, right, top, bottom = parsed
 
@@ -72,13 +80,13 @@ class TranscodingPipeline:
 
     def _validate_scale(self, media: MediaInput) -> None:
         if media.video is None:
-            raise ValueError("No se encontró stream de vídeo en el archivo.")
+            raise NoVideoStreamError("No se encontró stream de vídeo en el archivo.")
 
         if media.video.height is None:
-            raise ValueError("No se pudo obtener la altura del vídeo.")
+            raise InvalidScaleError("No se pudo obtener la altura del vídeo.")
 
         if self.scale is None:
-            raise ValueError("Valor de escala inválido.")
+            raise InvalidScaleError("Valor de escala inválido.")
 
         if self.scale >= media.video.height:
             print(
