@@ -32,9 +32,10 @@ class Config:
 
     @classmethod
     def load(cls) -> "Config":
-        path = Path(
-            platformdirs.user_config_dir("pymedia", appauthor=False, roaming=True)
-        ) / "config.toml"
+        path = (
+            Path(platformdirs.user_config_dir("pymedia", appauthor=False, roaming=True))
+            / "config.toml"
+        )
         if not path.exists():
             cls._create(path)
 
@@ -66,5 +67,5 @@ class Config:
 
     @classmethod
     def _validate(cls, data: dict) -> None:
-        print("Validando config.toml")
+        print("")
         # TODO: implementar validación de config.toml

@@ -45,7 +45,9 @@ class TranscodingPipeline:
 
     def _validate_crop(self, media: MediaInput) -> None:
         if media.video is None:
-            raise ValueError("No se encontró stream de vídeo en el archivo.")
+            print("Crop ignorado: no se encontró stream de vídeo en el archivo.")
+            self.crop = None
+            return
 
         parsed = parse_crop(self.crop)
         if parsed is None:
@@ -53,11 +55,20 @@ class TranscodingPipeline:
 
         left, right, top, bottom = parsed
 
-        if (left + right) > media.video.width:
-            raise ValueError("Valores de corte mayores a la resolución del vídeo.")
+        if (left + right) >= media.video.width:
+            print(
+                f"Crop ignorado: {left + right} >= ancho original "
+                f"({media.video.width})."
+            )
+            self.crop = None
+            return
 
-        if (top + bottom) > media.video.height:
-            raise ValueError("Valores de corte mayores a la resolución del vídeo.")
+        if (top + bottom) >= media.video.height:
+            print(
+                f"Crop ignorado: {top + bottom} >= alto original "
+                f"({media.video.height})."
+            )
+            self.crop = None
 
     def _validate_scale(self, media: MediaInput) -> None:
         if media.video is None:
