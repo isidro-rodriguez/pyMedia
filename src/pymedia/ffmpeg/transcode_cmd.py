@@ -13,12 +13,12 @@ def transcode_cmd(
     transcoding_pipeline: TranscodingPipeline,
 ):
 
-    video_input = path.absolute()
-    video_output = path.name + ".transcoded" + path.suffix
+    video_input = str(path.absolute())
+    video_output = str(path.stem + ".transcoded" + path.suffix)
 
     filters = []
 
-    if transcoding_pipeline.crop:
+    if transcoding_pipeline.crop is not None:
         if media.video is None:
             raise ValueError(f"Vídeo {path} no encontrado en transcode")
 
@@ -31,15 +31,13 @@ def transcode_cmd(
 
         crop_w = media.video.width - left - right
         crop_h = media.video.height - top - bottom
-        crop_x = left
-        crop_y = top
 
-        filters.append(f"crop={crop_w}:{crop_h}:{crop_x}:{crop_y}")
+        filters.append(f"crop={crop_w}:{crop_h}:{left}:{top}")
 
-    if transcoding_pipeline.scale:
+    if transcoding_pipeline.scale is not None:
         filters.append(f"scale=-2:{transcoding_pipeline.scale}")
 
-    if transcoding_pipeline.gyrate:
+    if transcoding_pipeline.gyrate is not None:
         match transcoding_pipeline.gyrate:
             case 90:
                 filters.append("transpose=1")
@@ -50,35 +48,29 @@ def transcode_cmd(
             case _:
                 return None
 
+    cmd = [
+        "ffmpeg",
+        "-i",
+        video_input,
+    ]
+
     if filters:
-        return [
-            "ffmpeg",
-            "-i",
-            video_input,
-            "-filter:v",
-            ",".join(filters),
+        cmd.extend(["-filter:v", ",".join(filters)])
+
+    cmd.extend(
+        [
             "-c:v",
             config.transcode.video_codec,
             "-crf",
-            config.transcode.video_crf,
+            str(config.transcode.video_crf),
             "-preset",
             config.transcode.video_preset,
+            "-pix_fmt",
+            config.transcode.video_pix_fmt,
             "-c:a",
             "copy",
             video_output,
         ]
+    )
 
-    return [
-        "ffmpeg",
-        "-i",
-        video_input,
-        "-c:v",
-        config.transcode.video_codec,
-        "-crf",
-        config.transcode.video_crf,
-        "-preset",
-        config.transcode.video_preset,
-        "-c:a",
-        "copy",
-        video_output,
-    ]
+    return cmd

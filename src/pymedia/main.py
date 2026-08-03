@@ -46,11 +46,10 @@ def recode(
     if crop is None and scale is None and gyrate is None and remux is False:
         print("Se requiere al menos una opción.")
         return
-    config = Config.load()
-    if scale:
-        resize_to = scale.value
-    pipeline = TranscodingPipeline(crop=crop, gyrate=gyrate, remux=remux, scale=resize_to)
-    transcode(paths, config, pipeline)
+    pipeline = TranscodingPipeline.load(
+        crop=crop, gyrate=gyrate, remux=remux, scale=scale
+    )
+    transcode(paths, Config.load(), pipeline)
 
 
 @app.command()

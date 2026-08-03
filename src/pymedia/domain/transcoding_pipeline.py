@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 
+from pymedia.cli_params import GyrateMode, ScaleMode
 from pymedia.domain.media_input import MediaInput
 from pymedia.utils import parse_crop
 
@@ -15,44 +16,50 @@ class TranscodingPipeline:
     def load(
         cls,
         crop: str | None = None,
-        gyrate: int | None = None,
+        gyrate: GyrateMode | None = None,
         remux: bool = False,
-        scale: int | None = None,
+        scale: ScaleMode | None = None,
     ) -> "TranscodingPipeline":
+        if gyrate is not None:
+            gyrate = gyrate.value
+        if scale is not None:
+            scale = scale.value
         return cls(crop=crop, gyrate=gyrate, remux=remux, scale=scale)
 
     def validate(self, media: MediaInput) -> None:
-        if self.crop:
-            crop = parse_crop(self.crop)
-            if crop is None:
-                raise ValueError(
-                    "Formato de crop inválido. Esperado: IZQ,DER,ARRIBA,ABAJO"
-                )
-            if not self._validate_crop(media):
-                raise ValueError("Valores de corte mayores a las resolución del vídeo")
+        if self.crop is not None:
+            self._validate_crop(media)
 
-        if self.scale:
-            if not self._validate_scale(media):
-                raise ValueError("Altura de escala mayor a la del vídeo original")
+        if self.scale is not None:
+            self._validate_scale(media)
 
-    def _validate_crop(self, media: MediaInput) -> bool:
-        parsed = parse_crop(self.crop)
-        if parsed is None or media.video is None:
-            return False
-        if (parsed[0] + parsed[1]) > media.video.width:
-            return False
-        if (parsed[2] + parsed[3]) > media.video.height:
-            return False
-        return True
-
-    def _validate_scale(self, media: MediaInput) -> bool:
+    def _validate_crop(self, media: MediaInput) -> None:
         if media.video is None:
-            return False
+            raise ValueError("No se encontró stream de vídeo en el archivo.")
+
+        parsed = parse_crop(self.crop)
+        if parsed is None:
+            raise ValueError("Formato de crop inválido. Esperado: IZQ,DER,ARRIBA,ABAJO")
+
+        left, right, top, bottom = parsed
+
+        if (left + right) > media.video.width:
+            raise ValueError("Valores de corte mayores a la resolución del vídeo.")
+
+        if (top + bottom) > media.video.height:
+            raise ValueError("Valores de corte mayores a la resolución del vídeo.")
+
+    def _validate_scale(self, media: MediaInput) -> None:
+        if media.video is None:
+            raise ValueError("No se encontró stream de vídeo en el archivo.")
+
         if media.video.height is None:
-            return False
+            raise ValueError("No se pudo obtener la altura del vídeo.")
+
         if self.scale is None:
-            return False
+            raise ValueError("Valor de escala inválido.")
+
         if self.scale >= media.video.height:
-            print(f"{self.scale} >= {media.video.height}")
-            return False
-        return True
+            raise ValueError(
+                "La altura de escala es mayor o igual a la del vídeo original."
+            )
