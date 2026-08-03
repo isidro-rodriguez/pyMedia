@@ -11,10 +11,13 @@ def transcode_cmd(
     config: Config,
     media: MediaInput,
     transcoding_pipeline: TranscodingPipeline,
+    output_name: str | None = None,
 ):
 
     video_input = str(path.absolute())
-    video_output = str(path.stem + ".transcoded" + path.suffix)
+    if output_name is None:
+        output_name = path.stem + ".transcoded" + path.suffix
+    video_output = output_name
 
     filters = []
 
@@ -50,6 +53,7 @@ def transcode_cmd(
 
     cmd = [
         "ffmpeg",
+        "-y",
         "-i",
         video_input,
     ]

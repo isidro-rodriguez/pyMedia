@@ -9,7 +9,10 @@ from pymedia.ffmpeg.transcode_cmd import transcode_cmd
 
 
 def transcode(
-    paths: list[Path], config: Config, transcoding_pipeline: TranscodingPipeline
+    paths: list[Path],
+    config: Config,
+    transcoding_pipeline: TranscodingPipeline,
+    output_name: str | None = None,
 ) -> None:
 
     for p in paths:
@@ -29,7 +32,9 @@ def transcode(
             print(f"Sin operaciones aplicables, omitido: {p}")
             continue
 
-        cmd = transcode_cmd(p, config, media, transcoding_pipeline)
+        cmd = transcode_cmd(
+            p, config, media, transcoding_pipeline, output_name=output_name
+        )
         if cmd is None:
             print(f"Parámetros inválidos: {p}")
             continue

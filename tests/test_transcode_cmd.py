@@ -79,7 +79,7 @@ def _run_pipeline(
     assert cmd is not None
     subprocess.run(cmd, capture_output=True, text=True, check=True)
 
-    out = tmp_path / OUTPUT_NAME
+    out = tmp_path / "video" / OUTPUT_NAME
     assert out.exists(), f"Salida no generada: {out}"
     return out
 

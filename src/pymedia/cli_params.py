@@ -82,6 +82,15 @@ RemuxOption = Annotated[
     ),
 ]
 
+OutputNameOption = Annotated[
+    str | None,
+    typer.Option(
+        "--output",
+        "-o",
+        help=("Nombre del archivo de salida. [dim]Ej: -o corte.mp4[/dim]"),
+    ),
+]
+
 
 TrimPointsOption = Annotated[
     str,

@@ -11,6 +11,7 @@ import typer
 from pymedia.cli_params import (
     CropOption,
     GyrateOption,
+    OutputNameOption,
     PathArgument,
     PathsArgument,
     RemuxOption,
@@ -39,6 +40,7 @@ def recode(
     scale: ScaleOption = None,
     gyrate: GyrateOption = None,
     remux: RemuxOption = False,
+    output_name: OutputNameOption = None,
 ) -> None:
     """
     Transcodifica con las opciones elegidas (requiere al menos una opción)
@@ -49,7 +51,7 @@ def recode(
     pipeline = TranscodingPipeline.load(
         crop=crop, gyrate=gyrate, remux=remux, scale=scale
     )
-    transcode(paths, Config.load(), pipeline)
+    transcode(paths, Config.load(), pipeline, output_name=output_name)
 
 
 @app.command()
