@@ -66,7 +66,7 @@ def test_load_format_props(name: str) -> None:
     """El formato mapea duration, size y format_name."""
     media = load(_clip("valid_concat", name))
     assert media.duration is not None
-    assert media.duration == pytest.approx(3.0, abs=0.1)
+    assert media.duration.total_seconds() == pytest.approx(3.0, abs=0.1)
     assert media.size is not None
     assert media.size > 0
     assert media.format_name is not None

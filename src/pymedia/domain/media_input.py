@@ -1,5 +1,6 @@
 # src/pymedia/domain/media_input.py
 from dataclasses import dataclass
+from datetime import timedelta
 from fractions import Fraction
 from pathlib import Path
 
@@ -31,7 +32,7 @@ class Audio:
 @dataclass(frozen=True)
 class MediaInput:
     path: Path
-    duration: float | None = None
+    duration: timedelta | None = None
     size: int | None = None
     format_name: str | None = None
     video: Video | None = None
@@ -71,10 +72,11 @@ def load(path: Path) -> MediaInput:
             )
 
     fmt = data.get("format", {})
+    duration_val = to_float(fmt.get("duration"))
 
     return MediaInput(
         path=path,
-        duration=to_float(fmt.get("duration")),
+        duration=timedelta(seconds=duration_val) if duration_val is not None else None,
         size=to_int(fmt.get("size")),
         format_name=fmt.get("format_name"),
         video=video,
