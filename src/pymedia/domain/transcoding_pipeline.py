@@ -26,6 +26,16 @@ class TranscodingPipeline:
             scale = scale.value
         return cls(crop=crop, gyrate=gyrate, remux=remux, scale=scale)
 
+    @property
+    def has_operations(self) -> bool:
+        """True si hay al menos una operación activa en el pipeline."""
+        return (
+            self.crop is not None
+            or self.gyrate is not None
+            or self.remux
+            or self.scale is not None
+        )
+
     def validate(self, media: MediaInput) -> None:
         if self.crop is not None:
             self._validate_crop(media)
@@ -60,6 +70,8 @@ class TranscodingPipeline:
             raise ValueError("Valor de escala inválido.")
 
         if self.scale >= media.video.height:
-            raise ValueError(
-                "La altura de escala es mayor o igual a la del vídeo original."
+            print(
+                f"Escala ignorada: {self.scale} >= altura original "
+                f"({media.video.height})."
             )
+            self.scale = None

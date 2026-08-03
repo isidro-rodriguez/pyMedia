@@ -25,6 +25,10 @@ def transcode(
             print(f"Formato no pasa verificación: {p}")
             continue
 
+        if not transcoding_pipeline.has_operations:
+            print(f"Sin operaciones aplicables, omitido: {p}")
+            continue
+
         cmd = transcode_cmd(p, config, media, transcoding_pipeline)
         if cmd is None:
             print(f"Parámetros inválidos: {p}")
