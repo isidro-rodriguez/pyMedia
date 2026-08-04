@@ -8,11 +8,12 @@ from pymedia.utils import parse_crop, resolve_output_path
 
 def encode_cmd(
     path: Path,
-    config: Config,
     media: MediaInput,
     encode_pipeline: EncodePipeline,
     output_name: str | None = None,
 ):
+
+    config = Config.load()
 
     video_input = str(path.absolute())
     video_output = str(resolve_output_path(output_name, path, "_encoded"))
