@@ -14,7 +14,7 @@ logger = get_logger("pipeline")
 
 
 @dataclass
-class TranscodingPipeline:
+class EncodePipeline:
     crop: str | None = None
     gyrate: int | None = None
     remux: bool = False
@@ -27,7 +27,7 @@ class TranscodingPipeline:
         gyrate: GyrateMode | None = None,
         remux: bool = False,
         scale: ScaleMode | None = None,
-    ) -> "TranscodingPipeline":
+    ) -> "EncodePipeline":
         if gyrate is not None:
             gyrate = gyrate.value
         if scale is not None:

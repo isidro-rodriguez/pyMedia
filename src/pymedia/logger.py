@@ -25,7 +25,7 @@ _LEVEL_ABBREV = {
 }
 
 _NAME_WIDTH = 20
-_LEVEL_WIDTH = 8
+_LEVEL_WIDTH = 9
 
 
 class AbbrevFormatter(logging.Formatter):
@@ -93,7 +93,7 @@ def setup_logging() -> None:
         / "logging.log"
     )
     file_fmt = AbbrevFormatter(
-        f"%(levelname)-{_LEVEL_WIDTH}s%(asctime)s %(name)-{_NAME_WIDTH}s%(message)s"
+        f"%(levelname)-{_LEVEL_WIDTH}s%(asctime)s  %(name)-{_NAME_WIDTH}s%(message)s"
     )
     file_handler = logging.FileHandler(log_path, encoding="utf-8")
     file_handler.setFormatter(file_fmt)

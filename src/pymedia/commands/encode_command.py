@@ -3,19 +3,19 @@ from json import JSONDecodeError
 from pathlib import Path
 
 from pymedia.domain.config import Config
+from pymedia.domain.encode_pipeline import EncodePipeline
 from pymedia.domain.errors import PipelineValidationError
 from pymedia.domain.media_input import MediaInput, load
-from pymedia.domain.transcoding_pipeline import TranscodingPipeline
-from pymedia.ffmpeg.transcode_cmd import transcode_cmd
+from pymedia.ffmpeg.encode_cmd import encode_cmd
 from pymedia.logger import get_logger
 
-logger = get_logger("transcode")
+logger = get_logger("encode")
 
 
-def transcode(
+def encode_command(
     paths: list[Path],
     config: Config,
-    transcoding_pipeline: TranscodingPipeline,
+    encode_pipeline: EncodePipeline,
     output_name: str | None = None,
 ) -> None:
 
@@ -27,7 +27,7 @@ def transcode(
             continue
 
         try:
-            transcoding_pipeline.validate(media)
+            encode_pipeline.validate(media)
         except PipelineValidationError as e:
             logger.error(f"Formato no pasa verificación: {p} ({e})")
             continue
@@ -35,13 +35,11 @@ def transcode(
             logger.error(f"Formato no pasa verificación: {p}")
             continue
 
-        if not transcoding_pipeline.has_operations:
+        if not encode_pipeline.has_operations:
             logger.warning(f"Sin operaciones aplicables, omitido: {p}")
             continue
 
-        cmd = transcode_cmd(
-            p, config, media, transcoding_pipeline, output_name=output_name
-        )
+        cmd = encode_cmd(p, config, media, encode_pipeline, output_name=output_name)
         if cmd is None:
             logger.error(f"Parámetros inválidos: {p}")
             continue

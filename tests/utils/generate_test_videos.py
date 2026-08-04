@@ -4,7 +4,7 @@ Ejecutar: uv run tests/utils/generate_test_videos.py
 
 Crea 15 archivos en tests/fixtures/:
   - valid_concat/   : 3 vídeos con parámetros idénticos (unibles con -c copy)
-  - valid_transcode/: 6 vídeos con parámetros variados (join requiere transcode)
+  - valid_encode/: 6 vídeos con parámetros variados (join requiere encode)
   - invalid/        : 6 archivos defectuosos para testear validación
 """
 
@@ -29,7 +29,7 @@ def _ffmpeg(args: list[str]) -> None:
 
 def _ensure_dirs() -> None:
     """Crea la estructura de carpetas de fixtures."""
-    for sub in ("valid_concat", "valid_transcode", "invalid"):
+    for sub in ("valid_concat", "valid_encode", "invalid"):
         (FIXTURES / sub).mkdir(parents=True, exist_ok=True)
 
 
@@ -68,8 +68,8 @@ def _gen_concat() -> None:
         )
 
 
-def _gen_transcode() -> None:
-    """6 vídeos con parámetros variados → join requiere transcode.
+def _gen_encode() -> None:
+    """6 vídeos con parámetros variados → join requiere encode.
 
     Variaciones: resolución, fps, codec de audio, sample rate, canales.
     """
@@ -84,7 +84,7 @@ def _gen_transcode() -> None:
         (854, 480, 30, "aac", 48000, "mono"),
     ]
     for i, (w, h, fps, acodec, arate, achan) in enumerate(specs, start=4):
-        out: Path = FIXTURES / "valid_transcode" / f"clip_{i:02d}.mp4"
+        out: Path = FIXTURES / "valid_encode" / f"clip_{i:02d}.mp4"
         _ffmpeg(
             [
                 "-f",
@@ -187,7 +187,7 @@ def main() -> None:
 
     _ensure_dirs()
     _gen_concat()
-    _gen_transcode()
+    _gen_encode()
     _gen_invalid()
 
     total: int = sum(

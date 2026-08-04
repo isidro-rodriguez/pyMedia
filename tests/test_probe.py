@@ -10,7 +10,7 @@ from pymedia.ffmpeg.probe import probe
 FIXTURES = Path(__file__).parent / "fixtures"
 
 VALID_CONCAT_CLIPS = ["clip_01.mp4", "clip_02.mp4", "clip_03.mp4"]
-VALID_TRANSCODE_CLIPS = [f"clip_{i:02d}.mp4" for i in range(4, 10)]
+VALID_ENCODE_CLIPS = [f"clip_{i:02d}.mp4" for i in range(4, 10)]
 
 # Archivos que ffprobe no puede leer → CalledProcessError
 INVALID_FILES = [
@@ -50,7 +50,7 @@ def test_probe_valid_concat_has_two_streams(name: str) -> None:
 
 @pytest.mark.parametrize("name", VALID_CONCAT_CLIPS)
 def test_probe_valid_concat_video_props(name: str) -> None:
-    """Los clips de valid_concat tienen vídeo h264, 640x360, 30fps."""
+    """Los clips de valid_concat tienen vídeo h264, 640x360, 30 fps."""
     data = probe(_clip("valid_concat", name))
     video = next(s for s in data["streams"] if s["codec_type"] == "video")
     assert video["codec_name"] == "h264"
@@ -70,10 +70,10 @@ def test_probe_valid_concat_audio_props(name: str) -> None:
     assert audio["channel_layout"] == "mono"
 
 
-@pytest.mark.parametrize("name", VALID_TRANSCODE_CLIPS)
-def test_probe_valid_transcode_returns_dict(name: str) -> None:
-    """Cada clip de valid_transcode devuelve un dict válido."""
-    data = probe(_clip("valid_transcode", name))
+@pytest.mark.parametrize("name", VALID_ENCODE_CLIPS)
+def test_probe_valid_encode_returns_dict(name: str) -> None:
+    """Cada clip de valid_encode devuelve un dict válido."""
+    data = probe(_clip("valid_encode", name))
     assert isinstance(data, dict)
     assert "streams" in data
     assert "format" in data

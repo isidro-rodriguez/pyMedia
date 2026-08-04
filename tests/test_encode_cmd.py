@@ -1,4 +1,4 @@
-"""Tests de transcode_cmd que ejecutan ffmpeg real y verifican la salida."""
+"""Tests de encode_cmd que ejecutan ffmpeg real y verifican la salida."""
 
 import json
 import shutil
@@ -7,15 +7,15 @@ from pathlib import Path
 
 import pytest
 
-from pymedia.domain.config import App, Config, ConflictiveJoin, Transcode
+from pymedia.domain.config import App, Config, ConflictiveJoin, Encode
+from pymedia.domain.encode_pipeline import EncodePipeline
 from pymedia.domain.media_input import load
-from pymedia.domain.transcoding_pipeline import TranscodingPipeline
-from pymedia.ffmpeg.transcode_cmd import transcode_cmd
+from pymedia.ffmpeg.encode_cmd import encode_cmd
 
 FIXTURES = Path(__file__).parent / "fixtures" / "valid_concat"
 SRC = FIXTURES / "clip_01.mp4"  # 640x360, 3 segundos
 
-OUTPUT_NAME = "clip_01.transcoded.mp4"
+OUTPUT_NAME = "clip_01.encoded.mp4"
 
 
 def _probe_resolution(path: Path) -> tuple[int, int]:
@@ -44,7 +44,7 @@ def _probe_resolution(path: Path) -> tuple[int, int]:
 def _config() -> Config:
     """Config con preset rápido para acortar los tests."""
     return Config(
-        transcode=Transcode(
+        encode=Encode(
             video_codec="libx264",
             video_preset="ultrafast",
             video_crf="23",
@@ -57,16 +57,16 @@ def _config() -> Config:
             fps="30",
             channels="1",
             pix_fmt="yuv420p",
-            confirm_transcode=True,
+            confirm_encode=True,
         ),
         app=App(logger_level="ERROR"),
     )
 
 
-def _run_pipeline(pipeline: TranscodingPipeline, tmp_path: Path, monkeypatch) -> Path:
-    """Copia la fixture a tmp, ejecuta ffmpeg real y devuelve la salida.
+def _run_pipeline(pipeline: EncodePipeline, tmp_path: Path, monkeypatch) -> Path:
+    """Copia el fixture a tmp, ejecuta ffmpeg real y devuelve la salida.
 
-    La salida se genera en el CWD con nombre `stem.transcoded.suffix`,
+    La salida se genera en el CWD con nombre `stem.encoded.suffix`,
     así que cambiamos el CWD a tmp_path y verificamos ahí.
     """
     wk = tmp_path / SRC.name
@@ -74,7 +74,7 @@ def _run_pipeline(pipeline: TranscodingPipeline, tmp_path: Path, monkeypatch) ->
     monkeypatch.chdir(tmp_path)
 
     media = load(wk)
-    cmd = transcode_cmd(wk, _config(), media, pipeline)
+    cmd = encode_cmd(wk, _config(), media, pipeline)
     assert cmd is not None
     subprocess.run(cmd, capture_output=True, text=True, check=True)
 
@@ -88,44 +88,44 @@ def _run_pipeline(pipeline: TranscodingPipeline, tmp_path: Path, monkeypatch) ->
 
 def test_cmd_no_filters_real(tmp_path, monkeypatch) -> None:
     """Sin filtros, la salida conserva 640x360."""
-    out = _run_pipeline(TranscodingPipeline(), tmp_path, monkeypatch)
+    out = _run_pipeline(EncodePipeline(), tmp_path, monkeypatch)
     assert _probe_resolution(out) == (640, 360)
 
 
 def test_cmd_with_crop_real(tmp_path, monkeypatch) -> None:
     """Crop 100,50,25,25 → salida 490x310."""
-    out = _run_pipeline(TranscodingPipeline(crop="100,50,25,25"), tmp_path, monkeypatch)
+    out = _run_pipeline(EncodePipeline(crop="100,50,25,25"), tmp_path, monkeypatch)
     assert _probe_resolution(out) == (490, 310)
 
 
 def test_cmd_with_scale_real(tmp_path, monkeypatch) -> None:
     """Scale 180 → salida 320x180."""
-    out = _run_pipeline(TranscodingPipeline(scale=180), tmp_path, monkeypatch)
+    out = _run_pipeline(EncodePipeline(scale=180), tmp_path, monkeypatch)
     assert _probe_resolution(out) == (320, 180)
 
 
 def test_cmd_with_gyrate_90_real(tmp_path, monkeypatch) -> None:
     """Gyrate 90 → dimensiones intercambiadas (360x640)."""
-    out = _run_pipeline(TranscodingPipeline(gyrate=90), tmp_path, monkeypatch)
+    out = _run_pipeline(EncodePipeline(gyrate=90), tmp_path, monkeypatch)
     assert _probe_resolution(out) == (360, 640)
 
 
 def test_cmd_with_gyrate_180_real(tmp_path, monkeypatch) -> None:
     """Gyrate 180 → mismas dimensiones (640x360)."""
-    out = _run_pipeline(TranscodingPipeline(gyrate=180), tmp_path, monkeypatch)
+    out = _run_pipeline(EncodePipeline(gyrate=180), tmp_path, monkeypatch)
     assert _probe_resolution(out) == (640, 360)
 
 
 def test_cmd_with_gyrate_270_real(tmp_path, monkeypatch) -> None:
     """Gyrate 270 → dimensiones intercambiadas (360x640)."""
-    out = _run_pipeline(TranscodingPipeline(gyrate=270), tmp_path, monkeypatch)
+    out = _run_pipeline(EncodePipeline(gyrate=270), tmp_path, monkeypatch)
     assert _probe_resolution(out) == (360, 640)
 
 
 def test_cmd_crop_and_scale_real(tmp_path, monkeypatch) -> None:
     """Crop + scale combinados producen salida de altura correcta."""
     out = _run_pipeline(
-        TranscodingPipeline(crop="100,50,25,25", scale=180), tmp_path, monkeypatch
+        EncodePipeline(crop="100,50,25,25", scale=180), tmp_path, monkeypatch
     )
     _, h = _probe_resolution(out)
     assert h == 180
@@ -137,5 +137,5 @@ def test_cmd_invalid_gyrate_returns_none(gyrate: int, tmp_path) -> None:
     wk = tmp_path / SRC.name
     shutil.copy(SRC, wk)
     media = load(wk)
-    cmd = transcode_cmd(wk, _config(), media, TranscodingPipeline(gyrate=gyrate))
+    cmd = encode_cmd(wk, _config(), media, EncodePipeline(gyrate=gyrate))
     assert cmd is None

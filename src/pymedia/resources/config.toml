@@ -11,7 +11,7 @@
 # - Equilibrado: ocupa un 40% menos que con h264, pero tarda el triple
 # - Máximo: ocupa un 12% menos que hevc, pero es mucho más lento
 
-[transcode]
+[encode]
 video_codec = "hevc"
 video_preset = "slow"
 video_crf = "24"
@@ -24,7 +24,7 @@ resize_to = "min_height"    # min_height | max_height
 fps = "min"                 # min | max
 channels = "stereo"         # stereo | mono
 pix_fmt = "yuv420p"         # yuv420p | yuv420p10le
-confirm_transcode = true
+confirm_encode = true
 
 [app]
 logger_level = "INFO"       # DEBUG | INFO | WARNING | ERROR

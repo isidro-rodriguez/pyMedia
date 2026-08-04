@@ -12,9 +12,10 @@ from pymedia.cli_params import (
     ScaleOption,
     TrimPointsOption,
 )
-from pymedia.commands.transcode import transcode
+from pymedia.commands.encode_command import encode_command
+from pymedia.commands.split import split_command
 from pymedia.domain.config import Config
-from pymedia.domain.transcoding_pipeline import TranscodingPipeline
+from pymedia.domain.encode_pipeline import EncodePipeline
 from pymedia.logger import get_logger
 
 app = typer.Typer()
@@ -30,7 +31,7 @@ def tui(ctx: typer.Context) -> None:
 
 
 @app.command()
-def recode(
+def encode(
     paths: PathsArgument,
     crop: CropOption = None,
     scale: ScaleOption = None,
@@ -44,10 +45,8 @@ def recode(
     if crop is None and scale is None and gyrate is None and remux is False:
         logger.warning("Se requiere al menos una opción.")
         return
-    pipeline = TranscodingPipeline.load(
-        crop=crop, gyrate=gyrate, remux=remux, scale=scale
-    )
-    transcode(paths, Config.load(), pipeline, output_name=output_name)
+    pipeline = EncodePipeline.load(crop=crop, gyrate=gyrate, remux=remux, scale=scale)
+    encode_command(paths, Config.load(), pipeline, output_name=output_name)
 
 
 @app.command()
@@ -57,6 +56,7 @@ def join(
     scale: ScaleOption = None,
     gyrate: GyrateOption = None,
     remux: RemuxOption = False,
+    output_name: OutputNameOption = None,
 ) -> None:
     """Une los vídeos en el orden aportado"""
     logger.info("Unión")
@@ -71,21 +71,25 @@ def split(
     scale: ScaleOption = None,
     gyrate: GyrateOption = None,
     remux: RemuxOption = False,
+    output_name: OutputNameOption = None,
 ) -> None:
     """Separa un vídeo en los puntos de corte indicados"""
-    logger.info("División")
-    # TODO: implementar split
+    pipeline = EncodePipeline.load(crop=crop, gyrate=gyrate, remux=remux, scale=scale)
+    split_command(trim_points, path, Config.load(), pipeline, output_name=output_name)
 
 
 @app.command()
-def gif(path: Path) -> None:
+def gif(
+    path: Path,
+    output_name: OutputNameOption = None,
+) -> None:
     """Genera un gif animado del vídeo aportado"""
     logger.info("Animando gif")
     # TODO: implementar gif
 
 
 @app.command()
-def configuration() -> None:
+def config() -> None:
     """Accede a la configuración de pyMedia"""
     logger.info("Editando configuración")
     # TODO: implementar edición del config

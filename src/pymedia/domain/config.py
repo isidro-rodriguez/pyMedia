@@ -10,7 +10,7 @@ logger = logging.getLogger("[pymedia.config]")
 
 
 @dataclass(frozen=True)
-class Transcode:
+class Encode:
     video_codec: str
     video_preset: str
     video_crf: int
@@ -25,7 +25,7 @@ class ConflictiveJoin:
     fps: str
     channels: str
     pix_fmt: str
-    confirm_transcode: bool
+    confirm_encode: bool
 
 
 @dataclass(frozen=True)
@@ -35,7 +35,7 @@ class App:
 
 @dataclass(frozen=True)
 class Config:
-    transcode: Transcode
+    encode: Encode
     conflictive_join: ConflictiveJoin
     app: App
 
@@ -53,7 +53,7 @@ class Config:
             cls._validate(data)
 
         return cls(
-            transcode=Transcode(**data["transcode"]),
+            encode=Encode(**data["encode"]),
             conflictive_join=ConflictiveJoin(**data["conflictive_join"]),
             app=App(**data["app"]),
         )
