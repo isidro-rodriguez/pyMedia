@@ -34,7 +34,6 @@ def _split(path: Path, trim_points: list[timedelta], output_name: str | None) ->
 def split_command(
     path: Path,
     trim_points: str,
-    config: Config,
     encode_pipeline: EncodePipeline,
     output_name: str | None = None,
 ) -> None:
@@ -71,7 +70,9 @@ def split_command(
     if encode_pipeline.has_operations:
         with tempfile.TemporaryDirectory() as tmp_dir:
             tmp_path = Path(tmp_dir) / (path.stem + "_tmp" + path.suffix)
-            if not transcode(media, config, encode_pipeline, output_name=str(tmp_path)):
+            if not transcode(
+                media, Config.load(), encode_pipeline, output_name=str(tmp_path)
+            ):
                 exit(1)
             _split(tmp_path, parsed_trim_points, output_name)
     else:

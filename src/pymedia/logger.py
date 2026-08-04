@@ -6,6 +6,8 @@ from pathlib import Path
 
 import platformdirs
 
+from pymedia.domain.config import Config
+
 _configured = False
 
 _LEVELS = {
@@ -73,8 +75,6 @@ def setup_logging() -> None:
     global _configured
     if _configured:
         return
-
-    from pymedia.domain.config import Config
 
     config = Config.load()
     level = _LEVELS.get(config.app.logger_level.upper(), logging.INFO)

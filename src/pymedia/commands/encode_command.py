@@ -2,7 +2,6 @@ import subprocess
 from json import JSONDecodeError
 from pathlib import Path
 
-from pymedia.domain.config import Config
 from pymedia.domain.encode_pipeline import EncodePipeline
 from pymedia.domain.errors import PipelineValidationError
 from pymedia.domain.media_input import MediaInput
@@ -14,7 +13,6 @@ logger = get_logger("encode")
 
 def transcode(
     media: MediaInput,
-    config: Config,
     encode_pipeline: EncodePipeline,
     output_name: str | None = None,
 ) -> bool:
@@ -32,9 +30,7 @@ def transcode(
         logger.warning(f"Sin operaciones aplicables, omitido: {media.path}")
         return False
 
-    cmd = encode_cmd(
-        media.path, config, media, encode_pipeline, output_name=output_name
-    )
+    cmd = encode_cmd(media.path, media, encode_pipeline, output_name=output_name)
     if cmd is None:
         logger.error(f"Parámetros inválidos: {media.path}")
         return False
@@ -50,7 +46,6 @@ def transcode(
 
 def encode_command(
     paths: list[Path],
-    config: Config,
     encode_pipeline: EncodePipeline,
     output_name: str | None = None,
 ) -> None:
@@ -62,4 +57,4 @@ def encode_command(
             logger.error(f"Probe indica formato inválido: {p}")
             continue
 
-        transcode(media, config, encode_pipeline, output_name)
+        transcode(media, encode_pipeline, output_name)
