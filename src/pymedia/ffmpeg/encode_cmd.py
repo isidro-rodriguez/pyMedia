@@ -3,7 +3,7 @@ from pathlib import Path
 from pymedia.domain.config import Config
 from pymedia.domain.encode_pipeline import EncodePipeline
 from pymedia.domain.media_input import MediaInput
-from pymedia.utils import parse_crop
+from pymedia.utils import parse_crop, resolve_output_path
 
 
 def encode_cmd(
@@ -15,9 +15,7 @@ def encode_cmd(
 ):
 
     video_input = str(path.absolute())
-    if output_name is None:
-        output_name = path.stem + ".encoded" + path.suffix
-    video_output = output_name
+    video_output = str(resolve_output_path(output_name, path, "_encoded"))
 
     filters = []
 

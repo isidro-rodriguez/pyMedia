@@ -13,7 +13,7 @@ from pymedia.cli_params import (
     TrimPointsOption,
 )
 from pymedia.commands.encode_command import encode_command
-from pymedia.commands.split import split_command
+from pymedia.commands.split_command import split_command
 from pymedia.domain.config import Config
 from pymedia.domain.encode_pipeline import EncodePipeline
 from pymedia.logger import get_logger
@@ -75,7 +75,7 @@ def split(
 ) -> None:
     """Separa un vídeo en los puntos de corte indicados"""
     pipeline = EncodePipeline.load(crop=crop, gyrate=gyrate, remux=remux, scale=scale)
-    split_command(trim_points, path, Config.load(), pipeline, output_name=output_name)
+    split_command(path, trim_points, Config.load(), pipeline, output_name=output_name)
 
 
 @app.command()

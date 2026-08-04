@@ -38,47 +38,49 @@ class MediaInput:
     video: Video | None = None
     audio: Audio | None = None
 
+    @classmethod
+    def load(cls, path: Path) -> "MediaInput":
+        """Mapea el JSON de ffprobe a MediaInput."""
+        data = ffprobe(path)
 
-def load(path: Path) -> MediaInput:
-    """Mapea el JSON de ffprobe a MediaInput."""
-    data = ffprobe(path)
+        video = None
+        audio = None
 
-    video = None
-    audio = None
+        for stream in data.get("streams", []):
+            codec_type = stream.get("codec_type")
+            tags = stream.get("tags", {})
+            language = tags.get("language")
 
-    for stream in data.get("streams", []):
-        codec_type = stream.get("codec_type")
-        tags = stream.get("tags", {})
-        language = tags.get("language")
+            if codec_type == "video":
+                video = Video(
+                    codec=stream.get("codec_name"),
+                    width=stream.get("width"),
+                    height=stream.get("height"),
+                    fps=parse_fraction(stream.get("avg_frame_rate")),
+                    bit_rate=to_int(stream.get("bit_rate")),
+                    pix_fmt=stream.get("pix_fmt"),
+                    aspect_ratio=stream.get("display_aspect_ratio"),
+                )
+            elif codec_type == "audio":
+                audio = Audio(
+                    codec=stream.get("codec_name"),
+                    sample_rate=to_int(stream.get("sample_rate")),
+                    channels=stream.get("channels"),
+                    channel_layout=stream.get("channel_layout"),
+                    bit_rate=to_int(stream.get("bit_rate")),
+                    language=language,
+                )
 
-        if codec_type == "video":
-            video = Video(
-                codec=stream.get("codec_name"),
-                width=stream.get("width"),
-                height=stream.get("height"),
-                fps=parse_fraction(stream.get("avg_frame_rate")),
-                bit_rate=to_int(stream.get("bit_rate")),
-                pix_fmt=stream.get("pix_fmt"),
-                aspect_ratio=stream.get("display_aspect_ratio"),
-            )
-        elif codec_type == "audio":
-            audio = Audio(
-                codec=stream.get("codec_name"),
-                sample_rate=to_int(stream.get("sample_rate")),
-                channels=stream.get("channels"),
-                channel_layout=stream.get("channel_layout"),
-                bit_rate=to_int(stream.get("bit_rate")),
-                language=language,
-            )
+        fmt = data.get("format", {})
+        duration_val = to_float(fmt.get("duration"))
 
-    fmt = data.get("format", {})
-    duration_val = to_float(fmt.get("duration"))
-
-    return MediaInput(
-        path=path,
-        duration=timedelta(seconds=duration_val) if duration_val is not None else None,
-        size=to_int(fmt.get("size")),
-        format_name=fmt.get("format_name"),
-        video=video,
-        audio=audio,
-    )
+        return MediaInput(
+            path=path,
+            duration=timedelta(seconds=duration_val)
+            if duration_val is not None
+            else None,
+            size=to_int(fmt.get("size")),
+            format_name=fmt.get("format_name"),
+            video=video,
+            audio=audio,
+        )

@@ -1,6 +1,6 @@
-import re
 from datetime import timedelta
 from fractions import Fraction
+from pathlib import Path
 
 
 def parse_fraction(value: str | None) -> Fraction | None:
@@ -50,27 +50,16 @@ def parse_crop(value: str | None) -> tuple[int, int, int, int] | None:
     return left, right, top, bottom
 
 
-# Patrón: "SS", "MM:SS" o "HH:MM:SS" (segundos con decimales opcionales)
-_TIMESTAMP_RE = re.compile(
-    r"^(?:(?P<hours>\d+):)?(?P<minutes>\d+):(?P<seconds>\d+(?:\.\d+)?)$"
-)
-
-
-def parse_timestamp(value: str | None) -> timedelta | None:
-    """Parsea 'HH:MM:SS', 'MM:SS' o 'SS' a timedelta."""
-    if value is None:
-        return None
-
-    match = _TIMESTAMP_RE.fullmatch(value)
-    if not match:
-        return None
-
-    parts = {k: float(v) for k, v in match.groupdict().items() if v}
-    return timedelta(
-        hours=parts.get("hours", 0),
-        minutes=parts.get("minutes", 0),
-        seconds=parts.get("seconds", 0),
-    )
+def convert_to_timedelta(total_time) -> timedelta | None:
+    match tuple(map(float, total_time.split(":"))):
+        case (hours, minutes, seconds):
+            return timedelta(hours=hours, minutes=minutes, seconds=seconds)
+        case (minutes, seconds):
+            return timedelta(minutes=minutes, seconds=seconds)
+        case (seconds,):
+            return timedelta(seconds=seconds)
+        case _:
+            return None
 
 
 def parse_trim_points(values: str | None) -> list[timedelta] | None:
@@ -78,22 +67,31 @@ def parse_trim_points(values: str | None) -> list[timedelta] | None:
     if values is None:
         return None
 
-    times: list[timedelta] = []
+    times_timedelta: list[timedelta] = []
 
     for v in values.split(","):
-        timestamp = parse_timestamp(v)
+        t = convert_to_timedelta(v)
+        if t is None:
+            continue
+        times_timedelta.append(t)
 
-        if not timestamp:
-            return None
-
-        times.append(timestamp)
-
-    return times
+    return times_timedelta
 
 
-def format_timedelta(td: timedelta) -> str:
-    """Convierte timedelta a 'HH:MM:SS'."""
-    total = int(td.total_seconds())
-    h, rem = divmod(total, 3600)
-    m, s = divmod(rem, 60)
-    return f"{h:02d}:{m:02d}:{s:02d}"
+def resolve_output_path(
+    output_name: str | None,
+    source_path: Path,
+    default_suffix: str,
+) -> Path:
+    """Resuelve la ruta de salida, creando directorio padre si necesario.
+
+    Si output_name es None, genera un nombre por defecto basado en el archivo
+    fuente. Si output_name incluye directorios, los crea si no existen.
+    """
+    if output_name is None:
+        return Path(source_path.stem + default_suffix + source_path.suffix)
+    out = Path(output_name)
+    parent = out.parent
+    if str(parent) != ".":
+        parent.mkdir(parents=True, exist_ok=True)
+    return out
