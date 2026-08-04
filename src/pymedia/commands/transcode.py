@@ -3,9 +3,13 @@ from json import JSONDecodeError
 from pathlib import Path
 
 from pymedia.domain.config import Config
+from pymedia.domain.errors import PipelineValidationError
 from pymedia.domain.media_input import MediaInput, load
 from pymedia.domain.transcoding_pipeline import TranscodingPipeline
 from pymedia.ffmpeg.transcode_cmd import transcode_cmd
+from pymedia.logger import get_logger
+
+logger = get_logger("transcode")
 
 
 def transcode(
@@ -19,27 +23,30 @@ def transcode(
         try:
             media: MediaInput = load(p)
         except (ValueError, subprocess.CalledProcessError, JSONDecodeError, OSError):
-            print(f"Probe indica formato inválido: {p}")
+            logger.error(f"Probe indica formato inválido: {p}")
             continue
 
         try:
             transcoding_pipeline.validate(media)
+        except PipelineValidationError as e:
+            logger.error(f"Formato no pasa verificación: {p} ({e})")
+            continue
         except ValueError:
-            print(f"Formato no pasa verificación: {p}")
+            logger.error(f"Formato no pasa verificación: {p}")
             continue
 
         if not transcoding_pipeline.has_operations:
-            print(f"Sin operaciones aplicables, omitido: {p}")
+            logger.warning(f"Sin operaciones aplicables, omitido: {p}")
             continue
 
         cmd = transcode_cmd(
             p, config, media, transcoding_pipeline, output_name=output_name
         )
         if cmd is None:
-            print(f"Parámetros inválidos: {p}")
+            logger.error(f"Parámetros inválidos: {p}")
             continue
 
         try:
             subprocess.run(cmd, capture_output=True, text=True, check=True)
         except subprocess.CalledProcessError as e:
-            print(f"Error al transcodificar {p}: {e.stderr}")
+            logger.error(f"Error al transcodificar {p}: {e.stderr}")

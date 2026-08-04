@@ -1,9 +1,3 @@
-# pyMedia
-# > pymedia                     # Abre TUI
-# > pymedia path              # Abre TUI con path cargados
-# > pymedia --help              # Muestra ayuda CLI con Typer
-# > pymedia ACTIONS path      # Genera comando ffmpeg y lo ejecuta por CLI
-# > pymedia OPERATION ACTIONS path
 from pathlib import Path
 
 import typer
@@ -21,8 +15,10 @@ from pymedia.cli_params import (
 from pymedia.commands.transcode import transcode
 from pymedia.domain.config import Config
 from pymedia.domain.transcoding_pipeline import TranscodingPipeline
+from pymedia.logger import get_logger
 
 app = typer.Typer()
+logger = get_logger("main")
 
 
 @app.callback(invoke_without_command=True)
@@ -30,7 +26,7 @@ app = typer.Typer()
 def tui(ctx: typer.Context) -> None:
     """Lanza la interfaz de usuario en terminal"""
     if ctx.invoked_subcommand is None:
-        print("Lanzando TUI.")
+        logger.info("Lanzando TUI.")
 
 
 @app.command()
@@ -46,7 +42,7 @@ def recode(
     Transcodifica con las opciones elegidas (requiere al menos una opción)
     """
     if crop is None and scale is None and gyrate is None and remux is False:
-        print("Se requiere al menos una opción.")
+        logger.warning("Se requiere al menos una opción.")
         return
     pipeline = TranscodingPipeline.load(
         crop=crop, gyrate=gyrate, remux=remux, scale=scale
@@ -63,7 +59,7 @@ def join(
     remux: RemuxOption = False,
 ) -> None:
     """Une los vídeos en el orden aportado"""
-    print("Unión")
+    logger.info("Unión")
     # TODO: implementar join
 
 
@@ -77,21 +73,21 @@ def split(
     remux: RemuxOption = False,
 ) -> None:
     """Separa un vídeo en los puntos de corte indicados"""
-    print("División")
+    logger.info("División")
     # TODO: implementar split
 
 
 @app.command()
 def gif(path: Path) -> None:
     """Genera un gif animado del vídeo aportado"""
-    print("Animando gif")
+    logger.info("Animando gif")
     # TODO: implementar gif
 
 
 @app.command()
-def config() -> None:
+def configuration() -> None:
     """Accede a la configuración de pyMedia"""
-    print("Editando configuración")
+    logger.info("Editando configuración")
     # TODO: implementar edición del config
 
 

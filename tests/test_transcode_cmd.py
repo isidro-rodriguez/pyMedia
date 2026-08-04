@@ -7,7 +7,7 @@ from pathlib import Path
 
 import pytest
 
-from pymedia.domain.config import Config, ConflictiveJoin, Transcode
+from pymedia.domain.config import App, Config, ConflictiveJoin, Transcode
 from pymedia.domain.media_input import load
 from pymedia.domain.transcoding_pipeline import TranscodingPipeline
 from pymedia.ffmpeg.transcode_cmd import transcode_cmd
@@ -59,12 +59,11 @@ def _config() -> Config:
             pix_fmt="yuv420p",
             confirm_transcode=True,
         ),
+        app=App(logger_level="ERROR"),
     )
 
 
-def _run_pipeline(
-    pipeline: TranscodingPipeline, tmp_path: Path, monkeypatch
-) -> Path:
+def _run_pipeline(pipeline: TranscodingPipeline, tmp_path: Path, monkeypatch) -> Path:
     """Copia la fixture a tmp, ejecuta ffmpeg real y devuelve la salida.
 
     La salida se genera en el CWD con nombre `stem.transcoded.suffix`,
@@ -79,7 +78,7 @@ def _run_pipeline(
     assert cmd is not None
     subprocess.run(cmd, capture_output=True, text=True, check=True)
 
-    out = tmp_path / "video" / OUTPUT_NAME
+    out = tmp_path / OUTPUT_NAME
     assert out.exists(), f"Salida no generada: {out}"
     return out
 

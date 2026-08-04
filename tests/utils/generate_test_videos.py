@@ -46,11 +46,23 @@ def _gen_concat() -> None:
         out: Path = FIXTURES / "valid_concat" / f"clip_{i:02d}.mp4"
         _ffmpeg(
             [
-                "-f", "lavfi", "-i", f"{pattern}=size=640x360:rate=30",
-                "-f", "lavfi", "-i", "anullsrc=r=44100:cl=mono",
-                "-t", "3",
-                "-c:v", "libx264", "-pix_fmt", "yuv420p",
-                "-c:a", "aac", "-shortest",
+                "-f",
+                "lavfi",
+                "-i",
+                f"{pattern}=size=640x360:rate=30",
+                "-f",
+                "lavfi",
+                "-i",
+                "anullsrc=r=44100:cl=mono",
+                "-t",
+                "3",
+                "-c:v",
+                "libx264",
+                "-pix_fmt",
+                "yuv420p",
+                "-c:a",
+                "aac",
+                "-shortest",
                 str(out),
             ]
         )
@@ -75,11 +87,23 @@ def _gen_transcode() -> None:
         out: Path = FIXTURES / "valid_transcode" / f"clip_{i:02d}.mp4"
         _ffmpeg(
             [
-                "-f", "lavfi", "-i", f"testsrc=size={w}x{h}:rate={fps}",
-                "-f", "lavfi", "-i", f"anullsrc=r={arate}:cl={achan}",
-                "-t", "3",
-                "-c:v", "libx264", "-pix_fmt", "yuv420p",
-                "-c:a", acodec, "-shortest",
+                "-f",
+                "lavfi",
+                "-i",
+                f"testsrc=size={w}x{h}:rate={fps}",
+                "-f",
+                "lavfi",
+                "-i",
+                f"anullsrc=r={arate}:cl={achan}",
+                "-t",
+                "3",
+                "-c:v",
+                "libx264",
+                "-pix_fmt",
+                "yuv420p",
+                "-c:a",
+                acodec,
+                "-shortest",
                 str(out),
             ]
         )
@@ -117,8 +141,14 @@ def _gen_invalid() -> None:
     audio_only: Path = base / "audio_only.mp4"
     _ffmpeg(
         [
-            "-f", "lavfi", "-i", "anullsrc=r=44100:cl=mono",
-            "-t", "2", "-c:a", "aac",
+            "-f",
+            "lavfi",
+            "-i",
+            "anullsrc=r=44100:cl=mono",
+            "-t",
+            "2",
+            "-c:a",
+            "aac",
             str(audio_only),
         ]
     )
@@ -127,8 +157,14 @@ def _gen_invalid() -> None:
     jpeg_src: Path = base / "_temp.jpg"
     _ffmpeg(
         [
-            "-f", "lavfi", "-i", "color=c=red:s=320x240:d=1",
-            "-frames:v", "1", "-f", "image2",
+            "-f",
+            "lavfi",
+            "-i",
+            "color=c=red:s=320x240:d=1",
+            "-frames:v",
+            "1",
+            "-f",
+            "image2",
             str(jpeg_src),
         ]
     )
@@ -144,9 +180,7 @@ def main() -> None:
     """Genera todos los fixtures."""
     # Verificar que ffmpeg está disponible
     try:
-        subprocess.run(
-            ["ffmpeg", "-version"], capture_output=True, check=True
-        )
+        subprocess.run(["ffmpeg", "-version"], capture_output=True, check=True)
     except (subprocess.CalledProcessError, FileNotFoundError):
         print("Error: ffmpeg no está instalado o no está en PATH.", file=sys.stderr)
         sys.exit(1)

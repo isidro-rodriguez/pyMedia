@@ -1,9 +1,12 @@
+import logging
 import tomllib
 from dataclasses import dataclass
 from importlib.resources import files
 from pathlib import Path
 
 import platformdirs
+
+logger = logging.getLogger("pymedia.config")
 
 
 @dataclass(frozen=True)
@@ -26,9 +29,15 @@ class ConflictiveJoin:
 
 
 @dataclass(frozen=True)
+class App:
+    logger_level: str
+
+
+@dataclass(frozen=True)
 class Config:
     transcode: Transcode
     conflictive_join: ConflictiveJoin
+    app: App
 
     @classmethod
     def load(cls) -> "Config":
@@ -46,17 +55,18 @@ class Config:
         return cls(
             transcode=Transcode(**data["transcode"]),
             conflictive_join=ConflictiveJoin(**data["conflictive_join"]),
+            app=App(**data["app"]),
         )
 
     @classmethod
     def save(cls) -> None:
-        print("Guardando config.toml")
+        logger.info("Guardando config.toml")
         # TODO: implementar posible manipulación de config.toml desde app
 
     @classmethod
     def _create(cls, path: Path) -> None:
         """Copia el config por defecto desde los recursos a la ruta de usuario."""
-        print("Guardando config.toml")
+        logger.info("Guardando config.toml")
         path.parent.mkdir(parents=True, exist_ok=True)
         src = (
             files("pymedia.resources")
@@ -67,5 +77,5 @@ class Config:
 
     @classmethod
     def _validate(cls, data: dict) -> None:
-        print("")
         # TODO: implementar validación de config.toml
+        pass

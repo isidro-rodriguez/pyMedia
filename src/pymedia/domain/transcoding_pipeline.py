@@ -2,13 +2,15 @@ from dataclasses import dataclass
 
 from pymedia.cli_params import GyrateMode, ScaleMode
 from pymedia.domain.errors import (
-    CropExceedsResolutionError,
     InvalidCropFormatError,
     InvalidScaleError,
     NoVideoStreamError,
 )
 from pymedia.domain.media_input import MediaInput
+from pymedia.logger import get_logger
 from pymedia.utils import parse_crop
+
+logger = get_logger("pipeline")
 
 
 @dataclass
@@ -51,9 +53,14 @@ class TranscodingPipeline:
 
     def _validate_crop(self, media: MediaInput) -> None:
         if media.video is None:
-            print("Crop ignorado: no se encontró stream de vídeo en el archivo.")
+            logger.warning(
+                "Crop ignorado: no se encontró stream de vídeo en el archivo."
+            )
             self.crop = None
             return
+
+        assert media.video.width is not None
+        assert media.video.height is not None
 
         parsed = parse_crop(self.crop)
         if parsed is None:
@@ -64,7 +71,7 @@ class TranscodingPipeline:
         left, right, top, bottom = parsed
 
         if (left + right) >= media.video.width:
-            print(
+            logger.warning(
                 f"Crop ignorado: {left + right} >= ancho original "
                 f"({media.video.width})."
             )
@@ -72,7 +79,7 @@ class TranscodingPipeline:
             return
 
         if (top + bottom) >= media.video.height:
-            print(
+            logger.warning(
                 f"Crop ignorado: {top + bottom} >= alto original "
                 f"({media.video.height})."
             )
@@ -89,7 +96,7 @@ class TranscodingPipeline:
             raise InvalidScaleError("Valor de escala inválido.")
 
         if self.scale >= media.video.height:
-            print(
+            logger.warning(
                 f"Escala ignorada: {self.scale} >= altura original "
                 f"({media.video.height})."
             )

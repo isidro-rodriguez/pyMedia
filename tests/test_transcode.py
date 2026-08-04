@@ -7,7 +7,7 @@ from unittest.mock import patch
 import pytest
 
 from pymedia.commands.transcode import transcode
-from pymedia.domain.config import Config, ConflictiveJoin, Transcode
+from pymedia.domain.config import App, Config, ConflictiveJoin, Transcode
 from pymedia.domain.transcoding_pipeline import TranscodingPipeline
 
 FIXTURES = Path(__file__).parent / "fixtures"
@@ -44,6 +44,7 @@ def _config() -> Config:
             pix_fmt="yuv420p",
             confirm_transcode=True,
         ),
+        app=App(logger_level="ERROR"),
     )
 
 

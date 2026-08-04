@@ -25,3 +25,6 @@ fps = "min"                 # min | max
 channels = "stereo"         # stereo | mono
 pix_fmt = "yuv420p"         # yuv420p | yuv420p10le
 confirm_transcode = true
+
+[app]
+logger_level = "INFO"       # DEBUG | INFO | WARNING | ERROR
