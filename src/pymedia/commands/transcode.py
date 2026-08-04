@@ -48,5 +48,6 @@ def transcode(
 
         try:
             subprocess.run(cmd, capture_output=True, text=True, check=True)
+            logger.info(f"Transcodificado correctamente: {p}")
         except subprocess.CalledProcessError as e:
             logger.error(f"Error al transcodificar {p}: {e.stderr}")

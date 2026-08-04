@@ -17,16 +17,19 @@ _LEVELS = {
 }
 
 _LEVEL_ABBREV = {
-    "DEBUG": "DEBUG",
-    "INFO": "INFO",
-    "WARNING": "WARN",
-    "ERROR": "ERROR",
-    "CRITICAL": "CRIT",
+    "DEBUG": "[DEBUG]",
+    "INFO": "[INFO]",
+    "WARNING": "[WARN]",
+    "ERROR": "[ERROR]",
+    "CRITICAL": "[CRIT]",
 }
+
+_NAME_WIDTH = 20
+_LEVEL_WIDTH = 8
 
 
 class AbbrevFormatter(logging.Formatter):
-    """Formatter que abrevia el levelname (WARNING → WARN, CRITICAL → CRIT)."""
+    """Formatter que abrevia el levelname (WARNING → [WARN], CRITICAL → [CRIT])."""
 
     def format(self, record: logging.LogRecord) -> str:
         record.levelname = _LEVEL_ABBREV.get(record.levelname, record.levelname)
@@ -53,12 +56,19 @@ class AnsiColorFormatter(AbbrevFormatter):
         return f"{start_style}{super().format(record)}{end_style}"
 
 
-def setup_logging() -> None:
-    """Configura el logger raíz 'pymedia' (idempotente).
+class PymediaFilter(logging.Filter):
+    """Solo deja pasar records del dominio 'pymedia'."""
 
-    - Console handler a stderr
+    def filter(self, record: logging.LogRecord) -> bool:
+        return record.name.startswith("[pymedia")
+
+
+def setup_logging() -> None:
+    """Configura el logger raíz (idempotente).
+
+    - Console handler a stderr (compacto, sin columnas extra)
     - File handler en el directorio de configuración del usuario,
-      o en la ruta indicada si se pasa log_file explícitamente.
+      columnizado para alinear el mensaje.
     """
     global _configured
     if _configured:
@@ -69,15 +79,13 @@ def setup_logging() -> None:
     config = Config.load()
     level = _LEVELS.get(config.app.logger_level.upper(), logging.INFO)
 
-    root = logging.getLogger("pymedia")
+    root = logging.getLogger()
     root.setLevel(level)
 
-    fmt = AnsiColorFormatter(
-        "[%(levelname)s] %(asctime)s [%(name)s] %(message)s", style="%"
-    )
-
+    console_fmt = AnsiColorFormatter("%(levelname)s %(asctime)s %(name)s %(message)s")
     console = logging.StreamHandler(sys.stderr)
-    console.setFormatter(fmt)
+    console.setFormatter(console_fmt)
+    console.addFilter(PymediaFilter())
     root.addHandler(console)
 
     log_path = (
@@ -85,10 +93,11 @@ def setup_logging() -> None:
         / "logging.log"
     )
     file_fmt = AbbrevFormatter(
-        "[%(levelname)s] %(asctime)s [%(name)s] %(message)s", style="%"
+        f"%(levelname)-{_LEVEL_WIDTH}s%(asctime)s %(name)-{_NAME_WIDTH}s%(message)s"
     )
     file_handler = logging.FileHandler(log_path, encoding="utf-8")
     file_handler.setFormatter(file_fmt)
+    file_handler.addFilter(PymediaFilter())
     root.addHandler(file_handler)
 
     _configured = True
@@ -97,4 +106,4 @@ def setup_logging() -> None:
 def get_logger(name: str = "") -> logging.Logger:
     """Devuelve un logger con prefijo 'pymedia.*'."""
     setup_logging()
-    return logging.getLogger(f"pymedia.{name}" if name else "pymedia")
+    return logging.getLogger(f"[pymedia.{name}]" if name else "[pymedia]")

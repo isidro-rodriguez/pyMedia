@@ -6,7 +6,7 @@ from pathlib import Path
 
 import platformdirs
 
-logger = logging.getLogger("pymedia.config")
+logger = logging.getLogger("[pymedia.config]")
 
 
 @dataclass(frozen=True)
