@@ -103,12 +103,5 @@ def gif(
     gif_command(path, pipeline, fps, start_point, end_point, output_name)
 
 
-@app.command()
-def config() -> None:
-    """Accede a la configuración de pyMedia"""
-    logger.info("Editando configuración")
-    # TODO: implementar edición del config
-
-
 if __name__ == "__main__":
     app()
