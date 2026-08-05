@@ -99,7 +99,8 @@ def gif(
     output_name: OutputNameOption = None,
 ) -> None:
     """Genera un gif animado del vídeo aportado"""
-    gif_command(path, fps, scale, start_point, end_point, crop, gyrate, output_name)
+    pipeline = EncodePipeline.load(crop, gyrate, False, scale)
+    gif_command(path, pipeline, fps, start_point, end_point, output_name)
 
 
 @app.command()
