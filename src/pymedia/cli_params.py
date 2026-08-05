@@ -14,14 +14,22 @@ class GyrateMode(int, Enum):
     d270 = 270
 
 
+class ScaleGifMode(int, Enum):
+    """Alturas de fotograma disponibles"""
+
+    P240 = 240
+    P480 = 480
+    P720 = 720
+
+
 class ScaleMode(int, Enum):
     """Alturas de fotograma disponibles"""
 
-    SD = 480
-    HD = 720
-    FHD = 1080
-    QHD = 1440
-    UHD = 2160
+    P480 = 480
+    P720 = 720
+    P1080 = 1080
+    P1440 = 1440
+    P2160 = 2160
 
 
 def _validate_path(path: Path) -> Path | None:
@@ -46,7 +54,6 @@ PathsArgument = Annotated[
 ]
 
 CropOption = Annotated[
-    # TODO: validar formato, suma de px a recortar < resolución
     str | None,
     typer.Option(
         "--crop",
@@ -56,22 +63,59 @@ CropOption = Annotated[
     ),
 ]
 
+EndPointOption = Annotated[
+    str | None,
+    typer.Option(
+        "--end-point",
+        "-ep",
+        metavar="hh:mm:ss",
+        help="Punto de tiempo en el que finaliza la generación del Gif. [dim]Ej: -ep 1:20[/dim]",  # noqa: E501
+    ),
+]
+
+FpsOption = Annotated[
+    int | None,
+    typer.Option(
+        "--fps",
+        "-f",
+        help="Imágenes por segundo del gif animado. [dim]Ej: -f 12[/dim]",
+    ),
+]
+
 GyrateOption = Annotated[
     GyrateMode | None,
     typer.Option(
         "--gyrate",
         "-g",
-        help="Gira el vídeo el ángulo indicado.\n[dim]Ej: -g 90[/dim]",
+        help="Gira el ángulo indicado.\n[dim]Ej: -g 90[/dim]",
+    ),
+]
+
+ScaleGifOption = Annotated[
+    ScaleGifMode | None,
+    typer.Option(
+        "--scale",
+        "-s",
+        help="Redimensiona proporcionalmente a la altura de indicada. [dim]Ej: -s 240[/dim]",  # noqa: E501
     ),
 ]
 
 ScaleOption = Annotated[
-    # TODO: ignorar, y notificar, si misma. Solicitar confirmación si redimensiona a mayor altura de pixeles. # noqa: E501
     ScaleMode | None,
     typer.Option(
         "--scale",
         "-s",
         help="Redimensiona proporcionalmente a la altura de indicada. [dim]Ej: -s 720[/dim]",  # noqa: E501
+    ),
+]
+
+StartPointOption = Annotated[
+    str | None,
+    typer.Option(
+        "--start-point",
+        "-sp",
+        metavar="hh:mm:ss",
+        help="Punto de tiempo en el que inicia la generación del Gif. [dim]Ej: -sp 1:20[/dim]",  # noqa: E501
     ),
 ]
 
@@ -87,10 +131,9 @@ OutputNameOption = Annotated[
     typer.Option(
         "--output",
         "-o",
-        help=("Nombre del archivo de salida. [dim]Ej: -o corte.mp4[/dim]"),
+        help="Nombre del archivo de salida. [dim]Ej: -o corte.mp4[/dim]",
     ),
 ]
-
 
 TrimPointsOption = Annotated[
     str,

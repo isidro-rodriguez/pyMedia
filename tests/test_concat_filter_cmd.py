@@ -10,13 +10,13 @@ from pymedia.domain.encode_pipeline import EncodePipeline
 from pymedia.domain.media_input import Audio, MediaInput, Video
 from pymedia.ffmpeg.concat_filter_cmd import (
     _all_audio_compatible,
-    build_audio_chain,
-    build_concat_graph,
-    build_ffmpeg_command,
-    build_input_args,
-    build_video_chain,
+    _build_audio_chain,
+    _build_concat_graph,
+    _build_ffmpeg_command,
+    _build_input_args,
+    _build_video_chain,
+    _determine_targets,
     concat_filter_cmd,
-    determine_targets,
 )
 
 # ──────────────────── fixtures ────────────────────
@@ -53,9 +53,7 @@ def pipeline() -> EncodePipeline:
 def media_with_audio() -> MediaInput:
     return MediaInput(
         path=Path("dummy.mp4"),
-        video=Video(
-            codec="h264", width=640, height=360, fps=30, pix_fmt="yuv420p"
-        ),
+        video=Video(codec="h264", width=640, height=360, fps=30, pix_fmt="yuv420p"),
         audio=Audio(
             codec="aac",
             sample_rate=44100,
@@ -69,9 +67,7 @@ def media_with_audio() -> MediaInput:
 def media_without_audio() -> MediaInput:
     return MediaInput(
         path=Path("dummy_no_audio.mp4"),
-        video=Video(
-            codec="h264", width=640, height=360, fps=30, pix_fmt="yuv420p"
-        ),
+        video=Video(codec="h264", width=640, height=360, fps=30, pix_fmt="yuv420p"),
         audio=None,
     )
 
@@ -124,9 +120,7 @@ def test_all_audio_compatible_all_with_audio_matching() -> None:
 def test_all_audio_compatible_some_without_audio() -> None:
     """Alguno sin audio → False."""
     medias = [
-        MediaInput(
-            path=Path("a.mp4"), video=Video(), audio=Audio(codec="aac")
-        ),
+        MediaInput(path=Path("a.mp4"), video=Video(), audio=Audio(codec="aac")),
         MediaInput(path=Path("b.mp4"), video=Video(), audio=None),
     ]
     assert _all_audio_compatible(medias) is False
@@ -175,7 +169,7 @@ def test_build_audio_chain_with_audio_compatible(
     media_with_audio, target_all_audio
 ) -> None:
     """Audio compatible → solo asetpts."""
-    result = build_audio_chain(media_with_audio, 0, target_all_audio)
+    result = _build_audio_chain(media_with_audio, 0, target_all_audio)
     assert result == "[0:a]asetpts=PTS-STARTPTS[a0]"
 
 
@@ -187,7 +181,7 @@ def test_build_audio_chain_with_audio_incompatible(
         "all_audio_compatible": False,
         "channel_layout": "stereo",
     }
-    result = build_audio_chain(media_with_audio, 1, target)
+    result = _build_audio_chain(media_with_audio, 1, target)
     assert "[1:a]aresample=48000" in result
     assert "aformat=sample_fmts=fltp:channel_layouts=stereo" in result
     assert "asetpts=PTS-STARTPTS[a1]" in result
@@ -198,7 +192,7 @@ def test_build_audio_chain_without_audio_raises(
 ) -> None:
     """Sin audio → ValueError (ya no se sintetiza silencio)."""
     with pytest.raises(ValueError, match="Stream de audio no encontrado"):
-        build_audio_chain(media_without_audio, 0, target_all_audio)
+        _build_audio_chain(media_without_audio, 0, target_all_audio)
 
 
 # ──────────────── build_concat_graph ────────────────
@@ -206,13 +200,13 @@ def test_build_audio_chain_without_audio_raises(
 
 def test_build_concat_graph_with_audio() -> None:
     """Con audio → concat con a=1."""
-    result = build_concat_graph(2, has_audio=True)
+    result = _build_concat_graph(2, has_audio=True)
     assert result == "[v0][a0][v1][a1]concat=n=2:v=1:a=1[v][a]"
 
 
 def test_build_concat_graph_without_audio() -> None:
     """Sin audio → concat con a=0."""
-    result = build_concat_graph(3, has_audio=False)
+    result = _build_concat_graph(3, has_audio=False)
     assert result == "[v0][v1][v2]concat=n=3:v=1:a=0[v]"
 
 
@@ -225,7 +219,7 @@ def test_build_input_args(tmp_path) -> None:
     paths[0].write_text("")
     paths[1].write_text("")
     medias = [MediaInput(path=p) for p in paths]
-    args = build_input_args(medias)
+    args = _build_input_args(medias)
     assert args == [
         "-i",
         str(paths[0].absolute()),
@@ -241,7 +235,7 @@ def test_build_video_chain_no_video_raises() -> None:
     """Sin stream de vídeo → ValueError."""
     media = MediaInput(path=Path("dummy.mp4"), video=None)
     with pytest.raises(ValueError, match="Stream de vídeo no encontrado"):
-        build_video_chain(media, 0, {}, EncodePipeline())
+        _build_video_chain(media, 0, {}, EncodePipeline())
 
 
 def test_build_video_chain_no_scale(media_with_audio) -> None:
@@ -251,9 +245,7 @@ def test_build_video_chain_no_scale(media_with_audio) -> None:
         "needs_fps": False,
         "needs_pix_fmt": False,
     }
-    result = build_video_chain(
-        media_with_audio, 0, target, EncodePipeline()
-    )
+    result = _build_video_chain(media_with_audio, 0, target, EncodePipeline())
     assert result == "[0:v]setsar=1,setpts=PTS-STARTPTS[v0]"
 
 
@@ -262,7 +254,7 @@ def test_build_video_chain_no_scale(media_with_audio) -> None:
 
 def test_build_ffmpeg_command_with_audio(config) -> None:
     """Con audio → incluye -map [a] y -c:a."""
-    cmd = build_ffmpeg_command(
+    cmd = _build_ffmpeg_command(
         input_args=["-i", "in.mp4"],
         filters="[0:v]...[v0]",
         config=config,
@@ -277,7 +269,7 @@ def test_build_ffmpeg_command_with_audio(config) -> None:
 
 def test_build_ffmpeg_command_without_audio(config) -> None:
     """Sin audio → no incluye -map [a] ni -c:a."""
-    cmd = build_ffmpeg_command(
+    cmd = _build_ffmpeg_command(
         input_args=["-i", "in.mp4"],
         filters="[0:v]...[v0]",
         config=config,
@@ -292,19 +284,15 @@ def test_build_ffmpeg_command_without_audio(config) -> None:
 # ──────────────── determine_targets ────────────────
 
 
-def test_determine_targets_has_audio(
-    media_with_audio, config, pipeline
-) -> None:
+def test_determine_targets_has_audio(media_with_audio, config, pipeline) -> None:
     """Con audio → has_audio=True."""
-    target = determine_targets([media_with_audio], config, pipeline)
+    target = _determine_targets([media_with_audio], config, pipeline)
     assert target["has_audio"] is True
 
 
-def test_determine_targets_has_no_audio(
-    media_without_audio, config, pipeline
-) -> None:
+def test_determine_targets_has_no_audio(media_without_audio, config, pipeline) -> None:
     """Sin audio → has_audio=False."""
-    target = determine_targets([media_without_audio], config, pipeline)
+    target = _determine_targets([media_without_audio], config, pipeline)
     assert target["has_audio"] is False
 
 
@@ -312,7 +300,7 @@ def test_determine_targets_mixed_audio(
     config, pipeline, media_with_audio, media_without_audio
 ) -> None:
     """Mezcla con/sin audio → has_audio=True, all_audio_compatible=False."""
-    target = determine_targets(
+    target = _determine_targets(
         [media_with_audio, media_without_audio], config, pipeline
     )
     assert target["has_audio"] is True  # al menos uno tiene audio
@@ -322,13 +310,9 @@ def test_determine_targets_mixed_audio(
 # ──────────────── concat_filter_cmd ────────────────
 
 
-def test_concat_filter_cmd_all_audio(
-    tmp_path, config, media_with_audio
-) -> None:
+def test_concat_filter_cmd_all_audio(tmp_path, config, media_with_audio) -> None:
     """Todos con audio → comando incluye audio en el filtro."""
-    with patch(
-        "pymedia.ffmpeg.concat_filter_cmd.Config.load", return_value=config
-    ):
+    with patch("pymedia.ffmpeg.concat_filter_cmd.Config.load", return_value=config):
         cmd = concat_filter_cmd(
             [media_with_audio, media_with_audio],
             EncodePipeline(),
@@ -340,13 +324,9 @@ def test_concat_filter_cmd_all_audio(
     assert "[a]" in cmd_str
 
 
-def test_concat_filter_cmd_no_audio(
-    tmp_path, config, media_without_audio
-) -> None:
+def test_concat_filter_cmd_no_audio(tmp_path, config, media_without_audio) -> None:
     """Ninguno con audio → comando sin audio en el filtro."""
-    with patch(
-        "pymedia.ffmpeg.concat_filter_cmd.Config.load", return_value=config
-    ):
+    with patch("pymedia.ffmpeg.concat_filter_cmd.Config.load", return_value=config):
         cmd = concat_filter_cmd(
             [media_without_audio, media_without_audio],
             EncodePipeline(),

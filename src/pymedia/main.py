@@ -4,16 +4,22 @@ import typer
 
 from pymedia.cli_params import (
     CropOption,
+    EndPointOption,
+    FpsOption,
     GyrateOption,
     OutputNameOption,
     PathArgument,
     PathsArgument,
     RemuxOption,
+    ScaleGifMode,
+    ScaleGifOption,
     ScaleOption,
+    StartPointOption,
     TrimPointsOption,
 )
 from pymedia.commands.concat_command import concat_command
 from pymedia.commands.encode_command import encode_command
+from pymedia.commands.gif_command import gif_command
 from pymedia.commands.split_command import split_command
 from pymedia.domain.encode_pipeline import EncodePipeline
 from pymedia.logger import get_logger
@@ -43,8 +49,8 @@ def concat(
     if len(paths) < 2:
         logger.warning("Se requiere al menos dos vídeos.")
         return
-    pipeline = EncodePipeline.load(crop=crop, gyrate=gyrate, remux=remux, scale=scale)
-    concat_command(paths, pipeline, output_name=output_name)
+    pipeline = EncodePipeline.load(crop, gyrate, remux, scale)
+    concat_command(paths, pipeline, output_name)
 
 
 @app.command()
@@ -62,8 +68,8 @@ def encode(
     if crop is None and scale is None and gyrate is None and remux is False:
         logger.warning("Se requiere al menos una opción.")
         return
-    pipeline = EncodePipeline.load(crop=crop, gyrate=gyrate, remux=remux, scale=scale)
-    encode_command(paths, pipeline, output_name=output_name)
+    pipeline = EncodePipeline.load(crop, gyrate, remux, scale)
+    encode_command(paths, pipeline, output_name)
 
 
 @app.command()
@@ -77,18 +83,23 @@ def split(
     output_name: OutputNameOption = None,
 ) -> None:
     """Separa un vídeo en los puntos de corte indicados"""
-    pipeline = EncodePipeline.load(crop=crop, gyrate=gyrate, remux=remux, scale=scale)
-    split_command(path, trim_points, pipeline, output_name=output_name)
+    pipeline = EncodePipeline.load(crop, gyrate, remux, scale)
+    split_command(path, trim_points, pipeline, output_name)
 
 
 @app.command()
 def gif(
     path: Path,
+    fps: FpsOption = 15,
+    scale: ScaleGifOption = ScaleGifMode.P480,
+    start_point: StartPointOption = None,
+    end_point: EndPointOption = None,
+    crop: CropOption = None,
+    gyrate: GyrateOption = None,
     output_name: OutputNameOption = None,
 ) -> None:
     """Genera un gif animado del vídeo aportado"""
-    logger.info("Animando gif")
-    # TODO: implementar gif
+    gif_command(path, fps, scale, start_point, end_point, crop, gyrate, output_name)
 
 
 @app.command()

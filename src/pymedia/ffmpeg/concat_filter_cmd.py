@@ -79,7 +79,7 @@ def _all_audio_compatible(media_infos: list[MediaInput]) -> bool:
     return len(signatures) == 1
 
 
-def determine_targets(
+def _determine_targets(
     media_infos: list[MediaInput], config: Config, pipeline: EncodePipeline
 ) -> dict:
     """Determina los targets y qué normalización es realmente necesaria."""
@@ -96,7 +96,7 @@ def determine_targets(
     }
 
 
-def build_input_args(media_infos: list[MediaInput]) -> list[str]:
+def _build_input_args(media_infos: list[MediaInput]) -> list[str]:
     """Construye los argumentos -i de ffmpeg para todas las entradas."""
     args: list[str] = []
     for media in media_infos:
@@ -105,7 +105,7 @@ def build_input_args(media_infos: list[MediaInput]) -> list[str]:
     return args
 
 
-def build_video_chain(
+def _build_video_chain(
     media: MediaInput, index: int, target: dict, pipeline: EncodePipeline
 ) -> str:
     """Construye la cadena de filtros de vídeo para una entrada."""
@@ -157,7 +157,7 @@ def build_video_chain(
     return f"[{index}:v]{video_filter_str}{','.join(normalization)}[v{index}]"
 
 
-def build_audio_chain(media: MediaInput, index: int, target: dict) -> str:
+def _build_audio_chain(media: MediaInput, index: int, target: dict) -> str:
     """Construye la cadena de filtros de audio para una entrada."""
     if media.audio is None:
         raise ValueError("Stream de audio no encontrado en unión recodificada")
@@ -175,7 +175,7 @@ def build_audio_chain(media: MediaInput, index: int, target: dict) -> str:
     )
 
 
-def build_concat_graph(n: int, has_audio: bool = True) -> str:
+def _build_concat_graph(n: int, has_audio: bool = True) -> str:
     """Construye el grafo concat final con en entradas."""
     if has_audio:
         labels = "".join(f"[v{i}][a{i}]" for i in range(n))
@@ -184,7 +184,7 @@ def build_concat_graph(n: int, has_audio: bool = True) -> str:
     return f"{labels}concat=n={n}:v=1:a=0[v]"
 
 
-def build_ffmpeg_command(
+def _build_ffmpeg_command(
     input_args: list[str],
     filters: str,
     config: Config,
@@ -223,23 +223,23 @@ def concat_filter_cmd(
 ):
     """Construye el comando ffmpeg para unión recodificada con filter_complex."""
     config = Config.load()
-    target = determine_targets(media_infos, config, pipeline)
+    target = _determine_targets(media_infos, config, pipeline)
 
-    input_args = build_input_args(media_infos)
+    input_args = _build_input_args(media_infos)
 
     media_filters: list[str] = []
     for i, media in enumerate(media_infos):
-        media_filters.append(build_video_chain(media, i, target, pipeline))
+        media_filters.append(_build_video_chain(media, i, target, pipeline))
         if target["has_audio"]:
-            media_filters.append(build_audio_chain(media, i, target))
+            media_filters.append(_build_audio_chain(media, i, target))
 
     filters = (
         ";".join(media_filters)
         + ";"
-        + build_concat_graph(len(media_infos), target["has_audio"])
+        + _build_concat_graph(len(media_infos), target["has_audio"])
     )
 
-    cmd = build_ffmpeg_command(
+    cmd = _build_ffmpeg_command(
         input_args, filters, config, output, has_audio=target["has_audio"]
     )
     print(cmd)
