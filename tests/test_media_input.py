@@ -6,7 +6,7 @@ from pathlib import Path
 
 import pytest
 
-from pymedia.domain.media_input import Audio, MediaInput, Video, load
+from pymedia.domain.media_input import Audio, MediaInput, Video
 
 FIXTURES = Path(__file__).parent / "fixtures"
 
@@ -32,14 +32,14 @@ def _clip(subdir: str, name: str) -> Path:
 @pytest.mark.parametrize("name", VALID_CONCAT_CLIPS)
 def test_load_returns_media_input(name: str) -> None:
     """load devuelve un MediaInput para clips válidos."""
-    media = load(_clip("valid_concat", name))
+    media = MediaInput.load(_clip("valid_concat", name))
     assert isinstance(media, MediaInput)
 
 
 @pytest.mark.parametrize("name", VALID_CONCAT_CLIPS)
 def test_load_video_props(name: str) -> None:
     """El vídeo mapea codec, resolución, fps y pix_fmt."""
-    media = load(_clip("valid_concat", name))
+    media = MediaInput.load(_clip("valid_concat", name))
     assert media.video is not None
     assert isinstance(media.video, Video)
     assert media.video.codec == "h264"
@@ -52,7 +52,7 @@ def test_load_video_props(name: str) -> None:
 @pytest.mark.parametrize("name", VALID_CONCAT_CLIPS)
 def test_load_audio_props(name: str) -> None:
     """El audio mapea codec, sample_rate, channels y channel_layout."""
-    media = load(_clip("valid_concat", name))
+    media = MediaInput.load(_clip("valid_concat", name))
     assert media.audio is not None
     assert isinstance(media.audio, Audio)
     assert media.audio.codec == "aac"
@@ -64,7 +64,7 @@ def test_load_audio_props(name: str) -> None:
 @pytest.mark.parametrize("name", VALID_CONCAT_CLIPS)
 def test_load_format_props(name: str) -> None:
     """El formato mapea duration, size y format_name."""
-    media = load(_clip("valid_concat", name))
+    media = MediaInput.load(_clip("valid_concat", name))
     assert media.duration is not None
     assert media.duration.total_seconds() == pytest.approx(3.0, abs=0.1)
     assert media.size is not None
@@ -77,7 +77,7 @@ def test_load_format_props(name: str) -> None:
 def test_load_path_preserved(name: str) -> None:
     """El path del MediaInput coincide con el pasado a load."""
     path = _clip("valid_concat", name)
-    media = load(path)
+    media = MediaInput.load(path)
     assert media.path == path
 
 
@@ -86,7 +86,7 @@ def test_load_path_preserved(name: str) -> None:
 
 def test_load_audio_only_no_video() -> None:
     """audio_only.mp4 no tiene stream de vídeo."""
-    media = load(_clip("invalid", "audio_only.mp4"))
+    media = MediaInput.load(_clip("invalid", "audio_only.mp4"))
     assert media.video is None
     assert media.audio is not None
     assert media.audio.codec == "aac"
@@ -99,10 +99,10 @@ def test_load_audio_only_no_video() -> None:
 def test_load_invalid_raises(name: str) -> None:
     """Los archivos inválidos lanzan CalledProcessError."""
     with pytest.raises(subprocess.CalledProcessError):
-        load(_clip("invalid", name))
+        MediaInput.load(_clip("invalid", name))
 
 
 def test_load_nonexistent_raises() -> None:
     """Un path inexistente lanza CalledProcessError."""
     with pytest.raises(subprocess.CalledProcessError):
-        load(Path("no_existe.mp4"))
+        MediaInput.load(Path("no_existe.mp4"))

@@ -7,15 +7,14 @@ from pathlib import Path
 
 import pytest
 
-from pymedia.domain.config import App, Config, ConflictiveJoin, Encode
 from pymedia.domain.encode_pipeline import EncodePipeline
-from pymedia.domain.media_input import load
+from pymedia.domain.media_input import MediaInput
 from pymedia.ffmpeg.encode_cmd import encode_cmd
 
 FIXTURES = Path(__file__).parent / "fixtures" / "valid_concat"
 SRC = FIXTURES / "clip_01.mp4"  # 640x360, 3 segundos
 
-OUTPUT_NAME = "clip_01.encoded.mp4"
+OUTPUT_NAME = "clip_01_encoded.mp4"
 
 
 def _probe_resolution(path: Path) -> tuple[int, int]:
@@ -41,28 +40,6 @@ def _probe_resolution(path: Path) -> tuple[int, int]:
     raise AssertionError("No se encontró stream de vídeo en la salida")
 
 
-def _config() -> Config:
-    """Config con preset rápido para acortar los tests."""
-    return Config(
-        encode=Encode(
-            video_codec="libx264",
-            video_preset="ultrafast",
-            video_crf="23",
-            video_pix_fmt="yuv420p",
-            audio_codec="aac",
-            audio_bit_rate="128k",
-        ),
-        conflictive_join=ConflictiveJoin(
-            resize_to="640",
-            fps="30",
-            channels="1",
-            pix_fmt="yuv420p",
-            confirm_encode=True,
-        ),
-        app=App(logger_level="ERROR"),
-    )
-
-
 def _run_pipeline(pipeline: EncodePipeline, tmp_path: Path, monkeypatch) -> Path:
     """Copia el fixture a tmp, ejecuta ffmpeg real y devuelve la salida.
 
@@ -73,8 +50,8 @@ def _run_pipeline(pipeline: EncodePipeline, tmp_path: Path, monkeypatch) -> Path
     shutil.copy(SRC, wk)
     monkeypatch.chdir(tmp_path)
 
-    media = load(wk)
-    cmd = encode_cmd(wk, _config(), media, pipeline)
+    media = MediaInput.load(wk)
+    cmd = encode_cmd(wk, media, pipeline)
     assert cmd is not None
     subprocess.run(cmd, capture_output=True, text=True, check=True)
 
@@ -136,6 +113,6 @@ def test_cmd_invalid_gyrate_returns_none(gyrate: int, tmp_path) -> None:
     """Un gyrate no soportado devuelve None sin ejecutar ffmpeg."""
     wk = tmp_path / SRC.name
     shutil.copy(SRC, wk)
-    media = load(wk)
-    cmd = encode_cmd(wk, _config(), media, EncodePipeline(gyrate=gyrate))
+    media = MediaInput.load(wk)
+    cmd = encode_cmd(wk, media, EncodePipeline(gyrate=gyrate))
     assert cmd is None

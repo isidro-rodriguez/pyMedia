@@ -7,7 +7,6 @@ from unittest.mock import patch
 import pytest
 
 from pymedia.commands.encode_command import encode_command
-from pymedia.domain.config import App, Config, ConflictiveJoin, Encode
 from pymedia.domain.encode_pipeline import EncodePipeline
 
 FIXTURES = Path(__file__).parent / "fixtures"
@@ -24,28 +23,6 @@ INVALID_FILES = [
 def _clip(subdir: str, name: str) -> Path:
     """Devuelve la ruta de un fixture."""
     return FIXTURES / subdir / name
-
-
-def _config() -> Config:
-    """Crea un Config válido para tests."""
-    return Config(
-        encode=Encode(
-            video_codec="libx264",
-            video_preset="medium",
-            video_crf=23,
-            video_pix_fmt="yuv420p",
-            audio_codec="aac",
-            audio_bit_rate="128k",
-        ),
-        conflictive_join=ConflictiveJoin(
-            resize_to="640",
-            fps="30",
-            channels="1",
-            pix_fmt="yuv420p",
-            confirm_encode=True,
-        ),
-        app=App(logger_level="ERROR"),
-    )
 
 
 def _pipeline(**kwargs) -> EncodePipeline:
@@ -87,9 +64,7 @@ def _count_ffmpeg_calls(mock_run) -> int:
 @patch("subprocess.run", side_effect=_passthrough_ffprobe)
 def test_encode_valid_file_calls_ffmpeg(mock_run) -> None:
     """Un archivo válido dispara ffmpeg."""
-    encode_command(
-        [_clip("valid_concat", "clip_01.mp4")], _config(), _pipeline(remux=True)
-    )
+    encode_command([_clip("valid_concat", "clip_01.mp4")], _pipeline(remux=True))
     assert _count_ffmpeg_calls(mock_run) == 1
 
 
@@ -99,7 +74,7 @@ def test_encode_valid_file_calls_ffmpeg(mock_run) -> None:
 @patch("subprocess.run", side_effect=_passthrough_ffprobe)
 def test_encode_pipeline_without_operations_skipped(mock_run) -> None:
     """Un pipeline sin operaciones aplicables no dispara ffmpeg."""
-    encode_command([_clip("valid_concat", "clip_01.mp4")], _config(), _pipeline())
+    encode_command([_clip("valid_concat", "clip_01.mp4")], _pipeline())
     assert _count_ffmpeg_calls(mock_run) == 0
 
 
@@ -110,7 +85,7 @@ def test_encode_pipeline_without_operations_skipped(mock_run) -> None:
 @patch("subprocess.run", side_effect=_passthrough_ffprobe)
 def test_encode_invalid_file_skipped(mock_run, name: str) -> None:
     """Un archivo inválido no dispara ffmpeg."""
-    encode_command([_clip("invalid", name)], _config(), _pipeline(remux=True))
+    encode_command([_clip("invalid", name)], _pipeline(remux=True))
     assert _count_ffmpeg_calls(mock_run) == 0
 
 
@@ -125,7 +100,7 @@ def test_encode_mixed_valid_invalid(mock_run) -> None:
         _clip("invalid", "empty.mp4"),
         _clip("valid_concat", "clip_02.mp4"),
     ]
-    encode_command(paths, _config(), _pipeline(remux=True))
+    encode_command(paths, _pipeline(remux=True))
     assert _count_ffmpeg_calls(mock_run) == 2
 
 
@@ -137,7 +112,7 @@ def test_encode_validation_failure_skipped(mock_run) -> None:
     """Un crop mayor que la resolución salta el archivo."""
     # Los clips de valid_concat son 640x360
     pipeline = _pipeline(crop="400,400,400,400")
-    encode_command([_clip("valid_concat", "clip_01.mp4")], _config(), pipeline)
+    encode_command([_clip("valid_concat", "clip_01.mp4")], pipeline)
     assert _count_ffmpeg_calls(mock_run) == 0
 
 
@@ -151,6 +126,6 @@ def test_encode_ffmpeg_error_continues(mock_run) -> None:
         _clip("valid_concat", "clip_01.mp4"),
         _clip("valid_concat", "clip_02.mp4"),
     ]
-    encode_command(paths, _config(), _pipeline(remux=True))
+    encode_command(paths, _pipeline(remux=True))
     # Ambos archivos intentaron ffmpeg (el error no detiene el bucle)
     assert _count_ffmpeg_calls(mock_run) == 2

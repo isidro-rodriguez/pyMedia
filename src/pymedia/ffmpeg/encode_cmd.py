@@ -9,7 +9,7 @@ from pymedia.utils import parse_crop, resolve_output_path
 def encode_cmd(
     path: Path,
     media: MediaInput,
-    encode_pipeline: EncodePipeline,
+    pipeline: EncodePipeline,
     output_name: str | None = None,
 ):
 
@@ -20,11 +20,11 @@ def encode_cmd(
 
     filters = []
 
-    if encode_pipeline.crop is not None:
+    if pipeline.crop is not None:
         if media.video is None:
             raise ValueError(f"Vídeo {path} no encontrado en encode")
 
-        parsed = parse_crop(encode_pipeline.crop)
+        parsed = parse_crop(pipeline.crop)
 
         if parsed is None:
             raise ValueError(f"Crop {path} no encontrado en encode")
@@ -36,11 +36,11 @@ def encode_cmd(
 
         filters.append(f"crop={crop_w}:{crop_h}:{left}:{top}")
 
-    if encode_pipeline.scale is not None:
-        filters.append(f"scale=-2:{encode_pipeline.scale}")
+    if pipeline.scale is not None:
+        filters.append(f"scale=-2:{pipeline.scale}")
 
-    if encode_pipeline.gyrate is not None:
-        match encode_pipeline.gyrate:
+    if pipeline.gyrate is not None:
+        match pipeline.gyrate:
             case 90:
                 filters.append("transpose=1")
             case 180:

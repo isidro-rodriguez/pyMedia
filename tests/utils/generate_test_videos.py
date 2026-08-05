@@ -2,8 +2,9 @@
 
 Ejecutar: uv run tests/utils/generate_test_videos.py
 
-Crea 15 archivos en tests/fixtures/:
-  - valid_concat/   : 3 vídeos con parámetros idénticos (unibles con -c copy)
+Crea 16 archivos en tests/fixtures/:
+  - valid_concat/   : 4 vídeos con parámetros idénticos (unibles con -c copy),
+                      uno de ellos sin pista de audio
   - valid_encode/: 6 vídeos con parámetros variados (join requiere encode)
   - invalid/        : 6 archivos defectuosos para testear validación
 """
@@ -66,6 +67,26 @@ def _gen_concat() -> None:
                 str(out),
             ]
         )
+
+
+def _gen_concat_no_audio() -> None:
+    """Vídeo sin pista de audio (mismo tamaño/fps que los concat)."""
+    out: Path = FIXTURES / "valid_concat" / "clip_no_audio.mp4"
+    _ffmpeg(
+        [
+            "-f",
+            "lavfi",
+            "-i",
+            "testsrc=size=640x360:rate=30",
+            "-t",
+            "3",
+            "-c:v",
+            "libx264",
+            "-pix_fmt",
+            "yuv420p",
+            str(out),
+        ]
+    )
 
 
 def _gen_encode() -> None:
@@ -187,6 +208,7 @@ def main() -> None:
 
     _ensure_dirs()
     _gen_concat()
+    _gen_concat_no_audio()
     _gen_encode()
     _gen_invalid()
 

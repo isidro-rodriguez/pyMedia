@@ -84,3 +84,29 @@ class MediaInput:
             video=video,
             audio=audio,
         )
+
+    @property
+    def concat_signature(self):
+        if self.video is not None:
+            video = (
+                self.video.codec,
+                self.video.width,
+                self.video.height,
+                self.video.fps,
+                self.video.pix_fmt,
+                self.video.aspect_ratio,
+            )
+        else:
+            video = None
+
+        if self.audio is not None:
+            audio = (
+                self.audio.codec,
+                self.audio.sample_rate,
+                self.audio.channels,
+                self.audio.channel_layout,
+            )
+        else:
+            audio = None
+
+        return video, audio

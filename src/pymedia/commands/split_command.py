@@ -5,7 +5,6 @@ from json import JSONDecodeError
 from pathlib import Path
 
 from pymedia.commands.encode_command import transcode
-from pymedia.domain.config import Config
 from pymedia.domain.encode_pipeline import EncodePipeline
 from pymedia.domain.errors import InvalidTrimPointsError
 from pymedia.domain.media_input import MediaInput
@@ -70,9 +69,7 @@ def split_command(
     if encode_pipeline.has_operations:
         with tempfile.TemporaryDirectory() as tmp_dir:
             tmp_path = Path(tmp_dir) / (path.stem + "_tmp" + path.suffix)
-            if not transcode(
-                media, Config.load(), encode_pipeline, output_name=str(tmp_path)
-            ):
+            if not transcode(media, encode_pipeline, output_name=str(tmp_path)):
                 exit(1)
             _split(tmp_path, parsed_trim_points, output_name)
     else:
