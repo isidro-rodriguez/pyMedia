@@ -5,9 +5,9 @@ from json import JSONDecodeError
 from pathlib import Path
 
 from pymedia.commands.encode_command import transcode
-from pymedia.domain.encode_pipeline import EncodePipeline
 from pymedia.domain.errors import InvalidTrimPointsError
-from pymedia.domain.media_input import MediaInput
+from pymedia.domain.media import Media
+from pymedia.domain.pipeline import Pipeline
 from pymedia.ffmpeg.split_cmd import split_cmd
 from pymedia.logger import get_logger
 from pymedia.utils import parse_trim_points
@@ -33,12 +33,12 @@ def _split(path: Path, trim_points: list[timedelta], output_name: str | None) ->
 def split_command(
     path: Path,
     trim_points: str,
-    encode_pipeline: EncodePipeline,
+    encode_pipeline: Pipeline,
     output_name: str | None = None,
 ) -> None:
 
     try:
-        media: MediaInput = MediaInput.load(path)
+        media: Media = Media.load(path)
     except (ValueError, subprocess.CalledProcessError, JSONDecodeError, OSError):
         logger.error(f"Probe indica formato inválido: {path}")
         exit(1)

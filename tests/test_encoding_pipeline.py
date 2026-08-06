@@ -5,18 +5,18 @@ from pathlib import Path
 
 import pytest
 
-from pymedia.domain.encode_pipeline import EncodePipeline
 from pymedia.domain.errors import (
     InvalidCropFormatError,
     InvalidScaleError,
     NoVideoStreamError,
 )
-from pymedia.domain.media_input import MediaInput, Video
+from pymedia.domain.media import Media, Video
+from pymedia.domain.pipeline import Pipeline
 
 
-def _media(video: Video | None = None) -> MediaInput:
+def _media(video: Video | None = None) -> Media:
     """Crea un MediaInput de prueba."""
-    return MediaInput(
+    return Media(
         path=Path("video.mp4"),
         duration=timedelta(seconds=10),
         video=video,
@@ -33,7 +33,7 @@ def _video(width: int = 640, height: int = 360) -> Video:
 
 def test_validate_crop_valid_no_error() -> None:
     """Un crop válido no lanza excepción."""
-    pipeline = EncodePipeline(crop="100,50,25,25")
+    pipeline = Pipeline(crop="100,50,25,25")
     pipeline.validate(_media(_video()))
     assert pipeline.crop == "100,50,25,25"
 
@@ -43,7 +43,7 @@ def test_validate_crop_valid_no_error() -> None:
 
 def test_validate_crop_no_video_ignored() -> None:
     """Sin stream de vídeo, el crop se ignora (crop = None)."""
-    pipeline = EncodePipeline(crop="100,50,25,25")
+    pipeline = Pipeline(crop="100,50,25,25")
     pipeline.validate(_media(video=None))
     assert pipeline.crop is None
 
@@ -53,7 +53,7 @@ def test_validate_crop_no_video_ignored() -> None:
 
 def test_validate_crop_invalid_format_raises() -> None:
     """Formato de crop inválido lanza InvalidCropFormatError."""
-    pipeline = EncodePipeline(crop="abc")
+    pipeline = Pipeline(crop="abc")
     with pytest.raises(InvalidCropFormatError):
         pipeline.validate(_media(_video()))
 
@@ -63,14 +63,14 @@ def test_validate_crop_invalid_format_raises() -> None:
 
 def test_validate_crop_exceeds_width_ignored() -> None:
     """Crop que excede el ancho se ignora (crop = None)."""
-    pipeline = EncodePipeline(crop="400,400,0,0")
+    pipeline = Pipeline(crop="400,400,0,0")
     pipeline.validate(_media(_video(width=640, height=360)))
     assert pipeline.crop is None
 
 
 def test_validate_crop_exceeds_height_ignored() -> None:
     """Crop que excede el alto se ignora (crop = None)."""
-    pipeline = EncodePipeline(crop="0,0,200,200")
+    pipeline = Pipeline(crop="0,0,200,200")
     pipeline.validate(_media(_video(width=640, height=360)))
     assert pipeline.crop is None
 
@@ -80,7 +80,7 @@ def test_validate_crop_exceeds_height_ignored() -> None:
 
 def test_validate_scale_no_video_raises() -> None:
     """Sin stream de vídeo, scale lanza NoVideoStreamError."""
-    pipeline = EncodePipeline(scale=180)
+    pipeline = Pipeline(scale=180)
     with pytest.raises(NoVideoStreamError):
         pipeline.validate(_media(video=None))
 
@@ -90,7 +90,7 @@ def test_validate_scale_no_video_raises() -> None:
 
 def test_validate_scale_no_height_raises() -> None:
     """Sin altura disponible, scale lanza InvalidScaleError."""
-    pipeline = EncodePipeline(scale=180)
+    pipeline = Pipeline(scale=180)
     with pytest.raises(InvalidScaleError):
         pipeline.validate(_media(_video(height=None)))
 
@@ -100,14 +100,14 @@ def test_validate_scale_no_height_raises() -> None:
 
 def test_validate_scale_equal_height_ignored() -> None:
     """Scale == height se ignora (scale = None)."""
-    pipeline = EncodePipeline(scale=360)
+    pipeline = Pipeline(scale=360)
     pipeline.validate(_media(_video(height=360)))
     assert pipeline.scale is None
 
 
 def test_validate_scale_greater_height_ignored() -> None:
     """Scale > height se ignora (scale = None)."""
-    pipeline = EncodePipeline(scale=720)
+    pipeline = Pipeline(scale=720)
     pipeline.validate(_media(_video(height=360)))
     assert pipeline.scale is None
 
@@ -117,6 +117,6 @@ def test_validate_scale_greater_height_ignored() -> None:
 
 def test_validate_scale_valid_no_error() -> None:
     """Un scale válido no lanza excepción."""
-    pipeline = EncodePipeline(scale=180)
+    pipeline = Pipeline(scale=180)
     pipeline.validate(_media(_video(height=360)))
     assert pipeline.scale == 180

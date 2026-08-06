@@ -1,10 +1,10 @@
 from pymedia.domain.config import Config
-from pymedia.domain.encode_pipeline import EncodePipeline
-from pymedia.domain.media_input import MediaInput
+from pymedia.domain.media import Media
+from pymedia.domain.pipeline import Pipeline
 from pymedia.utils import parse_crop
 
 
-def _target_fps(media_infos: list[MediaInput], mode: str) -> str:
+def _target_fps(media_infos: list[Media], mode: str) -> str:
     """Calcula el fps objetivo según el modo min/max del config."""
     fps_values = []
     for media in media_infos:
@@ -27,7 +27,7 @@ def _channel_layout(mode: str) -> str:
     return "stereo" if mode == "stereo" else "mono"
 
 
-def _target_height(media_infos: list[MediaInput], resize_to: str) -> int:
+def _target_height(media_infos: list[Media], resize_to: str) -> int:
     """Calcula la altura objetivo según el modo min/max del config."""
     video_heights = []
     for media in media_infos:
@@ -44,7 +44,7 @@ def _target_height(media_infos: list[MediaInput], resize_to: str) -> int:
             raise ValueError(f"Valor inválido para resize_to: {resize_to}")
 
 
-def _needs_scale(media_infos: list[MediaInput], pipeline: EncodePipeline) -> bool:
+def _needs_scale(media_infos: list[Media], pipeline: Pipeline) -> bool:
     """True si hay que escalar: alturas distintas o escala explícita del usuario."""
     heights = {m.video.height for m in media_infos if m.video is not None}
 
@@ -62,17 +62,17 @@ def _needs_scale(media_infos: list[MediaInput], pipeline: EncodePipeline) -> boo
     return True
 
 
-def _needs_fps(media_infos: list[MediaInput]) -> bool:
+def _needs_fps(media_infos: list[Media]) -> bool:
     """True si los vídeos tienen fps distintos (o desconocido)."""
     return len({m.video.fps for m in media_infos if m.video is not None}) > 1
 
 
-def _needs_pix_fmt(media_infos: list[MediaInput]) -> bool:
+def _needs_pix_fmt(media_infos: list[Media]) -> bool:
     """True si los vídeos tienen pix_fmt distintos (o desconocido)."""
     return len({m.video.pix_fmt for m in media_infos if m.video is not None}) > 1
 
 
-def _all_audio_compatible(media_infos: list[MediaInput]) -> bool:
+def _all_audio_compatible(media_infos: list[Media]) -> bool:
     """True si todos tienen audio y son idénticos en codec/rate/channels/layout."""
     if any(m.audio is None for m in media_infos):
         return False
@@ -84,7 +84,7 @@ def _all_audio_compatible(media_infos: list[MediaInput]) -> bool:
 
 
 def _determine_targets(
-    media_infos: list[MediaInput], config: Config, pipeline: EncodePipeline
+    media_infos: list[Media], config: Config, pipeline: Pipeline
 ) -> dict:
     """Determina los targets y qué normalización es realmente necesaria."""
     return {
@@ -100,7 +100,7 @@ def _determine_targets(
     }
 
 
-def _build_input_args(media_infos: list[MediaInput]) -> list[str]:
+def _build_input_args(media_infos: list[Media]) -> list[str]:
     """Construye los argumentos -i de ffmpeg para todas las entradas."""
     args: list[str] = []
     for media in media_infos:
@@ -110,7 +110,7 @@ def _build_input_args(media_infos: list[MediaInput]) -> list[str]:
 
 
 def _build_video_chain(
-    media: MediaInput, index: int, target: dict, pipeline: EncodePipeline
+    media: Media, index: int, target: dict, pipeline: Pipeline
 ) -> str:
     """Construye la cadena de filtros de vídeo para una entrada."""
     if media.video is None:
@@ -161,7 +161,7 @@ def _build_video_chain(
     return f"[{index}:v]{video_filter_str}{','.join(normalization)}[v{index}]"
 
 
-def _build_audio_chain(media: MediaInput, index: int, target: dict) -> str:
+def _build_audio_chain(media: Media, index: int, target: dict) -> str:
     """Construye la cadena de filtros de audio para una entrada."""
     if media.audio is None:
         raise ValueError("Stream de audio no encontrado en unión recodificada")
@@ -222,9 +222,7 @@ def _build_ffmpeg_command(
     return cmd
 
 
-def concat_filter_cmd(
-    media_infos: list[MediaInput], pipeline: EncodePipeline, output: str
-):
+def concat_filter_cmd(media_infos: list[Media], pipeline: Pipeline, output: str):
     """Construye el comando ffmpeg para unión recodificada con filter_complex."""
     config = Config.load()
     target = _determine_targets(media_infos, config, pipeline)

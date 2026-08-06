@@ -6,8 +6,8 @@ from unittest.mock import patch
 import pytest
 
 from pymedia.domain.config import App, Config, ConflictiveJoin, Encode
-from pymedia.domain.encode_pipeline import EncodePipeline
-from pymedia.domain.media_input import Audio, MediaInput, Video
+from pymedia.domain.media import Audio, Media, Video
+from pymedia.domain.pipeline import Pipeline
 from pymedia.ffmpeg.concat_filter_cmd import (
     _all_audio_compatible,
     _build_audio_chain,
@@ -45,13 +45,13 @@ def config() -> Config:
 
 
 @pytest.fixture
-def pipeline() -> EncodePipeline:
-    return EncodePipeline()
+def pipeline() -> Pipeline:
+    return Pipeline()
 
 
 @pytest.fixture
-def media_with_audio() -> MediaInput:
-    return MediaInput(
+def media_with_audio() -> Media:
+    return Media(
         path=Path("dummy.mp4"),
         video=Video(codec="h264", width=640, height=360, fps=30, pix_fmt="yuv420p"),
         audio=Audio(
@@ -64,8 +64,8 @@ def media_with_audio() -> MediaInput:
 
 
 @pytest.fixture
-def media_without_audio() -> MediaInput:
-    return MediaInput(
+def media_without_audio() -> Media:
+    return Media(
         path=Path("dummy_no_audio.mp4"),
         video=Video(codec="h264", width=640, height=360, fps=30, pix_fmt="yuv420p"),
         audio=None,
@@ -93,7 +93,7 @@ def target_all_audio() -> dict:
 def test_all_audio_compatible_all_with_audio_matching() -> None:
     """Todos con audio y mismo codec/rate/channels/layout → True."""
     medias = [
-        MediaInput(
+        Media(
             path=Path("a.mp4"),
             video=Video(),
             audio=Audio(
@@ -103,7 +103,7 @@ def test_all_audio_compatible_all_with_audio_matching() -> None:
                 channel_layout="stereo",
             ),
         ),
-        MediaInput(
+        Media(
             path=Path("b.mp4"),
             video=Video(),
             audio=Audio(
@@ -120,8 +120,8 @@ def test_all_audio_compatible_all_with_audio_matching() -> None:
 def test_all_audio_compatible_some_without_audio() -> None:
     """Alguno sin audio → False."""
     medias = [
-        MediaInput(path=Path("a.mp4"), video=Video(), audio=Audio(codec="aac")),
-        MediaInput(path=Path("b.mp4"), video=Video(), audio=None),
+        Media(path=Path("a.mp4"), video=Video(), audio=Audio(codec="aac")),
+        Media(path=Path("b.mp4"), video=Video(), audio=None),
     ]
     assert _all_audio_compatible(medias) is False
 
@@ -129,8 +129,8 @@ def test_all_audio_compatible_some_without_audio() -> None:
 def test_all_audio_compatible_all_without_audio() -> None:
     """Todos sin audio → False (no hay audio para comparar)."""
     medias = [
-        MediaInput(path=Path("a.mp4"), video=Video(), audio=None),
-        MediaInput(path=Path("b.mp4"), video=Video(), audio=None),
+        Media(path=Path("a.mp4"), video=Video(), audio=None),
+        Media(path=Path("b.mp4"), video=Video(), audio=None),
     ]
     assert _all_audio_compatible(medias) is False
 
@@ -138,7 +138,7 @@ def test_all_audio_compatible_all_without_audio() -> None:
 def test_all_audio_compatible_different_audio() -> None:
     """Todos con audio pero distinto codec → False."""
     medias = [
-        MediaInput(
+        Media(
             path=Path("a.mp4"),
             video=Video(),
             audio=Audio(
@@ -148,7 +148,7 @@ def test_all_audio_compatible_different_audio() -> None:
                 channel_layout="stereo",
             ),
         ),
-        MediaInput(
+        Media(
             path=Path("b.mp4"),
             video=Video(),
             audio=Audio(
@@ -218,7 +218,7 @@ def test_build_input_args(tmp_path) -> None:
     paths = [tmp_path / "a.mp4", tmp_path / "b.mp4"]
     paths[0].write_text("")
     paths[1].write_text("")
-    medias = [MediaInput(path=p) for p in paths]
+    medias = [Media(path=p) for p in paths]
     args = _build_input_args(medias)
     assert args == [
         "-i",
@@ -233,9 +233,9 @@ def test_build_input_args(tmp_path) -> None:
 
 def test_build_video_chain_no_video_raises() -> None:
     """Sin stream de vídeo → ValueError."""
-    media = MediaInput(path=Path("dummy.mp4"), video=None)
+    media = Media(path=Path("dummy.mp4"), video=None)
     with pytest.raises(ValueError, match="Stream de vídeo no encontrado"):
-        _build_video_chain(media, 0, {}, EncodePipeline())
+        _build_video_chain(media, 0, {}, Pipeline())
 
 
 def test_build_video_chain_no_scale(media_with_audio) -> None:
@@ -245,7 +245,7 @@ def test_build_video_chain_no_scale(media_with_audio) -> None:
         "needs_fps": False,
         "needs_pix_fmt": False,
     }
-    result = _build_video_chain(media_with_audio, 0, target, EncodePipeline())
+    result = _build_video_chain(media_with_audio, 0, target, Pipeline())
     assert result == "[0:v]setsar=1,setpts=PTS-STARTPTS[v0]"
 
 
@@ -315,7 +315,7 @@ def test_concat_filter_cmd_all_audio(tmp_path, config, media_with_audio) -> None
     with patch("pymedia.ffmpeg.concat_filter_cmd.Config.load", return_value=config):
         cmd = concat_filter_cmd(
             [media_with_audio, media_with_audio],
-            EncodePipeline(),
+            Pipeline(),
             "out.mp4",
         )
     cmd_str = " ".join(cmd)
@@ -329,7 +329,7 @@ def test_concat_filter_cmd_no_audio(tmp_path, config, media_without_audio) -> No
     with patch("pymedia.ffmpeg.concat_filter_cmd.Config.load", return_value=config):
         cmd = concat_filter_cmd(
             [media_without_audio, media_without_audio],
-            EncodePipeline(),
+            Pipeline(),
             "out.mp4",
         )
     cmd_str = " ".join(cmd)

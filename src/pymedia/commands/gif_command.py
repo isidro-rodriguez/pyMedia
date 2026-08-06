@@ -2,9 +2,9 @@ import subprocess
 from json import JSONDecodeError
 from pathlib import Path
 
-from pymedia.domain.encode_pipeline import EncodePipeline
 from pymedia.domain.errors import PipelineValidationError
-from pymedia.domain.media_input import MediaInput
+from pymedia.domain.media import Media
+from pymedia.domain.pipeline import Pipeline
 from pymedia.ffmpeg.gif_cmd import gif_cmd
 from pymedia.logger import get_logger
 
@@ -13,7 +13,7 @@ logger = get_logger("gif")
 
 def gif_command(
     path: Path,
-    pipeline: EncodePipeline,
+    pipeline: Pipeline,
     fps: int | None = None,
     start_point: str | None = None,
     end_point: str | None = None,
@@ -21,7 +21,7 @@ def gif_command(
 ) -> None:
 
     try:
-        media: MediaInput = MediaInput.load(path)
+        media: Media = Media.load(path)
     except (ValueError, subprocess.CalledProcessError, JSONDecodeError, OSError):
         logger.error(f"Probe indica formato inválido: {path}")
         exit(1)

@@ -1,4 +1,4 @@
-# src/pymedia/domain/media_input.py
+# src/pymedia/domain/media.py
 from dataclasses import dataclass
 from datetime import timedelta
 from fractions import Fraction
@@ -30,7 +30,7 @@ class Audio:
 
 
 @dataclass(frozen=True)
-class MediaInput:
+class Media:
     path: Path
     duration: timedelta | None = None
     size: int | None = None
@@ -39,7 +39,7 @@ class MediaInput:
     audio: Audio | None = None
 
     @classmethod
-    def load(cls, path: Path) -> "MediaInput":
+    def load(cls, path: Path) -> "Media":
         """Mapea el JSON de ffprobe a MediaInput."""
         data = ffprobe(path)
 
@@ -74,7 +74,7 @@ class MediaInput:
         fmt = data.get("format", {})
         duration_val = to_float(fmt.get("duration"))
 
-        return MediaInput(
+        return Media(
             path=path,
             duration=timedelta(seconds=duration_val)
             if duration_val is not None

@@ -2,9 +2,9 @@ import subprocess
 from json import JSONDecodeError
 from pathlib import Path
 
-from pymedia.domain.encode_pipeline import EncodePipeline
 from pymedia.domain.errors import PipelineValidationError
-from pymedia.domain.media_input import MediaInput
+from pymedia.domain.media import Media
+from pymedia.domain.pipeline import Pipeline
 from pymedia.ffmpeg.encode_cmd import encode_cmd
 from pymedia.logger import get_logger
 
@@ -12,8 +12,8 @@ logger = get_logger("encode")
 
 
 def transcode(
-    media: MediaInput,
-    encode_pipeline: EncodePipeline,
+    media: Media,
+    encode_pipeline: Pipeline,
     output_name: str | None = None,
 ) -> bool:
     """Transcodifica un único archivo. Devuelve True si tuvo éxito."""
@@ -46,13 +46,13 @@ def transcode(
 
 def encode_command(
     paths: list[Path],
-    encode_pipeline: EncodePipeline,
+    encode_pipeline: Pipeline,
     output_name: str | None = None,
 ) -> None:
 
     for i, path in enumerate(paths):
         try:
-            media: MediaInput = MediaInput.load(path)
+            media: Media = Media.load(path)
         except (ValueError, subprocess.CalledProcessError, JSONDecodeError, OSError):
             logger.error(f"Probe indica formato inválido: {path}")
             continue

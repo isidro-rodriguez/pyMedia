@@ -6,14 +6,14 @@ from pathlib import Path
 import pytest
 
 from pymedia.cli_params import GyrateMode, ScaleGifMode
-from pymedia.domain.encode_pipeline import EncodePipeline
-from pymedia.domain.media_input import MediaInput, Video
+from pymedia.domain.media import Media, Video
+from pymedia.domain.pipeline import Pipeline
 from pymedia.ffmpeg.gif_cmd import gif_cmd
 
 
-def _media(video: Video | None = None) -> MediaInput:
+def _media(video: Video | None = None) -> Media:
     """Crea un MediaInput de prueba."""
-    return MediaInput(
+    return Media(
         path=Path("video.mp4"),
         duration=timedelta(seconds=10),
         video=video,
@@ -25,9 +25,9 @@ def _video(width: int = 640, height: int = 360) -> Video:
     return Video(width=width, height=height)
 
 
-def _pipeline(**kwargs) -> EncodePipeline:
+def _pipeline(**kwargs) -> Pipeline:
     """Crea un EncodePipeline con parámetros opcionales."""
-    return EncodePipeline(**kwargs)
+    return Pipeline(**kwargs)
 
 
 def _get_filter_complex(cmd: list[str]) -> str:

@@ -3,8 +3,8 @@ import tempfile
 from json import JSONDecodeError
 from pathlib import Path
 
-from pymedia.domain.encode_pipeline import EncodePipeline
-from pymedia.domain.media_input import MediaInput
+from pymedia.domain.media import Media
+from pymedia.domain.pipeline import Pipeline
 from pymedia.ffmpeg.concat_demux_cmd import concat_demux_cmd
 from pymedia.ffmpeg.concat_filter_cmd import concat_filter_cmd
 from pymedia.logger import get_logger
@@ -15,25 +15,25 @@ logger = get_logger("concat")
 FFMPEG_TIMEOUT = 1800
 
 
-def _compatible_videos(media_inputs: list[MediaInput]) -> bool:
+def _compatible_videos(media_inputs: list[Media]) -> bool:
     reference = media_inputs[0].concat_signature
     return all(m.concat_signature == reference for m in media_inputs[1:])
 
 
 def concat_command(
     paths: list[Path],
-    pipeline: EncodePipeline,
+    pipeline: Pipeline,
     output_name: str | None,
 ):
 
-    media_inputs: list[MediaInput] = []
+    media_inputs: list[Media] = []
 
     if output_name is None:
         output_name = paths[0].stem + "_concat" + paths[0].suffix
 
     for p in paths:
         try:
-            media: MediaInput = MediaInput.load(p)
+            media: Media = Media.load(p)
         except (
             ValueError,
             subprocess.CalledProcessError,

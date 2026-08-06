@@ -6,7 +6,7 @@ from pymedia.domain.errors import (
     InvalidScaleError,
     NoVideoStreamError,
 )
-from pymedia.domain.media_input import MediaInput
+from pymedia.domain.media import Media
 from pymedia.logger import get_logger
 from pymedia.utils import parse_crop
 
@@ -14,7 +14,7 @@ logger = get_logger("pipeline")
 
 
 @dataclass
-class EncodePipeline:
+class Pipeline:
     crop: str | None = None
     gyrate: int | None = None
     remux: bool = False
@@ -27,7 +27,7 @@ class EncodePipeline:
         gyrate: GyrateMode | None = None,
         remux: bool = False,
         scale: ScaleMode | ScaleGifMode | None = None,
-    ) -> "EncodePipeline":
+    ) -> "Pipeline":
         """Crea un pipeline desde los parámetros CLI, convirtiendo enums a valores."""
         if gyrate is not None:
             gyrate = gyrate.value
@@ -42,7 +42,7 @@ class EncodePipeline:
             field is not None for field in (self.crop, self.gyrate, self.scale)
         ) or self.remux
 
-    def validate(self, media: MediaInput) -> None:
+    def validate(self, media: Media) -> None:
         """Valida el pipeline contra el medio, descartando operaciones inválidas.
 
         Mutates the pipeline in place: sets invalid fields to ``None``.
@@ -53,7 +53,7 @@ class EncodePipeline:
         if self.scale is not None:
             self._validate_scale(media)
 
-    def _validate_crop(self, media: MediaInput) -> None:
+    def _validate_crop(self, media: Media) -> None:
         if media.video is None:
             logger.warning(
                 "Crop ignorado: no se encontró stream de vídeo en el archivo."
@@ -91,7 +91,7 @@ class EncodePipeline:
             )
             self.crop = None
 
-    def _validate_scale(self, media: MediaInput) -> None:
+    def _validate_scale(self, media: Media) -> None:
         if media.video is None:
             raise NoVideoStreamError("No se encontró stream de vídeo en el archivo.")
 

@@ -1,15 +1,15 @@
 from pathlib import Path
 
 from pymedia.domain.config import Config
-from pymedia.domain.encode_pipeline import EncodePipeline
-from pymedia.domain.media_input import MediaInput
+from pymedia.domain.media import Media
+from pymedia.domain.pipeline import Pipeline
 from pymedia.utils import parse_crop, resolve_output_path
 
 
 def encode_cmd(
     path: Path,
-    media: MediaInput,
-    pipeline: EncodePipeline,
+    media: Media,
+    pipeline: Pipeline,
     output_name: str | None = None,
 ):
 

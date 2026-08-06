@@ -21,7 +21,7 @@ from pymedia.commands.concat_command import concat_command
 from pymedia.commands.encode_command import encode_command
 from pymedia.commands.gif_command import gif_command
 from pymedia.commands.split_command import split_command
-from pymedia.domain.encode_pipeline import EncodePipeline
+from pymedia.domain.pipeline import Pipeline
 from pymedia.logger import get_logger
 
 app = typer.Typer()
@@ -49,7 +49,7 @@ def concat(
     if len(paths) < 2:
         logger.warning("Se requiere al menos dos vídeos.")
         return
-    pipeline = EncodePipeline.load(crop, gyrate, remux, scale)
+    pipeline = Pipeline.load(crop, gyrate, remux, scale)
     concat_command(paths, pipeline, output_name)
 
 
@@ -68,7 +68,7 @@ def encode(
     if crop is None and scale is None and gyrate is None and remux is False:
         logger.warning("Se requiere al menos una opción.")
         return
-    pipeline = EncodePipeline.load(crop, gyrate, remux, scale)
+    pipeline = Pipeline.load(crop, gyrate, remux, scale)
     encode_command(paths, pipeline, output_name)
 
 
@@ -83,7 +83,7 @@ def split(
     output_name: OutputNameOption = None,
 ) -> None:
     """Separa un vídeo en los puntos de corte indicados"""
-    pipeline = EncodePipeline.load(crop, gyrate, remux, scale)
+    pipeline = Pipeline.load(crop, gyrate, remux, scale)
     split_command(path, trim_points, pipeline, output_name)
 
 
@@ -99,7 +99,7 @@ def gif(
     output_name: OutputNameOption = None,
 ) -> None:
     """Genera un gif animado del vídeo aportado"""
-    pipeline = EncodePipeline.load(crop, gyrate, False, scale)
+    pipeline = Pipeline.load(crop, gyrate, False, scale)
     gif_command(path, pipeline, fps, start_point, end_point, output_name)
 
 

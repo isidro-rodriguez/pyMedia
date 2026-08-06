@@ -7,7 +7,7 @@ from unittest.mock import patch
 import pytest
 
 from pymedia.commands.concat_command import concat_command
-from pymedia.domain.encode_pipeline import EncodePipeline
+from pymedia.domain.pipeline import Pipeline
 
 FIXTURES = Path(__file__).parent / "fixtures"
 
@@ -20,9 +20,9 @@ def _clip(subdir: str, name: str) -> Path:
     return FIXTURES / subdir / name
 
 
-def _pipeline(**kwargs) -> EncodePipeline:
+def _pipeline(**kwargs) -> Pipeline:
     """Crea un EncodePipeline con parámetros opcionales."""
-    return EncodePipeline.load(**kwargs)
+    return Pipeline.load(**kwargs)
 
 
 # Referencia al subprocess.run real para pasar ffprobe
