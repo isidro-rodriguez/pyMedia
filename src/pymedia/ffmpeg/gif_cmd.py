@@ -1,7 +1,7 @@
 from pathlib import Path
 
-from pymedia.domain.media import Media
-from pymedia.domain.pipeline import Pipeline
+from pymedia.models.media import Media
+from pymedia.models.pipeline import Pipeline
 from pymedia.logger import get_logger
 from pymedia.utils import convert_to_timedelta, parse_crop
 

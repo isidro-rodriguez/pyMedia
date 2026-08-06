@@ -21,7 +21,7 @@ from pymedia.commands.concat_command import concat_command
 from pymedia.commands.encode_command import encode_command
 from pymedia.commands.gif_command import gif_command
 from pymedia.commands.split_command import split_command
-from pymedia.domain.pipeline import Pipeline
+from pymedia.models.pipeline import Pipeline
 from pymedia.logger import get_logger
 
 app = typer.Typer()

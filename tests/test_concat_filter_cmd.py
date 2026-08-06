@@ -5,9 +5,9 @@ from unittest.mock import patch
 
 import pytest
 
-from pymedia.domain.config import App, Config, ConflictiveJoin, Encode
-from pymedia.domain.media import Audio, Media, Video
-from pymedia.domain.pipeline import Pipeline
+from pymedia.models.config import App, Config, ConflictiveJoin, Encode
+from pymedia.models.media import Audio, Media, Video
+from pymedia.models.pipeline import Pipeline
 from pymedia.ffmpeg.concat_filter_cmd import (
     _all_audio_compatible,
     _build_audio_chain,

@@ -1,4 +1,4 @@
-# src/pymedia/domain/media.py
+# src/pymedia/models/media.py
 from dataclasses import dataclass
 from datetime import timedelta
 from fractions import Fraction

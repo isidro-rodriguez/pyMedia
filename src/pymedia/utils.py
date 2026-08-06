@@ -2,7 +2,7 @@ from datetime import timedelta
 from fractions import Fraction
 from pathlib import Path
 
-from pymedia.domain.errors import InvalidTrimPointsError
+from pymedia.models.errors import InvalidTrimPointsError
 
 
 def parse_fraction(value: str | None) -> Fraction | None:

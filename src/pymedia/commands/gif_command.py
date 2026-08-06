@@ -2,9 +2,9 @@ import subprocess
 from json import JSONDecodeError
 from pathlib import Path
 
-from pymedia.domain.errors import PipelineValidationError
-from pymedia.domain.media import Media
-from pymedia.domain.pipeline import Pipeline
+from pymedia.models.errors import PipelineValidationError
+from pymedia.models.media import Media
+from pymedia.models.pipeline import Pipeline
 from pymedia.ffmpeg.gif_cmd import gif_cmd
 from pymedia.logger import get_logger
 

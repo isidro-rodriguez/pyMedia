@@ -6,8 +6,8 @@ from pathlib import Path
 import pytest
 
 from pymedia.cli_params import GyrateMode, ScaleGifMode
-from pymedia.domain.media import Media, Video
-from pymedia.domain.pipeline import Pipeline
+from pymedia.models.media import Media, Video
+from pymedia.models.pipeline import Pipeline
 from pymedia.ffmpeg.gif_cmd import gif_cmd
 
 

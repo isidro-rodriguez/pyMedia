@@ -2,9 +2,9 @@ import subprocess
 from json import JSONDecodeError
 from pathlib import Path
 
-from pymedia.domain.errors import PipelineValidationError
-from pymedia.domain.media import Media
-from pymedia.domain.pipeline import Pipeline
+from pymedia.models.errors import PipelineValidationError
+from pymedia.models.media import Media
+from pymedia.models.pipeline import Pipeline
 from pymedia.ffmpeg.encode_cmd import encode_cmd
 from pymedia.logger import get_logger
 
@@ -57,8 +57,10 @@ def encode_command(
             logger.error(f"Probe indica formato inválido: {path}")
             continue
 
+        # TODO: refactorizar y funcionalizar la salida de ficheros (posible añadir solo el directorio)
         if output_name is not None and len(paths) > 1:
-            output = f"{Path(output_name).stem}_{i}{path.suffix}"
+            p = Path(output_name).absolute()
+            output = f"{p.parent}/{p.stem}_{i}{p.suffix}"
         else:
             output = output_name
 

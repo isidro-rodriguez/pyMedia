@@ -7,7 +7,7 @@ from unittest.mock import patch
 import pytest
 
 from pymedia.commands.concat_command import concat_command
-from pymedia.domain.pipeline import Pipeline
+from pymedia.models.pipeline import Pipeline
 
 FIXTURES = Path(__file__).parent / "fixtures"
 

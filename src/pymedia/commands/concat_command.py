@@ -3,8 +3,8 @@ import tempfile
 from json import JSONDecodeError
 from pathlib import Path
 
-from pymedia.domain.media import Media
-from pymedia.domain.pipeline import Pipeline
+from pymedia.models.media import Media
+from pymedia.models.pipeline import Pipeline
 from pymedia.ffmpeg.concat_demux_cmd import concat_demux_cmd
 from pymedia.ffmpeg.concat_filter_cmd import concat_filter_cmd
 from pymedia.logger import get_logger

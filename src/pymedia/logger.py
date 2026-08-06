@@ -6,7 +6,7 @@ from pathlib import Path
 
 import platformdirs
 
-from pymedia.domain.config import Config
+from pymedia.models.config import Config
 
 _configured = False
 

@@ -6,7 +6,7 @@ from pathlib import Path
 
 import pytest
 
-from pymedia.domain.media import Audio, Media, Video
+from pymedia.models.media import Audio, Media, Video
 
 FIXTURES = Path(__file__).parent / "fixtures"
 

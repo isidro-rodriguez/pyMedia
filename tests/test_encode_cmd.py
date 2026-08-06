@@ -7,8 +7,8 @@ from pathlib import Path
 
 import pytest
 
-from pymedia.domain.media import Media
-from pymedia.domain.pipeline import Pipeline
+from pymedia.models.media import Media
+from pymedia.models.pipeline import Pipeline
 from pymedia.ffmpeg.encode_cmd import encode_cmd
 
 FIXTURES = Path(__file__).parent / "fixtures" / "valid_concat"

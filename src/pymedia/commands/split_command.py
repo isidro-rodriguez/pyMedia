@@ -5,9 +5,9 @@ from json import JSONDecodeError
 from pathlib import Path
 
 from pymedia.commands.encode_command import transcode
-from pymedia.domain.errors import InvalidTrimPointsError
-from pymedia.domain.media import Media
-from pymedia.domain.pipeline import Pipeline
+from pymedia.models.errors import InvalidTrimPointsError
+from pymedia.models.media import Media
+from pymedia.models.pipeline import Pipeline
 from pymedia.ffmpeg.split_cmd import split_cmd
 from pymedia.logger import get_logger
 from pymedia.utils import parse_trim_points

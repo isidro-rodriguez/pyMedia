@@ -5,13 +5,13 @@ from pathlib import Path
 
 import pytest
 
-from pymedia.domain.errors import (
+from pymedia.models.errors import (
     InvalidCropFormatError,
     InvalidScaleError,
     NoVideoStreamError,
 )
-from pymedia.domain.media import Media, Video
-from pymedia.domain.pipeline import Pipeline
+from pymedia.models.media import Media, Video
+from pymedia.models.pipeline import Pipeline
 
 
 def _media(video: Video | None = None) -> Media:

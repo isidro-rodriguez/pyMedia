@@ -1,12 +1,12 @@
 from dataclasses import dataclass
 
 from pymedia.cli_params import GyrateMode, ScaleGifMode, ScaleMode
-from pymedia.domain.errors import (
+from pymedia.models.errors import (
     InvalidCropFormatError,
     InvalidScaleError,
     NoVideoStreamError,
 )
-from pymedia.domain.media import Media
+from pymedia.models.media import Media
 from pymedia.logger import get_logger
 from pymedia.utils import parse_crop
 
