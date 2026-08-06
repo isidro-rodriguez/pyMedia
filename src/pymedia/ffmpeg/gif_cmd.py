@@ -9,16 +9,17 @@ logger = get_logger("gif")
 
 
 def _build_filters(
-    media: MediaInput, fps: int, scale: int, crop: str | None, gyrate: int | None
+    media: MediaInput,
+    fps: int,
+    pipeline: EncodePipeline,
 ) -> str:
     encode_filters = []
 
-    if crop:
-        parse_crop(crop)
+    if pipeline.crop:
         if media.video is None:
             raise ValueError("Vídeo no encontrado en encode")
 
-        parsed = parse_crop(crop)
+        parsed = parse_crop(pipeline.crop)
 
         if parsed is None:
             raise ValueError("Crop no encontrado en encode")
@@ -29,17 +30,17 @@ def _build_filters(
         crop_h = media.video.height - top - bottom
 
         encode_filters.append(f"crop={crop_w}:{crop_h}:{left}:{top}")
-    if gyrate:
-        match gyrate:
+    if pipeline.gyrate:
+        match pipeline.gyrate:
             case 90:
                 encode_filters.append("transpose=1")
             case 180:
                 encode_filters.append("vflip,hflip")
             case 270:
                 encode_filters.append("transpose=2")
-    if scale:
+    if pipeline.scale:
         # int(scale) resuelve enums tipo ScaleGifMode(int, Enum) a su valor numérico
-        encode_filters.append(f"scale=-2:{int(scale)}:flags=lanczos")
+        encode_filters.append(f"scale=-2:{int(pipeline.scale)}:flags=lanczos")
 
     filters = ",".join(encode_filters)
     if filters:
@@ -63,18 +64,14 @@ def gif_cmd(
     output_name: str | None = None,
 ) -> list[str]:
 
-    assert fps
-    assert pipeline.scale
+    if fps is None:
+        logger.error("Recepción de FPS inválida.")
+        exit(1)
 
-    filters: str = _build_filters(
-        media, fps, pipeline.scale, pipeline.crop, pipeline.gyrate
-    )
+    filters: str = _build_filters(media, fps, pipeline)
 
     if output_name:
-        if output_name.endswith(".gif"):
-            output = output_name
-        else:
-            output = path.stem + ".gif"
+        output = output_name if output_name.endswith(".gif") else output_name + ".gif"
     else:
         output = path.stem + ".gif"
 

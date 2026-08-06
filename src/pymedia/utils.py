@@ -2,6 +2,8 @@ from datetime import timedelta
 from fractions import Fraction
 from pathlib import Path
 
+from pymedia.domain.errors import InvalidTrimPointsError
+
 
 def parse_fraction(value: str | None) -> Fraction | None:
     """Convierte '25/1' a Fraction(25, 1)."""
@@ -50,8 +52,12 @@ def parse_crop(value: str | None) -> tuple[int, int, int, int] | None:
     return left, right, top, bottom
 
 
-def convert_to_timedelta(total_time) -> timedelta | None:
-    match tuple(map(float, total_time.split(":"))):
+def convert_to_timedelta(total_time: str) -> timedelta | None:
+    """Convierte 'hh:mm:ss', 'mm:ss' o 'ss' a timedelta."""
+    parts = total_time.split(":")
+    if not all(p.isdigit() for p in parts):
+        return None
+    match tuple(map(float, parts)):
         case (hours, minutes, seconds):
             return timedelta(hours=hours, minutes=minutes, seconds=seconds)
         case (minutes, seconds):
@@ -63,7 +69,7 @@ def convert_to_timedelta(total_time) -> timedelta | None:
 
 
 def parse_trim_points(values: str | None) -> list[timedelta] | None:
-    """Parsea lista de puntos de corte en str a lista timedelta"""
+    """Parsea lista de puntos de corte en str a lista timedelta."""
     if values is None:
         return None
 
@@ -72,7 +78,7 @@ def parse_trim_points(values: str | None) -> list[timedelta] | None:
     for v in values.split(","):
         t = convert_to_timedelta(v)
         if t is None:
-            continue
+            raise InvalidTrimPointsError(f"Formato no válido: {v}")
         times_timedelta.append(t)
 
     return times_timedelta

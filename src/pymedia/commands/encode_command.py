@@ -50,11 +50,16 @@ def encode_command(
     output_name: str | None = None,
 ) -> None:
 
-    for p in paths:
+    for i, path in enumerate(paths):
         try:
-            media: MediaInput = MediaInput.load(p)
+            media: MediaInput = MediaInput.load(path)
         except (ValueError, subprocess.CalledProcessError, JSONDecodeError, OSError):
-            logger.error(f"Probe indica formato inválido: {p}")
+            logger.error(f"Probe indica formato inválido: {path}")
             continue
 
-        transcode(media, encode_pipeline, output_name)
+        if output_name is not None and len(paths) > 1:
+            output = f"{Path(output_name).stem}_{i}{path.suffix}"
+        else:
+            output = output_name
+
+        transcode(media, encode_pipeline, output)

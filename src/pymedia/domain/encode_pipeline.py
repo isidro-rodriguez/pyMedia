@@ -28,7 +28,7 @@ class EncodePipeline:
         remux: bool = False,
         scale: ScaleMode | ScaleGifMode | None = None,
     ) -> "EncodePipeline":
-        """Crea un pipeline desde los parámetros CLI, convirtiendo enums a sus valores."""
+        """Crea un pipeline desde los parámetros CLI, convirtiendo enums a valores."""
         if gyrate is not None:
             gyrate = gyrate.value
         if scale is not None:

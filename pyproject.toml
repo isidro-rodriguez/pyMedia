@@ -1,6 +1,6 @@
 [project]
 name = "pymedia"
-version = "0.1.0"
+version = "0.1.1"
 description = "Aplicación de consola, CLI + TUI, que actúa como handler de comandos ffmpeg."
 readme = "README.md"
 requires-python = ">=3.11"
@@ -32,7 +32,7 @@ dev = [
 [project.optional-dependencies]
 
 [project.scripts]
-main = "pymedia.main:app"
+pymedia = "pymedia.main:app"
 
 [build-system]
 requires = ["hatchling"]

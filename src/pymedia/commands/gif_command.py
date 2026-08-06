@@ -24,16 +24,16 @@ def gif_command(
         media: MediaInput = MediaInput.load(path)
     except (ValueError, subprocess.CalledProcessError, JSONDecodeError, OSError):
         logger.error(f"Probe indica formato inválido: {path}")
-        exit()
+        exit(1)
 
     try:
         pipeline.validate(media)
     except PipelineValidationError as e:
         logger.error(f"Formato no pasa verificación: {media.path} ({e})")
-        exit()
+        exit(1)
     except ValueError:
         logger.error(f"Formato no pasa verificación: {media.path}")
-        exit()
+        exit(1)
 
     cmd = gif_cmd(path, pipeline, media, fps, start_point, end_point, output_name)
 

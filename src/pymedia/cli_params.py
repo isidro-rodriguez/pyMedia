@@ -78,6 +78,8 @@ FpsOption = Annotated[
     typer.Option(
         "--fps",
         "-f",
+        min=4,
+        max=20,
         help="Imágenes por segundo del gif animado. [dim]Ej: -f 12[/dim]",
     ),
 ]

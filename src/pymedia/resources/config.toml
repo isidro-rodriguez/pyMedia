@@ -14,7 +14,7 @@
 [encode]
 video_codec = "libx264"     # libx264 | libx265 | libsvtav1
 video_preset = "fast"
-video_crf = "22"
+video_crf = 22
 video_pix_fmt = "yuv420p"
 audio_codec = "aac"
 audio_bit_rate = "160k"

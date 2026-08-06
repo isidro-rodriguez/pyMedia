@@ -47,6 +47,10 @@ def _target_height(media_infos: list[MediaInput], resize_to: str) -> int:
 def _needs_scale(media_infos: list[MediaInput], pipeline: EncodePipeline) -> bool:
     """True si hay que escalar: alturas distintas o escala explícita del usuario."""
     heights = {m.video.height for m in media_infos if m.video is not None}
+
+    if heights is None:
+        raise ValueError("Alturas de vídeos inválida")
+
     all_same = len(heights) <= 1
 
     if all_same:
@@ -242,5 +246,5 @@ def concat_filter_cmd(
     cmd = _build_ffmpeg_command(
         input_args, filters, config, output, has_audio=target["has_audio"]
     )
-    print(cmd)
+
     return cmd
