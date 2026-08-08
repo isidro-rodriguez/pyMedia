@@ -2,18 +2,18 @@ import subprocess
 from json import JSONDecodeError
 from pathlib import Path
 
-from pymedia.models.errors import PipelineValidationError
-from pymedia.models.media import Media
-from pymedia.models.pipeline import Pipeline
 from pymedia.ffmpeg.gif_cmd import gif_cmd
 from pymedia.logger import get_logger
+from pymedia.models.errors import PipelineValidationError
+from pymedia.models.media import Media
+from pymedia.models.video_pipeline import VideoPipeline
 
 logger = get_logger("gif")
 
 
 def gif_command(
     path: Path,
-    pipeline: Pipeline,
+    pipeline: VideoPipeline,
     fps: int | None = None,
     start_point: str | None = None,
     end_point: str | None = None,

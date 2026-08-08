@@ -6,7 +6,7 @@ from pathlib import Path
 
 import platformdirs
 
-logger = logging.getLogger("[pymedia.config]")
+logger = logging.getLogger("config")
 
 
 @dataclass(frozen=True)
@@ -31,6 +31,7 @@ class ConflictiveJoin:
 @dataclass(frozen=True)
 class App:
     logger_level: str
+    disable_resolution_increase: bool
 
 
 @dataclass(frozen=True)

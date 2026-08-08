@@ -5,9 +5,6 @@ from unittest.mock import patch
 
 import pytest
 
-from pymedia.models.config import App, Config, ConflictiveJoin, Encode
-from pymedia.models.media import Audio, Media, Video
-from pymedia.models.pipeline import Pipeline
 from pymedia.ffmpeg.concat_filter_cmd import (
     _all_audio_compatible,
     _build_audio_chain,
@@ -18,6 +15,9 @@ from pymedia.ffmpeg.concat_filter_cmd import (
     _determine_targets,
     concat_filter_cmd,
 )
+from pymedia.models.config import App, Config, ConflictiveJoin, Encode
+from pymedia.models.media import Audio, Media, Video
+from pymedia.models.video_pipeline import VideoPipeline
 
 # ──────────────────── fixtures ────────────────────
 
@@ -45,8 +45,8 @@ def config() -> Config:
 
 
 @pytest.fixture
-def pipeline() -> Pipeline:
-    return Pipeline()
+def pipeline() -> VideoPipeline:
+    return VideoPipeline()
 
 
 @pytest.fixture
@@ -235,7 +235,7 @@ def test_build_video_chain_no_video_raises() -> None:
     """Sin stream de vídeo → ValueError."""
     media = Media(path=Path("dummy.mp4"), video=None)
     with pytest.raises(ValueError, match="Stream de vídeo no encontrado"):
-        _build_video_chain(media, 0, {}, Pipeline())
+        _build_video_chain(media, 0, {}, VideoPipeline())
 
 
 def test_build_video_chain_no_scale(media_with_audio) -> None:
@@ -245,7 +245,7 @@ def test_build_video_chain_no_scale(media_with_audio) -> None:
         "needs_fps": False,
         "needs_pix_fmt": False,
     }
-    result = _build_video_chain(media_with_audio, 0, target, Pipeline())
+    result = _build_video_chain(media_with_audio, 0, target, VideoPipeline())
     assert result == "[0:v]setsar=1,setpts=PTS-STARTPTS[v0]"
 
 
@@ -315,7 +315,7 @@ def test_concat_filter_cmd_all_audio(tmp_path, config, media_with_audio) -> None
     with patch("pymedia.ffmpeg.concat_filter_cmd.Config.load", return_value=config):
         cmd = concat_filter_cmd(
             [media_with_audio, media_with_audio],
-            Pipeline(),
+            VideoPipeline(),
             "out.mp4",
         )
     cmd_str = " ".join(cmd)
@@ -329,7 +329,7 @@ def test_concat_filter_cmd_no_audio(tmp_path, config, media_without_audio) -> No
     with patch("pymedia.ffmpeg.concat_filter_cmd.Config.load", return_value=config):
         cmd = concat_filter_cmd(
             [media_without_audio, media_without_audio],
-            Pipeline(),
+            VideoPipeline(),
             "out.mp4",
         )
     cmd_str = " ".join(cmd)

@@ -2,14 +2,14 @@ from pathlib import Path
 
 from pymedia.models.config import Config
 from pymedia.models.media import Media
-from pymedia.models.pipeline import Pipeline
+from pymedia.models.video_pipeline import VideoPipeline
 from pymedia.utils import parse_crop, resolve_output_path
 
 
 def encode_cmd(
     path: Path,
     media: Media,
-    pipeline: Pipeline,
+    pipeline: VideoPipeline,
     output_name: str | None = None,
 ):
 

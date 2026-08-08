@@ -7,9 +7,9 @@ from pathlib import Path
 
 import pytest
 
-from pymedia.models.media import Media
-from pymedia.models.pipeline import Pipeline
 from pymedia.ffmpeg.encode_cmd import encode_cmd
+from pymedia.models.media import Media
+from pymedia.models.video_pipeline import VideoPipeline
 
 FIXTURES = Path(__file__).parent / "fixtures" / "valid_concat"
 SRC = FIXTURES / "clip_01.mp4"  # 640x360, 3 segundos
@@ -40,7 +40,7 @@ def _probe_resolution(path: Path) -> tuple[int, int]:
     raise AssertionError("No se encontró stream de vídeo en la salida")
 
 
-def _run_pipeline(pipeline: Pipeline, tmp_path: Path, monkeypatch) -> Path:
+def _run_pipeline(pipeline: VideoPipeline, tmp_path: Path, monkeypatch) -> Path:
     """Copia el fixture a tmp, ejecuta ffmpeg real y devuelve la salida.
 
     La salida se genera en el CWD con nombre `stem.encoded.suffix`,
@@ -65,43 +65,45 @@ def _run_pipeline(pipeline: Pipeline, tmp_path: Path, monkeypatch) -> Path:
 
 def test_cmd_no_filters_real(tmp_path, monkeypatch) -> None:
     """Sin filtros, la salida conserva 640x360."""
-    out = _run_pipeline(Pipeline(), tmp_path, monkeypatch)
+    out = _run_pipeline(VideoPipeline(), tmp_path, monkeypatch)
     assert _probe_resolution(out) == (640, 360)
 
 
 def test_cmd_with_crop_real(tmp_path, monkeypatch) -> None:
     """Crop 100,50,25,25 → salida 490x310."""
-    out = _run_pipeline(Pipeline(crop="100,50,25,25"), tmp_path, monkeypatch)
+    out = _run_pipeline(VideoPipeline(crop="100,50,25,25"), tmp_path, monkeypatch)
     assert _probe_resolution(out) == (490, 310)
 
 
 def test_cmd_with_scale_real(tmp_path, monkeypatch) -> None:
     """Scale 180 → salida 320x180."""
-    out = _run_pipeline(Pipeline(scale=180), tmp_path, monkeypatch)
+    out = _run_pipeline(VideoPipeline(scale=180), tmp_path, monkeypatch)
     assert _probe_resolution(out) == (320, 180)
 
 
 def test_cmd_with_gyrate_90_real(tmp_path, monkeypatch) -> None:
     """Gyrate 90 → dimensiones intercambiadas (360x640)."""
-    out = _run_pipeline(Pipeline(gyrate=90), tmp_path, monkeypatch)
+    out = _run_pipeline(VideoPipeline(gyrate=90), tmp_path, monkeypatch)
     assert _probe_resolution(out) == (360, 640)
 
 
 def test_cmd_with_gyrate_180_real(tmp_path, monkeypatch) -> None:
     """Gyrate 180 → mismas dimensiones (640x360)."""
-    out = _run_pipeline(Pipeline(gyrate=180), tmp_path, monkeypatch)
+    out = _run_pipeline(VideoPipeline(gyrate=180), tmp_path, monkeypatch)
     assert _probe_resolution(out) == (640, 360)
 
 
 def test_cmd_with_gyrate_270_real(tmp_path, monkeypatch) -> None:
     """Gyrate 270 → dimensiones intercambiadas (360x640)."""
-    out = _run_pipeline(Pipeline(gyrate=270), tmp_path, monkeypatch)
+    out = _run_pipeline(VideoPipeline(gyrate=270), tmp_path, monkeypatch)
     assert _probe_resolution(out) == (360, 640)
 
 
 def test_cmd_crop_and_scale_real(tmp_path, monkeypatch) -> None:
     """Crop + scale combinados producen salida de altura correcta."""
-    out = _run_pipeline(Pipeline(crop="100,50,25,25", scale=180), tmp_path, monkeypatch)
+    out = _run_pipeline(
+        VideoPipeline(crop="100,50,25,25", scale=180), tmp_path, monkeypatch
+    )
     _, h = _probe_resolution(out)
     assert h == 180
 
@@ -112,5 +114,5 @@ def test_cmd_invalid_gyrate_returns_none(gyrate: int, tmp_path) -> None:
     wk = tmp_path / SRC.name
     shutil.copy(SRC, wk)
     media = Media.load(wk)
-    cmd = encode_cmd(wk, media, Pipeline(gyrate=gyrate))
+    cmd = encode_cmd(wk, media, VideoPipeline(gyrate=gyrate))
     assert cmd is None

@@ -1,6 +1,6 @@
 from pymedia.models.config import Config
 from pymedia.models.media import Media
-from pymedia.models.pipeline import Pipeline
+from pymedia.models.video_pipeline import VideoPipeline
 from pymedia.utils import parse_crop
 
 
@@ -44,7 +44,7 @@ def _target_height(media_infos: list[Media], resize_to: str) -> int:
             raise ValueError(f"Valor inválido para resize_to: {resize_to}")
 
 
-def _needs_scale(media_infos: list[Media], pipeline: Pipeline) -> bool:
+def _needs_scale(media_infos: list[Media], pipeline: VideoPipeline) -> bool:
     """True si hay que escalar: alturas distintas o escala explícita del usuario."""
     heights = {m.video.height for m in media_infos if m.video is not None}
 
@@ -84,7 +84,7 @@ def _all_audio_compatible(media_infos: list[Media]) -> bool:
 
 
 def _determine_targets(
-    media_infos: list[Media], config: Config, pipeline: Pipeline
+    media_infos: list[Media], config: Config, pipeline: VideoPipeline
 ) -> dict:
     """Determina los targets y qué normalización es realmente necesaria."""
     return {
@@ -110,7 +110,7 @@ def _build_input_args(media_infos: list[Media]) -> list[str]:
 
 
 def _build_video_chain(
-    media: Media, index: int, target: dict, pipeline: Pipeline
+    media: Media, index: int, target: dict, pipeline: VideoPipeline
 ) -> str:
     """Construye la cadena de filtros de vídeo para una entrada."""
     if media.video is None:
@@ -222,7 +222,7 @@ def _build_ffmpeg_command(
     return cmd
 
 
-def concat_filter_cmd(media_infos: list[Media], pipeline: Pipeline, output: str):
+def concat_filter_cmd(media_infos: list[Media], pipeline: VideoPipeline, output: str):
     """Construye el comando ffmpeg para unión recodificada con filter_complex."""
     config = Config.load()
     target = _determine_targets(media_infos, config, pipeline)

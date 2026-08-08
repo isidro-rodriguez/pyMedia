@@ -2,8 +2,6 @@ from datetime import timedelta
 from fractions import Fraction
 from pathlib import Path
 
-from pymedia.models.errors import InvalidTrimPointsError
-
 
 def parse_fraction(value: str | None) -> Fraction | None:
     """Convierte '25/1' a Fraction(25, 1)."""
@@ -66,22 +64,6 @@ def convert_to_timedelta(total_time: str) -> timedelta | None:
             return timedelta(seconds=seconds)
         case _:
             return None
-
-
-def parse_trim_points(values: str | None) -> list[timedelta] | None:
-    """Parsea lista de puntos de corte en str a lista timedelta."""
-    if values is None:
-        return None
-
-    times_timedelta: list[timedelta] = []
-
-    for v in values.split(","):
-        t = convert_to_timedelta(v)
-        if t is None:
-            raise InvalidTrimPointsError(f"Formato no válido: {v}")
-        times_timedelta.append(t)
-
-    return times_timedelta
 
 
 def resolve_output_path(

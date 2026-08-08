@@ -3,11 +3,11 @@ import tempfile
 from json import JSONDecodeError
 from pathlib import Path
 
-from pymedia.models.media import Media
-from pymedia.models.pipeline import Pipeline
 from pymedia.ffmpeg.concat_demux_cmd import concat_demux_cmd
 from pymedia.ffmpeg.concat_filter_cmd import concat_filter_cmd
 from pymedia.logger import get_logger
+from pymedia.models.media import Media
+from pymedia.models.video_pipeline import VideoPipeline
 
 logger = get_logger("concat")
 
@@ -22,7 +22,7 @@ def _compatible_videos(media_inputs: list[Media]) -> bool:
 
 def concat_command(
     paths: list[Path],
-    pipeline: Pipeline,
+    pipeline: VideoPipeline,
     output_name: str | None,
 ):
 

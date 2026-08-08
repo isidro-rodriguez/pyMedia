@@ -6,9 +6,9 @@ from pathlib import Path
 import pytest
 
 from pymedia.cli_params import GyrateMode, ScaleGifMode
-from pymedia.models.media import Media, Video
-from pymedia.models.pipeline import Pipeline
 from pymedia.ffmpeg.gif_cmd import gif_cmd
+from pymedia.models.media import Media, Video
+from pymedia.models.video_pipeline import VideoPipeline
 
 
 def _media(video: Video | None = None) -> Media:
@@ -25,9 +25,9 @@ def _video(width: int = 640, height: int = 360) -> Video:
     return Video(width=width, height=height)
 
 
-def _pipeline(**kwargs) -> Pipeline:
+def _pipeline(**kwargs) -> VideoPipeline:
     """Crea un EncodePipeline con parámetros opcionales."""
-    return Pipeline(**kwargs)
+    return VideoPipeline(**kwargs)
 
 
 def _get_filter_complex(cmd: list[str]) -> str:

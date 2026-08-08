@@ -34,7 +34,7 @@ class ScaleMode(int, Enum):
 
 def _validate_path(path: Path) -> Path | None:
     if not path.is_file():
-        raise typer.BadParameter(f"{path} no es un archivo")
+        raise typer.BadParameter(f"{path} no es un archivo.")
     return path
 
 

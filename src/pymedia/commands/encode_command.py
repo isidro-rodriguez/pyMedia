@@ -2,18 +2,18 @@ import subprocess
 from json import JSONDecodeError
 from pathlib import Path
 
-from pymedia.models.errors import PipelineValidationError
-from pymedia.models.media import Media
-from pymedia.models.pipeline import Pipeline
 from pymedia.ffmpeg.encode_cmd import encode_cmd
 from pymedia.logger import get_logger
+from pymedia.models.errors import PipelineValidationError
+from pymedia.models.media import Media
+from pymedia.models.video_pipeline import VideoPipeline
 
 logger = get_logger("encode")
 
 
 def transcode(
     media: Media,
-    encode_pipeline: Pipeline,
+    encode_pipeline: VideoPipeline,
     output_name: str | None = None,
 ) -> bool:
     """Transcodifica un único archivo. Devuelve True si tuvo éxito."""
@@ -46,7 +46,7 @@ def transcode(
 
 def encode_command(
     paths: list[Path],
-    encode_pipeline: Pipeline,
+    encode_pipeline: VideoPipeline,
     output_name: str | None = None,
 ) -> None:
 

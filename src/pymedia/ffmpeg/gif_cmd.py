@@ -1,8 +1,8 @@
 from pathlib import Path
 
-from pymedia.models.media import Media
-from pymedia.models.pipeline import Pipeline
 from pymedia.logger import get_logger
+from pymedia.models.media import Media
+from pymedia.models.video_pipeline import VideoPipeline
 from pymedia.utils import convert_to_timedelta, parse_crop
 
 logger = get_logger("gif")
@@ -11,7 +11,7 @@ logger = get_logger("gif")
 def _build_filters(
     media: Media,
     fps: int,
-    pipeline: Pipeline,
+    pipeline: VideoPipeline,
 ) -> str:
     encode_filters = []
 
@@ -56,7 +56,7 @@ def _build_filters(
 
 def gif_cmd(
     path: Path,
-    pipeline: Pipeline,
+    pipeline: VideoPipeline,
     media: Media,
     fps: int | None = None,
     start_point: str | None = None,
