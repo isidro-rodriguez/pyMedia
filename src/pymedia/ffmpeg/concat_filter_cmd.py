@@ -1,3 +1,5 @@
+from fractions import Fraction
+
 from pymedia.models.errors import MissingMediaPropertyError, ValueComparisonError
 from pymedia.models.media import Media
 from pymedia.models.state import state
@@ -6,22 +8,29 @@ from pymedia.models.state import state
 def _target_fps() -> str:
     """Calcula el fps objetivo según el modo min/max del config."""
 
-    if state.config.conflictive_join.fps == "max":
-        return max(x for x in state.media.video.fps)
-    elif state.config.conflictive_join.fps == "min":
-        return min(x for x in state.media.video.fps)
-    else:
-        return "30"
+    fps_list: list[Fraction] = state.media.fps
+    for m in state.media:
+        fps = m.video.fps
+        if fps not in fps_list:
+            fps_list.append(fps)
+
+    match state.config.conflictive_join.fps:
+        case "min_fps":
+            return str(min(fps_list))
+        case "max_fps":
+            return str(max(fps_list))
+        case _:
+            return "30"
 
 
 def _channel_layout() -> str:
     """Devuelve el channel_layout según el modo del config."""
-    return "stereo" if state.config.channel_layout == "stereo" else "mono"
+    return "stereo" if state.config.conflictive_join.channels == "stereo" else "mono"
 
 
 def _target_height() -> int:
     """Calcula la altura objetivo según el modo min/max del config."""
-    match state.config.conflictive_join.height:
+    match state.config.conflictive_join.resize_to:
         case "min_height":
             return min(x for x in state.media.height)
         case "max_height":
@@ -75,7 +84,7 @@ def _all_audio_compatible() -> bool:
 def _build_input_args() -> list[str]:
     """Construye los argumentos -i de ffmpeg para todas las entradas."""
     args: list[str] = []
-    for i in enumerate(state.media):
+    for i in range(len(state.media)):
         args.append("-i")
         args.append(str(state.inputs[i]))
     return args
@@ -159,7 +168,7 @@ def _determine_targets() -> dict:
     }
 
 
-def concat_filter_cmd(output: str):
+def concat_filter_cmd():
     """Construye el comando ffmpeg para unión recodificada con filter_complex."""
     target = _determine_targets()
 
@@ -199,6 +208,6 @@ def concat_filter_cmd(output: str):
     ]
     if target["has_audio"]:
         cmd.extend(["-map", "[a]", "-c:a", state.config.encode.audio_codec])
-    cmd.append(output)
+    cmd.append(state.output)
 
     return cmd

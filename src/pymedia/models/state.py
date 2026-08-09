@@ -22,7 +22,7 @@ logger = get_logger("state")
 
 
 @dataclass
-class _State:
+class State:
     config: Config
     arguments: Arguments | None = None
     inputs: list[Path] = field(default_factory=list)
@@ -37,7 +37,7 @@ class _State:
 
     def set_output(self, output: Path) -> None:
         """Comprueba el fichero de salida tenga un nombre y extensión válido."""
-        self.output = process_output(output)
+        self.output = process_output(self, output)
 
     def set_media(self, paths: list[Path]) -> None:
         for p in paths:
@@ -64,20 +64,21 @@ class _State:
             )
 
         args: Arguments = self.arguments
+        self.video_pipeline = VideoPipeline.load()
 
         if args.crop is not None:
-            self.video_pipeline.crop = process_crop()
+            self.video_pipeline.crop = process_crop(self)
 
         if args.gyrate is not None:
-            self.video_pipeline.gyrate = process_gyrate()
+            self.video_pipeline.gyrate = process_gyrate(self)
 
         self.video_pipeline.remux = args.remux
 
         if args.scale:
-            self.video_pipeline.scale = process_scale()
+            self.video_pipeline.scale = process_scale(self)
 
         if args.trim_points:
-            self.video_pipeline.trim_points = process_trim_points()
+            self.video_pipeline.trim_points = process_trim_points(self)
 
     def set_gif_pipeline(self) -> None:
         if self.arguments is None:
@@ -90,22 +91,22 @@ class _State:
         self.gif_pipeline = GifPipeline.load()
 
         if args.crop is not None:
-            self.gif_pipeline.crop = process_crop()
+            self.gif_pipeline.crop = process_crop(self)
 
         if args.end_point is not None:
-            self.gif_pipeline.end_point = process_time(args.end_point)
+            self.gif_pipeline.end_point = process_time(self, args.end_point)
 
         if args.fps is not None:
             self.gif_pipeline.fps = args.fps
 
         if args.gyrate is not None:
-            self.gif_pipeline.gyrate = process_gyrate()
+            self.gif_pipeline.gyrate = process_gyrate(self)
 
         if args.scale:
-            self.gif_pipeline.scale = process_scale()
+            self.gif_pipeline.scale = process_scale(self)
 
         if args.start_point:
-            self.gif_pipeline.start_point = process_time(args.start_point)
+            self.gif_pipeline.start_point = process_time(self, args.start_point)
 
 
-state = _State(config=Config.load())
+state = State(config=Config.load())

@@ -18,7 +18,7 @@ def encode_command(args: Arguments, output: Path | None = None) -> None:
         state.output = output
         state.set_video_pipeline()
 
-    for i in enumerate(state.media):
+    for i in range(len(state.media)):
         if state.output and len(state.media) == 1:
             output = state.output.absolute()
         elif state.output and len(state.media) > 1:

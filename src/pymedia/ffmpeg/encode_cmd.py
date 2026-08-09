@@ -11,15 +11,16 @@ def encode_cmd(
     filters = []
     pipeline = state.video_pipeline
     encode = state.config.encode
+    index = state.inputs.index(input_single)
 
     if pipeline.crop:
-        filters.append(pipeline.crop)
-
-    if pipeline.scale:
-        filters.append(pipeline.scale)
+        filters.append(pipeline.crop[index])
 
     if pipeline.gyrate:
         filters.append(pipeline.gyrate)
+
+    if pipeline.scale:
+        filters.append(pipeline.scale[index])
 
     cmd = [
         "ffmpeg",

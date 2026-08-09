@@ -8,7 +8,7 @@ from pymedia.models.errors import (
     MissingMediaError,
     MissingMediaPropertyError,
 )
-from pymedia.models.state import state
+from pymedia.models.state import State
 
 
 def _is_valid_video_extension(video: Path) -> bool:
@@ -59,7 +59,7 @@ def process_inputs(inputs: list[Path]) -> list[Path]:
     return inputs
 
 
-def process_output(output: Path) -> Path:
+def process_output(state: State, output: Path) -> Path:
     """Comprueba el fichero de salida tenga un nombre y extensión válido."""
     if output.stem is None:
         raise InvalidFilenameError(None)

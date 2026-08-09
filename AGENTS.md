@@ -3,7 +3,6 @@
 ## CONTEXT & PROFILE
 
 - User: Hobbyist developer (non-pro). Wants simple, low-friction, cognitive-light solutions.
-- Write in english, I need practice.
 - OS: Cross-platform (Windows 90%, Linux Debian/Ubuntu 10%).
 
 ## AGENT BEHAVIOR & TOKEN SAVING
@@ -21,6 +20,4 @@
 
 ## CODE & LANGUAGE RULES
 
-- **Code:** English (variables, functions, classes, commits).
-- **Comments & Outputs:** Spanish (comments, logs, docstrings, UI/CLI outputs, AI responses).
 - **Pythonic Style:** Idiomatic Python, type hints, PEP 8, dataclasses/pydantic where fit, `pathlib` over `os.path`.

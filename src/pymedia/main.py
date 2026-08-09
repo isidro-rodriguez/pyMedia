@@ -7,7 +7,7 @@ from pymedia.cli_params import (
     EndPointOption,
     FpsOption,
     GyrateOption,
-    OutputNameOption,
+    OutputOption,
     PathArgument,
     PathsArgument,
     RemuxOption,
@@ -42,7 +42,7 @@ def concat(
     inputs: PathsArgument,
     crop: CropOption = None,
     gyrate: GyrateOption = None,
-    output_name: OutputNameOption = None,
+    output: OutputOption = None,
     remux: RemuxOption = False,
     scale: ScaleOption = None,
 ) -> None:
@@ -56,7 +56,7 @@ def concat(
             inputs=inputs,
             crop=crop,
             gyrate=gyrate,
-            output_name=output_name,
+            output=output,
             remux=remux,
             scale=scale,
         )
@@ -70,7 +70,7 @@ def encode(
     scale: ScaleOption = None,
     gyrate: GyrateOption = None,
     remux: RemuxOption = False,
-    output_name: OutputNameOption = None,
+    output: OutputOption = None,
 ) -> None:
     """
     Transcodifica con las opciones elegidas (requiere al menos una opción)
@@ -81,11 +81,11 @@ def encode(
 
     encode_command(
         Arguments(
-            command=CommandName.CONCAT,
+            command=CommandName.ENCODE,
             inputs=inputs,
             crop=crop,
             gyrate=gyrate,
-            output_name=output_name,
+            output=output,
             remux=remux,
             scale=scale,
         )
@@ -100,17 +100,17 @@ def split(
     scale: ScaleOption = None,
     gyrate: GyrateOption = None,
     remux: RemuxOption = False,
-    output_name: OutputNameOption = None,
+    output: OutputOption = None,
 ) -> None:
     """Separa un vídeo en los puntos de corte indicados"""
     split_command(
         Arguments(
-            command=CommandName.CONCAT,
-            inputs=input_single,
+            command=CommandName.SPLIT,
+            inputs=[input_single],
             trim_points=trim_points,
             crop=crop,
             gyrate=gyrate,
-            output_name=output_name,
+            output=output,
             remux=remux,
             scale=scale,
         )
@@ -125,20 +125,20 @@ def gif(
     fps: FpsOption = 15,
     start_point: StartPointOption = None,
     gyrate: GyrateOption = None,
-    output_name: OutputNameOption = None,
+    output: OutputOption = None,
     scale: ScaleGifOption = ScaleGifMode.P480,
 ) -> None:
     """Genera un gif animado del vídeo aportado"""
     gif_command(
         Arguments(
-            command=CommandName.CONCAT,
-            inputs=input_single,
+            command=CommandName.GIF,
+            inputs=[input_single],
             end_point=end_point,
             fps=fps,
             crop=crop,
             gyrate=gyrate,
             start_point=start_point,
-            output_name=output_name,
+            output=output,
             scale=scale,
         )
     )

@@ -11,11 +11,11 @@ def gif_cmd(output: Path) -> list[str]:
         filters_array = []
 
         if pipeline.crop:
-            filters_array.append(pipeline.crop)
+            filters_array.append(pipeline.crop[0])
         if pipeline.gyrate:
             filters_array.append(pipeline.gyrate)
         if pipeline.scale:
-            filters_array.append(pipeline.scale)
+            filters_array.append(pipeline.scale[0])
 
         filters = ",".join(filters_array) + ","
 
@@ -27,10 +27,10 @@ def gif_cmd(output: Path) -> list[str]:
     cmd = ["ffmpeg"]
 
     if pipeline.start_point:
-        cmd.extend(pipeline.start_point)
+        cmd.extend(str(pipeline.start_point))
 
     if pipeline.end_point:
-        cmd.extend(pipeline.end_point)
+        cmd.extend(str(pipeline.end_point))
 
     cmd.extend(["-i", str(state.inputs[0]), "-filter_complex", filters, str(output)])
 

@@ -128,8 +128,8 @@ RemuxOption = Annotated[
     ),
 ]
 
-OutputNameOption = Annotated[
-    str | None,
+OutputOption = Annotated[
+    Path | None,
     typer.Option(
         "--output",
         "-o",

@@ -7,13 +7,13 @@ from pymedia.models.errors import (
     MissingMediaPropertyError,
     MissingOptionsError,
 )
-from pymedia.models.state import state
+from pymedia.models.state import State
 from pymedia.utils import convert_to_timedelta, parse_crop
 
 logger = get_logger("pipeline")
 
 
-def process_crop() -> list[str]:
+def process_crop(state: State) -> list[str]:
     """Valida y procesa la opción de corte."""
     crop_list: list[str] = []
 
@@ -54,7 +54,7 @@ def process_crop() -> list[str]:
     return crop_list
 
 
-def process_gyrate() -> str:
+def process_gyrate(state: State) -> str:
     """Valida y procesa la opción de giro."""
     if state.arguments is None or state.arguments.gyrate is None:
         raise MissingOptionsError("No se pudo obtener el valor de giro.")
@@ -72,7 +72,7 @@ def process_gyrate() -> str:
             )
 
 
-def process_scale() -> list[int | None]:
+def process_scale(state: State) -> list[int | None]:
     """Valida y procesa la opción de escalado."""
     if state.arguments is None or state.arguments.scale is None:
         raise MissingOptionsError("No se pudo obtener el valor de escalado")
@@ -106,7 +106,7 @@ def process_scale() -> list[int | None]:
     return scale_list
 
 
-def process_time(time_str: str) -> float:
+def process_time(state: State, time_str: str) -> float:
     """Valida y procesa una marca de tiempo."""
     if not state.media:
         raise MissingMediaError()
@@ -136,7 +136,7 @@ def process_time(time_str: str) -> float:
     return time_delta.total_seconds()
 
 
-def process_trim_points() -> str:
+def process_trim_points(state: State) -> str:
     """Valida y procesa los puntos de corte."""
     if not state.media:
         raise MissingMediaError(state.inputs[0])

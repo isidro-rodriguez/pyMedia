@@ -5,13 +5,13 @@ from pathlib import Path
 from pymedia.ffmpeg.concat_demux_cmd import concat_demux_cmd
 from pymedia.ffmpeg.concat_filter_cmd import concat_filter_cmd
 from pymedia.logger import get_logger
+from pymedia.models.arguments import Arguments
 from pymedia.models.errors import (
     CommandExecutionError,
     CommandGenerationError,
     FFmpegTimeoutError,
     IncompatibleFilesError,
 )
-from pymedia.models.media import Media
 from pymedia.models.state import state
 
 logger = get_logger("concat")
@@ -20,7 +20,7 @@ logger = get_logger("concat")
 FFMPEG_TIMEOUT = 1800
 
 
-def _compatible_videos(media: list[Media]) -> bool:
+def _compatible_videos() -> bool:
     reference = state.media[0].concat_signature
     return all(m.concat_signature == reference for m in state.media[1:])
 
@@ -42,7 +42,7 @@ def _run_ffmpeg(cmd: list[str]) -> None:
         raise CommandExecutionError("concat", e.stderr) from e
 
 
-def concat_command():
+def concat_command(args: Arguments):
     if not state.output:
         state.output = Path(state.inputs[0].stem + "_concat" + state.inputs[0].suffix)
 
@@ -54,7 +54,7 @@ def concat_command():
         raise IncompatibleFilesError()
 
     # Si son compatibles y se realiza transcodificación, se usa concat demuxer
-    if _compatible_videos(media) and not state.video_pipeline.requires_encode:
+    if _compatible_videos() and not state.video_pipeline.requires_encode:
         with tempfile.TemporaryDirectory() as tmp_dir:
             list_txt = Path(tmp_dir) / "list.txt"
             with open(list_txt, "w", encoding="utf-8") as f:

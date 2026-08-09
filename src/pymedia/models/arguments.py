@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from enum import Enum, StrEnum
+from enum import StrEnum
 from pathlib import Path
 
 from pymedia.cli_params import GyrateMode, ScaleGifMode, ScaleMode
@@ -19,14 +19,14 @@ class CommandName(StrEnum):
 class Arguments:
     # Default parameters
     command: CommandName
-    inputs: list[Path] | Path | None = None
+    inputs: list[Path] | None = None
     trim_points: str | None = None
     # Optional parameters
     crop: str | None = None
     end_point: str | None = None
     fps: int | None = None
     gyrate: GyrateMode | None = None
-    output_name: str | None = None
+    output: Path | None = None
     remux: bool = False
     scale: ScaleMode | ScaleGifMode | None = None
     start_point: str | None = None
