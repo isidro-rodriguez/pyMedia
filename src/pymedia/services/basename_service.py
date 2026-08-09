@@ -5,10 +5,8 @@ from pymedia.data import CONTAINERS_BY_CODEC, GIF_EXTENSION, VIDEO_EXTENSIONS
 from pymedia.models.errors import (
     InvalidFileExtensionError,
     InvalidFilenameError,
-    MissingMediaError,
     MissingMediaPropertyError,
 )
-from pymedia.models.state import State
 
 
 def _is_valid_video_extension(video: Path) -> bool:
@@ -53,13 +51,16 @@ def _is_valid_filename(name: str) -> bool:
 
 
 def process_inputs(inputs: list[Path]) -> list[Path]:
-
     for i in inputs:
         _is_valid_video_extension(i)
     return inputs
 
 
-def process_output(state: State, output: Path) -> Path:
+def process_output(
+    output: Path,
+    target_codec: str | None = None,
+    is_gif: bool = False,
+) -> Path:
     """Comprueba el fichero de salida tenga un nombre y extensión válido."""
     if output.stem is None:
         raise InvalidFilenameError(None)
@@ -69,27 +70,16 @@ def process_output(state: State, output: Path) -> Path:
     if output.suffix is None:
         raise InvalidFileExtensionError(None, None)
 
-    if state.gif_pipeline is not None:
-        if output.suffix != ".gif":
+    if is_gif:
+        if output.suffix != GIF_EXTENSION:
             raise InvalidFileExtensionError(output.suffix, GIF_EXTENSION)
-
-    if output.suffix not in VIDEO_EXTENSIONS:
+    elif output.suffix not in VIDEO_EXTENSIONS:
         raise InvalidFileExtensionError(output.suffix, VIDEO_EXTENSIONS)
 
-    pipeline = state.video_pipeline
-    if pipeline is not None and pipeline.requires_encode:
-        target_video_codec = state.config.encode.video_codec
-    else:
-        if not state.media:
-            raise MissingMediaError("No se ha podido cargar la información del vídeo.")
-        video = state.media[0].video
-        if video is None:
-            raise MissingMediaPropertyError(
-                f"El vídeo '{state.media[0].path}' no tiene stream de vídeo."
-            )
-        target_video_codec = video.codec
+    if target_codec is None:
+        raise MissingMediaPropertyError("Video codec")
 
-    valid_containers = CONTAINERS_BY_CODEC.get(target_video_codec, set())
+    valid_containers = CONTAINERS_BY_CODEC.get(target_codec, set())
     if valid_containers and output.suffix not in valid_containers:
         raise InvalidFileExtensionError(output.suffix, valid_containers)
 

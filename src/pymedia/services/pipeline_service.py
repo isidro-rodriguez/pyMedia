@@ -1,26 +1,24 @@
 from datetime import timedelta
+from pathlib import Path
 
+from pymedia.cli_params import GyrateMode, ScaleGifMode, ScaleMode
 from pymedia.logger import get_logger
 from pymedia.models.errors import (
     InvalidOptionError,
     MissingMediaError,
     MissingMediaPropertyError,
-    MissingOptionsError,
 )
-from pymedia.models.state import State
+from pymedia.models.media import Media
 from pymedia.utils import convert_to_timedelta, parse_crop
 
 logger = get_logger("pipeline")
 
 
-def process_crop(state: State) -> list[str]:
+def process_crop(crop: str | None, media: list[Media]) -> list[str]:
     """Valida y procesa la opción de corte."""
     crop_list: list[str] = []
 
-    if state.arguments is None or state.arguments.crop is None:
-        raise MissingOptionsError("No se pudo obtener los valores de corte.")
-
-    parsed = parse_crop(state.arguments.crop)
+    parsed = parse_crop(crop)
 
     if parsed is None:
         raise InvalidOptionError(
@@ -29,42 +27,41 @@ def process_crop(state: State) -> list[str]:
 
     left, right, top, bottom = parsed
 
-    for media in state.media:
+    for media_item in media:
         if (
-            media.video is None
-            or media.video.width is None
-            or media.video.height is None
+            media_item.video is None
+            or media_item.video.width is None
+            or media_item.video.height is None
         ):
             raise MissingMediaPropertyError("Crop")
 
-        if (left + right) >= media.video.width:
+        if (left + right) >= media_item.video.width:
             raise InvalidOptionError(
-                f"Crop inválido: {left + right} >= ancho original {media.video.width}."
+                f"Crop inválido: {left + right} >= ancho original "
+                f"{media_item.video.width}."
             )
 
-        if (top + bottom) >= media.video.width:
+        if (top + bottom) >= media_item.video.height:
             raise InvalidOptionError(
-                f"Crop inválido: {top + bottom} >= ancho original {media.video.height}."
+                f"Crop inválido: {top + bottom} >= alto original "
+                f"{media_item.video.height}."
             )
 
-        crop_w = media.video.width - left - right
-        crop_h = media.video.height - top - bottom
+        crop_w = media_item.video.width - left - right
+        crop_h = media_item.video.height - top - bottom
         crop_list.append(f"crop={crop_w}:{crop_h}:{left}:{top}")
 
     return crop_list
 
 
-def process_gyrate(state: State) -> str:
+def process_gyrate(gyrate: GyrateMode) -> str:
     """Valida y procesa la opción de giro."""
-    if state.arguments is None or state.arguments.gyrate is None:
-        raise MissingOptionsError("No se pudo obtener el valor de giro.")
-
-    match state.arguments.gyrate:
-        case 90:
+    match gyrate:
+        case GyrateMode.d90:
             return "transpose=1"
-        case 180:
+        case GyrateMode.d180:
             return "vflip,hflip"
-        case 270:
+        case GyrateMode.d270:
             return "transpose=2"
         case _:
             raise InvalidOptionError(
@@ -72,31 +69,32 @@ def process_gyrate(state: State) -> str:
             )
 
 
-def process_scale(state: State) -> list[int | None]:
+def process_scale(
+    scale: ScaleMode | ScaleGifMode,
+    media: list[Media],
+    reject_increase: bool,
+) -> list[int | None]:
     """Valida y procesa la opción de escalado."""
-    if state.arguments is None or state.arguments.scale is None:
-        raise MissingOptionsError("No se pudo obtener el valor de escalado")
-
     scale_list: list[int | None] = []
-    scale = state.arguments.scale
-    reject_increase = state.config.app.disable_resolution_increase
 
-    for media in state.media:
-        if media.video is None or media.video.height is None:
+    for media_item in media:
+        if media_item.video is None or media_item.video.height is None:
             raise MissingMediaPropertyError(
                 "No se pudo obtener la resolución del vídeo para validar el escalado."
             )
 
-        if scale == media.video.height:
+        if scale == media_item.video.height:
             logger.warning(
-                f"Escalado rechazado: {scale} = altura original {media.video.height}."
+                f"Escalado rechazado: {scale} = altura original "
+                f"{media_item.video.height}."
             )
             scale_list.append(None)
             continue
 
-        if reject_increase and scale > media.video.height:
+        if reject_increase and scale > media_item.video.height:
             logger.warning(
-                f"Escalado rechazado: {scale} > altura original {media.video.height}."
+                f"Escalado rechazado: {scale} > altura original "
+                f"{media_item.video.height}."
             )
             scale_list.append(None)
             continue
@@ -106,11 +104,8 @@ def process_scale(state: State) -> list[int | None]:
     return scale_list
 
 
-def process_time(state: State, time_str: str) -> float:
+def process_time(time_str: str, video_duration: timedelta | None) -> float:
     """Valida y procesa una marca de tiempo."""
-    if not state.media:
-        raise MissingMediaError()
-
     time_delta = convert_to_timedelta(time_str)
 
     if time_delta is None:
@@ -120,8 +115,6 @@ def process_time(state: State, time_str: str) -> float:
 
     if time_delta < timedelta(0):
         raise InvalidOptionError("Marca de tiempo negativa.")
-
-    video_duration = state.media[0].duration
 
     if video_duration is None:
         raise MissingMediaPropertyError(
@@ -136,20 +129,24 @@ def process_time(state: State, time_str: str) -> float:
     return time_delta.total_seconds()
 
 
-def process_trim_points(state: State) -> str:
+def process_trim_points(
+    trim_points: str,
+    video_duration: timedelta | None,
+    input_path: Path,
+) -> str:
     """Valida y procesa los puntos de corte."""
-    if not state.media:
-        raise MissingMediaError(state.inputs[0])
+    if video_duration is None:
+        raise MissingMediaError(input_path)
 
     times_timedelta: list[timedelta] = []
 
-    for tp in state.arguments.trim_points.split(","):
+    for tp in trim_points.split(","):
         t = convert_to_timedelta(tp)
         if t is None:
             raise InvalidOptionError(
                 "Formato de marca de tiempo no válida. Esperado hh:mm:ss"
             )
-        if t > state.media[0].duration:
+        if t > video_duration:
             raise InvalidOptionError()
         times_timedelta.append(t)
 
