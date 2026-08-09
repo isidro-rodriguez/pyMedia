@@ -19,20 +19,6 @@ class VideoPipeline:
         return cls()
 
     @property
-    def has_operations(self) -> bool:
-        """True si hay al menos una operación activa en el pipeline."""
-        return any(
-            field is not None
-            for field in (
-                self.crop,
-                self.gyrate,
-                self.remux,
-                self.scale,
-                self.trim_points,
-            )
-        )
-
-    @property
     def requires_encode(self) -> bool:
         """True si hay al menos una operación que requiera transcodificación."""
         return any(

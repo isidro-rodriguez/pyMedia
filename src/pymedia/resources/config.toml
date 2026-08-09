@@ -12,12 +12,13 @@
 # - Máximo: 15% menos espacio que equilibrado, pero aún más lento
 
 [encode]
-video_codec = "libx264"     # libx264 | libx265 | libsvtav1
+video_codec = "libx264"
 video_preset = "fast"
 video_crf = 22
 video_pix_fmt = "yuv420p"
 audio_codec = "aac"
 audio_bit_rate = "160k"
+default_container = ".mp4"
 
 [conflictive_join]
 resize_to = "min_height"    # min_height | max_height

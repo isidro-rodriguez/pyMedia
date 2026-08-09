@@ -2,13 +2,13 @@ import re
 from pathlib import Path
 
 from pymedia.data import CONTAINERS_BY_CODEC, GIF_EXTENSION, VIDEO_EXTENSIONS
-from pymedia.models import state
 from pymedia.models.errors import (
     InvalidFileExtensionError,
     InvalidFilenameError,
     MissingMediaError,
     MissingMediaPropertyError,
 )
+from pymedia.models.state import state
 
 
 def _is_valid_video_extension(video: Path) -> bool:

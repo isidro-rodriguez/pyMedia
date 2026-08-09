@@ -1,67 +1,41 @@
 import subprocess
-from json import JSONDecodeError
 from pathlib import Path
 
 from pymedia.ffmpeg.encode_cmd import encode_cmd
 from pymedia.logger import get_logger
-from pymedia.models.errors import PipelineValidationError
-from pymedia.models.media import Media
-from pymedia.models.video_pipeline import VideoPipeline
+from pymedia.models.arguments import Arguments
+from pymedia.models.errors import CommandExecutionError, CommandGenerationError
+from pymedia.models.state import state
+from pymedia.services.commands_service import initialize_command
 
 logger = get_logger("encode")
 
 
-def transcode(
-    media: Media,
-    encode_pipeline: VideoPipeline,
-    output_name: str | None = None,
-) -> bool:
-    """Transcodifica un único archivo. Devuelve True si tuvo éxito."""
-    try:
-        encode_pipeline.validate(media)
-    except PipelineValidationError as e:
-        logger.error(f"Formato no pasa verificación: {media.path} ({e})")
-        return False
-    except ValueError:
-        logger.error(f"Formato no pasa verificación: {media.path}")
-        return False
+def encode_command(args: Arguments, output: Path | None = None) -> None:
+    if not output:  # normal encode
+        initialize_command(args)
+    else:  # split auxiliar operation
+        state.output = output
+        state.set_video_pipeline()
 
-    if not encode_pipeline.has_operations:
-        logger.warning(f"Sin operaciones aplicables, omitido: {media.path}")
-        return False
-
-    cmd = encode_cmd(media.path, media, encode_pipeline, output_name=output_name)
-    if cmd is None:
-        logger.error(f"Parámetros inválidos: {media.path}")
-        return False
-
-    try:
-        subprocess.run(cmd, capture_output=True, text=True, check=True)
-        logger.info(f"Transcodificado correctamente: {media.path}")
-        return True
-    except subprocess.CalledProcessError as e:
-        logger.error(f"Error al transcodificar {media.path}: {e.stderr}")
-        return False
-
-
-def encode_command(
-    paths: list[Path],
-    encode_pipeline: VideoPipeline,
-    output_name: str | None = None,
-) -> None:
-
-    for i, path in enumerate(paths):
-        try:
-            media: Media = Media.load(path)
-        except (ValueError, subprocess.CalledProcessError, JSONDecodeError, OSError):
-            logger.error(f"Probe indica formato inválido: {path}")
-            continue
-
-        # TODO: refactorizar y funcionalizar la salida de ficheros (posible añadir solo el directorio)
-        if output_name is not None and len(paths) > 1:
-            p = Path(output_name).absolute()
-            output = f"{p.parent}/{p.stem}_{i}{p.suffix}"
+    for i in enumerate(state.media):
+        if state.output and len(state.media) == 1:
+            output = state.output.absolute()
+        elif state.output and len(state.media) > 1:
+            p = state.output
+            output = Path(f"{p.parent}/{p.stem}_{i}{p.suffix}").absolute()
         else:
-            output = output_name
+            output = Path(
+                f"{state.inputs[i].stem}_encoded{state.config.encode.default_container}"
+            ).absolute()
 
-        transcode(media, encode_pipeline, output)
+        cmd = encode_cmd(state.inputs[i], output)
+
+        if cmd is None:
+            raise CommandGenerationError("encode")
+
+        try:
+            subprocess.run(cmd, capture_output=True, text=True, check=True)
+            logger.info(f"Transcodificación correcta: {output}")
+        except subprocess.CalledProcessError as e:
+            raise CommandExecutionError("encode", e.stderr) from e

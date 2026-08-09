@@ -31,7 +31,6 @@ class Audio:
 
 @dataclass(frozen=True)
 class Media:
-    path: Path
     duration: timedelta | None = None
     size: int | None = None
     format_name: str | None = None
@@ -75,7 +74,6 @@ class Media:
         duration_val = to_float(fmt.get("duration"))
 
         return Media(
-            path=path,
             duration=timedelta(seconds=duration_val)
             if duration_val is not None
             else None,

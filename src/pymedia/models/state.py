@@ -22,12 +22,12 @@ logger = get_logger("state")
 
 
 @dataclass
-class State:
+class _State:
     config: Config
+    arguments: Arguments | None = None
     inputs: list[Path] = field(default_factory=list)
     output: Path | None = None
     media: list[Media] = field(default_factory=list)
-    arguments: Arguments | None = None
     video_pipeline: VideoPipeline | None = None
     gif_pipeline: GifPipeline | None = None
 
@@ -54,8 +54,8 @@ class State:
 
             self.media.append(media)
 
-    def set_options(self, options: Arguments) -> None:
-        self.arguments = options
+    def set_arguments(self, args: Arguments) -> None:
+        self.arguments = args
 
     def set_video_pipeline(self) -> None:
         if self.arguments is None:
@@ -108,4 +108,4 @@ class State:
             self.gif_pipeline.start_point = process_time(args.start_point)
 
 
-state = State(config=Config.load())
+state = _State(config=Config.load())

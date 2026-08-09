@@ -67,9 +67,9 @@ def convert_to_timedelta(total_time: str) -> timedelta | None:
 
 
 def resolve_output_path(
+    path: Path,
     output_name: str | None,
-    source_path: Path,
-    default_suffix: str,
+    suffix: str = "processed",
 ) -> Path:
     """Resuelve la ruta de salida, creando directorio padre si necesario.
 
@@ -77,9 +77,8 @@ def resolve_output_path(
     fuente. Si output_name incluye directorios, los crea si no existen.
     """
     if output_name is None:
-        return Path(source_path.stem + default_suffix + source_path.suffix)
-    out = Path(output_name)
-    parent = out.parent
-    if str(parent) != ".":
-        parent.mkdir(parents=True, exist_ok=True)
-    return out
+        return Path(path.stem + "_" + suffix + path.suffix)
+    output = Path(output_name)
+    if str(output.parent) != ".":
+        output.parent.mkdir(parents=True, exist_ok=True)
+    return output

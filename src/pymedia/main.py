@@ -22,7 +22,8 @@ from pymedia.commands.encode_command import encode_command
 from pymedia.commands.gif_command import gif_command
 from pymedia.commands.split_command import split_command
 from pymedia.logger import get_logger
-from pymedia.models.video_pipeline import VideoPipeline
+from pymedia.models.arguments import Arguments, CommandName
+from pymedia.models.errors import InsufficientInputError
 
 app = typer.Typer()
 logger = get_logger("main")
@@ -38,24 +39,33 @@ def tui(ctx: typer.Context) -> None:
 
 @app.command()
 def concat(
-    paths: PathsArgument,
+    inputs: PathsArgument,
     crop: CropOption = None,
-    scale: ScaleOption = None,
     gyrate: GyrateOption = None,
-    remux: RemuxOption = False,
     output_name: OutputNameOption = None,
+    remux: RemuxOption = False,
+    scale: ScaleOption = None,
 ) -> None:
     """Une los vídeos en el orden aportado"""
-    if len(paths) < 2:
-        logger.warning("Se requiere al menos dos vídeos.")
-        return
-    pipeline = VideoPipeline.load(crop, gyrate, remux, scale)
-    concat_command(paths, pipeline, output_name)
+    if len(inputs) < 2:
+        raise InsufficientInputError()
+
+    concat_command(
+        Arguments(
+            command=CommandName.CONCAT,
+            inputs=inputs,
+            crop=crop,
+            gyrate=gyrate,
+            output_name=output_name,
+            remux=remux,
+            scale=scale,
+        )
+    )
 
 
 @app.command()
 def encode(
-    paths: PathsArgument,
+    inputs: PathsArgument,
     crop: CropOption = None,
     scale: ScaleOption = None,
     gyrate: GyrateOption = None,
@@ -68,14 +78,24 @@ def encode(
     if crop is None and scale is None and gyrate is None and remux is False:
         logger.warning("Se requiere al menos una opción.")
         return
-    pipeline = VideoPipeline.load(crop, gyrate, remux, scale)
-    encode_command(paths, pipeline, output_name)
+
+    encode_command(
+        Arguments(
+            command=CommandName.CONCAT,
+            inputs=inputs,
+            crop=crop,
+            gyrate=gyrate,
+            output_name=output_name,
+            remux=remux,
+            scale=scale,
+        )
+    )
 
 
 @app.command()
 def split(
+    input_single: PathArgument,
     trim_points: TrimPointsOption,
-    path: PathArgument,
     crop: CropOption = None,
     scale: ScaleOption = None,
     gyrate: GyrateOption = None,
@@ -83,24 +103,45 @@ def split(
     output_name: OutputNameOption = None,
 ) -> None:
     """Separa un vídeo en los puntos de corte indicados"""
-    pipeline = VideoPipeline.load(crop, gyrate, remux, scale)
-    split_command(path, trim_points, pipeline, output_name)
+    split_command(
+        Arguments(
+            command=CommandName.CONCAT,
+            inputs=input_single,
+            trim_points=trim_points,
+            crop=crop,
+            gyrate=gyrate,
+            output_name=output_name,
+            remux=remux,
+            scale=scale,
+        )
+    )
 
 
 @app.command()
 def gif(
-    path: Path,
-    fps: FpsOption = 15,
-    scale: ScaleGifOption = ScaleGifMode.P480,
-    start_point: StartPointOption = None,
-    end_point: EndPointOption = None,
+    input_single: Path,
     crop: CropOption = None,
+    end_point: EndPointOption = None,
+    fps: FpsOption = 15,
+    start_point: StartPointOption = None,
     gyrate: GyrateOption = None,
     output_name: OutputNameOption = None,
+    scale: ScaleGifOption = ScaleGifMode.P480,
 ) -> None:
     """Genera un gif animado del vídeo aportado"""
-    pipeline = VideoPipeline.load(crop, gyrate, False, scale)
-    gif_command(path, pipeline, fps, start_point, end_point, output_name)
+    gif_command(
+        Arguments(
+            command=CommandName.CONCAT,
+            inputs=input_single,
+            end_point=end_point,
+            fps=fps,
+            crop=crop,
+            gyrate=gyrate,
+            start_point=start_point,
+            output_name=output_name,
+            scale=scale,
+        )
+    )
 
 
 if __name__ == "__main__":

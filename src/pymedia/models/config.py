@@ -17,6 +17,7 @@ class Encode:
     video_pix_fmt: str
     audio_codec: str
     audio_bit_rate: str
+    default_container: str
 
 
 @dataclass(frozen=True)

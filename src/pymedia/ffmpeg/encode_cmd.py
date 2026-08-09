@@ -1,60 +1,31 @@
 from pathlib import Path
 
-from pymedia.models.config import Config
-from pymedia.models.media import Media
-from pymedia.models.video_pipeline import VideoPipeline
-from pymedia.utils import parse_crop, resolve_output_path
+from pymedia.models.state import state
 
 
 def encode_cmd(
-    path: Path,
-    media: Media,
-    pipeline: VideoPipeline,
-    output_name: str | None = None,
+    input_single: Path,
+    output: Path,
 ):
 
-    config = Config.load()
-
-    video_input = str(path.absolute())
-    video_output = str(resolve_output_path(output_name, path, "_encoded"))
-
     filters = []
+    pipeline = state.video_pipeline
+    encode = state.config.encode
 
-    if pipeline.crop is not None:
-        if media.video is None:
-            raise ValueError(f"Vídeo {path} no encontrado en encode")
+    if pipeline.crop:
+        filters.append(pipeline.crop)
 
-        parsed = parse_crop(pipeline.crop)
+    if pipeline.scale:
+        filters.append(pipeline.scale)
 
-        if parsed is None:
-            raise ValueError(f"Crop {path} no encontrado en encode")
-
-        left, right, top, bottom = parsed
-
-        crop_w = media.video.width - left - right
-        crop_h = media.video.height - top - bottom
-
-        filters.append(f"crop={crop_w}:{crop_h}:{left}:{top}")
-
-    if pipeline.scale is not None:
-        filters.append(f"scale=-2:{pipeline.scale}")
-
-    if pipeline.gyrate is not None:
-        match pipeline.gyrate:
-            case 90:
-                filters.append("transpose=1")
-            case 180:
-                filters.append("vflip,hflip")
-            case 270:
-                filters.append("transpose=2")
-            case _:
-                return None
+    if pipeline.gyrate:
+        filters.append(pipeline.gyrate)
 
     cmd = [
         "ffmpeg",
         "-y",
         "-i",
-        video_input,
+        str(input_single),
     ]
 
     if filters:
@@ -63,16 +34,16 @@ def encode_cmd(
     cmd.extend(
         [
             "-c:v",
-            config.encode.video_codec,
+            encode.video_codec,
             "-crf",
-            str(config.encode.video_crf),
+            str(encode.video_crf),
             "-preset",
-            config.encode.video_preset,
+            encode.video_preset,
             "-pix_fmt",
-            config.encode.video_pix_fmt,
+            encode.video_pix_fmt,
             "-c:a",
             "copy",
-            video_output,
+            str(output),
         ]
     )
 

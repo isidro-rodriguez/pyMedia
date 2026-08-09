@@ -112,9 +112,6 @@ CONTAINERS_BY_CODEC = {
     "wmv3": {".mkv", ".mov", ".mp4", ".wmv"},
 }
 
-
-DEFAULT_CONTAINER = ".mp4"
-
 GIF_EXTENSION = ".gif"
 
 # Valid video input extensions

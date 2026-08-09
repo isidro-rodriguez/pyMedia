@@ -1,148 +1,103 @@
-from pymedia.models.config import Config
+from pymedia.models.errors import MissingMediaPropertyError, ValueComparisonError
 from pymedia.models.media import Media
-from pymedia.models.video_pipeline import VideoPipeline
-from pymedia.utils import parse_crop
+from pymedia.models.state import state
 
 
-def _target_fps(media_infos: list[Media], mode: str) -> str:
+def _target_fps() -> str:
     """Calcula el fps objetivo según el modo min/max del config."""
-    fps_values = []
-    for media in media_infos:
-        if media.video is not None and media.video.fps is not None:
-            fps_values.append(media.video.fps)
 
-    if not fps_values:
+    if state.config.conflictive_join.fps == "max":
+        return max(x for x in state.media.video.fps)
+    elif state.config.conflictive_join.fps == "min":
+        return min(x for x in state.media.video.fps)
+    else:
         return "30"
 
-    if mode == "max":
-        target = max(fps_values)
-    else:  # min
-        target = min(fps_values)
 
-    return str(target)
-
-
-def _channel_layout(mode: str) -> str:
+def _channel_layout() -> str:
     """Devuelve el channel_layout según el modo del config."""
-    return "stereo" if mode == "stereo" else "mono"
+    return "stereo" if state.config.channel_layout == "stereo" else "mono"
 
 
-def _target_height(media_infos: list[Media], resize_to: str) -> int:
+def _target_height() -> int:
     """Calcula la altura objetivo según el modo min/max del config."""
-    video_heights = []
-    for media in media_infos:
-        if media.video is None:
-            raise ValueError("Stream de vídeo no encontrado en unión recodificada")
-        video_heights.append(media.video.height)
-
-    match resize_to:
+    match state.config.conflictive_join.height:
         case "min_height":
-            return min(video_heights)
+            return min(x for x in state.media.height)
         case "max_height":
-            return max(video_heights)
+            return max(x for x in state.media.height)
         case _:
-            raise ValueError(f"Valor inválido para resize_to: {resize_to}")
+            raise ValueComparisonError("concat", "Height")
 
 
-def _needs_scale(media_infos: list[Media], pipeline: VideoPipeline) -> bool:
+def _needs_scale() -> bool:
     """True si hay que escalar: alturas distintas o escala explícita del usuario."""
-    heights = {m.video.height for m in media_infos if m.video is not None}
+    heights = {m.video.height for m in state.media if m.video is not None}
 
     if heights is None:
-        raise ValueError("Alturas de vídeos inválida")
+        raise MissingMediaPropertyError("Height")
 
     all_same = len(heights) <= 1
 
     if all_same:
         # Solo escalar si el usuario pidió una resolución menor
         height = next(iter(heights))
-        return pipeline.scale is not None and height > pipeline.scale
+        return (
+            state.video_pipeline.scale is not None
+            and height > state.video_pipeline.scale
+        )
 
     # Alturas diferentes → necesitan escalado para normalizar
     return True
 
 
-def _needs_fps(media_infos: list[Media]) -> bool:
+def _needs_fps() -> bool:
     """True si los vídeos tienen fps distintos (o desconocido)."""
-    return len({m.video.fps for m in media_infos if m.video is not None}) > 1
+    return len({m.video.fps for m in state.media if m.video is not None}) > 1
 
 
-def _needs_pix_fmt(media_infos: list[Media]) -> bool:
+def _needs_pix_fmt() -> bool:
     """True si los vídeos tienen pix_fmt distintos (o desconocido)."""
-    return len({m.video.pix_fmt for m in media_infos if m.video is not None}) > 1
+    return len({m.video.pix_fmt for m in state.media if m.video is not None}) > 1
 
 
-def _all_audio_compatible(media_infos: list[Media]) -> bool:
+def _all_audio_compatible() -> bool:
     """True si todos tienen audio y son idénticos en codec/rate/channels/layout."""
-    if any(m.audio is None for m in media_infos):
+    if any(m.audio is None for m in state.media):
         return False
     signatures = {
         (m.audio.codec, m.audio.sample_rate, m.audio.channels, m.audio.channel_layout)
-        for m in media_infos
+        for m in state.media
     }
     return len(signatures) == 1
 
 
-def _determine_targets(
-    media_infos: list[Media], config: Config, pipeline: VideoPipeline
-) -> dict:
-    """Determina los targets y qué normalización es realmente necesaria."""
-    return {
-        "height": _target_height(media_infos, config.conflictive_join.resize_to),
-        "fps": _target_fps(media_infos, config.conflictive_join.fps),
-        "pix_fmt": config.conflictive_join.pix_fmt,
-        "channel_layout": _channel_layout(config.conflictive_join.channels),
-        "needs_scale": _needs_scale(media_infos, pipeline),
-        "needs_fps": _needs_fps(media_infos),
-        "needs_pix_fmt": _needs_pix_fmt(media_infos),
-        "all_audio_compatible": _all_audio_compatible(media_infos),
-        "has_audio": any(m.audio is not None for m in media_infos),
-    }
-
-
-def _build_input_args(media_infos: list[Media]) -> list[str]:
+def _build_input_args() -> list[str]:
     """Construye los argumentos -i de ffmpeg para todas las entradas."""
     args: list[str] = []
-    for media in media_infos:
+    for i in enumerate(state.media):
         args.append("-i")
-        args.append(str(media.path.absolute()))
+        args.append(str(state.inputs[i]))
     return args
 
 
-def _build_video_chain(
-    media: Media, index: int, target: dict, pipeline: VideoPipeline
-) -> str:
+def _build_video_chain(index: int, target: dict) -> str:
     """Construye la cadena de filtros de vídeo para una entrada."""
-    if media.video is None:
-        raise ValueError("Stream de vídeo no encontrado en unión recodificada")
-
+    pipeline = state.video_pipeline
     video_filters: list[str] = []
 
     # Si opción de cortado de imagen
-    if pipeline.crop is not None:
-        parsed = parse_crop(pipeline.crop)
-        if parsed is None:
-            raise ValueError("Crop no encontrado en unión recodificada")
-        left, right, top, bottom = parsed
-
-        crop_w = media.video.width - left - right
-        crop_h = media.video.height - top - bottom
-        video_filters.append(f"crop={crop_w}:{crop_h}:{left}:{top}")
+    if pipeline.crop:
+        video_filters.append(pipeline.crop)
 
     # Si opción giro
-    if pipeline.gyrate is not None:
-        match pipeline.gyrate:
-            case 90:
-                video_filters.append("transpose=1")
-            case 180:
-                video_filters.append("vflip,hflip")
-            case 270:
-                video_filters.append("transpose=2")
+    if pipeline.gyrate:
+        video_filters.append(pipeline.gyrate)
 
     # Escalado — solo si es necesario
     if target["needs_scale"]:
-        if pipeline.scale is not None:
-            video_filters.append(f"scale=-2:{pipeline.scale}")
+        if pipeline.scale:
+            video_filters.append(pipeline.scale)
         else:
             video_filters.append(f"scale=-2:{target['height']}")
 
@@ -188,14 +143,40 @@ def _build_concat_graph(n: int, has_audio: bool = True) -> str:
     return f"{labels}concat=n={n}:v=1:a=0[v]"
 
 
-def _build_ffmpeg_command(
-    input_args: list[str],
-    filters: str,
-    config: Config,
-    output: str,
-    has_audio: bool = True,
-) -> list[str]:
-    """Ensambla el comando ffmpeg completo."""
+def _determine_targets() -> dict:
+    """Determina los targets y qué normalización es realmente necesaria."""
+    conflict = state.config.conflictive_join
+    return {
+        "height": _target_height(),
+        "fps": _target_fps(),
+        "pix_fmt": conflict.pix_fmt,
+        "channel_layout": _channel_layout(),
+        "needs_scale": _needs_scale(),
+        "needs_fps": _needs_fps(),
+        "needs_pix_fmt": _needs_pix_fmt(),
+        "all_audio_compatible": _all_audio_compatible(),
+        "has_audio": any(m.audio is not None for m in state.media),
+    }
+
+
+def concat_filter_cmd(output: str):
+    """Construye el comando ffmpeg para unión recodificada con filter_complex."""
+    target = _determine_targets()
+
+    input_args = _build_input_args()
+
+    media_filters: list[str] = []
+    for i, media in enumerate(state.media):
+        media_filters.append(_build_video_chain(i, target))
+        if target["has_audio"]:
+            media_filters.append(_build_audio_chain(media, i, target))
+
+    filters = (
+        ";".join(media_filters)
+        + ";"
+        + _build_concat_graph(len(state.media), target["has_audio"])
+    )
+
     cmd = [
         "ffmpeg",
         "-y",
@@ -208,41 +189,16 @@ def _build_ffmpeg_command(
         "-map",
         "[v]",
         "-c:v",
-        config.encode.video_codec,
+        state.config.encode.video_codec,
         "-preset",
-        config.encode.video_preset,
+        state.config.encode.video_preset,
         "-crf",
-        str(config.encode.video_crf),
+        str(state.config.encode.video_crf),
         "-threads",
         "1",
     ]
-    if has_audio:
-        cmd.extend(["-map", "[a]", "-c:a", config.encode.audio_codec])
+    if target["has_audio"]:
+        cmd.extend(["-map", "[a]", "-c:a", state.config.encode.audio_codec])
     cmd.append(output)
-    return cmd
-
-
-def concat_filter_cmd(media_infos: list[Media], pipeline: VideoPipeline, output: str):
-    """Construye el comando ffmpeg para unión recodificada con filter_complex."""
-    config = Config.load()
-    target = _determine_targets(media_infos, config, pipeline)
-
-    input_args = _build_input_args(media_infos)
-
-    media_filters: list[str] = []
-    for i, media in enumerate(media_infos):
-        media_filters.append(_build_video_chain(media, i, target, pipeline))
-        if target["has_audio"]:
-            media_filters.append(_build_audio_chain(media, i, target))
-
-    filters = (
-        ";".join(media_filters)
-        + ";"
-        + _build_concat_graph(len(media_infos), target["has_audio"])
-    )
-
-    cmd = _build_ffmpeg_command(
-        input_args, filters, config, output, has_audio=target["has_audio"]
-    )
 
     return cmd

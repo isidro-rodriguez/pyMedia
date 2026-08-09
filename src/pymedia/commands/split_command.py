@@ -1,76 +1,46 @@
 import subprocess
 import tempfile
-from datetime import timedelta
-from json import JSONDecodeError
 from pathlib import Path
 
-from pymedia.commands.encode_command import transcode
+from pymedia.commands.encode_command import encode_command
 from pymedia.ffmpeg.split_cmd import split_cmd
 from pymedia.logger import get_logger
-from pymedia.models.errors import InvalidOptionError
-from pymedia.models.media import Media
-from pymedia.models.video_pipeline import VideoPipeline
-from pymedia.utils import parse_trim_points
+from pymedia.models.arguments import Arguments
+from pymedia.models.errors import CommandExecutionError, CommandGenerationError
+from pymedia.models.state import state
+from pymedia.services.commands_service import initialize_command
 
 logger = get_logger("split")
 
 
-def _split(path: Path, trim_points: list[timedelta], output_name: str | None) -> None:
+def _split(input_single: Path, output: Path) -> None:
     """Divide un vídeo en los puntos de corte indicados."""
-    cmd = split_cmd(path, trim_points, output_name)
+    cmd = split_cmd(input_single, output)
+
     if cmd is None:
-        logger.error(f"Parámetros inválidos para división de vídeo: {path}")
-        exit(1)
+        raise CommandGenerationError("split")
+
     try:
         subprocess.run(cmd, capture_output=True, text=True, check=True)
-        logger.info(f"Vídeo dividido correctamente: {path}")
+        logger.info(f"División correcta del vídeo: {output}")
     except subprocess.CalledProcessError as e:
-        logger.error(f"Error al dividir {path}: {e.stderr}")
-        exit(1)
+        raise CommandExecutionError("split", e.stderr) from e
 
 
-# TODO: opción de corte recodificado en el punto de corte exacto.
-def split_command(
-    path: Path,
-    trim_points: str,
-    encode_pipeline: VideoPipeline,
-    output_name: str | None = None,
-) -> None:
-
-    try:
-        media: Media = Media.load(path)
-    except (ValueError, subprocess.CalledProcessError, JSONDecodeError, OSError):
-        logger.error(f"Probe indica formato inválido: {path}")
-        exit(1)
-
-    if media.duration is None:
-        logger.error(f"Probe no devolvió duración: {path}")
-        exit(1)
-
-    try:
-        parsed_trim_points = parse_trim_points(trim_points)
-    except InvalidOptionError as e:
-        logger.error(f"Los puntos de corte no pasan la verificación: {path} ({e})")
-        exit(1)
-
-    if parsed_trim_points is None:
-        logger.error(f"Los puntos de corte no pasan la verificación: {path}")
-        exit(1)
-
-    md = media.duration.total_seconds()
-    for p in parsed_trim_points:
-        pc = p.total_seconds()
-        if pc > md:
-            logger.error(
-                f"Punto de corte inválido: {pc} mayor a la duración del vídeo {md}"
-            )
-            exit(1)
-
-    if encode_pipeline.has_operations:
-        with tempfile.TemporaryDirectory() as tmp_dir:
-            tmp_path = Path(tmp_dir) / (path.stem + "_tmp" + path.suffix)
-            if not transcode(media, encode_pipeline, output_name=str(tmp_path)):
-                exit(1)
-            _split(tmp_path, parsed_trim_points, output_name)
+def split_command(args: Arguments) -> None:
+    initialize_command(args)
+    pipeline = state.video_pipeline
+    if state.output:
+        output = state.output
     else:
-        _split(path, parsed_trim_points, output_name)
+        output = state.inputs[0]
+
+    if pipeline.requires_encode:
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            tmp_path = Path(tmp_dir) / (
+                state.inputs[0].stem + "_tmp" + state.inputs[0].suffix
+            )
+            encode_command(args, tmp_path)
+            _split(tmp_path, output)
+
+    _split(state.inputs[0], output)

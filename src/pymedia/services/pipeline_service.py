@@ -35,9 +35,7 @@ def process_crop() -> list[str]:
             or media.video.width is None
             or media.video.height is None
         ):
-            raise MissingMediaPropertyError(
-                "No se pudo obtener la resolución de vídeo para validar el corte."
-            )
+            raise MissingMediaPropertyError("Crop")
 
         if (left + right) >= media.video.width:
             raise InvalidOptionError(
@@ -111,9 +109,7 @@ def process_scale() -> list[int | None]:
 def process_time(time_str: str) -> float:
     """Valida y procesa una marca de tiempo."""
     if not state.media:
-        raise MissingMediaError(
-            "No se pudo obtener la duración del vídeo para validar la marca de tiempo."
-        )
+        raise MissingMediaError()
 
     time_delta = convert_to_timedelta(time_str)
 
@@ -143,9 +139,7 @@ def process_time(time_str: str) -> float:
 def process_trim_points() -> str:
     """Valida y procesa los puntos de corte."""
     if not state.media:
-        raise MissingMediaError(
-            "No se pudo obtener la duración del vídeo para validar los puntos de corte."  # noqa: E501
-        )
+        raise MissingMediaError(state.inputs[0])
 
     times_timedelta: list[timedelta] = []
 
@@ -155,6 +149,8 @@ def process_trim_points() -> str:
             raise InvalidOptionError(
                 "Formato de marca de tiempo no válida. Esperado hh:mm:ss"
             )
+        if t > state.media[0].duration:
+            raise InvalidOptionError()
         times_timedelta.append(t)
 
     return ",".join(str(t.total_seconds()) for t in times_timedelta)
