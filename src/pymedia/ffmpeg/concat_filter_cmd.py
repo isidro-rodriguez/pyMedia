@@ -1,6 +1,6 @@
 from fractions import Fraction
 
-from pymedia.models.errors import MissingMediaPropertyError, ValueComparisonError
+from pymedia.models.errors import ValueComparisonError
 from pymedia.models.media import Media
 from pymedia.models.state import state
 
@@ -43,9 +43,6 @@ def _needs_scale() -> bool:
     """True si hay que escalar: alturas distintas o escala explícita del usuario."""
     heights = {m.video.height for m in state.media if m.video is not None}
 
-    if heights is None:
-        raise MissingMediaPropertyError("Height")
-
     all_same = len(heights) <= 1
 
     if all_same:
@@ -53,7 +50,7 @@ def _needs_scale() -> bool:
         height = next(iter(heights))
         return (
             state.video_pipeline.scale is not None
-            and height > state.video_pipeline.scale
+            and height > state.video_pipeline.scale[0]
         )
 
     # Alturas diferentes → necesitan escalado para normalizar

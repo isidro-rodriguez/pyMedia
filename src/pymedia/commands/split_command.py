@@ -42,5 +42,5 @@ def split_command(args: Arguments) -> None:
             )
             encode_command(args, tmp_path)
             _split(tmp_path, output)
-
-    _split(state.inputs[0], output)
+    else:
+        _split(state.inputs[0], output)

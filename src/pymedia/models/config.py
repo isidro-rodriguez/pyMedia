@@ -61,11 +61,6 @@ class Config:
         )
 
     @classmethod
-    def save(cls) -> None:
-        logger.info("Guardando config.toml")
-        # TODO: implementar posible manipulación de config.toml desde app
-
-    @classmethod
     def _create(cls, path: Path) -> None:
         """Copia el config por defecto desde los recursos a la ruta de usuario."""
         logger.info("Guardando config.toml")

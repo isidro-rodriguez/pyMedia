@@ -53,8 +53,8 @@ def concat_command(args: Arguments):
     if any(has_audio) and not all(has_audio):
         raise IncompatibleFilesError()
 
-    # Si son compatibles y se realiza transcodificación, se usa concat demuxer
-    if _compatible_videos() and not state.video_pipeline.requires_encode:
+    # Si son compatibles y no se realiza transcodificación, se usa concat demux
+    if _compatible_videos() and state.video_pipeline.requires_encode is False:
         with tempfile.TemporaryDirectory() as tmp_dir:
             list_txt = Path(tmp_dir) / "list.txt"
             with open(list_txt, "w", encoding="utf-8") as f:
@@ -64,7 +64,7 @@ def concat_command(args: Arguments):
             cmd = concat_demux_cmd(list_txt)
 
             if cmd is None:
-                raise CommandGenerationError("encode")
+                raise CommandGenerationError("concat")
 
             _run_ffmpeg(cmd)
 
