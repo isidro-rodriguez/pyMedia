@@ -64,6 +64,23 @@ def _needs_scale() -> bool:
     return True
 
 
+def _scaled_dims() -> list[tuple[int, int]]:
+    """Calcula las dimensiones post-escalado de cada vídeo."""
+    pipeline = state.video_pipeline
+    dims: list[tuple[int, int]] = []
+
+    for i, media in enumerate(state.media):
+        if pipeline.scale and pipeline.scale[i]:
+            scale_value = state.arguments.scale.value
+            height = scale_value
+            width = round(media.video.width * height / media.video.height / 2) * 2
+        else:
+            width, height = media.video.width, media.video.height
+        dims.append((width, height))
+
+    return dims
+
+
 def _needs_fps() -> bool:
     """True si los vídeos tienen fps distintos (o desconocido)."""
     return len({m.video.fps for m in state.media if m.video is not None}) > 1
@@ -102,7 +119,8 @@ def _build_video_chain(index: int, target: dict) -> str:
         if target["needs_normalize"]:
             video_filters.append(f"scale={target['width']}:{target['height']}")
         elif pipeline.scale and pipeline.scale[index]:
-            video_filters.append(pipeline.scale[index])
+            w, h = target["scaled_dims"][index]
+            video_filters.append(f"scale={w}:{h}")
         else:
             video_filters.append(f"scale=-2:{target['height']}")
 
@@ -166,13 +184,11 @@ def _recalculate_crop(target: dict) -> None:
 
     dimensions: list[tuple[int, int]] = []
 
-    for media in state.media:
+    for i in range(len(state.media)):
         if target["needs_normalize"]:
             width, height = target["width"], target["height"]
         else:
-            scale_factor = target["height"] / media.video.height
-            width = round(media.video.width * scale_factor / 2) * 2
-            height = target["height"]
+            width, height = target["scaled_dims"][i]
         dimensions.append((width, height))
 
     state.video_pipeline.crop = process_crop(
@@ -184,7 +200,15 @@ def concat_filter_cmd():
     """Construye el comando ffmpeg para unión recodificada con filter_complex."""
     inputs: list[str] = []
     media_filters: list[str] = []
-    target_height = _target_height()
+    scaled_dims = _scaled_dims()
+    scale_value = state.arguments.scale.value if state.arguments.scale else None
+    heights = [m.video.height for m in state.media if m.video is not None]
+
+    if scale_value is not None and scale_value < min(heights):
+        target_height = scale_value
+    else:
+        target_height = _target_height()
+
     first_media = state.media[0]
     target_width = (
         round(first_media.video.width * target_height / first_media.video.height / 2)
@@ -193,13 +217,12 @@ def concat_filter_cmd():
     target = {
         "height": target_height,
         "width": target_width,
+        "scaled_dims": scaled_dims,
         "fps": _target_fps(),
         "pix_fmt": state.config.conflictive_join.pix_fmt,
         "channel_layout": _channel_layout(),
         "needs_scale": _needs_scale(),
-        "needs_normalize": (
-            len({m.video.height for m in state.media if m.video is not None}) > 1
-        ),
+        "needs_normalize": len(set(scaled_dims)) > 1,
         "needs_fps": _needs_fps(),
         "needs_pix_fmt": _needs_pix_fmt(),
         "all_audio_compatible": _all_audio_compatible(),

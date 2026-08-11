@@ -4,19 +4,19 @@
   "commands": [
     {
       "name": "CONCAT DEMUX MISMO VIDEO",
-      "command": "uv run pymedia concat ./VIDs/bunny_1080p_av1_no_sound.mp4 ./VIDs/bunny_1080p_av1_no_sound.mp4 -o concat_simple_mismo_video.mp4"
+      "command": "uv run pymedia concat ./VIDs/bunny_1080p_av1_no_sound.mp4 ./VIDs/bunny_1080p_av1_no_sound.mp4 -o concat_demux_mismo_video.mp4"
     },
     {
       "name": "CONCAT DEMUX EN DISTINTOS VIDEOS COMPATIBLES",
-      "command": "uv run pymedia concat ./VIDs/trees_720p_h264_sound.mp4 ./VIDs/lake_720p_h264_sound.mp4 -o concat_simple_mismo_video.mp4"
+      "command": "uv run pymedia concat ./VIDs/trees_720p_h264_sound.mp4 ./VIDs/lake_720p_h264_sound.mp4 -o concat_demux_videos_compatibles.mp4"
     },
     {
       "name": "CONCAT TRANSCODIFICADO",
-      "command": "uv run pymedia concat ./VIDs/trees_720p_h264_sound.mp4 ./VIDs/lake_720p_h264_sound.mp4 -g 90 -c 0,0,100,100 -s 480 -o concat_transcodificado.mp4"
+      "command": "uv run pymedia concat ./VIDs/trees_720p_h264_sound.mp4 ./VIDs/lake_720p_h264_sound.mp4 -g 90 -c 0,0,100,100 -s 480 -o concat_filter_transcodificado.mp4"
     },
     {
       "name": "CONCAT INCOMPATIBLE",
-      "command": "uv run pymedia concat ./VIDs/bunny_1080p_av1_no_sound.mp4 ./VIDs/jellyfish_360p_h264_no_sound.mp4 -o concat_incompatible.mp4"
+      "command": "uv run pymedia concat ./VIDs/bunny_1080p_av1_no_sound.mp4 ./VIDs/jellyfish_360p_h264_no_sound.mp4 -o concat_filter_incompatibles.mp4"
     },
     {
       "name": "ENCODE SIMPLE",
@@ -36,11 +36,11 @@
     },
     {
       "name": "GIF",
-      "command": "uv run pymedia gif ./VIDs/trees_720p_h264_sound.mp4 -sp 5 -ep 10 -o gif_simple.mp4"
+      "command": "uv run pymedia gif ./VIDs/jellyfish_360p_h264_no_sound.mp4 -o gif_simple.gif"
     },
     {
       "name": "GIF TRANSCODIFICADO",
-      "command": "uv run pymedia gif ./VIDs/world_1080p_h264_sound.mp4 -sp 5 -ep 10 -s 240 -c 200,200,0,0 -o gif_transcodificado.mp4"
+      "command": "uv run pymedia gif ./VIDs/world_1080p_h264_sound.mp4 -sp 5 -ep 10 -s 240 -c 200,200,0,0 -o gif_transcodificado.gif"
     },
     {
       "name": "ARCHIVOS GENERADOS",
@@ -67,4 +67,3 @@ foreach ($item in $header.commands) {
     Write-Host "Ejecutando: $($item.name)" -ForegroundColor yellow
     Invoke-Expression $item.command
 }
-
