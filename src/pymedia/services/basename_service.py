@@ -63,11 +63,16 @@ def process_output(
     target_codec: str | None = None,
 ) -> Path:
     """Comprueba el fichero de salida tenga un nombre y extensión válido."""
+    # Crear directorios intermedios si no existen
+    output.parent.mkdir(parents=True, exist_ok=True)
+
+    # Comprobación del nombre de fichero
     if output.stem is None:
         raise InvalidFilenameError(None)
     if not _is_valid_filename(output.stem):
         raise InvalidFilenameError(output.stem)
 
+    # Comprobación de la extensión
     if output.suffix is None:
         raise InvalidFileExtensionError("", VIDEO_EXTENSIONS)
 
