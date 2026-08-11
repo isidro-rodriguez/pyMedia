@@ -60,20 +60,17 @@ class InvalidFileExtensionError(ValueError):
     """Excepción levantada cuando una extensión no soporta el contenido multimedia."""
 
     def __init__(
-        self, extension: str | None, supported_extensions: list[str] | str | None
+        self, extension: str | None, supported_extensions: list[str] | str
     ) -> None:
         if extension is None:
             message = "Se requiere especificar una extensión."
         else:
             self.extension = extension
             self.supported_extensions = supported_extensions
-            if supported_extensions is None:
-                message = f"Extensión '{extension}' no válida."
-            else:
-                message = (
-                    f"Extensión '{extension}' no válida. "
-                    f"Tiene que ser: {', '.join(sorted(supported_extensions))}"
-                )
+            message = (
+                f"Extensión '{extension}' no válida. "
+                f"Tiene que ser: {', '.join(sorted(supported_extensions))}"
+            )
         super().__init__(message)
 
 

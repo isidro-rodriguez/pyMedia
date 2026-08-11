@@ -33,7 +33,7 @@ def split_command(args: Arguments) -> None:
     if state.output:
         output = state.output
     else:
-        output = state.inputs[0]
+        output = Path(state.inputs[0].name)
 
     if pipeline.requires_encode:
         with tempfile.TemporaryDirectory() as tmp_dir:

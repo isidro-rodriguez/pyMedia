@@ -14,8 +14,17 @@ from pymedia.utils import convert_to_timedelta, parse_crop
 logger = get_logger("pipeline")
 
 
-def process_crop(crop: str | None, media: list[Media]) -> list[str]:
-    """Valida y procesa la opción de corte."""
+def process_crop(
+    crop: str | None,
+    media: list[Media],
+    dimensions: list[tuple[int, int]] | None = None,
+) -> list[str]:
+    """Valida y procesa la opción de corte.
+
+    Si `dimensions` se proporciona, se usan esas dimensiones (ancho, alto)
+    en lugar de las del vídeo original. Útil para concat, donde los vídeos
+    se escalan a una resolución objetivo antes de recortar.
+    """
     crop_list: list[str] = []
 
     parsed = parse_crop(crop)
@@ -27,7 +36,10 @@ def process_crop(crop: str | None, media: list[Media]) -> list[str]:
 
     left, right, top, bottom = parsed
 
-    for media_item in media:
+    if all([left == 0, right == 0, top == 0, bottom == 0]):
+        raise InvalidOptionError("Crop inválido. Todos los valores son 0.")
+
+    for i, media_item in enumerate(media):
         if (
             media_item.video is None
             or media_item.video.width is None
@@ -35,20 +47,23 @@ def process_crop(crop: str | None, media: list[Media]) -> list[str]:
         ):
             raise MissingMediaPropertyError("Crop")
 
-        if (left + right) >= media_item.video.width:
+        if dimensions is not None:
+            width, height = dimensions[i]
+        else:
+            width, height = media_item.video.width, media_item.video.height
+
+        if (left + right) >= width:
             raise InvalidOptionError(
-                f"Crop inválido: {left + right} >= ancho original "
-                f"{media_item.video.width}."
+                f"Crop inválido: {left + right} >= ancho original {width}."
             )
 
-        if (top + bottom) >= media_item.video.height:
+        if (top + bottom) >= height:
             raise InvalidOptionError(
-                f"Crop inválido: {top + bottom} >= alto original "
-                f"{media_item.video.height}."
+                f"Crop inválido: {top + bottom} >= alto original {height}."
             )
 
-        crop_w = media_item.video.width - left - right
-        crop_h = media_item.video.height - top - bottom
+        crop_w = width - left - right
+        crop_h = height - top - bottom
         crop_list.append(f"crop={crop_w}:{crop_h}:{left}:{top}")
 
     return crop_list
@@ -73,9 +88,9 @@ def process_scale(
     scale: ScaleMode | ScaleGifMode,
     media: list[Media],
     reject_increase: bool,
-) -> list[int | None]:
+) -> list[str | None]:
     """Valida y procesa la opción de escalado."""
-    scale_list: list[int | None] = []
+    scale_list: list[str | None] = []
 
     for media_item in media:
         if media_item.video is None or media_item.video.height is None:
@@ -91,15 +106,18 @@ def process_scale(
             scale_list.append(None)
             continue
 
-        if reject_increase and scale > media_item.video.height:
+        if reject_increase and scale.value > media_item.video.height:
             logger.warning(
-                f"Escalado rechazado: {scale} > altura original "
-                f"{media_item.video.height}."
+                f"Escalado a {scale.value}p no aplicado: resolución mayor "
+                f"que la original ({media_item.video.height}p)."
             )
             scale_list.append(None)
             continue
 
-        scale_list.append(scale)
+        if reject_increase:
+            scale_list.append(f"scale=-2:min({scale.value}\\,ih)")
+        else:
+            scale_list.append(f"scale=-2:{scale.value}")
 
     return scale_list
 

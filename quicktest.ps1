@@ -32,7 +32,7 @@
     },
     {
       "name": "DIVISION TRANCODIFICADA",
-      "command": "uv run pymedia split ./VIDs/sintel_1080_h264_no_sound.mp4 -t 3 -s 720 -g 180 -o division_transcodificada.mp4"
+      "command": "uv run pymedia split ./VIDs/sintel_818p_h264_no_sound.mp4 -t 3 -s 720 -g 180 -o division_transcodificada.mp4"
     },
     {
       "name": "GIF",

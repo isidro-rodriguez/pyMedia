@@ -2,6 +2,7 @@ import re
 from pathlib import Path
 
 from pymedia.data import CONTAINERS_BY_CODEC, GIF_EXTENSION, VIDEO_EXTENSIONS
+from pymedia.models.arguments import CommandName
 from pymedia.models.errors import (
     InvalidFileExtensionError,
     InvalidFilenameError,
@@ -58,8 +59,8 @@ def process_inputs(inputs: list[Path]) -> list[Path]:
 
 def process_output(
     output: Path,
+    command: str,
     target_codec: str | None = None,
-    is_gif: bool = False,
 ) -> Path:
     """Comprueba el fichero de salida tenga un nombre y extensión válido."""
     if output.stem is None:
@@ -70,17 +71,18 @@ def process_output(
     if output.suffix is None:
         raise InvalidFileExtensionError(None, None)
 
-    if is_gif:
+    if command is CommandName.GIF:
         if output.suffix != GIF_EXTENSION:
             raise InvalidFileExtensionError(output.suffix, GIF_EXTENSION)
-    elif output.suffix not in VIDEO_EXTENSIONS:
-        raise InvalidFileExtensionError(output.suffix, VIDEO_EXTENSIONS)
+    else:
+        if output.suffix not in VIDEO_EXTENSIONS:
+            raise InvalidFileExtensionError(output.suffix, VIDEO_EXTENSIONS)
 
-    if target_codec is None:
-        raise MissingMediaPropertyError("Video codec")
+        if target_codec is None:
+            raise MissingMediaPropertyError("Video codec")
 
-    valid_containers = CONTAINERS_BY_CODEC.get(target_codec, set())
-    if valid_containers and output.suffix not in valid_containers:
-        raise InvalidFileExtensionError(output.suffix, valid_containers)
+        valid_containers = CONTAINERS_BY_CODEC.get(target_codec, set())
+        if valid_containers and output.suffix not in valid_containers:
+            raise InvalidFileExtensionError(output.suffix, valid_containers)
 
     return output

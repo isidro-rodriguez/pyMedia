@@ -13,6 +13,7 @@ from pymedia.models.errors import (
     IncompatibleFilesError,
 )
 from pymedia.models.state import state
+from pymedia.services.commands_service import initialize_command
 
 logger = get_logger("concat")
 
@@ -43,6 +44,8 @@ def _run_ffmpeg(cmd: list[str]) -> None:
 
 
 def concat_command(args: Arguments):
+    initialize_command(args)
+
     if not state.output:
         state.output = Path(state.inputs[0].stem + "_concat" + state.inputs[0].suffix)
 

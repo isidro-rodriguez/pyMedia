@@ -1,14 +1,17 @@
-from fractions import Fraction
-
+from pymedia.logger import get_logger
 from pymedia.models.errors import ValueComparisonError
 from pymedia.models.media import Media
 from pymedia.models.state import state
+from pymedia.services.pipeline_service import process_crop
+from pymedia.utils import parse_crop
+
+logger = get_logger("concat")
 
 
 def _target_fps() -> str:
     """Calcula el fps objetivo según el modo min/max del config."""
+    fps_list: list[str] = []
 
-    fps_list: list[Fraction] = state.media.fps
     for m in state.media:
         fps = m.video.fps
         if fps not in fps_list:
@@ -30,11 +33,15 @@ def _channel_layout() -> str:
 
 def _target_height() -> int:
     """Calcula la altura objetivo según el modo min/max del config."""
+    media_heights: list[int] = []
+    for media in state.media:
+        media_heights.append(media.video.height)
+
     match state.config.conflictive_join.resize_to:
         case "min_height":
-            return min(x for x in state.media.height)
+            return min(media_heights)
         case "max_height":
-            return max(x for x in state.media.height)
+            return max(media_heights)
         case _:
             raise ValueComparisonError("concat", "Height")
 
@@ -50,7 +57,7 @@ def _needs_scale() -> bool:
         height = next(iter(heights))
         return (
             state.video_pipeline.scale is not None
-            and height > state.video_pipeline.scale[0]
+            and height > state.arguments.scale.value
         )
 
     # Alturas diferentes → necesitan escalado para normalizar
@@ -81,9 +88,6 @@ def _all_audio_compatible() -> bool:
 def _build_input_args() -> list[str]:
     """Construye los argumentos -i de ffmpeg para todas las entradas."""
     args: list[str] = []
-    for i in range(len(state.media)):
-        args.append("-i")
-        args.append(str(state.inputs[i]))
     return args
 
 
@@ -91,25 +95,27 @@ def _build_video_chain(index: int, target: dict) -> str:
     """Construye la cadena de filtros de vídeo para una entrada."""
     pipeline = state.video_pipeline
     video_filters: list[str] = []
+    video_filter_str = ""
+
+    # Escalado — solo si es necesario
+    if target["needs_scale"]:
+        if target["needs_normalize"]:
+            video_filters.append(f"scale={target['width']}:{target['height']}")
+        elif pipeline.scale and pipeline.scale[index]:
+            video_filters.append(pipeline.scale[index])
+        else:
+            video_filters.append(f"scale=-2:{target['height']}")
 
     # Si opción de cortado de imagen
-    if pipeline.crop:
-        video_filters.append(pipeline.crop)
+    if pipeline.crop and pipeline.crop[index]:
+        video_filters.append(pipeline.crop[index])
 
     # Si opción giro
     if pipeline.gyrate:
         video_filters.append(pipeline.gyrate)
 
-    # Escalado — solo si es necesario
-    if target["needs_scale"]:
-        if pipeline.scale:
-            video_filters.append(pipeline.scale)
-        else:
-            video_filters.append(f"scale=-2:{target['height']}")
-
-    video_filter_str = ",".join(video_filters)
-    if video_filter_str:
-        video_filter_str += ","
+    if video_filters:
+        video_filter_str += ",".join(video_filters) + ","
 
     # Normalización común — se omiten filtros no necesarios
     normalization = ["setsar=1"]
@@ -118,8 +124,9 @@ def _build_video_chain(index: int, target: dict) -> str:
     if target["needs_pix_fmt"]:
         normalization.append(f"format={target['pix_fmt']}")
     normalization.append("setpts=PTS-STARTPTS")
+    normalization_str = ",".join(normalization)
 
-    return f"[{index}:v]{video_filter_str}{','.join(normalization)}[v{index}]"
+    return f"[{index}:v]{video_filter_str}{normalization_str}[v{index}]"
 
 
 def _build_audio_chain(media: Media, index: int, target: dict) -> str:
@@ -149,29 +156,62 @@ def _build_concat_graph(n: int, has_audio: bool = True) -> str:
     return f"{labels}concat=n={n}:v=1:a=0[v]"
 
 
-def _determine_targets() -> dict:
-    """Determina los targets y qué normalización es realmente necesaria."""
-    conflict = state.config.conflictive_join
-    return {
-        "height": _target_height(),
+def _recalculate_crop(target: dict) -> None:
+    """Recalcula el crop sobre la resolución normalizada para concat."""
+    if state.arguments is None or state.arguments.crop is None:
+        return
+
+    if parse_crop(state.arguments.crop) is None:
+        return
+
+    dimensions: list[tuple[int, int]] = []
+
+    for media in state.media:
+        if target["needs_normalize"]:
+            width, height = target["width"], target["height"]
+        else:
+            scale_factor = target["height"] / media.video.height
+            width = round(media.video.width * scale_factor / 2) * 2
+            height = target["height"]
+        dimensions.append((width, height))
+
+    state.video_pipeline.crop = process_crop(
+        state.arguments.crop, state.media, dimensions
+    )
+
+
+def concat_filter_cmd():
+    """Construye el comando ffmpeg para unión recodificada con filter_complex."""
+    inputs: list[str] = []
+    media_filters: list[str] = []
+    target_height = _target_height()
+    first_media = state.media[0]
+    target_width = (
+        round(first_media.video.width * target_height / first_media.video.height / 2)
+        * 2
+    )
+    target = {
+        "height": target_height,
+        "width": target_width,
         "fps": _target_fps(),
-        "pix_fmt": conflict.pix_fmt,
+        "pix_fmt": state.config.conflictive_join.pix_fmt,
         "channel_layout": _channel_layout(),
         "needs_scale": _needs_scale(),
+        "needs_normalize": (
+            len({m.video.height for m in state.media if m.video is not None}) > 1
+        ),
         "needs_fps": _needs_fps(),
         "needs_pix_fmt": _needs_pix_fmt(),
         "all_audio_compatible": _all_audio_compatible(),
         "has_audio": any(m.audio is not None for m in state.media),
     }
 
+    _recalculate_crop(target)
 
-def concat_filter_cmd():
-    """Construye el comando ffmpeg para unión recodificada con filter_complex."""
-    target = _determine_targets()
+    for i in range(len(state.media)):
+        inputs.append("-i")
+        inputs.append(str(state.inputs[i]))
 
-    input_args = _build_input_args()
-
-    media_filters: list[str] = []
     for i, media in enumerate(state.media):
         media_filters.append(_build_video_chain(i, target))
         if target["has_audio"]:
@@ -189,7 +229,7 @@ def concat_filter_cmd():
         "-nostdin",
         "-loglevel",
         "error",
-        *input_args,
+        *inputs,
         "-filter_complex",
         filters,
         "-map",

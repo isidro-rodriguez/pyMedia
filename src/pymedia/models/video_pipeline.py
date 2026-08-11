@@ -10,7 +10,7 @@ class VideoPipeline:
     crop: list[str | None] | None = None
     gyrate: str | None = None
     remux: bool = False
-    scale: list[int | None] | None = None
+    scale: list[str | None] | None = None
     trim_points: str | None = None
 
     @classmethod
@@ -21,12 +21,9 @@ class VideoPipeline:
     @property
     def requires_encode(self) -> bool:
         """True si hay al menos una operación que requiera transcodificación."""
-        return any(
-            field is not None
-            for field in (
-                self.crop,
-                self.gyrate,
-                self.remux,
-                self.scale,
-            )
+        return (
+            self.crop is not None
+            or self.gyrate is not None
+            or self.remux is True
+            or self.scale is not None
         )

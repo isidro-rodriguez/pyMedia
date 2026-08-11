@@ -44,8 +44,8 @@ class State:
 
         self.output = process_output(
             output=output,
+            command=self.arguments.command,
             target_codec=target_codec,
-            is_gif=self.gif_pipeline is not None,
         )
 
     def set_media(self, paths: list[Path]) -> None:

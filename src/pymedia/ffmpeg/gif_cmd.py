@@ -27,10 +27,10 @@ def gif_cmd(output: Path) -> list[str]:
     cmd = ["ffmpeg"]
 
     if pipeline.start_point:
-        cmd.extend(str(pipeline.start_point))
+        cmd.extend(["-ss", str(pipeline.start_point)])
 
     if pipeline.end_point:
-        cmd.extend(str(pipeline.end_point))
+        cmd.extend(["-t", str(pipeline.end_point)])
 
     cmd.extend(["-i", str(state.inputs[0]), "-filter_complex", filters, str(output)])
 

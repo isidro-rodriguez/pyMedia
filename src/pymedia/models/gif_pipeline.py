@@ -11,7 +11,7 @@ class GifPipeline:
     end_point: float | None = None
     fps: int | None = None
     gyrate: str | None = None
-    scale: list[int | None] | None = None
+    scale: list[str | None] | None = None
     start_point: float | None = None
 
     @classmethod
