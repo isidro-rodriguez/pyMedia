@@ -69,10 +69,10 @@ def process_output(
         raise InvalidFilenameError(output.stem)
 
     if output.suffix is None:
-        raise InvalidFileExtensionError(None, None)
+        raise InvalidFileExtensionError("", VIDEO_EXTENSIONS)
 
     if command is CommandName.GIF:
-        if output.suffix != GIF_EXTENSION:
+        if output.suffix != GIF_EXTENSION[0]:
             raise InvalidFileExtensionError(output.suffix, GIF_EXTENSION)
     else:
         if output.suffix not in VIDEO_EXTENSIONS:
