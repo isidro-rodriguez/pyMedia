@@ -1,66 +1,63 @@
 ExecutionError = {
+    "cannot_create_directory": "Could not create directory: {path}",
     "command_execution": (
         "FFmpeg command '{command_name}' failed during execution. Error: {error}"
     ),
     "command_generation": "FFmpeg command '{command_name}' was not generated.",
     "ffmpeg_timeout": "FFmpeg operation exceeded the allowed timeout.",
-    "cannot_create_directory": "No se pudo crear el directorio: {path}",
-    "invalid_config": "Configuración inválida: {message}",
+    "invalid_config": "Invalid configuration: {message}",
 }
 
 PipelineError = {
-    "missing_media": "Media information of '{path}' could not be found.",
-    "missing_media_property": "'{property_name}' media information could not be found.",
     "incompatible_files": "Video files are incompatible with each other.",
+    "missing_media": "Media information for '{path}' could not be found.",
+    "missing_media_property": "Media property '{property_name}' could not be found.",
 }
 
 ValidationError = {
+    "crop_all_zero": "Invalid crop: all values are 0.",
+    "crop_exceeds_height": "Invalid crop: {total} >= original height {height}.",
+    "crop_exceeds_width": "Invalid crop: {total} >= original width {width}.",
+    "insufficient_inputs": "At least two videos must be provided for this command.",
+    "invalid_crop_format": "Invalid crop format. Expected: LEFT,RIGHT,TOP,BOTTOM",
     "invalid_directory_name": (
-        "'{directory}' contiene caracteres no válidos: '< > : \" / \\ | ? *'"
+        "'{directory}' contains invalid characters: '< > : \" / \\ | ? *'"
     ),
+    "invalid_extension": "Invalid extension '{extension}'. Must be one of: {supported}",
     "invalid_filename": (
-        "'{filename}' contiene caracteres no válidos: '< > : \" / \\ | ? *'"
+        "'{filename}' contains invalid characters: '< > : \" / \\ | ? *'"
     ),
-    "invalid_extension": (
-        "Extensión '{extension}' no válida. Tiene que ser: {supported}"
-    ),
-    "invalid_crop_format": "Formato de crop inválido. Esperado: IZQ,DER,ARRIBA,ABAJO",
-    "crop_all_zero": "Crop inválido: todos los valores son 0.",
-    "crop_exceeds_width": "Crop inválido: {total} >= ancho original {width}.",
-    "crop_exceeds_height": "Crop inválido: {total} >= alto original {height}.",
-    "invalid_gyrate": "Formato de giro no valido. Esperado 90 | 180 | 270.",
-    "invalid_time_format": "Formato de marca de tiempo no válida. Esperado hh:mm:ss.",
-    "negative_time": "Marca de tiempo negativa.",
-    "time_exceeds_duration": "Marca de tiempo {time} > duración vídeo {duration}.",
-    "invalid_trim_points": "Marcas de tiempo para corte inválidas.",
-    "missing_options": "Se requiere al menos una opción.",
-    "insufficient_inputs": (
-        "Se requieren al menos proporcionar dos vídeos para este comando."
-    ),
+    "invalid_gyrate": "Invalid rotation format. Expected: 90 | 180 | 270.",
+    "invalid_time_format": "Invalid timestamp format. Expected: hh:mm:ss.",
+    "invalid_trim_points": "Invalid trim points.",
+    "missing_options": "At least one option is required.",
+    "negative_time": "Timestamp cannot be negative.",
+    "time_exceeds_duration": "Timestamp {time} exceeds video duration {duration}.",
 }
 
 Warnings = {
-    "scale_rejected_equal": "Escalado rechazado: {scale} = altura original {height}.",
+    "missing_options": "At least one option is required.",
+    "scale_rejected_equal": "Scaling rejected: {scale} = original height {height}.",
     "scale_rejected_increase": (
-        "Escalado a {scale}p no aplicado: resolución mayor que la original ({height}p)."
+        "Scaling to {scale}p not applied: resolution is higher than the original "
+        "({height}p)."
     ),
-    "missing_options": "Se requiere al menos una opción.",
 }
 
 Info = {
-    "config_saved": "Guardando config.toml",
-    "concat_success": "Vídeos unidos correctamente: {output}",
-    "encode_success": "Transcodificación correcta: {output}",
-    "gif_success": "Generado correctamente GIF: {output}",
-    "split_success": "División correcta del vídeo: {output}",
+    "config_saved": "Saving config.toml",
+    "concat_success": "Videos concatenated successfully: {output}",
+    "encode_success": "Transcoding completed successfully: {output}",
+    "gif_success": "GIF generated successfully: {output}",
+    "split_success": "Video split successfully: {output}",
 }
 
 Debug = {
-    "ffprobe_data": "Datos ffprobe: {data}",
-    "ffmpeg_command": "Comando ffmpeg: {cmd}",
-    "pipeline_crop": "Crop calculado: {crop}",
-    "pipeline_scale": "Scale calculado: {scale}",
-    "pipeline_gyrate": "Gyrate aplicado: {gyrate}",
+    "ffmpeg_command": "FFmpeg command: {cmd}",
+    "ffprobe_data": "ffprobe data: {data}",
+    "pipeline_crop": "Calculated crop: {crop}",
+    "pipeline_gyrate": "Applied rotation: {gyrate}",
+    "pipeline_scale": "Calculated scale: {scale}",
+    "pipeline_time": "Processed time: {time}",
     "pipeline_trim": "Trim points: {trim}",
-    "pipeline_time": "Tiempo procesado: {time}",
 }
