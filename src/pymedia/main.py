@@ -7,13 +7,15 @@ from pymedia.cli_params import (
     EndPointOption,
     FpsOption,
     GyrateOption,
+    OutputOnConflictMode,
+    OutputOnConflictOption,
     OutputOption,
     PathArgument,
     PathsArgument,
     RemuxOption,
     ScaleGifMode,
     ScaleGifOption,
-    ScaleOption,
+    ScaleVideoOption,
     StartPointOption,
     TrimPointsOption,
 )
@@ -39,11 +41,12 @@ def concat(
     inputs: PathsArgument,
     crop: CropOption = None,
     gyrate: GyrateOption = None,
-    output: OutputOption = None,
     remux: RemuxOption = False,
-    scale: ScaleOption = None,
+    scale: ScaleVideoOption = None,
+    output: OutputOption = None,
+    output_on_conflict: OutputOnConflictOption = OutputOnConflictMode.FAIL,
 ) -> None:
-    """Une los vídeos en el orden aportado"""
+    """Concatenates videos in the specified order"""
     if len(inputs) < 2:
         raise InsufficientInputError()
 
@@ -53,9 +56,10 @@ def concat(
             inputs=inputs,
             crop=crop,
             gyrate=gyrate,
-            output=output,
             remux=remux,
             scale=scale,
+            output=output,
+            output_on_conflict=output_on_conflict,
         )
     )
 
@@ -64,13 +68,14 @@ def concat(
 def encode(
     inputs: PathsArgument,
     crop: CropOption = None,
-    scale: ScaleOption = None,
+    scale: ScaleVideoOption = None,
     gyrate: GyrateOption = None,
     remux: RemuxOption = False,
     output: OutputOption = None,
+    output_on_conflict: OutputOnConflictOption = OutputOnConflictMode.FAIL,
 ) -> None:
     """
-    Transcodifica con las opciones elegidas (requiere al menos una opción)
+    Transcode using the selected options (requires at least one option)
     """
     if crop is None and scale is None and gyrate is None and remux is False:
         log_warning(logger, "missing_options")
@@ -82,9 +87,10 @@ def encode(
             inputs=inputs,
             crop=crop,
             gyrate=gyrate,
-            output=output,
             remux=remux,
             scale=scale,
+            output=output,
+            output_on_conflict=output_on_conflict,
         )
     )
 
@@ -94,12 +100,13 @@ def split(
     input_single: PathArgument,
     trim_points: TrimPointsOption,
     crop: CropOption = None,
-    scale: ScaleOption = None,
+    scale: ScaleVideoOption = None,
     gyrate: GyrateOption = None,
     remux: RemuxOption = False,
     output: OutputOption = None,
+    output_on_conflict: OutputOnConflictOption = OutputOnConflictMode.FAIL,
 ) -> None:
-    """Separa un vídeo en los puntos de corte indicados"""
+    """Splits a video at the specified points"""
     split_command(
         Arguments(
             command=CommandName.SPLIT,
@@ -107,9 +114,10 @@ def split(
             trim_points=trim_points,
             crop=crop,
             gyrate=gyrate,
-            output=output,
             remux=remux,
             scale=scale,
+            output=output,
+            output_on_conflict=output_on_conflict,
         )
     )
 
@@ -124,8 +132,9 @@ def gif(
     gyrate: GyrateOption = None,
     output: OutputOption = None,
     scale: ScaleGifOption = ScaleGifMode.P480,
+    output_on_conflict: OutputOnConflictOption = OutputOnConflictMode.FAIL,
 ) -> None:
-    """Genera un gif animado del vídeo aportado"""
+    """Generates an animated GIF from the specified video"""
     gif_command(
         Arguments(
             command=CommandName.GIF,
@@ -134,9 +143,10 @@ def gif(
             fps=fps,
             crop=crop,
             gyrate=gyrate,
+            scale=scale,
             start_point=start_point,
             output=output,
-            scale=scale,
+            output_on_conflict=output_on_conflict,
         )
     )
 

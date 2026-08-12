@@ -20,14 +20,11 @@ _LEVELS = {
 
 _LEVEL_ABBREV = {
     "DEBUG": "[DEBUG]",
-    "INFO": "[INFO]",
-    "WARNING": "[WARN]",
+    "INFO": "[INFO] ",
+    "WARNING": "[WARN] ",
     "ERROR": "[ERROR]",
-    "CRITICAL": "[CRIT]",
+    "CRITICAL": "[CRIT] ",
 }
-
-_NAME_WIDTH = 20
-_LEVEL_WIDTH = 9
 
 
 class AbbrevFormatter(logging.Formatter):
@@ -61,7 +58,7 @@ class PymediaFilter(logging.Filter):
     """Solo deja pasar records del dominio 'pymedia'."""
 
     def filter(self, record: logging.LogRecord) -> bool:
-        return record.name.startswith("[pymedia")
+        return record.name.startswith("pymedia")
 
 
 def setup_logging() -> None:
@@ -93,9 +90,7 @@ def setup_logging() -> None:
         Path(platformdirs.user_config_dir("pymedia", appauthor=False, roaming=True))
         / "logging.log"
     )
-    file_fmt = AbbrevFormatter(
-        f"%(levelname)-{_LEVEL_WIDTH}s %(asctime)s  -  %(message)s"
-    )
+    file_fmt = AbbrevFormatter("%(asctime)s %(levelname)s %(message)s")
     file_handler = logging.FileHandler(log_path, encoding="utf-8")
     file_handler.setFormatter(file_fmt)
     file_handler.addFilter(PymediaFilter())

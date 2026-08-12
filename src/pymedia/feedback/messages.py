@@ -10,8 +10,11 @@ ExecutionError = {
 
 PipelineError = {
     "incompatible_files": "Video files are incompatible with each other.",
+    "missing_arguments": "Missing arguments retrieved from Typer.",
+    "missing_argument": "Missing argument: {argument}",
     "missing_media": "Media information for '{path}' could not be found.",
     "missing_media_property": "Media property '{property_name}' could not be found.",
+    "output_on_conflict": "Stopped process because output file already exist.",
 }
 
 ValidationError = {
@@ -37,6 +40,7 @@ ValidationError = {
 
 Warnings = {
     "missing_options": "At least one option is required.",
+    "output_exist": "File already exist: {file_path}",
     "scale_rejected_equal": "Scaling rejected: {scale} = original height {height}.",
     "scale_rejected_increase": (
         "Scaling to {scale}p not applied: resolution is higher than the original "

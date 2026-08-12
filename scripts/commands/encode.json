@@ -1,0 +1,6 @@
+{
+  "base_command": "uv run pymedia encode",
+  "variants": [
+    {"name": "ENCODE SIMPLE", "args": "./data/fixtures/cell_h264_480p.mp4 -r -o ./data/qt/encode_simple.mp4"}
+  ]
+}

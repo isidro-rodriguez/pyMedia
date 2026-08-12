@@ -13,7 +13,10 @@ from pymedia.ffmpeg.concat_demux_cmd import concat_demux_cmd
 from pymedia.ffmpeg.concat_filter_cmd import concat_filter_cmd
 from pymedia.models.arguments import Arguments
 from pymedia.models.state import state
-from pymedia.services.commands_service import initialize_command
+from pymedia.services.commands_service import (
+    initialize_command,
+    resolve_output_conflict,
+)
 
 logger = get_logger("concat")
 
@@ -49,6 +52,11 @@ def concat_command(args: Arguments):
 
     if not state.output:
         state.output = Path(state.inputs[0].stem + "_concat" + state.inputs[0].suffix)
+
+    state.output = resolve_output_conflict(state.output, logger)
+
+    if state.output is None:
+        return
 
     media = state.media
 

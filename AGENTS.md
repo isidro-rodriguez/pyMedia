@@ -21,3 +21,4 @@
 ## CODE & LANGUAGE RULES
 
 - **Pythonic Style:** Idiomatic Python, type hints, PEP 8, dataclasses/pydantic where fit, `pathlib` over `os.path`.
+- Comentarios en español, todo lo demás en inglés.

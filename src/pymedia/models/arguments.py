@@ -2,7 +2,12 @@ from dataclasses import dataclass
 from enum import StrEnum
 from pathlib import Path
 
-from pymedia.cli_params import GyrateMode, ScaleGifMode, ScaleMode
+from pymedia.cli_params import (
+    GyrateMode,
+    OutputOnConflictMode,
+    ScaleGifMode,
+    ScaleVideoMode,
+)
 
 
 class CommandName(StrEnum):
@@ -20,12 +25,14 @@ class Arguments:
     command: CommandName
     inputs: list[Path] | None = None
     trim_points: str | None = None
-    # Optional parameters
+    # Optional encode parameters
     crop: str | None = None
     end_point: str | None = None
     fps: int | None = None
     gyrate: GyrateMode | None = None
-    output: Path | None = None
     remux: bool = False
-    scale: ScaleMode | ScaleGifMode | None = None
+    scale: ScaleVideoMode | ScaleGifMode | None = None
     start_point: str | None = None
+    # Optional output parameters
+    output: Path | None = None
+    output_on_conflict: OutputOnConflictMode | None = None

@@ -133,6 +133,18 @@ class PipelineError(PyMediaError):
     category = "PipelineError"
 
 
+class ArgumentError(PipelineError):
+    """Errores relacionados con los argumentos recogidos por Typer."""
+
+
+class MissingArgumentsError(ArgumentError):
+    message_key = "missing_arguments"
+
+
+class MissingArgumentError(ArgumentError):
+    message_key = "missing_argument"
+
+
 class MediaError(PipelineError):
     """Errores relacionados con los datos del medio (ffprobe)."""
 
@@ -147,6 +159,10 @@ class MissingMediaPropertyError(MediaError):
 
 class IncompatibleFilesError(PipelineError):
     message_key = "incompatible_files"
+
+
+class OutputOnConflictError(PipelineError):
+    message_key = "output_on_conflict"
 
 
 # ─────────────────────────────────────────────────────────────────────────────

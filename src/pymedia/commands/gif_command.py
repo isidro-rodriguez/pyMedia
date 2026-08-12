@@ -6,7 +6,10 @@ from pymedia.feedback.logger import get_logger, log_debug, log_info
 from pymedia.ffmpeg.gif_cmd import gif_cmd
 from pymedia.models.arguments import Arguments
 from pymedia.models.state import state
-from pymedia.services.commands_service import initialize_command
+from pymedia.services.commands_service import (
+    initialize_command,
+    resolve_output_conflict,
+)
 
 logger = get_logger("gif")
 
@@ -19,6 +22,11 @@ def gif_command(args: Arguments) -> None:
         output = state.output.absolute()
     else:
         output = Path(path.stem + ".gif").absolute()
+
+    output = resolve_output_conflict(output, logger)
+
+    if output is None:
+        return
 
     cmd = gif_cmd(output)
 

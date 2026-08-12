@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 
+from pymedia.cli_params import OutputOnConflictMode
 from pymedia.feedback.errors import InvalidConfigError
 from pymedia.feedback.logger import get_logger
 from pymedia.models.media import Media
@@ -332,24 +333,32 @@ def _build_cmd(final: TargetFinal) -> list[str]:
     """Construye el comando ffmpeg completo."""
     cmd = [
         "ffmpeg",
-        "-y",
         "-nostdin",
         "-loglevel",
         "error",
-        *final.inputs,
-        "-filter_complex",
-        final.filters,
-        "-map",
-        "[v]",
-        "-c:v",
-        state.config.encode.video_codec,
-        "-preset",
-        state.config.encode.video_preset,
-        "-crf",
-        str(state.config.encode.video_crf),
-        "-threads",
-        "1",
     ]
+
+    if state.output_on_conflict == OutputOnConflictMode.REPLACE:
+        cmd.extend(["-y"])
+
+    cmd.extend(
+        [
+            *final.inputs,
+            "-filter_complex",
+            final.filters,
+            "-map",
+            "[v]",
+            "-c:v",
+            state.config.encode.video_codec,
+            "-preset",
+            state.config.encode.video_preset,
+            "-crf",
+            str(state.config.encode.video_crf),
+            "-threads",
+            "1",
+        ]
+    )
+
     if final.has_audio:
         cmd.extend(["-map", "[a]", "-c:a", state.config.encode.audio_codec])
     cmd.append(state.output)

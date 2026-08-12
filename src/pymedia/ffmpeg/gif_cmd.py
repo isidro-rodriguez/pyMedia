@@ -1,5 +1,6 @@
 from pathlib import Path
 
+from pymedia.cli_params import OutputOnConflictMode
 from pymedia.models.state import state
 
 
@@ -20,6 +21,9 @@ def gif_cmd(output: Path) -> list[str]:
     )
 
     cmd = ["ffmpeg"]
+
+    if state.output_on_conflict == OutputOnConflictMode.REPLACE:
+        cmd.extend(["-y"])
 
     if pipeline.start_point:
         cmd.extend(["-ss", str(pipeline.start_point)])

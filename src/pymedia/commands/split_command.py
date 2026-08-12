@@ -8,7 +8,10 @@ from pymedia.feedback.logger import get_logger, log_debug, log_info
 from pymedia.ffmpeg.split_cmd import split_cmd
 from pymedia.models.arguments import Arguments
 from pymedia.models.state import state
-from pymedia.services.commands_service import initialize_command
+from pymedia.services.commands_service import (
+    initialize_command,
+    resolve_output_conflict,
+)
 
 logger = get_logger("split")
 
@@ -35,6 +38,11 @@ def split_command(args: Arguments) -> None:
         output = state.output
     else:
         output = Path(state.inputs[0].name)
+
+    output = resolve_output_conflict(output, logger)
+
+    if output is None:
+        return
 
     if pipeline.requires_encode:
         with tempfile.TemporaryDirectory() as tmp_dir:

@@ -1,7 +1,7 @@
 from datetime import timedelta
 from pathlib import Path
 
-from pymedia.cli_params import GyrateMode, ScaleGifMode, ScaleMode
+from pymedia.cli_params import GyrateMode, ScaleGifMode, ScaleVideoMode
 from pymedia.feedback.errors import (
     CropAllZeroError,
     CropExceedsHeightError,
@@ -85,7 +85,7 @@ def process_gyrate(gyrate: GyrateMode) -> str:
 
 
 def process_scale(
-    scale: ScaleMode | ScaleGifMode,
+    scale: ScaleVideoMode | ScaleGifMode,
     media: list[Media],
     reject_increase: bool,
 ) -> list[str | None]:

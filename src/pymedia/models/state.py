@@ -3,7 +3,11 @@ from dataclasses import dataclass, field
 from json import JSONDecodeError
 from pathlib import Path
 
-from pymedia.feedback.errors import MissingMediaError
+from pymedia.cli_params import OutputOnConflictMode
+from pymedia.feedback.errors import (
+    MissingArgumentsError,
+    MissingMediaError,
+)
 from pymedia.feedback.logger import get_logger, log_debug
 from pymedia.models.arguments import Arguments
 from pymedia.models.config import Config
@@ -19,35 +23,17 @@ class State:
     config: Config
     arguments: Arguments | None = None
     inputs: list[Path] = field(default_factory=list)
-    output: Path | None = None
     media: list[Media] = field(default_factory=list)
     video_pipeline: VideoPipeline | None = None
     gif_pipeline: GifPipeline | None = None
+    output: Path | None = None
+    output_on_conflict: OutputOnConflictMode | None = None
 
     def set_inputs(self, inputs: list[Path]) -> None:
         """Comprueba que la extensión del vídeo de entrada sea válida."""
         from pymedia.services.basename_service import process_inputs
 
         self.inputs = process_inputs(inputs)
-
-    def set_output(self, output: Path) -> None:
-        """Comprueba el fichero de salida tenga un nombre y extensión válido."""
-        from pymedia.services.basename_service import process_output
-
-        pipeline = self.video_pipeline
-        requires_encode = pipeline.requires_encode if pipeline else False
-
-        if requires_encode:
-            target_codec = self.config.encode.video_codec
-        else:
-            video = self.media[0].video if self.media else None
-            target_codec = video.codec if video else None
-
-        self.output = process_output(
-            output=output,
-            command=self.arguments.command,
-            target_codec=target_codec,
-        )
 
     def set_media(self, paths: list[Path]) -> None:
         for p in paths:
@@ -68,9 +54,7 @@ class State:
 
     def set_video_pipeline(self) -> None:
         if self.arguments is None:
-            raise RuntimeError(
-                "Argumentos de comando no recogidos antes de construir el pipeline"
-            )
+            raise MissingArgumentsError()
 
         from pymedia.services.pipeline_service import (
             process_crop,
@@ -112,9 +96,7 @@ class State:
 
     def set_gif_pipeline(self) -> None:
         if self.arguments is None:
-            raise RuntimeError(
-                "Argumentos de comando no recogidos antes de construir el pipeline"
-            )
+            raise MissingArgumentsError()
 
         from pymedia.services.pipeline_service import (
             process_crop,
@@ -167,6 +149,31 @@ class State:
                 "pipeline_time",
                 time=self.gif_pipeline.start_point,
             )
+
+    def set_output(self, output: Path) -> None:
+        """Comprueba el fichero de salida tenga un nombre y extensión válido."""
+        from pymedia.services.basename_service import process_output
+
+        pipeline = self.video_pipeline
+        requires_encode = pipeline.requires_encode if pipeline else False
+
+        if requires_encode:
+            target_codec = self.config.encode.video_codec
+        else:
+            video = self.media[0].video if self.media else None
+            target_codec = video.codec if video else None
+
+        self.output = process_output(
+            output=output,
+            command=self.arguments.command,
+            target_codec=target_codec,
+        )
+
+    def set_output_on_conflict(self) -> None:
+        if self.arguments is None:
+            raise MissingArgumentsError()
+
+        self.output_on_conflict = self.arguments.output_on_conflict
 
 
 state = State(config=Config.load())

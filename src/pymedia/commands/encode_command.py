@@ -1,12 +1,18 @@
 import subprocess
 from pathlib import Path
 
-from pymedia.feedback.errors import CommandExecutionError, CommandGenerationError
+from pymedia.feedback.errors import (
+    CommandExecutionError,
+    CommandGenerationError,
+)
 from pymedia.feedback.logger import get_logger, log_debug, log_info
 from pymedia.ffmpeg.encode_cmd import encode_cmd
 from pymedia.models.arguments import Arguments
 from pymedia.models.state import state
-from pymedia.services.commands_service import initialize_command
+from pymedia.services.commands_service import (
+    initialize_command,
+    resolve_output_conflict,
+)
 
 logger = get_logger("encode")
 
@@ -28,6 +34,11 @@ def encode_command(args: Arguments, output: Path | None = None) -> None:
             output = Path(
                 f"{state.inputs[i].stem}_encoded{state.config.encode.default_container}"
             ).absolute()
+
+        output = resolve_output_conflict(output, logger)
+
+        if output is None:
+            return
 
         cmd = encode_cmd(state.inputs[i], output)
 

@@ -5,6 +5,10 @@ from typing import Annotated
 
 import typer
 
+# -----------------------------------------------------------------------------
+#  Enums
+# -----------------------------------------------------------------------------
+
 
 class GyrateMode(int, Enum):
     """Ángulos de giro disponibles"""
@@ -12,6 +16,13 @@ class GyrateMode(int, Enum):
     d90 = 90
     d180 = 180
     d270 = 270
+
+
+class OutputOnConflictMode(Enum):
+    FAIL = "fail"
+    REPLACE = "replace"
+    RENAME = "rename"
+    SKIP = "skip"
 
 
 class ScaleGifMode(int, Enum):
@@ -22,7 +33,7 @@ class ScaleGifMode(int, Enum):
     P720 = 720
 
 
-class ScaleMode(int, Enum):
+class ScaleVideoMode(int, Enum):
     """Alturas de fotograma disponibles"""
 
     P480 = 480
@@ -32,9 +43,14 @@ class ScaleMode(int, Enum):
     P2160 = 2160
 
 
+# -----------------------------------------------------------------------------
+#  Auxiliar typer functions
+# -----------------------------------------------------------------------------
+
+
 def _validate_path(path: Path) -> Path | None:
     if not path.is_file():
-        raise typer.BadParameter(f"{path} no es un archivo.")
+        raise typer.BadParameter(f"{path} is not a file.")
     return path
 
 
@@ -44,22 +60,34 @@ def _validate_path_list(path_list: list[Path]) -> list[Path] | None:
     return path_list
 
 
+# -----------------------------------------------------------------------------
+#  Arguments
+# -----------------------------------------------------------------------------
+
+
 PathArgument = Annotated[
-    Path, typer.Argument(help="Vídeo a procesar.", callback=_validate_path)
+    Path, typer.Argument(help="Video to process.", callback=_validate_path)
 ]
 
 PathsArgument = Annotated[
     list[Path],
-    typer.Argument(help="Lista de vídeos a procesar.", callback=_validate_path_list),
+    typer.Argument(help="Video list to process.", callback=_validate_path_list),
 ]
+
+
+# -----------------------------------------------------------------------------
+#  Transcode options
+# -----------------------------------------------------------------------------
+
 
 CropOption = Annotated[
     str | None,
     typer.Option(
         "--crop",
         "-c",
-        metavar="IZQ,DER,ARRIBA,ABAJO",
-        help="Recorta los pixeles indicados. [dim]Ej: -c 200,200,0,0[/dim]",
+        metavar="left,right,top,bottom",
+        rich_help_panel="Encode options",
+        help="Crops the specified number of pixels. [dim]E.g.: -c 200,200,0,0[/dim]",
     ),
 ]
 
@@ -69,7 +97,8 @@ EndPointOption = Annotated[
         "--end-point",
         "-ep",
         metavar="hh:mm:ss",
-        help="Punto de tiempo en el que finaliza la generación del Gif. [dim]Ej: -ep 1:20[/dim]",  # noqa: E501
+        rich_help_panel="Encode options",
+        help="Time point at which GIF generation ends. [dim]E.g.: -ep 1:20[/dim]",
     ),
 ]
 
@@ -80,7 +109,8 @@ FpsOption = Annotated[
         "-f",
         min=4,
         max=20,
-        help="Imágenes por segundo del gif animado. [dim]Ej: -f 12[/dim]",
+        rich_help_panel="Encode options",
+        help="Frames per second of the animated GIF. [dim]E.g.: -f 12[/dim]",
     ),
 ]
 
@@ -89,7 +119,8 @@ GyrateOption = Annotated[
     typer.Option(
         "--gyrate",
         "-g",
-        help="Gira el ángulo indicado.\n[dim]Ej: -g 90[/dim]",
+        rich_help_panel="Encode options",
+        help="Rotate the media by the specified angle in degrees. [dim]E.g.: -g 90[/dim]",  # noqa: E501
     ),
 ]
 
@@ -98,16 +129,18 @@ ScaleGifOption = Annotated[
     typer.Option(
         "--scale",
         "-s",
-        help="Redimensiona proporcionalmente a la altura de indicada. [dim]Ej: -s 240[/dim]",  # noqa: E501
+        rich_help_panel="Encode options",
+        help="Resize the media proportionally to the specified height. [dim]E.g.: -s 240[/dim]",  # noqa: E501
     ),
 ]
 
-ScaleOption = Annotated[
-    ScaleMode | None,
+ScaleVideoOption = Annotated[
+    ScaleVideoMode | None,
     typer.Option(
         "--scale",
         "-s",
-        help="Redimensiona proporcionalmente a la altura de indicada. [dim]Ej: -s 720[/dim]",  # noqa: E501
+        rich_help_panel="Encode options",
+        help="Resize the media proportionally to the specified height. [dim]E.g.: -s 240[/dim]",  # noqa: E501
     ),
 ]
 
@@ -117,23 +150,18 @@ StartPointOption = Annotated[
         "--start-point",
         "-sp",
         metavar="hh:mm:ss",
-        help="Punto de tiempo en el que inicia la generación del Gif. [dim]Ej: -sp 1:20[/dim]",  # noqa: E501
+        rich_help_panel="Encode options",
+        help="Time point at which GIF generation starts. [dim]E.g.: -sp 1:20[/dim]",  # noqa: E501
     ),
 ]
 
 RemuxOption = Annotated[
     bool,
     typer.Option(
-        "--remux", "-r", help="Recodifica con el perfil indicado en la configuración."
-    ),
-]
-
-OutputOption = Annotated[
-    Path | None,
-    typer.Option(
-        "--output",
-        "-o",
-        help="Nombre del archivo de salida. [dim]Ej: -o corte.mp4[/dim]",
+        "--remux",
+        "-r",
+        rich_help_panel="Encode options",
+        help="Re-encodes using the profile specified in the configuration.",
     ),
 ]
 
@@ -143,6 +171,33 @@ TrimPointsOption = Annotated[
         "--trim-points",
         "-t",
         metavar="00:10,00:20,00:30",
-        help="Puntos de corte. [dim]Ej: -t 00:10,00:20,00:30[/dim]",
+        rich_help_panel="Encode options",
+        help="Split points for the video. [dim]E.g.: -t 00:10,00:20,00:30[/dim]",
+    ),
+]
+
+
+# -----------------------------------------------------------------------------
+#  Output options
+# -----------------------------------------------------------------------------
+
+
+OutputOnConflictOption = Annotated[
+    OutputOnConflictMode | None,
+    typer.Option(
+        "--on-conflict",
+        "-oc",
+        rich_help_panel="Output options",
+        help="Action to take if a file with the same name already exists. [dim]E.g.: -oc rename[/dim]",  # noqa: E501
+    ),
+]
+
+OutputOption = Annotated[
+    Path | None,
+    typer.Option(
+        "--output",
+        "-o",
+        rich_help_panel="Output options",
+        help="Output file name. [dim]E.g.: -o cut.mp4[/dim]",
     ),
 ]
