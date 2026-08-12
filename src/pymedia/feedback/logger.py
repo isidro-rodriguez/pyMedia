@@ -42,7 +42,6 @@ class AnsiColorFormatter(AbbrevFormatter):
     def format(self, record: logging.LogRecord) -> str:
         no_style = "\033[0m"
         blue = "\033[34m"
-        bold = "\033[91m"
         grey = "\033[90m"
         yellow = "\033[93m"
         red = "\033[31m"
@@ -52,7 +51,7 @@ class AnsiColorFormatter(AbbrevFormatter):
             "INFO": blue,
             "WARNING": yellow,
             "ERROR": red,
-            "CRITICAL": red_light + bold,
+            "CRITICAL": red_light,
         }.get(record.levelname, no_style)
         end_style = no_style
         return f"{start_style}{super().format(record)}{end_style}"
@@ -84,7 +83,7 @@ def setup_logging() -> None:
     root = logging.getLogger()
     root.setLevel(level)
 
-    console_fmt = AnsiColorFormatter("%(levelname)s %(asctime)s %(name)s %(message)s")
+    console_fmt = AnsiColorFormatter("%(levelname)s %(message)s")
     console = logging.StreamHandler(sys.stderr)
     console.setFormatter(console_fmt)
     console.addFilter(PymediaFilter())
@@ -95,7 +94,7 @@ def setup_logging() -> None:
         / "logging.log"
     )
     file_fmt = AbbrevFormatter(
-        f"%(levelname)-{_LEVEL_WIDTH}s%(asctime)s  %(name)-{_NAME_WIDTH}s%(message)s"
+        f"%(levelname)-{_LEVEL_WIDTH}s %(asctime)s  -  %(message)s"
     )
     file_handler = logging.FileHandler(log_path, encoding="utf-8")
     file_handler.setFormatter(file_fmt)
@@ -108,7 +107,7 @@ def setup_logging() -> None:
 def get_logger(name: str = "") -> logging.Logger:
     """Devuelve un logger con prefijo 'pymedia.*'."""
     setup_logging()
-    return logging.getLogger(f"[pymedia.{name}]" if name else "[pymedia]")
+    return logging.getLogger(f"pymedia.{name}" if name else "pymedia")
 
 
 # ─── Helpers con plantillas de messages.py ───────────────────────────────────
