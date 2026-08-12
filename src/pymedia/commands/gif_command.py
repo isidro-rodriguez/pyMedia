@@ -1,10 +1,10 @@
 import subprocess
 from pathlib import Path
 
+from pymedia.feedback.errors import CommandExecutionError
+from pymedia.feedback.logger import get_logger, log_debug, log_info
 from pymedia.ffmpeg.gif_cmd import gif_cmd
-from pymedia.logger import get_logger
 from pymedia.models.arguments import Arguments
-from pymedia.models.errors import CommandExecutionError
 from pymedia.models.state import state
 from pymedia.services.commands_service import initialize_command
 
@@ -22,8 +22,9 @@ def gif_command(args: Arguments) -> None:
 
     cmd = gif_cmd(output)
 
+    log_debug(logger, "ffmpeg_command", cmd=cmd)
     try:
         subprocess.run(cmd, capture_output=True, text=True, check=True)
-        logger.info(f"Generado correctamente GIF: {output}")
+        log_info(logger, "gif_success", output=output)
     except subprocess.CalledProcessError as e:
-        raise CommandExecutionError("gif", e.stderr) from e
+        raise CommandExecutionError(command_name="gif", error=e.stderr) from e

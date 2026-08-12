@@ -2,12 +2,20 @@ from datetime import timedelta
 from pathlib import Path
 
 from pymedia.cli_params import GyrateMode, ScaleGifMode, ScaleMode
-from pymedia.logger import get_logger
-from pymedia.models.errors import (
-    InvalidOptionError,
+from pymedia.feedback.errors import (
+    CropAllZeroError,
+    CropExceedsHeightError,
+    CropExceedsWidthError,
+    InvalidCropFormatError,
+    InvalidGyrateError,
+    InvalidTimeFormatError,
+    InvalidTrimPointsError,
     MissingMediaError,
     MissingMediaPropertyError,
+    NegativeTimeError,
+    TimeExceedsDurationError,
 )
+from pymedia.feedback.logger import get_logger, log_warning
 from pymedia.models.media import Media
 from pymedia.utils import convert_to_timedelta, parse_crop
 
@@ -30,14 +38,12 @@ def process_crop(
     parsed = parse_crop(crop)
 
     if parsed is None:
-        raise InvalidOptionError(
-            "Formato de crop inválido. Esperado: IZQ,DER,ARRIBA,ABAJO"
-        )
+        raise InvalidCropFormatError()
 
     left, right, top, bottom = parsed
 
     if all([left == 0, right == 0, top == 0, bottom == 0]):
-        raise InvalidOptionError("Crop inválido. Todos los valores son 0.")
+        raise CropAllZeroError()
 
     for i, media_item in enumerate(media):
         if (
@@ -45,7 +51,7 @@ def process_crop(
             or media_item.video.width is None
             or media_item.video.height is None
         ):
-            raise MissingMediaPropertyError("Crop")
+            raise MissingMediaPropertyError(property_name="Crop")
 
         if dimensions is not None:
             width, height = dimensions[i]
@@ -53,14 +59,10 @@ def process_crop(
             width, height = media_item.video.width, media_item.video.height
 
         if (left + right) >= width:
-            raise InvalidOptionError(
-                f"Crop inválido: {left + right} >= ancho original {width}."
-            )
+            raise CropExceedsWidthError(total=left + right, width=width)
 
         if (top + bottom) >= height:
-            raise InvalidOptionError(
-                f"Crop inválido: {top + bottom} >= alto original {height}."
-            )
+            raise CropExceedsHeightError(total=top + bottom, height=height)
 
         crop_w = width - left - right
         crop_h = height - top - bottom
@@ -79,9 +81,7 @@ def process_gyrate(gyrate: GyrateMode) -> str:
         case GyrateMode.d270:
             return "transpose=2"
         case _:
-            raise InvalidOptionError(
-                "Formato de giro no valido. Esperado 90 | 180 | 270."
-            )
+            raise InvalidGyrateError()
 
 
 def process_scale(
@@ -95,21 +95,25 @@ def process_scale(
     for media_item in media:
         if media_item.video is None or media_item.video.height is None:
             raise MissingMediaPropertyError(
-                "No se pudo obtener la resolución del vídeo para validar el escalado."
+                property_name="resolución del vídeo para validar el escalado"
             )
 
         if scale == media_item.video.height:
-            logger.warning(
-                f"Escalado rechazado: {scale} = altura original "
-                f"{media_item.video.height}."
+            log_warning(
+                logger,
+                "scale_rejected_equal",
+                scale=scale,
+                height=media_item.video.height,
             )
             scale_list.append(None)
             continue
 
         if reject_increase and scale.value > media_item.video.height:
-            logger.warning(
-                f"Escalado a {scale.value}p no aplicado: resolución mayor "
-                f"que la original ({media_item.video.height}p)."
+            log_warning(
+                logger,
+                "scale_rejected_increase",
+                scale=scale.value,
+                height=media_item.video.height,
             )
             scale_list.append(None)
             continue
@@ -127,22 +131,18 @@ def process_time(time_str: str, video_duration: timedelta | None) -> float:
     time_delta = convert_to_timedelta(time_str)
 
     if time_delta is None:
-        raise InvalidOptionError(
-            "Formato de marca de tiempo no válida. Esperado hh:mm:ss."
-        )
+        raise InvalidTimeFormatError()
 
     if time_delta < timedelta(0):
-        raise InvalidOptionError("Marca de tiempo negativa.")
+        raise NegativeTimeError()
 
     if video_duration is None:
         raise MissingMediaPropertyError(
-            "No se pudo obtener la duración del vídeo para validar la marca de tiempo"
+            property_name="duración del vídeo para validar la marca de tiempo"
         )
 
     if time_delta > video_duration:
-        raise InvalidOptionError(
-            f"Marca de tiempo {time_delta} > duración vídeo {video_duration}."
-        )
+        raise TimeExceedsDurationError(time=time_delta, duration=video_duration)
 
     return time_delta.total_seconds()
 
@@ -154,18 +154,16 @@ def process_trim_points(
 ) -> str:
     """Valida y procesa los puntos de corte."""
     if video_duration is None:
-        raise MissingMediaError(input_path)
+        raise MissingMediaError(path=input_path)
 
     times_timedelta: list[timedelta] = []
 
     for tp in trim_points.split(","):
         t = convert_to_timedelta(tp)
         if t is None:
-            raise InvalidOptionError(
-                "Formato de marca de tiempo no válida. Esperado hh:mm:ss"
-            )
+            raise InvalidTimeFormatError()
         if t > video_duration:
-            raise InvalidOptionError()
+            raise InvalidTrimPointsError()
         times_timedelta.append(t)
 
     return ",".join(str(t.total_seconds()) for t in times_timedelta)

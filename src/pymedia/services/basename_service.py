@@ -2,19 +2,31 @@ import re
 from pathlib import Path
 
 from pymedia.data import CONTAINERS_BY_CODEC, GIF_EXTENSION, VIDEO_EXTENSIONS
-from pymedia.models.arguments import CommandName
-from pymedia.models.errors import (
+from pymedia.feedback.errors import (
+    CannotCreateDirectoryError,
+    InvalidDirectoryError,
     InvalidFileExtensionError,
-    InvalidFilenameError,
+    InvalidFileNameError,
     MissingMediaPropertyError,
 )
+from pymedia.models.arguments import CommandName
+
+
+def _format_supported(extensions: set[str] | list[str]) -> str:
+    """Formatea extensiones como lista legible para mensajes."""
+    return ", ".join(sorted(extensions))
 
 
 def _is_valid_video_extension(video: Path) -> bool:
     if video.suffix is None:
-        raise InvalidFileExtensionError(None, None)
+        raise InvalidFileExtensionError(
+            extension=None, supported=_format_supported(VIDEO_EXTENSIONS)
+        )
     if video.suffix not in VIDEO_EXTENSIONS:
-        raise InvalidFileExtensionError(video.suffix, VIDEO_EXTENSIONS)
+        raise InvalidFileExtensionError(
+            extension=video.suffix,
+            supported=_format_supported(VIDEO_EXTENSIONS),
+        )
     return True
 
 
@@ -64,30 +76,48 @@ def process_output(
 ) -> Path:
     """Comprueba el fichero de salida tenga un nombre y extensión válido."""
     # Crear directorios intermedios si no existen
-    output.parent.mkdir(parents=True, exist_ok=True)
+    try:
+        output.parent.mkdir(parents=True, exist_ok=True)
+    except OSError as e:
+        raise CannotCreateDirectoryError(path=output.parent) from e
+
+    # Comprobación del directorio (solo si se va a crear/escritura en subdirectorio)
+    if output.parent != Path(".") and not _is_valid_filename(output.parent.name):
+        raise InvalidDirectoryError(directory=output.parent.name)
 
     # Comprobación del nombre de fichero
     if output.stem is None:
-        raise InvalidFilenameError(None)
+        raise InvalidFileNameError(filename=None)
     if not _is_valid_filename(output.stem):
-        raise InvalidFilenameError(output.stem)
+        raise InvalidFileNameError(filename=output.stem)
 
     # Comprobación de la extensión
     if output.suffix is None:
-        raise InvalidFileExtensionError("", VIDEO_EXTENSIONS)
+        raise InvalidFileExtensionError(
+            extension="", supported=_format_supported(VIDEO_EXTENSIONS)
+        )
 
     if command is CommandName.GIF:
         if output.suffix != GIF_EXTENSION[0]:
-            raise InvalidFileExtensionError(output.suffix, GIF_EXTENSION)
+            raise InvalidFileExtensionError(
+                extension=output.suffix,
+                supported=_format_supported(GIF_EXTENSION),
+            )
     else:
         if output.suffix not in VIDEO_EXTENSIONS:
-            raise InvalidFileExtensionError(output.suffix, VIDEO_EXTENSIONS)
+            raise InvalidFileExtensionError(
+                extension=output.suffix,
+                supported=_format_supported(VIDEO_EXTENSIONS),
+            )
 
         if target_codec is None:
-            raise MissingMediaPropertyError("Video codec")
+            raise MissingMediaPropertyError(property_name="Video codec")
 
         valid_containers = CONTAINERS_BY_CODEC.get(target_codec, set())
         if valid_containers and output.suffix not in valid_containers:
-            raise InvalidFileExtensionError(output.suffix, valid_containers)
+            raise InvalidFileExtensionError(
+                extension=output.suffix,
+                supported=_format_supported(valid_containers),
+            )
 
     return output

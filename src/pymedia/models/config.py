@@ -6,7 +6,9 @@ from pathlib import Path
 
 import platformdirs
 
-logger = logging.getLogger("config")
+from pymedia.feedback.logger import log_info
+
+logger = logging.getLogger("[pymedia.config]")
 
 
 @dataclass(frozen=True)
@@ -63,7 +65,7 @@ class Config:
     @classmethod
     def _create(cls, path: Path) -> None:
         """Copia el config por defecto desde los recursos a la ruta de usuario."""
-        logger.info("Guardando config.toml")
+        log_info(logger, "config_saved")
         path.parent.mkdir(parents=True, exist_ok=True)
         src = (
             files("pymedia.resources")

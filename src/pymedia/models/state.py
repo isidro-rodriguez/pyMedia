@@ -3,7 +3,8 @@ from dataclasses import dataclass, field
 from json import JSONDecodeError
 from pathlib import Path
 
-from pymedia.logger import get_logger
+from pymedia.feedback.errors import MissingMediaError
+from pymedia.feedback.logger import get_logger, log_debug
 from pymedia.models.arguments import Arguments
 from pymedia.models.config import Config
 from pymedia.models.gif_pipeline import GifPipeline
@@ -57,9 +58,8 @@ class State:
                 subprocess.CalledProcessError,
                 JSONDecodeError,
                 OSError,
-            ):
-                logger.error(f"Vídeo con formato inválido: {p}")
-                raise
+            ) as e:
+                raise MissingMediaError(path=p) from e
 
             self.media.append(media)
 
@@ -84,9 +84,11 @@ class State:
 
         if args.crop is not None:
             self.video_pipeline.crop = process_crop(args.crop, self.media)
+            log_debug(logger, "pipeline_crop", crop=self.video_pipeline.crop)
 
         if args.gyrate is not None:
             self.video_pipeline.gyrate = process_gyrate(args.gyrate)
+            log_debug(logger, "pipeline_gyrate", gyrate=self.video_pipeline.gyrate)
 
         self.video_pipeline.remux = args.remux
 
@@ -96,6 +98,7 @@ class State:
                 self.media,
                 self.config.app.disable_resolution_increase,
             )
+            log_debug(logger, "pipeline_scale", scale=self.video_pipeline.scale)
 
         if args.trim_points:
             duration = self.media[0].duration if self.media else None
@@ -105,6 +108,7 @@ class State:
                 duration,
                 input_path,
             )
+            log_debug(logger, "pipeline_trim", trim=self.video_pipeline.trim_points)
 
     def set_gif_pipeline(self) -> None:
         if self.arguments is None:
@@ -125,16 +129,27 @@ class State:
 
         if args.crop is not None:
             self.gif_pipeline.crop = process_crop(args.crop, self.media)
+            log_debug(logger, "pipeline_crop", crop=self.gif_pipeline.crop)
 
         if args.end_point is not None:
             duration = self.media[0].duration if self.media else None
             self.gif_pipeline.end_point = process_time(args.end_point, duration)
+            log_debug(
+                logger,
+                "pipeline_time",
+                time=self.gif_pipeline.end_point,
+            )
 
         if args.fps is not None:
             self.gif_pipeline.fps = args.fps
 
         if args.gyrate is not None:
             self.gif_pipeline.gyrate = process_gyrate(args.gyrate)
+            log_debug(
+                logger,
+                "pipeline_gyrate",
+                gyrate=self.gif_pipeline.gyrate,
+            )
 
         if args.scale:
             self.gif_pipeline.scale = process_scale(
@@ -142,10 +157,16 @@ class State:
                 self.media,
                 self.config.app.disable_resolution_increase,
             )
+            log_debug(logger, "pipeline_scale", scale=self.gif_pipeline.scale)
 
         if args.start_point:
             duration = self.media[0].duration if self.media else None
             self.gif_pipeline.start_point = process_time(args.start_point, duration)
+            log_debug(
+                logger,
+                "pipeline_time",
+                time=self.gif_pipeline.start_point,
+            )
 
 
 state = State(config=Config.load())

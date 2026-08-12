@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 
-from pymedia.logger import get_logger
-from pymedia.models.errors import ValueComparisonError
+from pymedia.feedback.errors import InvalidConfigError
+from pymedia.feedback.logger import get_logger
 from pymedia.models.media import Media
 from pymedia.models.state import state
 from pymedia.services.pipeline_service import process_crop
@@ -83,7 +83,10 @@ def _target_height() -> int:
         case "max_height":
             return max(media_heights)
         case _:
-            raise ValueComparisonError("concat", "Height")
+            value = state.config.conflictive_join.resize_to
+            raise InvalidConfigError(
+                message=f"Valor inválido para conflictive_join.resize_to: {value}"
+            )
 
 
 def _build_requirements() -> TargetRequirements:

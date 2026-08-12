@@ -1,10 +1,10 @@
 import subprocess
 from pathlib import Path
 
+from pymedia.feedback.errors import CommandExecutionError, CommandGenerationError
+from pymedia.feedback.logger import get_logger, log_debug, log_info
 from pymedia.ffmpeg.encode_cmd import encode_cmd
-from pymedia.logger import get_logger
 from pymedia.models.arguments import Arguments
-from pymedia.models.errors import CommandExecutionError, CommandGenerationError
 from pymedia.models.state import state
 from pymedia.services.commands_service import initialize_command
 
@@ -32,10 +32,11 @@ def encode_command(args: Arguments, output: Path | None = None) -> None:
         cmd = encode_cmd(state.inputs[i], output)
 
         if cmd is None:
-            raise CommandGenerationError("encode")
+            raise CommandGenerationError(command_name="encode")
 
+        log_debug(logger, "ffmpeg_command", cmd=cmd)
         try:
             subprocess.run(cmd, capture_output=True, text=True, check=True)
-            logger.info(f"Transcodificación correcta: {output}")
+            log_info(logger, "encode_success", output=output)
         except subprocess.CalledProcessError as e:
-            raise CommandExecutionError("encode", e.stderr) from e
+            raise CommandExecutionError(command_name="encode", error=e.stderr) from e

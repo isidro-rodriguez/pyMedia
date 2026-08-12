@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 
-from pymedia.logger import get_logger
+from pymedia.feedback.logger import get_logger
 
 logger = get_logger("pipeline")
 

@@ -7,17 +7,12 @@ def gif_cmd(output: Path) -> list[str]:
     pipeline = state.gif_pipeline
     filters: str = ""
 
-    if pipeline.crop or pipeline.gyrate or pipeline.scale:
-        filters_array = []
-
-        if pipeline.crop:
-            filters_array.append(pipeline.crop[0])
-        if pipeline.gyrate:
-            filters_array.append(pipeline.gyrate)
-        if pipeline.scale:
-            filters_array.append(pipeline.scale[0])
-
-        filters = ",".join(filters_array) + ","
+    if pipeline.crop:
+        filters += pipeline.crop[0] + ","
+    if pipeline.gyrate:
+        filters += pipeline.gyrate + ","
+    if pipeline.scale != [None]:
+        filters += pipeline.scale[0] + ","
 
     filters += (
         f"fps={pipeline.fps},split[a][b];[a]palettegen[p];"

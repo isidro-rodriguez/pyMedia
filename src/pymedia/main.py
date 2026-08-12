@@ -21,20 +21,17 @@ from pymedia.commands.concat_command import concat_command
 from pymedia.commands.encode_command import encode_command
 from pymedia.commands.gif_command import gif_command
 from pymedia.commands.split_command import split_command
-from pymedia.logger import get_logger
+from pymedia.feedback.errors import InsufficientInputError
+from pymedia.feedback.logger import get_logger, log_warning
 from pymedia.models.arguments import Arguments, CommandName
-from pymedia.models.errors import InsufficientInputError
 
-app = typer.Typer()
+app = typer.Typer(
+    name="pyMedia",
+    rich_markup_mode="rich",
+    no_args_is_help=True,
+    add_completion=False,
+)
 logger = get_logger("main")
-
-
-@app.callback(invoke_without_command=True)
-@app.command()
-def tui(ctx: typer.Context) -> None:
-    """Lanza la interfaz de usuario en terminal"""
-    if ctx.invoked_subcommand is None:
-        logger.info("Lanzando TUI.")
 
 
 @app.command()
@@ -76,7 +73,7 @@ def encode(
     Transcodifica con las opciones elegidas (requiere al menos una opción)
     """
     if crop is None and scale is None and gyrate is None and remux is False:
-        logger.warning("Se requiere al menos una opción.")
+        log_warning(logger, "missing_options")
         return
 
     encode_command(

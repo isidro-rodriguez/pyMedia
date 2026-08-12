@@ -6,7 +6,7 @@ from pathlib import Path
 
 import platformdirs
 
-from pymedia.models.config import Config
+from pymedia.feedback.messages import Debug, Info, Warnings
 
 _configured = False
 
@@ -76,6 +76,8 @@ def setup_logging() -> None:
     if _configured:
         return
 
+    from pymedia.models.config import Config
+
     config = Config.load()
     level = _LEVELS.get(config.app.logger_level.upper(), logging.INFO)
 
@@ -107,3 +109,21 @@ def get_logger(name: str = "") -> logging.Logger:
     """Devuelve un logger con prefijo 'pymedia.*'."""
     setup_logging()
     return logging.getLogger(f"[pymedia.{name}]" if name else "[pymedia]")
+
+
+# ─── Helpers con plantillas de messages.py ───────────────────────────────────
+
+
+def log_info(logger: logging.Logger, key: str, **kwargs) -> None:
+    """Registra un mensaje INFO usando la plantilla de messages.Info."""
+    logger.info(Info[key].format(**kwargs))
+
+
+def log_warning(logger: logging.Logger, key: str, **kwargs) -> None:
+    """Registra un mensaje WARNING usando la plantilla de messages.Warnings."""
+    logger.warning(Warnings[key].format(**kwargs))
+
+
+def log_debug(logger: logging.Logger, key: str, **kwargs) -> None:
+    """Registra un mensaje DEBUG usando la plantilla de messages.Debug."""
+    logger.debug(Debug[key].format(**kwargs))

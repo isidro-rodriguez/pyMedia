@@ -3,10 +3,10 @@ import tempfile
 from pathlib import Path
 
 from pymedia.commands.encode_command import encode_command
+from pymedia.feedback.errors import CommandExecutionError, CommandGenerationError
+from pymedia.feedback.logger import get_logger, log_debug, log_info
 from pymedia.ffmpeg.split_cmd import split_cmd
-from pymedia.logger import get_logger
 from pymedia.models.arguments import Arguments
-from pymedia.models.errors import CommandExecutionError, CommandGenerationError
 from pymedia.models.state import state
 from pymedia.services.commands_service import initialize_command
 
@@ -18,13 +18,14 @@ def _split(input_single: Path, output: Path) -> None:
     cmd = split_cmd(input_single, output)
 
     if cmd is None:
-        raise CommandGenerationError("split")
+        raise CommandGenerationError(command_name="split")
 
+    log_debug(logger, "ffmpeg_command", cmd=cmd)
     try:
         subprocess.run(cmd, capture_output=True, text=True, check=True)
-        logger.info(f"División correcta del vídeo: {output}")
+        log_info(logger, "split_success", output=output)
     except subprocess.CalledProcessError as e:
-        raise CommandExecutionError("split", e.stderr) from e
+        raise CommandExecutionError(command_name="split", error=e.stderr) from e
 
 
 def split_command(args: Arguments) -> None:

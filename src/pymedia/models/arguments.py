@@ -8,7 +8,6 @@ from pymedia.cli_params import GyrateMode, ScaleGifMode, ScaleMode
 class CommandName(StrEnum):
     """Nombres de los comandos disponibles en la CLI."""
 
-    TUI = "tui"
     CONCAT = "concat"
     ENCODE = "encode"
     SPLIT = "split"

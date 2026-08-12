@@ -2,6 +2,10 @@ import json
 import subprocess
 from pathlib import Path
 
+from pymedia.feedback.logger import get_logger, log_debug
+
+logger = get_logger("probe")
+
 
 def probe(path: Path) -> dict:
     """Ejecuta ffprobe y devuelve el JSON parseado."""
@@ -16,4 +20,6 @@ def probe(path: Path) -> dict:
         str(path),
     ]
     result = subprocess.run(cmd, capture_output=True, text=True, check=True)
-    return json.loads(result.stdout)
+    data = json.loads(result.stdout)
+    log_debug(logger, "ffprobe_data", data=data)
+    return data
