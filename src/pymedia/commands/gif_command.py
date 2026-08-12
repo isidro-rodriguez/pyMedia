@@ -1,7 +1,7 @@
 import subprocess
 from pathlib import Path
 
-from pymedia.feedback.errors import CommandExecutionError
+from pymedia.feedback.errors import CommandExecutionError, CommandGenerationError
 from pymedia.feedback.logger import get_logger, log_debug, log_info
 from pymedia.ffmpeg.gif_cmd import gif_cmd
 from pymedia.models.arguments import Arguments
@@ -29,6 +29,9 @@ def gif_command(args: Arguments) -> None:
         return
 
     cmd = gif_cmd(output)
+
+    if cmd is None:
+        raise CommandGenerationError(command_name="concat")
 
     log_debug(logger, "ffmpeg_command", cmd=cmd)
     try:

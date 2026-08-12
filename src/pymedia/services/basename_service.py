@@ -75,15 +75,15 @@ def process_output(
     target_codec: str | None = None,
 ) -> Path:
     """Comprueba el fichero de salida tenga un nombre y extensión válido."""
+    # Comprobación del directorio (solo si se va a crear/escritura en subdirectorio)
+    if output.parent != Path(".") and not _is_valid_filename(output.parent.name):
+        raise InvalidDirectoryError(directory=output.parent.name)
+
     # Crear directorios intermedios si no existen
     try:
         output.parent.mkdir(parents=True, exist_ok=True)
     except OSError as e:
         raise CannotCreateDirectoryError(path=output.parent) from e
-
-    # Comprobación del directorio (solo si se va a crear/escritura en subdirectorio)
-    if output.parent != Path(".") and not _is_valid_filename(output.parent.name):
-        raise InvalidDirectoryError(directory=output.parent.name)
 
     # Comprobación del nombre de fichero
     if output.stem is None:

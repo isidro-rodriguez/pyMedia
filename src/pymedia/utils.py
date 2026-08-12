@@ -51,24 +51,34 @@ def parse_crop(value: str | None) -> tuple[int, int, int, int] | None:
 
 
 def convert_to_timedelta(total_time: str) -> timedelta | None:
-    """Convierte 'hh:mm:ss', 'mm:ss' o 'ss' a timedelta."""
+    """Convierte 'hh:mm:ss', 'mm:ss' o 'ss' a timedelta.
+
+    Soporta formato negativo: '-1:00' o '-45'.
+    """
+    negative = False
+    if total_time.startswith("-"):
+        negative = True
+        total_time = total_time[1:]
+
     parts = total_time.split(":")
     if not all(p.isdigit() for p in parts):
         return None
     match tuple(map(float, parts)):
         case (hours, minutes, seconds):
-            return timedelta(hours=hours, minutes=minutes, seconds=seconds)
+            result = timedelta(hours=hours, minutes=minutes, seconds=seconds)
         case (minutes, seconds):
-            return timedelta(minutes=minutes, seconds=seconds)
+            result = timedelta(minutes=minutes, seconds=seconds)
         case (seconds,):
-            return timedelta(seconds=seconds)
+            result = timedelta(seconds=seconds)
         case _:
             return None
+
+    return -result if negative else result
 
 
 def resolve_output_path(
     path: Path,
-    output_name: str | None,
+    output_name: str | None = None,
     suffix: str = "processed",
 ) -> Path:
     """Resuelve la ruta de salida, creando directorio padre si necesario.

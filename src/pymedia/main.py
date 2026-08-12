@@ -23,8 +23,7 @@ from pymedia.commands.concat_command import concat_command
 from pymedia.commands.encode_command import encode_command
 from pymedia.commands.gif_command import gif_command
 from pymedia.commands.split_command import split_command
-from pymedia.feedback.errors import InsufficientInputError
-from pymedia.feedback.logger import get_logger, log_warning
+from pymedia.feedback.errors import InsufficientInputError, MissingOptionsError
 from pymedia.models.arguments import Arguments, CommandName
 
 app = typer.Typer(
@@ -33,7 +32,6 @@ app = typer.Typer(
     no_args_is_help=True,
     add_completion=False,
 )
-logger = get_logger("main")
 
 
 @app.command()
@@ -78,8 +76,7 @@ def encode(
     Transcode using the selected options (requires at least one option)
     """
     if crop is None and scale is None and gyrate is None and remux is False:
-        log_warning(logger, "missing_options")
-        return
+        raise MissingOptionsError()
 
     encode_command(
         Arguments(

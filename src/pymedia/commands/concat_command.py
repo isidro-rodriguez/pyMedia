@@ -83,4 +83,8 @@ def concat_command(args: Arguments):
     # Si no son compatibles o hay operaciones, se usa concat filter (recodificación)
     else:
         cmd = concat_filter_cmd()
+
+        if cmd is None:
+            raise CommandGenerationError(command_name="concat")
+
         _run_ffmpeg(cmd)
