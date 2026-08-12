@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 
 from pymedia.cli_params import OutputOnConflictMode
-from pymedia.feedback.errors import InvalidConfigError
+from pymedia.feedback.errors import InvalidConfigError, InvalidSettingError
 from pymedia.feedback.logger import get_logger
 from pymedia.models.media import Media
 from pymedia.models.state import state
@@ -64,7 +64,7 @@ def _target_fps() -> str:
         case "max_fps":
             return str(max(fps_list))
         case _:
-            return "30"
+            raise InvalidSettingError(parameter="fps")
 
 
 def _channel_layout() -> str:

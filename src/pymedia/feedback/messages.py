@@ -22,6 +22,7 @@ ValidationError = {
     "crop_exceeds_height": "Invalid crop: {total} >= original height {height}.",
     "crop_exceeds_width": "Invalid crop: {total} >= original width {width}.",
     "insufficient_inputs": "At least two videos must be provided for this command.",
+    "invalid_setting": "Invalid configuration setting: {setting}",
     "invalid_crop_format": "Invalid crop format. Expected: LEFT,RIGHT,TOP,BOTTOM",
     "invalid_directory_name": (
         "'{directory}' contains invalid characters: '< > : \" / \\ | ? *'"

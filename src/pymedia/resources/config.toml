@@ -22,7 +22,7 @@ default_container = ".mp4"
 
 [conflictive_join]
 resize_to = "min_height"    # min_height | max_height
-fps = "min"                 # min | max
+fps = "min_fps"             # min_fps | max_fps
 channels = "stereo"         # stereo | mono
 pix_fmt = "yuv420p"         # yuv420p | yuv420p10le
 confirm_encode = true

@@ -122,6 +122,10 @@ class MissingOptionsError(ValidationError):
     message_key = "missing_options"
 
 
+class InvalidSettingError(ValidationError):
+    message_key = "invalid_setting"
+
+
 # ─────────────────────────────────────────────────────────────────────────────
 #  PipelineError (nivel ERROR)
 # ─────────────────────────────────────────────────────────────────────────────
