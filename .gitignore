@@ -1,11 +1,11 @@
 .idea/
+.local/
 .pytest_cache/
 .ruff_cache/
 .venv/
 __pycache__/
 *.egg-info/
 build/
-data/
 *.pyc
 .env
 Thumbs.db

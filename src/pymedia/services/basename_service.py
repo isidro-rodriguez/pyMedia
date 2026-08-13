@@ -1,7 +1,9 @@
 import re
 from pathlib import Path
 
-from pymedia.data import CONTAINERS_BY_CODEC, GIF_EXTENSION, VIDEO_EXTENSIONS
+from pymedia.data.audio_codecs import AUDIO_CODECS
+from pymedia.data.containers import GIF_CONTAINER, VIDEO_CONTAINERS
+from pymedia.data.video_codecs import VIDEO_CODECS
 from pymedia.feedback.errors import (
     CannotCreateDirectoryError,
     InvalidDirectoryError,
@@ -20,12 +22,12 @@ def _format_supported(extensions: set[str] | list[str]) -> str:
 def _is_valid_video_extension(video: Path) -> bool:
     if video.suffix is None:
         raise InvalidFileExtensionError(
-            extension=None, supported=_format_supported(VIDEO_EXTENSIONS)
+            extension=None, supported=_format_supported(VIDEO_CONTAINERS)
         )
-    if video.suffix not in VIDEO_EXTENSIONS:
+    if video.suffix not in VIDEO_CONTAINERS:
         raise InvalidFileExtensionError(
             extension=video.suffix,
-            supported=_format_supported(VIDEO_EXTENSIONS),
+            supported=_format_supported(VIDEO_CONTAINERS),
         )
     return True
 
@@ -72,7 +74,8 @@ def process_inputs(inputs: list[Path]) -> list[Path]:
 def process_output(
     output: Path,
     command: str,
-    target_codec: str | None = None,
+    target_video_codec: str | None = None,
+    target_audio_codec: str | None = None,
 ) -> Path:
     """Comprueba el fichero de salida tenga un nombre y extensión válido."""
     # Comprobación del directorio (solo si se va a crear/escritura en subdirectorio)
@@ -94,30 +97,48 @@ def process_output(
     # Comprobación de la extensión
     if output.suffix is None:
         raise InvalidFileExtensionError(
-            extension="", supported=_format_supported(VIDEO_EXTENSIONS)
+            extension="", supported=_format_supported(VIDEO_CONTAINERS)
         )
 
     if command is CommandName.GIF:
-        if output.suffix != GIF_EXTENSION[0]:
+        if output.suffix != GIF_CONTAINER[0]:
             raise InvalidFileExtensionError(
                 extension=output.suffix,
-                supported=_format_supported(GIF_EXTENSION),
+                supported=_format_supported(GIF_CONTAINER),
             )
     else:
-        if output.suffix not in VIDEO_EXTENSIONS:
+        if output.suffix not in VIDEO_CONTAINERS:
             raise InvalidFileExtensionError(
                 extension=output.suffix,
-                supported=_format_supported(VIDEO_EXTENSIONS),
+                supported=_format_supported(VIDEO_CONTAINERS),
             )
 
-        if target_codec is None:
+        if target_video_codec is None:
             raise MissingMediaPropertyError(property_name="Video codec")
 
-        valid_containers = CONTAINERS_BY_CODEC.get(target_codec, set())
-        if valid_containers and output.suffix not in valid_containers:
+        video_codec_data = VIDEO_CODECS[target_video_codec]
+
+        if (
+            video_codec_data.containers
+            and output.suffix not in video_codec_data.containers
+        ):
             raise InvalidFileExtensionError(
                 extension=output.suffix,
-                supported=_format_supported(valid_containers),
+                codec=video_codec_data.name,
+                supported=_format_supported(video_codec_data.containers),
             )
+
+        if target_audio_codec is not None:
+            audio_codec_data = AUDIO_CODECS[target_audio_codec]
+
+            if (
+                audio_codec_data.containers
+                and output.suffix not in audio_codec_data.containers
+            ):
+                raise InvalidFileExtensionError(
+                    extension=output.suffix,
+                    codec=audio_codec_data.name,
+                    supported=_format_supported(audio_codec_data.containers),
+                )
 
     return output

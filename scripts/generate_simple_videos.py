@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 
 DURATION = 10
 FPS = 30
-OUTPUT_DIR = Path("../data/fixtures")
+OUTPUT_DIR = Path("../.local/fixtures")
 
 RESOLUTIONS = {
     "480p": "854x480",

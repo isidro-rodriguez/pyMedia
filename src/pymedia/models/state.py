@@ -158,15 +158,19 @@ class State:
         requires_encode = pipeline.requires_encode if pipeline else False
 
         if requires_encode:
-            target_codec = self.config.encode.video_codec
+            target_video_codec = self.config.encode.video_codec
+            target_audio_codec = self.config.encode.audio_codec
         else:
             video = self.media[0].video if self.media else None
-            target_codec = video.codec if video else None
+            audio = self.media[0].audio if self.media else None
+            target_video_codec = video.codec if video else None
+            target_audio_codec = audio.codec if audio else None
 
         self.output = process_output(
             output=output,
             command=self.arguments.command,
-            target_codec=target_codec,
+            target_video_codec=target_video_codec,
+            target_audio_codec=target_audio_codec,
         )
 
     def set_output_on_conflict(self) -> None:

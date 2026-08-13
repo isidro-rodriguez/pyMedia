@@ -27,7 +27,7 @@ ValidationError = {
     "invalid_directory_name": (
         "'{directory}' contains invalid characters: '< > : \" / \\ | ? *'"
     ),
-    "invalid_extension": "Invalid extension '{extension}'. Must be one of: {supported}",
+    "invalid_extension": "Invalid extension '{extension}'. Codec '{codec}' requires one of: {supported}",
     "invalid_filename": (
         "'{filename}' contains invalid characters: '< > : \" / \\ | ? *'"
     ),

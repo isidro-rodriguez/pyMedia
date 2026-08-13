@@ -1,6 +1,6 @@
 [project]
 name = "pymedia"
-version = "0.2.2"
+version = "0.2.3"
 description = "Aplicación de consola, CLI + TUI, que actúa como handler de comandos ffmpeg."
 readme = "README.md"
 requires-python = ">=3.11"
