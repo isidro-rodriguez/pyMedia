@@ -4,7 +4,7 @@ from pathlib import Path
 from pymedia.data.audio_codecs import AUDIO_CODECS
 from pymedia.data.containers import GIF_CONTAINER, VIDEO_CONTAINERS
 from pymedia.data.video_codecs import VIDEO_CODECS
-from pymedia.feedback.errors import (
+from pymedia.errors import (
     CannotCreateDirectoryError,
     InvalidDirectoryError,
     InvalidFileExtensionError,

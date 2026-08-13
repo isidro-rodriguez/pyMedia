@@ -1,4 +1,3 @@
-import logging
 import tomllib
 from dataclasses import dataclass
 from importlib.resources import files
@@ -6,17 +5,12 @@ from pathlib import Path
 
 import platformdirs
 
-from pymedia.feedback.logger import log_info
-
-logger = logging.getLogger("[pymedia.config]")
-
 
 @dataclass(frozen=True)
 class Encode:
     video_codec: str
     video_preset: str
     video_crf: int
-    video_pix_fmt: str
     audio_codec: str
     audio_bit_rate: str
     default_container: str
@@ -27,7 +21,6 @@ class ConflictiveJoin:
     resize_to: str
     fps: str
     channels: str
-    pix_fmt: str
     confirm_encode: bool
 
 
@@ -65,7 +58,6 @@ class Config:
     @classmethod
     def _create(cls, path: Path) -> None:
         """Copia el config por defecto desde los recursos a la ruta de usuario."""
-        log_info(logger, "config_saved")
         path.parent.mkdir(parents=True, exist_ok=True)
         src = (
             files("pymedia.resources")

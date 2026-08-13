@@ -4,11 +4,11 @@ from json import JSONDecodeError
 from pathlib import Path
 
 from pymedia.cli_params import OutputOnConflictMode
-from pymedia.feedback.errors import (
+from pymedia.errors import (
     MissingArgumentsError,
     MissingMediaError,
 )
-from pymedia.feedback.logger import get_logger, log_debug
+from pymedia.logger import get_logger, log_debug
 from pymedia.models.arguments import Arguments
 from pymedia.models.config import Config
 from pymedia.models.gif_pipeline import GifPipeline

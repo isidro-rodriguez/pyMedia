@@ -1,8 +1,8 @@
 from pathlib import Path
 
 from pymedia.cli_params import OutputOnConflictMode
-from pymedia.feedback.errors import OutputOnConflictError
-from pymedia.feedback.logger import log_warning
+from pymedia.errors import OutputOnConflictError
+from pymedia.logger import log_warning
 from pymedia.models.arguments import Arguments, CommandName
 from pymedia.models.state import state
 

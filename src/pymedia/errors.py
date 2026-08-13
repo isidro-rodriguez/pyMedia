@@ -1,4 +1,4 @@
-from pymedia.feedback.logger import get_logger
+from pymedia.logger import get_logger
 
 logger = get_logger("errors")
 
@@ -8,10 +8,10 @@ class PyMediaError(Exception):
 
     Cada subclase define:
     - `level`: nivel de logging ("ERROR" | "CRITICAL")
-    - `category`: diccionario de plantillas en messages.py
+    - `category`: diccionario de plantillas en en.py
     - `message_key`: clave de la plantilla a usar
 
-    El mensaje se formatea desde `feedback/messages.py` y se
+    El mensaje se formatea desde `lang/en.py` y se
     registra automáticamente en el log al levantarse la excepción.
     """
 
@@ -20,7 +20,7 @@ class PyMediaError(Exception):
     message_key = ""
 
     def __init__(self, **kwargs) -> None:
-        from pymedia.feedback.messages import (
+        from pymedia.lang.en import (
             ExecutionError,
             PipelineError,
             ValidationError,
@@ -197,5 +197,25 @@ class CannotCreateDirectoryError(ExecutionError):
     message_key = "cannot_create_directory"
 
 
-class InvalidConfigError(ExecutionError):
+class ConfigError(ExecutionError):
+    """Errores relacionados con el fichero de configuración."""
+
+
+class InvalidConfigError(ConfigError):
     message_key = "invalid_config"
+
+
+class InvalidConfigSettingError(ConfigError):
+    message_key = "invalid_config_setting"
+
+
+class MissingConfigSectionError(ConfigError):
+    message_key = "missing_config_section"
+
+
+class MissingConfigSettingError(ConfigError):
+    message_key = "missing_config_setting"
+
+
+class UnexpectedConfigSettingError(ConfigError):
+    message_key = "unexpected_config_setting"

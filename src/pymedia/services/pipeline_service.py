@@ -2,7 +2,7 @@ from datetime import timedelta
 from pathlib import Path
 
 from pymedia.cli_params import GyrateMode, ScaleGifMode, ScaleVideoMode
-from pymedia.feedback.errors import (
+from pymedia.errors import (
     CropAllZeroError,
     CropExceedsHeightError,
     CropExceedsWidthError,
@@ -15,7 +15,7 @@ from pymedia.feedback.errors import (
     NegativeTimeError,
     TimeExceedsDurationError,
 )
-from pymedia.feedback.logger import get_logger, log_warning
+from pymedia.logger import get_logger, log_warning
 from pymedia.models.media import Media
 from pymedia.utils import convert_to_timedelta, parse_crop
 

@@ -3,9 +3,9 @@ import tempfile
 from pathlib import Path
 
 from pymedia.commands.encode_command import encode_command
-from pymedia.feedback.errors import CommandExecutionError, CommandGenerationError
-from pymedia.feedback.logger import get_logger, log_debug, log_info
+from pymedia.errors import CommandExecutionError, CommandGenerationError
 from pymedia.ffmpeg.split_cmd import split_cmd
+from pymedia.logger import get_logger, log_debug, log_info
 from pymedia.models.arguments import Arguments
 from pymedia.models.state import state
 from pymedia.services.commands_service import (

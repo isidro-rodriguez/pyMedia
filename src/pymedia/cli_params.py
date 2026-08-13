@@ -1,4 +1,3 @@
-# src/pymedia/cli_params.py
 from enum import Enum
 from pathlib import Path
 from typing import Annotated
@@ -6,7 +5,7 @@ from typing import Annotated
 import typer
 
 # -----------------------------------------------------------------------------
-#  Enums
+#  Enums de opciones
 # -----------------------------------------------------------------------------
 
 
@@ -19,6 +18,8 @@ class GyrateMode(int, Enum):
 
 
 class OutputOnConflictMode(Enum):
+    """Resolución de conflicto si ya existe un fichero con el mismo nombre"""
+
     FAIL = "fail"
     REPLACE = "replace"
     RENAME = "rename"
@@ -88,6 +89,14 @@ CropOption = Annotated[
         metavar="left,right,top,bottom",
         rich_help_panel="Encode options",
         help="Crops the specified number of pixels. [dim]E.g.: -c 200,200,0,0[/dim]",
+    ),
+]
+
+DebugOption = Annotated[
+    bool,
+    typer.Option(
+        "--debug",
+        help="Log level DEBUG",
     ),
 ]
 

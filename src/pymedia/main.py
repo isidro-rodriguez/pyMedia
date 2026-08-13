@@ -4,6 +4,7 @@ import typer
 
 from pymedia.cli_params import (
     CropOption,
+    DebugOption,
     EndPointOption,
     FpsOption,
     GyrateOption,
@@ -23,7 +24,8 @@ from pymedia.commands.concat_command import concat_command
 from pymedia.commands.encode_command import encode_command
 from pymedia.commands.gif_command import gif_command
 from pymedia.commands.split_command import split_command
-from pymedia.feedback.errors import InsufficientInputError, MissingOptionsError
+from pymedia.errors import InsufficientInputError, MissingOptionsError
+from pymedia.logger import setup_logging
 from pymedia.models.arguments import Arguments, CommandName
 
 app = typer.Typer(
@@ -32,6 +34,11 @@ app = typer.Typer(
     no_args_is_help=True,
     add_completion=False,
 )
+
+
+@app.callback()
+def main(debug: DebugOption = False) -> None:
+    setup_logging(debug=debug)
 
 
 @app.command()
@@ -66,6 +73,7 @@ def concat(
 def encode(
     inputs: PathsArgument,
     crop: CropOption = None,
+    debug: DebugOption = False,
     scale: ScaleVideoOption = None,
     gyrate: GyrateOption = None,
     remux: RemuxOption = False,
@@ -97,6 +105,7 @@ def split(
     input_single: PathArgument,
     trim_points: TrimPointsOption,
     crop: CropOption = None,
+    debug: DebugOption = False,
     scale: ScaleVideoOption = None,
     gyrate: GyrateOption = None,
     remux: RemuxOption = False,

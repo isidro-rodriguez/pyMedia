@@ -2,7 +2,7 @@ import json
 import subprocess
 from pathlib import Path
 
-from pymedia.feedback.logger import get_logger, log_debug
+from pymedia.logger import get_logger, log_debug
 
 logger = get_logger("probe")
 

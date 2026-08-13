@@ -1,32 +1,30 @@
-# +-------------+------------------------------------+--------------------+
-# |             |             Vídeo                  |       Audio        |
-# |  Perfiles   +-------+--------+-----+-------------+---------+----------+
-# |             | Códec | Preset | CRF | pix_fmt     | Códec   | bit rate |
-# +-------------+-------+--------+-----+-------------+---------+----------+
-# | Rápido      | h264  |  fast  |  22 | yuv420p     | aac     |     160k |
-# | Equilibrado | hevc  |  slow  |  24 | yuv420p10le | aac     |     128k |
-# | Máximo      | av1   |     4  |  32 | yuv420p10le | libopus |      96k |
-# +-------------+-------+--------+-----+-------------+---------+----------+
+# +-------------+----------------------+------------------+
+# |             |             Vídeo    |       Audio      |
+# |  Perfiles   +-------+--------+-----+-------+----------+
+# |             | Códec | Preset | CRF | Códec | bit rate |
+# +-------------+-------+--------+-----+-------+----------+
+# | Rápido      | h264  |  fast  |  22 | aac   |     160k |
+# | Equilibrado | hevc  |  slow  |  24 | opus  |     128k |
+# | Máximo      | av1   |     4  |  32 | opus  |      96k |
+# +-------------+-------+--------+-----+-------+----------+
 # - Rápido: transcodifica sin esperar mucho
 # - Equilibrado: 40% menos espacio, pero tarda el triple
 # - Máximo: 15% menos espacio que equilibrado, pero aún más lento
 
 [encode]
-video_codec = "libx264"
+video_codec = "h264"
 video_preset = "fast"
 video_crf = 22
-video_pix_fmt = "yuv420p"
 audio_codec = "aac"
 audio_bit_rate = "160k"
 default_container = ".mp4"
 
 [conflictive_join]
-resize_to = "min_height"    # min_height | max_height
-fps = "min_fps"             # min_fps | max_fps
-channels = "stereo"         # stereo | mono
-pix_fmt = "yuv420p"         # yuv420p | yuv420p10le
+resize_to = "min_height"            # min_height | max_height
+fps = "min_fps"                     # min_fps | max_fps
+channels = "stereo"                 # stereo | mono | 5.1
 confirm_encode = true
 
 [app]
-logger_level = "INFO"               # DEBUG | INFO | WARNING | ERROR
+logger_level = "INFO"               # DEBUG | INFO | WARNING | ERROR | CRITICAL
 disable_resolution_increase = true

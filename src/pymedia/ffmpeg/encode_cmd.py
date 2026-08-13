@@ -1,6 +1,7 @@
 from pathlib import Path
 
 from pymedia.cli_params import OutputOnConflictMode
+from pymedia.data.video_codecs import VIDEO_CODECS
 from pymedia.models.state import state
 
 
@@ -41,13 +42,13 @@ def encode_cmd(
     cmd.extend(
         [
             "-c:v",
-            encode.video_codec,
+            VIDEO_CODECS[state.config.encode.video_codec].library,
             "-crf",
             str(encode.video_crf),
             "-preset",
             encode.video_preset,
             "-pix_fmt",
-            encode.video_pix_fmt,
+            VIDEO_CODECS[state.config.encode.video_codec].pix_fmt,
             "-c:a",
             "copy",
             str(output),

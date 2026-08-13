@@ -6,6 +6,10 @@ ExecutionError = {
     "command_generation": "FFmpeg command '{command_name}' was not generated.",
     "ffmpeg_timeout": "FFmpeg operation exceeded the allowed timeout.",
     "invalid_config": "Invalid configuration: {message}",
+    "invalid_config_setting": "Invalid configuration setting: {setting} is expected {expected}",  # noqa: E501
+    "missing_config_section": "Missing configuration section: {section}",
+    "missing_config_setting": "Missing configuration setting: {setting}",
+    "unexpected_config_setting": "Unexpected configuration setting: {setting}",
 }
 
 PipelineError = {
@@ -22,12 +26,11 @@ ValidationError = {
     "crop_exceeds_height": "Invalid crop: {total} >= original height {height}.",
     "crop_exceeds_width": "Invalid crop: {total} >= original width {width}.",
     "insufficient_inputs": "At least two videos must be provided for this command.",
-    "invalid_setting": "Invalid configuration setting: {setting}",
     "invalid_crop_format": "Invalid crop format. Expected: LEFT,RIGHT,TOP,BOTTOM",
     "invalid_directory_name": (
         "'{directory}' contains invalid characters: '< > : \" / \\ | ? *'"
     ),
-    "invalid_extension": "Invalid extension '{extension}'. Codec '{codec}' requires one of: {supported}",
+    "invalid_extension": "Invalid extension '{extension}'. Codec '{codec}' requires one of: {supported}",  # noqa: E501
     "invalid_filename": (
         "'{filename}' contains invalid characters: '< > : \" / \\ | ? *'"
     ),

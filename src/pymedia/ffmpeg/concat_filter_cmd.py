@@ -1,8 +1,9 @@
 from dataclasses import dataclass
 
 from pymedia.cli_params import OutputOnConflictMode
-from pymedia.feedback.errors import InvalidConfigError, InvalidSettingError
-from pymedia.feedback.logger import get_logger
+from pymedia.data.video_codecs import VIDEO_CODECS
+from pymedia.errors import InvalidConfigError, InvalidSettingError
+from pymedia.logger import get_logger
 from pymedia.models.media import Media
 from pymedia.models.state import state
 from pymedia.services.pipeline_service import process_crop
@@ -18,7 +19,6 @@ class TargetRequirements:
     height: int
     width: int
     fps: str
-    pix_fmt: str
     channel_layout: str
     has_audio: bool
 
@@ -31,7 +31,6 @@ class TargetDerived:
     needs_scale: bool
     needs_normalize: bool
     needs_fps: bool
-    needs_pix_fmt: bool
     all_audio_compatible: bool
 
 
@@ -116,7 +115,6 @@ def _build_requirements() -> TargetRequirements:
         height=target_height,
         width=target_width,
         fps=_target_fps(),
-        pix_fmt=state.config.conflictive_join.pix_fmt,
         channel_layout=_channel_layout(),
         has_audio=any(m.audio is not None for m in state.media),
     )
@@ -167,11 +165,6 @@ def _needs_fps() -> bool:
     return len({m.video.fps for m in state.media if m.video is not None}) > 1
 
 
-def _needs_pix_fmt() -> bool:
-    """True si los vídeos tienen pix_fmt distintos (o desconocido)."""
-    return len({m.video.pix_fmt for m in state.media if m.video is not None}) > 1
-
-
 def _all_audio_compatible() -> bool:
     """True si todos tienen audio y son idénticos en codec/rate/channels/layout."""
     if any(m.audio is None for m in state.media):
@@ -214,7 +207,6 @@ def _build_derived(req: TargetRequirements) -> TargetDerived:
         needs_scale=_needs_scale(),
         needs_normalize=len(set(scaled_dims)) > 1,
         needs_fps=_needs_fps(),
-        needs_pix_fmt=_needs_pix_fmt(),
         all_audio_compatible=_all_audio_compatible(),
     )
 
@@ -262,8 +254,9 @@ def _build_video_chain(
     normalization = ["setsar=1"]
     if derived.needs_fps:
         normalization.append(f"fps={req.fps}")
-    if derived.needs_pix_fmt:
-        normalization.append(f"format={req.pix_fmt}")
+        normalization.append(
+            f"format={VIDEO_CODECS[state.config.encode.video_codec].pix_fmt}"
+        )
     normalization.append("setpts=PTS-STARTPTS")
     normalization_str = ",".join(normalization)
 
@@ -349,7 +342,7 @@ def _build_cmd(final: TargetFinal) -> list[str]:
             "-map",
             "[v]",
             "-c:v",
-            state.config.encode.video_codec,
+            VIDEO_CODECS[state.config.encode.video_codec].library,
             "-preset",
             state.config.encode.video_preset,
             "-crf",

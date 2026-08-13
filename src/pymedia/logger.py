@@ -1,22 +1,12 @@
-"""Sistema de logging global de pyMedia."""
-
 import logging
 import sys
 from pathlib import Path
 
 import platformdirs
 
-from pymedia.feedback.messages import Debug, Info, Warnings
+from pymedia.lang.en import Debug, Info, Warnings
 
 _configured = False
-
-_LEVELS = {
-    "DEBUG": logging.DEBUG,
-    "INFO": logging.INFO,
-    "WARNING": logging.WARNING,
-    "ERROR": logging.ERROR,
-    "CRITICAL": logging.CRITICAL,
-}
 
 _LEVEL_ABBREV = {
     "DEBUG": "[DEBUG]",
@@ -61,21 +51,23 @@ class PymediaFilter(logging.Filter):
         return record.name.startswith("pymedia")
 
 
-def setup_logging() -> None:
+def setup_logging(debug: bool = False) -> None:
     """Configura el logger raíz (idempotente).
 
     - Console handler a stderr (compacto, sin columnas extra)
     - File handler en el directorio de configuración del usuario,
       columnizado para alinear el mensaje.
+
+    Se debe llamar explícitamente una vez desde el entrypoint CLI, pasando
+    ``debug=True`` si el usuario pide más verbosidad. Si algún módulo pide
+    un logger antes de esa llamada (tests, imports sueltos), se configura
+    con el nivel por defecto (INFO) como red de seguridad.
     """
     global _configured
     if _configured:
         return
 
-    from pymedia.models.config import Config
-
-    config = Config.load()
-    level = _LEVELS.get(config.app.logger_level.upper(), logging.INFO)
+    level = logging.DEBUG if debug else logging.INFO
 
     root = logging.getLogger()
     root.setLevel(level)
@@ -100,12 +92,19 @@ def setup_logging() -> None:
 
 
 def get_logger(name: str = "") -> logging.Logger:
-    """Devuelve un logger con prefijo 'pymedia.*'."""
+    """Devuelve un logger con prefijo 'pymedia.*'.
+
+    Si `setup_logging()` no se ha llamado todavía (p. ej. en tests o al
+    importar un módulo de forma aislada), se configura aquí con el nivel
+    por defecto para que el logger siempre esté operativo.
+    """
     setup_logging()
     return logging.getLogger(f"pymedia.{name}" if name else "pymedia")
 
 
-# ─── Helpers con plantillas de messages.py ───────────────────────────────────
+# -----------------------------------------------------------------------------
+#  Helpers con plantillas
+# -----------------------------------------------------------------------------
 
 
 def log_info(logger: logging.Logger, key: str, **kwargs) -> None:
