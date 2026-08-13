@@ -4,7 +4,7 @@ from pathlib import Path
 
 import platformdirs
 
-from pymedia.lang.en import Debug, Info, Warnings
+from pymedia.locales.en import Debug, Info, Warnings
 
 _configured = False
 

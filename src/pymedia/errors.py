@@ -11,7 +11,7 @@ class PyMediaError(Exception):
     - `category`: diccionario de plantillas en en.py
     - `message_key`: clave de la plantilla a usar
 
-    El mensaje se formatea desde `lang/en.py` y se
+    El mensaje se formatea desde `locales/en.py` y se
     registra automáticamente en el log al levantarse la excepción.
     """
 
@@ -20,7 +20,7 @@ class PyMediaError(Exception):
     message_key = ""
 
     def __init__(self, **kwargs) -> None:
-        from pymedia.lang.en import (
+        from pymedia.locales.en import (
             ExecutionError,
             PipelineError,
             ValidationError,

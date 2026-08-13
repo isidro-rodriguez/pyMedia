@@ -1,3 +1,27 @@
+ConfigValidation = {
+    "invalid_audio_bit_rate": "Invalid configuration setting: encode.audio_bit_rate is expected one of: {expected}",  # noqa: E501
+    "invalid_audio_codec": "Invalid configuration setting: encode.audio_codec is expected one of: {expected}",  # noqa: E501
+    "invalid_channels": "Invalid configuration setting: conflictive_join.channels is expected one of: {expected}",  # noqa: E501
+    "invalid_default_container": "Invalid configuration setting: encode.default_container is expected one of: {expected}",  # noqa: E501
+    "invalid_fps": "Invalid configuration setting: conflictive_join.fps is expected one of: {expected}",  # noqa: E501
+    "invalid_resize_to": "Invalid configuration setting: conflictive_join.resize_to is expected one of: {expected}",  # noqa: E501
+    "invalid_video_codec": "Invalid configuration setting: encode.video_codec is expected one of: {expected}",  # noqa: E501
+    "invalid_video_crf": "Invalid configuration setting: encode.video_crf is expected between {min} and {max}",  # noqa: E501
+    "invalid_video_preset": "Invalid configuration setting: encode.video_preset is expected one of: {expected}",  # noqa: E501
+}
+
+
+Debug = {
+    "ffmpeg_command": "FFmpeg command: {cmd}",
+    "ffprobe_data": "ffprobe data: {data}",
+    "pipeline_crop": "Calculated crop: {crop}",
+    "pipeline_gyrate": "Applied rotation: {gyrate}",
+    "pipeline_scale": "Calculated scale: {scale}",
+    "pipeline_time": "Processed time: {time}",
+    "pipeline_trim": "Trim points: {trim}",
+}
+
+
 ExecutionError = {
     "cannot_create_directory": "Could not create directory: {path}",
     "command_execution": (
@@ -12,6 +36,16 @@ ExecutionError = {
     "unexpected_config_setting": "Unexpected configuration setting: {setting}",
 }
 
+
+Info = {
+    "config_saved": "Saving config.toml",
+    "concat_success": "Videos concatenated successfully: {output}",
+    "encode_success": "Transcoding completed successfully: {output}",
+    "gif_success": "GIF generated successfully: {output}",
+    "split_success": "Video split successfully: {output}",
+}
+
+
 PipelineError = {
     "incompatible_files": "Video files are incompatible with each other.",
     "missing_arguments": "Missing arguments retrieved from Typer.",
@@ -20,6 +54,7 @@ PipelineError = {
     "missing_media_property": "Media property '{property_name}' could not be found.",
     "output_on_conflict": "Stopped process because output file already exist.",
 }
+
 
 ValidationError = {
     "crop_all_zero": "Invalid crop: all values are 0.",
@@ -42,6 +77,7 @@ ValidationError = {
     "time_exceeds_duration": "Timestamp {time} exceeds video duration {duration}.",
 }
 
+
 Warnings = {
     "missing_options": "At least one option is required.",
     "output_exist": "File already exist: {file_path}",
@@ -50,22 +86,4 @@ Warnings = {
         "Scaling to {scale}p not applied: resolution is higher than the original "
         "({height}p)."
     ),
-}
-
-Info = {
-    "config_saved": "Saving config.toml",
-    "concat_success": "Videos concatenated successfully: {output}",
-    "encode_success": "Transcoding completed successfully: {output}",
-    "gif_success": "GIF generated successfully: {output}",
-    "split_success": "Video split successfully: {output}",
-}
-
-Debug = {
-    "ffmpeg_command": "FFmpeg command: {cmd}",
-    "ffprobe_data": "ffprobe data: {data}",
-    "pipeline_crop": "Calculated crop: {crop}",
-    "pipeline_gyrate": "Applied rotation: {gyrate}",
-    "pipeline_scale": "Calculated scale: {scale}",
-    "pipeline_time": "Processed time: {time}",
-    "pipeline_trim": "Trim points: {trim}",
 }
