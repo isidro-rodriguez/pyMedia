@@ -1,10 +1,10 @@
-import tomllib
 from dataclasses import dataclass
 from enum import Enum
 from importlib.resources import files
 from pathlib import Path
 
 import platformdirs
+import tomllib
 
 from pymedia import locales
 from pymedia.data.audio_codecs import AUDIO_CODECS
@@ -31,11 +31,12 @@ class Channels(Enum):
 class Language(Enum):
     """Idiomas disponibles para la interfaz de la aplicación."""
 
-    SYSTEM = "system"
     ENGLISH = "english"
-    SPANISH = "spanish"
-    ITALIAN = "italian"
     FRENCH = "french"
+    GERMAN = "german"
+    ITALIAN = "italian"
+    SPANISH = "spanish"
+    SYSTEM = "system"
 
 
 class ResizeTo(Enum):

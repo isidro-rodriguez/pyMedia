@@ -12,10 +12,10 @@
 # - Máximo: 15% menos espacio que equilibrado, pero aún más lento
 
 [encode]
-video_codec = "h264"
+video_codec = "h264"                # h264 | h265 | av1
 video_preset = "fast"
 video_crf = 22
-audio_codec = "aac"
+audio_codec = "aac"                 # aac | opus | eac3
 audio_bit_rate = "160k"
 default_container = ".mp4"
 
@@ -26,5 +26,5 @@ channels = "stereo"                 # stereo | mono | 5.1
 confirm_encode = true
 
 [app]
-language = "system"                 # system | english | spanish | italian | french
+language = "system"                 # system | english | spanish | italian | french | german
 disable_resolution_increase = true

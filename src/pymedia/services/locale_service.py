@@ -2,19 +2,20 @@
 
 import importlib
 import os
-import tomllib
 from pathlib import Path
 
 import platformdirs
+import tomllib
 
 LANGUAGE_MAP = {
     "system": None,
     "english": "en",
-    "spanish": "es",
-    "italian": "it",
     "french": "fr",
+    "german": "de",
+    "italian": "it",
+    "spanish": "es",
 }
-SUPPORTED_LANGUAGES = {"en", "es", "it", "fr"}
+SUPPORTED_LANGUAGES = {"de", "en", "es", "it", "fr"}
 _current_locale = None
 
 
