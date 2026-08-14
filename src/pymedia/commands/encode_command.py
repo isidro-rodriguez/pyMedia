@@ -38,7 +38,7 @@ def encode_command(args: Arguments, output: Path | None = None) -> None:
         output = resolve_output_conflict(output, logger)
 
         if output is None:
-            return
+            continue
 
         cmd = encode_cmd(state.inputs[i], output)
 
