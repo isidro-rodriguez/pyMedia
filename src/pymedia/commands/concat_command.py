@@ -1,11 +1,10 @@
-import subprocess
 import tempfile
+from datetime import timedelta
 from pathlib import Path
 
+from pymedia import locales
 from pymedia.errors import (
-    CommandExecutionError,
     CommandGenerationError,
-    FFmpegTimeoutError,
     IncompatibleFilesError,
 )
 from pymedia.ffmpeg.concat_demux_cmd import concat_demux_cmd
@@ -16,6 +15,7 @@ from pymedia.models.state import state
 from pymedia.services.command_service import (
     initialize_command,
     resolve_output_conflict,
+    run_ffmpeg,
 )
 
 logger = get_logger("concat")
@@ -32,19 +32,14 @@ def _compatible_videos() -> bool:
 def _run_ffmpeg(cmd: list[str]) -> None:
     """Ejecuta ffmpeg con timeout y manejo de errores."""
     log_debug(logger, "ffmpeg_command", cmd=cmd)
-    try:
-        subprocess.run(
-            cmd,
-            capture_output=True,
-            text=True,
-            check=True,
-            timeout=FFMPEG_TIMEOUT,
-        )
-        log_info(logger, "concat_success", output=state.output)
-    except subprocess.TimeoutExpired as exc:
-        raise FFmpegTimeoutError() from exc
-    except subprocess.CalledProcessError as e:
-        raise CommandExecutionError(command_name="concat", error=e.stderr) from e
+    duration = sum((m.duration for m in state.media), timedelta())
+    duration_in_seconds = duration / timedelta(milliseconds=1)
+    run_ffmpeg(
+        cmd=cmd,
+        duration=duration_in_seconds,
+        description=locales.Progress["concat"],
+    )
+    log_info(logger, "concat_success", output=state.output)
 
 
 def concat_command(args: Arguments):

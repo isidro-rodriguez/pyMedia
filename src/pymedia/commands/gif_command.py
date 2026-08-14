@@ -1,7 +1,7 @@
-import subprocess
 from pathlib import Path
 
-from pymedia.errors import CommandExecutionError, CommandGenerationError
+from pymedia import locales
+from pymedia.errors import CommandGenerationError
 from pymedia.ffmpeg.gif_cmd import gif_cmd
 from pymedia.logger import get_logger, log_debug, log_info
 from pymedia.models.arguments import Arguments
@@ -9,6 +9,7 @@ from pymedia.models.state import state
 from pymedia.services.command_service import (
     initialize_command,
     resolve_output_conflict,
+    run_ffmpeg,
 )
 
 logger = get_logger("gif")
@@ -34,8 +35,9 @@ def gif_command(args: Arguments) -> None:
         raise CommandGenerationError(command_name="concat")
 
     log_debug(logger, "ffmpeg_command", cmd=cmd)
-    try:
-        subprocess.run(cmd, capture_output=True, text=True, check=True)
-        log_info(logger, "gif_success", output=output)
-    except subprocess.CalledProcessError as e:
-        raise CommandExecutionError(command_name="gif", error=e.stderr) from e
+    run_ffmpeg(
+        cmd=cmd,
+        duration=state.media[0].duration.total_seconds(),
+        description=locales.Progress["gif"],
+    )
+    log_info(logger, "gif_success", output=output)

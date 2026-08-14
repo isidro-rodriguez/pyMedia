@@ -32,6 +32,9 @@ def split_cmd(
             "1",
             "-segment_times",
             state.video_pipeline.trim_points,
+            "-progress",
+            "pipe:1",
+            "-nostats",
             str(video_outputs),
         ]
     )

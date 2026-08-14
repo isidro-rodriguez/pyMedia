@@ -51,6 +51,9 @@ def encode_cmd(
             VIDEO_CODECS[state.config.encode.video_codec].pix_fmt,
             "-c:a",
             "copy",
+            "-progress",
+            "pipe:1",
+            "-nostats",
             str(output),
         ]
     )

@@ -45,6 +45,8 @@ app = typer.Typer(
 
 
 def _build_arguments(command: CommandName, local_vars: dict) -> Arguments:
+    if "input_single" in local_vars:
+        local_vars = {**local_vars, "inputs": [local_vars["input_single"]]}
     valid = {f.name for f in fields(Arguments)}
     return Arguments(
         command=command, **{k: v for k, v in local_vars.items() if k in valid}
@@ -80,6 +82,7 @@ def concat(
 def encode(
     inputs: PathsArgument,
     crop: CropOption = None,
+    debug: DebugOption = False,
     gyrate: GyrateOption = None,
     help_: HelpOption = False,
     output: OutputOption = None,

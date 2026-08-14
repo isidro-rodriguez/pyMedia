@@ -1,8 +1,7 @@
-import subprocess
 from pathlib import Path
 
+from pymedia import locales
 from pymedia.errors import (
-    CommandExecutionError,
     CommandGenerationError,
 )
 from pymedia.ffmpeg.encode_cmd import encode_cmd
@@ -12,6 +11,7 @@ from pymedia.models.state import state
 from pymedia.services.command_service import (
     initialize_command,
     resolve_output_conflict,
+    run_ffmpeg,
 )
 
 logger = get_logger("encode")
@@ -24,7 +24,7 @@ def encode_command(args: Arguments, output: Path | None = None) -> None:
         state.output = output
         state.set_video_pipeline()
 
-    for i in range(len(state.media)):
+    for i, media in enumerate(state.media):
         if state.output and len(state.media) == 1:
             output = state.output.absolute()
         elif state.output and len(state.media) > 1:
@@ -46,8 +46,9 @@ def encode_command(args: Arguments, output: Path | None = None) -> None:
             raise CommandGenerationError(command_name="encode")
 
         log_debug(logger, "ffmpeg_command", cmd=cmd)
-        try:
-            subprocess.run(cmd, capture_output=True, text=True, check=True)
-            log_info(logger, "encode_success", output=output)
-        except subprocess.CalledProcessError as e:
-            raise CommandExecutionError(command_name="encode", error=e.stderr) from e
+        run_ffmpeg(
+            cmd=cmd,
+            duration=media.duration.total_seconds(),
+            description=locales.Progress["encode"],
+        )
+        log_info(logger, "encode_success", output=output)

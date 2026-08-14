@@ -81,6 +81,14 @@ PipelineError = {
 }
 
 
+Progress = {
+    "concat": "Concatenating",
+    "encode": "Transcoding",
+    "gif": "Generating GIF",
+    "split": "Splitting",
+}
+
+
 ValidationError = {
     "crop_all_zero": "Invalid crop: all values are 0.",
     "crop_exceeds_height": "Invalid crop: {total} >= original height {height}.",

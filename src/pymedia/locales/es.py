@@ -81,6 +81,14 @@ PipelineError = {
 }
 
 
+Progress = {
+    "concat": "Concatenando",
+    "encode": "Transcodificando",
+    "gif": "Generando GIF",
+    "split": "Dividiendo",
+}
+
+
 ValidationError = {
     "crop_all_zero": "Recorte inválido: todos los valores son 0.",
     "crop_exceeds_height": "Recorte inválido: {total} >= altura original {height}.",

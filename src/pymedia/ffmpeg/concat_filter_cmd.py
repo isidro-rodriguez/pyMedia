@@ -353,8 +353,23 @@ def _build_cmd(final: TargetFinal) -> list[str]:
     )
 
     if final.has_audio:
-        cmd.extend(["-map", "[a]", "-c:a", state.config.encode.audio_codec])
-    cmd.append(state.output)
+        cmd.extend(
+            [
+                "-map",
+                "[a]",
+                "-c:a",
+                state.config.encode.audio_codec,
+            ]
+        )
+
+    cmd.extend(
+        [
+            "-progress",
+            "pipe:1",
+            "-nostats",
+            state.output,
+        ]
+    )
 
     return cmd
 

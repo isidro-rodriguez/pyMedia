@@ -67,6 +67,7 @@ def _update_package_attributes() -> None:
         "ExecutionError",
         "Info",
         "PipelineError",
+        "Progress",
         "ValidationError",
         "Warnings",
     ):

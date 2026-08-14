@@ -1,9 +1,9 @@
-import subprocess
 import tempfile
 from pathlib import Path
 
+from pymedia import locales
 from pymedia.commands.encode_command import encode_command
-from pymedia.errors import CommandExecutionError, CommandGenerationError
+from pymedia.errors import CommandGenerationError
 from pymedia.ffmpeg.split_cmd import split_cmd
 from pymedia.logger import get_logger, log_debug, log_info
 from pymedia.models.arguments import Arguments
@@ -11,6 +11,7 @@ from pymedia.models.state import state
 from pymedia.services.command_service import (
     initialize_command,
     resolve_output_conflict,
+    run_ffmpeg,
 )
 
 logger = get_logger("split")
@@ -24,11 +25,12 @@ def _split(input_single: Path, output: Path) -> None:
         raise CommandGenerationError(command_name="split")
 
     log_debug(logger, "ffmpeg_command", cmd=cmd)
-    try:
-        subprocess.run(cmd, capture_output=True, text=True, check=True)
-        log_info(logger, "split_success", output=output)
-    except subprocess.CalledProcessError as e:
-        raise CommandExecutionError(command_name="split", error=e.stderr) from e
+    run_ffmpeg(
+        cmd=cmd,
+        duration=state.media[0].duration.total_seconds(),
+        description=locales.Progress["split"],
+    )
+    log_info(logger, "split_success", output=output)
 
 
 def split_command(args: Arguments) -> None:

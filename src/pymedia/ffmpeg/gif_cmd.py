@@ -31,6 +31,17 @@ def gif_cmd(output: Path) -> list[str]:
     if pipeline.end_point:
         cmd.extend(["-t", str(pipeline.end_point)])
 
-    cmd.extend(["-i", str(state.inputs[0]), "-filter_complex", filters, str(output)])
+    cmd.extend(
+        [
+            "-i",
+            str(state.inputs[0]),
+            "-filter_complex",
+            filters,
+            "-progress",
+            "pipe:1",
+            "-nostats",
+            str(output),
+        ]
+    )
 
     return cmd
