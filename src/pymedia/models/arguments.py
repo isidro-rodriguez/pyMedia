@@ -21,18 +21,17 @@ class CommandName(StrEnum):
 
 @dataclass
 class Arguments:
-    # Default parameters
+    # Required arguments
     command: CommandName
     inputs: list[Path] | None = None
     trim_points: str | None = None
-    # Optional encode parameters
+    # Optional arguments
     crop: str | None = None
     end_point: str | None = None
     fps: int | None = None
     gyrate: GyrateMode | None = None
+    output: Path | None = None
+    output_on_conflict: OutputOnConflictMode | None = None
     remux: bool = False
     scale: ScaleVideoMode | ScaleGifMode | None = None
     start_point: str | None = None
-    # Optional output parameters
-    output: Path | None = None
-    output_on_conflict: OutputOnConflictMode | None = None

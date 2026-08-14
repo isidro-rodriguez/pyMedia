@@ -23,77 +23,21 @@ class State:
     config: Config
     local: str = "en"
     arguments: Arguments | None = None
+    gif_pipeline: GifPipeline | None = None
     inputs: list[Path] = field(default_factory=list)
     media: list[Media] = field(default_factory=list)
-    video_pipeline: VideoPipeline | None = None
-    gif_pipeline: GifPipeline | None = None
     output: Path | None = None
     output_on_conflict: OutputOnConflictMode | None = None
+    video_pipeline: VideoPipeline | None = None
+
+    def set_arguments(self, args: Arguments) -> None:
+        self.arguments = args
 
     def set_inputs(self, inputs: list[Path]) -> None:
         """Comprueba que la extensión del vídeo de entrada sea válida."""
         from pymedia.services.basename_service import process_inputs
 
         self.inputs = process_inputs(inputs)
-
-    def set_media(self, paths: list[Path]) -> None:
-        for p in paths:
-            try:
-                media: Media = Media.load(p)
-            except (
-                ValueError,
-                subprocess.CalledProcessError,
-                JSONDecodeError,
-                OSError,
-            ) as e:
-                raise MissingMediaError(path=p) from e
-
-            self.media.append(media)
-
-    def set_arguments(self, args: Arguments) -> None:
-        self.arguments = args
-
-    def set_video_pipeline(self) -> None:
-        if self.arguments is None:
-            raise MissingArgumentsError()
-
-        from pymedia.services.pipeline_service import (
-            process_crop,
-            process_gyrate,
-            process_scale,
-            process_trim_points,
-        )
-
-        args: Arguments = self.arguments
-        self.video_pipeline = VideoPipeline.load()
-
-        if args.crop is not None:
-            self.video_pipeline.crop = process_crop(args.crop, self.media)
-            log_debug(logger, "pipeline_crop", crop=self.video_pipeline.crop)
-
-        if args.gyrate is not None:
-            self.video_pipeline.gyrate = process_gyrate(args.gyrate)
-            log_debug(logger, "pipeline_gyrate", gyrate=self.video_pipeline.gyrate)
-
-        self.video_pipeline.remux = args.remux
-
-        if args.scale:
-            self.video_pipeline.scale = process_scale(
-                args.scale,
-                self.media,
-                self.config.app.disable_resolution_increase,
-            )
-            log_debug(logger, "pipeline_scale", scale=self.video_pipeline.scale)
-
-        if args.trim_points:
-            duration = self.media[0].duration if self.media else None
-            input_path = self.inputs[0] if self.inputs else Path()
-            self.video_pipeline.trim_points = process_trim_points(
-                args.trim_points,
-                duration,
-                input_path,
-            )
-            log_debug(logger, "pipeline_trim", trim=self.video_pipeline.trim_points)
 
     def set_gif_pipeline(self) -> None:
         if self.arguments is None:
@@ -151,6 +95,20 @@ class State:
                 time=self.gif_pipeline.start_point,
             )
 
+    def set_media(self, paths: list[Path]) -> None:
+        for p in paths:
+            try:
+                media: Media = Media.load(p)
+            except (
+                ValueError,
+                subprocess.CalledProcessError,
+                JSONDecodeError,
+                OSError,
+            ) as e:
+                raise MissingMediaError(path=p) from e
+
+            self.media.append(media)
+
     def set_output(self, output: Path) -> None:
         """Comprueba el fichero de salida tenga un nombre y extensión válido."""
         from pymedia.services.basename_service import process_output
@@ -179,6 +137,48 @@ class State:
             raise MissingArgumentsError()
 
         self.output_on_conflict = self.arguments.output_on_conflict
+
+    def set_video_pipeline(self) -> None:
+        if self.arguments is None:
+            raise MissingArgumentsError()
+
+        from pymedia.services.pipeline_service import (
+            process_crop,
+            process_gyrate,
+            process_scale,
+            process_trim_points,
+        )
+
+        args: Arguments = self.arguments
+        self.video_pipeline = VideoPipeline.load()
+
+        if args.crop is not None:
+            self.video_pipeline.crop = process_crop(args.crop, self.media)
+            log_debug(logger, "pipeline_crop", crop=self.video_pipeline.crop)
+
+        if args.gyrate is not None:
+            self.video_pipeline.gyrate = process_gyrate(args.gyrate)
+            log_debug(logger, "pipeline_gyrate", gyrate=self.video_pipeline.gyrate)
+
+        self.video_pipeline.remux = args.remux
+
+        if args.scale:
+            self.video_pipeline.scale = process_scale(
+                args.scale,
+                self.media,
+                self.config.app.disable_resolution_increase,
+            )
+            log_debug(logger, "pipeline_scale", scale=self.video_pipeline.scale)
+
+        if args.trim_points:
+            duration = self.media[0].duration if self.media else None
+            input_path = self.inputs[0] if self.inputs else Path()
+            self.video_pipeline.trim_points = process_trim_points(
+                args.trim_points,
+                duration,
+                input_path,
+            )
+            log_debug(logger, "pipeline_trim", trim=self.video_pipeline.trim_points)
 
 
 state = State(config=Config.load())

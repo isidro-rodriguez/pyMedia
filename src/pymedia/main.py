@@ -1,3 +1,4 @@
+# ruff: noqa
 from pathlib import Path
 
 import typer
@@ -7,8 +8,8 @@ from pymedia.services.locale_service import detect_language, set_language
 # Cargar el idioma ANTES de importar cli_params (que usa locales en los help=)
 set_language(detect_language())
 
-from pymedia import locales  # noqa: E402
-from pymedia.cli_params import (  # noqa: E402
+from pymedia import locales
+from pymedia.cli_params import (
     CropOption,
     DebugOption,
     EndPointOption,
@@ -27,13 +28,12 @@ from pymedia.cli_params import (  # noqa: E402
     StartPointOption,
     TrimPointsOption,
 )
-from pymedia.commands.concat_command import concat_command  # noqa: E402
-from pymedia.commands.encode_command import encode_command  # noqa: E402
-from pymedia.commands.gif_command import gif_command  # noqa: E402
-from pymedia.commands.split_command import split_command  # noqa: E402
-from pymedia.errors import InsufficientInputError, MissingOptionsError  # noqa: E402
-from pymedia.logger import setup_logging  # noqa: E402
-from pymedia.models.arguments import Arguments, CommandName  # noqa: E402
+from pymedia.commands.concat_command import concat_command
+from pymedia.commands.encode_command import encode_command
+from pymedia.commands.gif_command import gif_command
+from pymedia.commands.split_command import split_command
+from pymedia.errors import InsufficientInputError, MissingOptionsError
+from pymedia.models.arguments import Arguments, CommandName
 
 app = typer.Typer(
     name="pyMedia",
@@ -43,33 +43,26 @@ app = typer.Typer(
 )
 
 
-def _show_help(ctx: typer.Context, value: bool) -> None:
-    if value:
-        typer.echo(ctx.get_help())
-        raise typer.Exit()
-
-
 @app.callback()
 def main(
     debug: DebugOption = False,
     help_: HelpOption = False,
 ) -> None:
-    setup_logging(debug=debug)
+    pass
 
 
 @app.command(help=locales.Cli["concat_help"])
 def concat(
     inputs: PathsArgument,
-    debug: DebugOption = False,
-    help_: HelpOption = False,
     crop: CropOption = None,
+    debug: DebugOption = False,
     gyrate: GyrateOption = None,
+    help_: HelpOption = False,
     remux: RemuxOption = False,
     scale: ScaleVideoOption = None,
     output: OutputOption = None,
     output_on_conflict: OutputOnConflictOption = OutputOnConflictMode.FAIL,
 ) -> None:
-    setup_logging(debug=debug)
     if len(inputs) < 2:
         raise InsufficientInputError()
 
@@ -79,10 +72,10 @@ def concat(
             inputs=inputs,
             crop=crop,
             gyrate=gyrate,
-            remux=remux,
-            scale=scale,
             output=output,
             output_on_conflict=output_on_conflict,
+            remux=remux,
+            scale=scale,
         )
     )
 
@@ -90,16 +83,14 @@ def concat(
 @app.command(help=locales.Cli["encode_help"])
 def encode(
     inputs: PathsArgument,
-    debug: DebugOption = False,
-    help_: HelpOption = False,
     crop: CropOption = None,
-    scale: ScaleVideoOption = None,
     gyrate: GyrateOption = None,
-    remux: RemuxOption = False,
+    help_: HelpOption = False,
     output: OutputOption = None,
     output_on_conflict: OutputOnConflictOption = OutputOnConflictMode.FAIL,
+    remux: RemuxOption = False,
+    scale: ScaleVideoOption = None,
 ) -> None:
-    setup_logging(debug=debug)
     if crop is None and scale is None and gyrate is None and remux is False:
         raise MissingOptionsError()
 
@@ -109,10 +100,10 @@ def encode(
             inputs=inputs,
             crop=crop,
             gyrate=gyrate,
-            remux=remux,
-            scale=scale,
             output=output,
             output_on_conflict=output_on_conflict,
+            remux=remux,
+            scale=scale,
         )
     )
 
@@ -130,7 +121,6 @@ def split(
     output: OutputOption = None,
     output_on_conflict: OutputOnConflictOption = OutputOnConflictMode.FAIL,
 ) -> None:
-    setup_logging(debug=debug)
     split_command(
         Arguments(
             command=CommandName.SPLIT,
@@ -138,10 +128,10 @@ def split(
             trim_points=trim_points,
             crop=crop,
             gyrate=gyrate,
-            remux=remux,
-            scale=scale,
             output=output,
             output_on_conflict=output_on_conflict,
+            remux=remux,
+            scale=scale,
         )
     )
 
@@ -160,19 +150,18 @@ def gif(
     scale: ScaleGifOption = ScaleGifMode.P480,
     output_on_conflict: OutputOnConflictOption = OutputOnConflictMode.FAIL,
 ) -> None:
-    setup_logging(debug=debug)
     gif_command(
         Arguments(
             command=CommandName.GIF,
             inputs=[input_single],
+            crop=crop,
             end_point=end_point,
             fps=fps,
-            crop=crop,
+            output=output,
+            output_on_conflict=output_on_conflict,
             gyrate=gyrate,
             scale=scale,
             start_point=start_point,
-            output=output,
-            output_on_conflict=output_on_conflict,
         )
     )
 

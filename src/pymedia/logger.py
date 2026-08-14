@@ -91,14 +91,13 @@ def setup_logging(debug: bool = False) -> None:
     _configured = True
 
 
-def get_logger(name: str = "") -> logging.Logger:
+def get_logger(name: str = "", debug: bool = False) -> logging.Logger:
     """Devuelve un logger con prefijo 'pymedia.*'.
 
     Si `setup_logging()` no se ha llamado todavía (p. ej. en tests o al
     importar un módulo de forma aislada), se configura aquí con el nivel
     por defecto para que el logger siempre esté operativo.
     """
-    setup_logging()
     return logging.getLogger(f"pymedia.{name}" if name else "pymedia")
 
 
