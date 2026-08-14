@@ -6,10 +6,10 @@ from pathlib import Path
 
 import platformdirs
 
+from pymedia import locales
 from pymedia.data.audio_codecs import AUDIO_CODECS
 from pymedia.data.video_codecs import VIDEO_CODECS
 from pymedia.errors import InvalidConfigError
-from pymedia.locales.en import ConfigValidation
 
 
 class AudioCodec(Enum):
@@ -26,6 +26,16 @@ class Channels(Enum):
     MONO = "mono"
     STEREO = "stereo"
     SURROUND = "5.1"
+
+
+class Language(Enum):
+    """Idiomas disponibles para la interfaz de la aplicación."""
+
+    SYSTEM = "system"
+    ENGLISH = "english"
+    SPANISH = "spanish"
+    ITALIAN = "italian"
+    FRENCH = "french"
 
 
 class ResizeTo(Enum):
@@ -73,6 +83,7 @@ class ConflictiveJoin:
 
 @dataclass(frozen=True)
 class App:
+    language: str
     disable_resolution_increase: bool
 
 
@@ -119,13 +130,14 @@ class Config:
 
         encode = data["encode"]
         conflictive_join = data["conflictive_join"]
+        app = data["app"]
 
         # encode.video_codec
         video_codec = encode["video_codec"]
         valid_video_codecs = {v.value for v in VideoCodec}
         if video_codec not in valid_video_codecs:
             errors.append(
-                ConfigValidation["invalid_video_codec"].format(
+                locales.ConfigValidation["invalid_video_codec"].format(
                     expected=", ".join(sorted(valid_video_codecs))
                 )
             )
@@ -136,7 +148,7 @@ class Config:
             presets = VIDEO_CODECS[video_codec].presets
             if presets is not None and video_preset not in presets:
                 errors.append(
-                    ConfigValidation["invalid_video_preset"].format(
+                    locales.ConfigValidation["invalid_video_preset"].format(
                         expected=", ".join(presets)
                     )
                 )
@@ -147,7 +159,9 @@ class Config:
             crf = VIDEO_CODECS[video_codec].crf
             if crf is not None and not crf[0] <= video_crf <= crf[1]:
                 errors.append(
-                    ConfigValidation["invalid_video_crf"].format(min=crf[0], max=crf[1])
+                    locales.ConfigValidation["invalid_video_crf"].format(
+                        min=crf[0], max=crf[1]
+                    )
                 )
 
         # encode.audio_codec
@@ -155,7 +169,7 @@ class Config:
         valid_audio_codecs = {a.value for a in AudioCodec}
         if audio_codec not in valid_audio_codecs:
             errors.append(
-                ConfigValidation["invalid_audio_codec"].format(
+                locales.ConfigValidation["invalid_audio_codec"].format(
                     expected=", ".join(sorted(valid_audio_codecs))
                 )
             )
@@ -166,7 +180,7 @@ class Config:
             bit_rates = AUDIO_CODECS[audio_codec].bit_rates
             if bit_rates is not None and audio_bit_rate not in bit_rates:
                 errors.append(
-                    ConfigValidation["invalid_audio_bit_rate"].format(
+                    locales.ConfigValidation["invalid_audio_bit_rate"].format(
                         expected=", ".join(bit_rates)
                     )
                 )
@@ -182,7 +196,7 @@ class Config:
             ):
                 common = sorted(set(video_containers) & set(audio_containers))
                 errors.append(
-                    ConfigValidation["invalid_default_container"].format(
+                    locales.ConfigValidation["invalid_default_container"].format(
                         expected=", ".join(common)
                     )
                 )
@@ -192,7 +206,7 @@ class Config:
         valid_resize_to = {r.value for r in ResizeTo}
         if resize_to not in valid_resize_to:
             errors.append(
-                ConfigValidation["invalid_resize_to"].format(
+                locales.ConfigValidation["invalid_resize_to"].format(
                     expected=", ".join(sorted(valid_resize_to))
                 )
             )
@@ -202,7 +216,7 @@ class Config:
         valid_fps = {f.value for f in TargetFPS}
         if fps not in valid_fps:
             errors.append(
-                ConfigValidation["invalid_fps"].format(
+                locales.ConfigValidation["invalid_fps"].format(
                     expected=", ".join(sorted(valid_fps))
                 )
             )
@@ -212,8 +226,18 @@ class Config:
         valid_channels = {c.value for c in Channels}
         if channels not in valid_channels:
             errors.append(
-                ConfigValidation["invalid_channels"].format(
+                locales.ConfigValidation["invalid_channels"].format(
                     expected=", ".join(sorted(valid_channels))
+                )
+            )
+
+        # app.language
+        language = app["language"]
+        valid_languages = {l.value for l in Language}
+        if language not in valid_languages:
+            errors.append(
+                locales.ConfigValidation["invalid_language"].format(
+                    expected=", ".join(sorted(valid_languages))
                 )
             )
 

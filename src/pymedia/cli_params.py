@@ -4,6 +4,8 @@ from typing import Annotated
 
 import typer
 
+from pymedia import locales
+
 # -----------------------------------------------------------------------------
 #  Enums de opciones
 # -----------------------------------------------------------------------------
@@ -49,9 +51,15 @@ class ScaleVideoMode(int, Enum):
 # -----------------------------------------------------------------------------
 
 
+def _show_help(ctx: typer.Context, value: bool) -> None:
+    if value:
+        typer.echo(ctx.get_help())
+        raise typer.Exit()
+
+
 def _validate_path(path: Path) -> Path | None:
     if not path.is_file():
-        raise typer.BadParameter(f"{path} is not a file.")
+        raise typer.BadParameter(locales.Cli["invalid_path"].format(path=path))
     return path
 
 
@@ -67,12 +75,15 @@ def _validate_path_list(path_list: list[Path]) -> list[Path] | None:
 
 
 PathArgument = Annotated[
-    Path, typer.Argument(help="Video to process.", callback=_validate_path)
+    Path,
+    typer.Argument(help=locales.Cli["path_argument_help"], callback=_validate_path),
 ]
 
 PathsArgument = Annotated[
     list[Path],
-    typer.Argument(help="Video list to process.", callback=_validate_path_list),
+    typer.Argument(
+        help=locales.Cli["paths_argument_help"], callback=_validate_path_list
+    ),
 ]
 
 
@@ -88,7 +99,7 @@ CropOption = Annotated[
         "-c",
         metavar="left,right,top,bottom",
         rich_help_panel="Encode options",
-        help="Crops the specified number of pixels. [dim]E.g.: -c 200,200,0,0[/dim]",
+        help=locales.Cli["crop_help"],
     ),
 ]
 
@@ -96,7 +107,7 @@ DebugOption = Annotated[
     bool,
     typer.Option(
         "--debug",
-        help="Log level DEBUG",
+        help=locales.Cli["debug_help"],
     ),
 ]
 
@@ -107,7 +118,7 @@ EndPointOption = Annotated[
         "-ep",
         metavar="hh:mm:ss",
         rich_help_panel="Encode options",
-        help="Time point at which GIF generation ends. [dim]E.g.: -ep 1:20[/dim]",
+        help=locales.Cli["end_point_help"],
     ),
 ]
 
@@ -119,7 +130,7 @@ FpsOption = Annotated[
         min=4,
         max=20,
         rich_help_panel="Encode options",
-        help="Frames per second of the animated GIF. [dim]E.g.: -f 12[/dim]",
+        help=locales.Cli["fps_help"],
     ),
 ]
 
@@ -129,7 +140,18 @@ GyrateOption = Annotated[
         "--gyrate",
         "-g",
         rich_help_panel="Encode options",
-        help="Rotate the media by the specified angle in degrees. [dim]E.g.: -g 90[/dim]",  # noqa: E501
+        help=locales.Cli["gyrate_help"],
+    ),
+]
+
+HelpOption = Annotated[
+    bool,
+    typer.Option(
+        "--help",
+        help=locales.Cli["show_help"],  # tu texto traducido
+        callback=_show_help,
+        is_eager=True,
+        expose_value=False,
     ),
 ]
 
@@ -139,7 +161,7 @@ ScaleGifOption = Annotated[
         "--scale",
         "-s",
         rich_help_panel="Encode options",
-        help="Resize the media proportionally to the specified height. [dim]E.g.: -s 240[/dim]",  # noqa: E501
+        help=locales.Cli["scale_gif_help"],
     ),
 ]
 
@@ -149,7 +171,7 @@ ScaleVideoOption = Annotated[
         "--scale",
         "-s",
         rich_help_panel="Encode options",
-        help="Resize the media proportionally to the specified height. [dim]E.g.: -s 240[/dim]",  # noqa: E501
+        help=locales.Cli["scale_video_help"],
     ),
 ]
 
@@ -160,7 +182,7 @@ StartPointOption = Annotated[
         "-sp",
         metavar="hh:mm:ss",
         rich_help_panel="Encode options",
-        help="Time point at which GIF generation starts. [dim]E.g.: -sp 1:20[/dim]",  # noqa: E501
+        help=locales.Cli["start_point_help"],
     ),
 ]
 
@@ -170,7 +192,7 @@ RemuxOption = Annotated[
         "--remux",
         "-r",
         rich_help_panel="Encode options",
-        help="Re-encodes using the profile specified in the configuration.",
+        help=locales.Cli["remux_help"],
     ),
 ]
 
@@ -181,7 +203,7 @@ TrimPointsOption = Annotated[
         "-t",
         metavar="00:10,00:20,00:30",
         rich_help_panel="Encode options",
-        help="Split points for the video. [dim]E.g.: -t 00:10,00:20,00:30[/dim]",
+        help=locales.Cli["trim_points_help"],
     ),
 ]
 
@@ -197,7 +219,7 @@ OutputOnConflictOption = Annotated[
         "--on-conflict",
         "-oc",
         rich_help_panel="Output options",
-        help="Action to take if a file with the same name already exists. [dim]E.g.: -oc rename[/dim]",  # noqa: E501
+        help=locales.Cli["output_on_conflict_help"],
     ),
 ]
 
@@ -207,6 +229,6 @@ OutputOption = Annotated[
         "--output",
         "-o",
         rich_help_panel="Output options",
-        help="Output file name. [dim]E.g.: -o cut.mp4[/dim]",
+        help=locales.Cli["output_help"],
     ),
 ]

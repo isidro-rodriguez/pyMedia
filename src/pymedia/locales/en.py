@@ -1,13 +1,38 @@
+Cli = {
+    "concat_help": "Concatenates videos in the specified order",
+    "crop_help": "Crops the specified number of pixels. [dim]E.g.: -c 200,200,0,0[/dim]",
+    "debug_help": "Log level DEBUG",
+    "encode_help": "Transcode using the selected options (requires at least one option)",
+    "end_point_help": "Time point at which GIF generation ends. [dim]E.g.: -ep 1:20[/dim]",
+    "fps_help": "Frames per second of the animated GIF. [dim]E.g.: -f 12[/dim]",
+    "gif_help": "Generates an animated GIF from the specified video",
+    "gyrate_help": "Rotate the media by the specified angle in degrees. [dim]E.g.: -g 90[/dim]",
+    "invalid_path": "{path} is not a file.",
+    "output_help": "Output file name. [dim]E.g.: -o cut.mp4[/dim]",
+    "output_on_conflict_help": "Action to take if a file with the same name already exists. [dim]E.g.: -oc rename[/dim]",
+    "path_argument_help": "Video to process.",
+    "paths_argument_help": "Video list to process.",
+    "remux_help": "Re-encodes using the profile specified in the configuration.",
+    "scale_gif_help": "Resize the media proportionally to the specified height. [dim]E.g.: -s 240[/dim]",
+    "scale_video_help": "Resize the media proportionally to the specified height. [dim]E.g.: -s 240[/dim]",
+    "show_help": "Show this message and exit.",
+    "split_help": "Splits a video at the specified points",
+    "start_point_help": "Time point at which GIF generation starts. [dim]E.g.: -sp 1:20[/dim]",
+    "trim_points_help": "Split points for the video. [dim]E.g.: -t 00:10,00:20,00:30[/dim]",
+}
+
+
 ConfigValidation = {
-    "invalid_audio_bit_rate": "Invalid configuration setting: encode.audio_bit_rate is expected one of: {expected}",  # noqa: E501
-    "invalid_audio_codec": "Invalid configuration setting: encode.audio_codec is expected one of: {expected}",  # noqa: E501
-    "invalid_channels": "Invalid configuration setting: conflictive_join.channels is expected one of: {expected}",  # noqa: E501
-    "invalid_default_container": "Invalid configuration setting: encode.default_container is expected one of: {expected}",  # noqa: E501
-    "invalid_fps": "Invalid configuration setting: conflictive_join.fps is expected one of: {expected}",  # noqa: E501
-    "invalid_resize_to": "Invalid configuration setting: conflictive_join.resize_to is expected one of: {expected}",  # noqa: E501
-    "invalid_video_codec": "Invalid configuration setting: encode.video_codec is expected one of: {expected}",  # noqa: E501
-    "invalid_video_crf": "Invalid configuration setting: encode.video_crf is expected between {min} and {max}",  # noqa: E501
-    "invalid_video_preset": "Invalid configuration setting: encode.video_preset is expected one of: {expected}",  # noqa: E501
+    "invalid_audio_bit_rate": "\nInvalid configuration setting: encode.audio_bit_rate is expected one of: {expected}",  # noqa: E501
+    "invalid_audio_codec": "\nInvalid configuration setting: encode.audio_codec is expected one of: {expected}",  # noqa: E501
+    "invalid_channels": "\nInvalid configuration setting: conflictive_join.channels is expected one of: {expected}",  # noqa: E501
+    "invalid_default_container": "\nInvalid configuration setting: encode.default_container is expected one of: {expected}",  # noqa: E501
+    "invalid_fps": "\nInvalid configuration setting: conflictive_join.fps is expected one of: {expected}",  # noqa: E501
+    "invalid_language": "\nInvalid configuration setting: app.language is expected one of: {expected}",  # noqa: E501
+    "invalid_resize_to": "\nInvalid configuration setting: conflictive_join.resize_to is expected one of: {expected}",  # noqa: E501
+    "invalid_video_codec": "\nInvalid configuration setting: encode.video_codec is expected one of: {expected}",  # noqa: E501
+    "invalid_video_crf": "\nInvalid configuration setting: encode.video_crf is expected between {min} and {max}",  # noqa: E501
+    "invalid_video_preset": "\nInvalid configuration setting: encode.video_preset is expected one of: {expected}",  # noqa: E501
 }
 
 

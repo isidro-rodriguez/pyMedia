@@ -1,3 +1,4 @@
+from pymedia import locales
 from pymedia.logger import get_logger
 
 logger = get_logger("errors")
@@ -20,16 +21,10 @@ class PyMediaError(Exception):
     message_key = ""
 
     def __init__(self, **kwargs) -> None:
-        from pymedia.locales.en import (
-            ExecutionError,
-            PipelineError,
-            ValidationError,
-        )
-
         templates = {
-            "ValidationError": ValidationError,
-            "PipelineError": PipelineError,
-            "ExecutionError": ExecutionError,
+            "ValidationError": locales.ValidationError,
+            "PipelineError": locales.PipelineError,
+            "ExecutionError": locales.ExecutionError,
         }[self.category]
 
         self.message = templates[self.message_key].format(**kwargs)
@@ -203,19 +198,3 @@ class ConfigError(ExecutionError):
 
 class InvalidConfigError(ConfigError):
     message_key = "invalid_config"
-
-
-class InvalidConfigSettingError(ConfigError):
-    message_key = "invalid_config_setting"
-
-
-class MissingConfigSectionError(ConfigError):
-    message_key = "missing_config_section"
-
-
-class MissingConfigSettingError(ConfigError):
-    message_key = "missing_config_setting"
-
-
-class UnexpectedConfigSettingError(ConfigError):
-    message_key = "unexpected_config_setting"

@@ -21,6 +21,7 @@ logger = get_logger("state")
 @dataclass
 class State:
     config: Config
+    local: str = "en"
     arguments: Arguments | None = None
     inputs: list[Path] = field(default_factory=list)
     media: list[Media] = field(default_factory=list)

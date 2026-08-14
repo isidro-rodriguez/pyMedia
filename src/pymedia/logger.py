@@ -4,7 +4,7 @@ from pathlib import Path
 
 import platformdirs
 
-from pymedia.locales.en import Debug, Info, Warnings
+from pymedia import locales
 
 _configured = False
 
@@ -108,15 +108,15 @@ def get_logger(name: str = "") -> logging.Logger:
 
 
 def log_info(logger: logging.Logger, key: str, **kwargs) -> None:
-    """Registra un mensaje INFO usando la plantilla de messages.Info."""
-    logger.info(Info[key].format(**kwargs))
+    """Registra un mensaje INFO usando la plantilla de locales.Info."""
+    logger.info(locales.Info[key].format(**kwargs))
 
 
 def log_warning(logger: logging.Logger, key: str, **kwargs) -> None:
-    """Registra un mensaje WARNING usando la plantilla de messages.Warnings."""
-    logger.warning(Warnings[key].format(**kwargs))
+    """Registra un mensaje WARNING usando la plantilla de locales.Warnings."""
+    logger.warning(locales.Warnings[key].format(**kwargs))
 
 
 def log_debug(logger: logging.Logger, key: str, **kwargs) -> None:
-    """Registra un mensaje DEBUG usando la plantilla de messages.Debug."""
-    logger.debug(Debug[key].format(**kwargs))
+    """Registra un mensaje DEBUG usando la plantilla de locales.Debug."""
+    logger.debug(locales.Debug[key].format(**kwargs))

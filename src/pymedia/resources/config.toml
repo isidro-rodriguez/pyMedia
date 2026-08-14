@@ -26,5 +26,5 @@ channels = "stereo"                 # stereo | mono | 5.1
 confirm_encode = true
 
 [app]
-logger_level = "INFO"               # DEBUG | INFO | WARNING | ERROR | CRITICAL
+language = "system"                 # system | english | spanish | italian | french
 disable_resolution_increase = true
