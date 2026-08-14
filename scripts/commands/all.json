@@ -1,0 +1,33 @@
+{
+  "base_command": "",
+  "variants": [
+    {
+      "name": "TEST CONCAT COMPATIBLE",
+      "args": "python.exe ./scripts/quick_test.py concat_comp"
+    },
+    {
+      "name": "TEST CONCAT INCOMPATIBLE",
+      "args": "python.exe ./scripts/quick_test.py concat_incomp"
+    },
+    {
+      "name": "TEST ENCODE",
+      "args": "python.exe ./scripts/quick_test.py encode"
+    },
+    {
+      "name": "TEST ENCODE MULTIPLE",
+      "args": "python.exe ./scripts/quick_test.py encode_multiple"
+    },
+    {
+      "name": "TEST GIF",
+      "args": "python.exe ./scripts/quick_test.py gif"
+    },
+    {
+      "name": "TEST SPLIT",
+      "args": "python.exe ./scripts/quick_test.py split"
+    },
+    {
+      "name": "BORRADO QUICK TEST",
+      "args": "rm -r ./.local/qt/"
+    }
+  ]
+}

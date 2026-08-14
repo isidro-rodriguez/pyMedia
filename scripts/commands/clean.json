@@ -1,0 +1,6 @@
+{
+  "base_command": "rm -r ",
+  "variants": [
+    {"name": "BORRADO QUICK TEST", "args": "./.local/qt/"}
+  ]
+}

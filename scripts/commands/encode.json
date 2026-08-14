@@ -1,6 +1,25 @@
 {
-  "base_command": "uv run pymedia encode",
+  "base_command": "uv run pymedia encode ./.local/fixtures/cell_h264_720p.mp4 ",
   "variants": [
-    {"name": "ENCODE SIMPLE", "args": "./.local/fixtures/cell_h264_480p.mp4 -r -o ./.local/qt/encode_simple.mp4"}
+    {
+      "name": "ENCODE REMUX",
+      "args": "-o ./.local/qt/encode_remux.mp4 -r"
+    },
+    {
+      "name": "ENCODE GYRATE",
+      "args": "-o ./.local/qt/encode_gyrate.mp4 -g 90"
+    },
+    {
+      "name": "ENCODE SCALE",
+      "args": "-o ./.local/qt/encode_scale.mp4 -s 480"
+    },
+    {
+      "name": "ENCODE CROP",
+      "args": "-o ./.local/qt/encode_crop.mp4 -c 0,0,100,100"
+    },
+    {
+      "name": "ENCODE FULL",
+      "args": "-o ./.local/qt/encode_full.mp4 -g 180 -s 480 -c 0,0,100,100"
+    }
   ]
 }
