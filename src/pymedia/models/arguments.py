@@ -27,6 +27,7 @@ class Arguments:
     trim_points: str | None = None
     # Optional arguments
     crop: str | None = None
+    debug: bool = False
     end_point: str | None = None
     fps: int | None = None
     gyrate: GyrateMode | None = None

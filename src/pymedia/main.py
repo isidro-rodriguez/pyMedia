@@ -1,6 +1,7 @@
 # ruff: noqa
 from pathlib import Path
 
+from dataclasses import fields
 import typer
 
 from pymedia.services.locale_service import detect_language, set_language
@@ -43,9 +44,15 @@ app = typer.Typer(
 )
 
 
+def _build_arguments(command: CommandName, local_vars: dict) -> Arguments:
+    valid = {f.name for f in fields(Arguments)}
+    return Arguments(
+        command=command, **{k: v for k, v in local_vars.items() if k in valid}
+    )
+
+
 @app.callback()
 def main(
-    debug: DebugOption = False,
     help_: HelpOption = False,
 ) -> None:
     pass
@@ -58,26 +65,15 @@ def concat(
     debug: DebugOption = False,
     gyrate: GyrateOption = None,
     help_: HelpOption = False,
-    remux: RemuxOption = False,
-    scale: ScaleVideoOption = None,
     output: OutputOption = None,
     output_on_conflict: OutputOnConflictOption = OutputOnConflictMode.FAIL,
+    remux: RemuxOption = False,
+    scale: ScaleVideoOption = None,
 ) -> None:
     if len(inputs) < 2:
         raise InsufficientInputError()
 
-    concat_command(
-        Arguments(
-            command=CommandName.CONCAT,
-            inputs=inputs,
-            crop=crop,
-            gyrate=gyrate,
-            output=output,
-            output_on_conflict=output_on_conflict,
-            remux=remux,
-            scale=scale,
-        )
-    )
+    concat_command(_build_arguments(CommandName.CONCAT, locals()))
 
 
 @app.command(help=locales.Cli["encode_help"])
@@ -94,18 +90,7 @@ def encode(
     if crop is None and scale is None and gyrate is None and remux is False:
         raise MissingOptionsError()
 
-    encode_command(
-        Arguments(
-            command=CommandName.ENCODE,
-            inputs=inputs,
-            crop=crop,
-            gyrate=gyrate,
-            output=output,
-            output_on_conflict=output_on_conflict,
-            remux=remux,
-            scale=scale,
-        )
-    )
+    encode_command(_build_arguments(CommandName.ENCODE, locals()))
 
 
 @app.command(help=locales.Cli["split_help"])
@@ -113,57 +98,33 @@ def split(
     input_single: PathArgument,
     trim_points: TrimPointsOption,
     debug: DebugOption = False,
-    help_: HelpOption = False,
     crop: CropOption = None,
-    scale: ScaleVideoOption = None,
     gyrate: GyrateOption = None,
-    remux: RemuxOption = False,
+    help_: HelpOption = False,
     output: OutputOption = None,
     output_on_conflict: OutputOnConflictOption = OutputOnConflictMode.FAIL,
+    remux: RemuxOption = False,
+    scale: ScaleVideoOption = None,
 ) -> None:
-    split_command(
-        Arguments(
-            command=CommandName.SPLIT,
-            inputs=[input_single],
-            trim_points=trim_points,
-            crop=crop,
-            gyrate=gyrate,
-            output=output,
-            output_on_conflict=output_on_conflict,
-            remux=remux,
-            scale=scale,
-        )
-    )
+    split_command(_build_arguments(CommandName.SPLIT, locals()))
 
 
 @app.command(help=locales.Cli["gif_help"])
 def gif(
     input_single: Path,
     debug: DebugOption = False,
-    help_: HelpOption = False,
     crop: CropOption = None,
     end_point: EndPointOption = None,
     fps: FpsOption = 15,
-    start_point: StartPointOption = None,
     gyrate: GyrateOption = None,
+    help_: HelpOption = False,
     output: OutputOption = None,
-    scale: ScaleGifOption = ScaleGifMode.P480,
     output_on_conflict: OutputOnConflictOption = OutputOnConflictMode.FAIL,
+    scale: ScaleGifOption = ScaleGifMode.P480,
+    start_point: StartPointOption = None,
 ) -> None:
-    gif_command(
-        Arguments(
-            command=CommandName.GIF,
-            inputs=[input_single],
-            crop=crop,
-            end_point=end_point,
-            fps=fps,
-            output=output,
-            output_on_conflict=output_on_conflict,
-            gyrate=gyrate,
-            scale=scale,
-            start_point=start_point,
-        )
-    )
+
+    gif_command(_build_arguments(CommandName.GIF, locals()))
 
 
 if __name__ == "__main__":

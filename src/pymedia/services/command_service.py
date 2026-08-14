@@ -2,12 +2,13 @@ from pathlib import Path
 
 from pymedia.cli_params import OutputOnConflictMode
 from pymedia.errors import OutputOnConflictError
-from pymedia.logger import log_warning
+from pymedia.logger import log_warning, setup_logging
 from pymedia.models.arguments import Arguments, CommandName
 from pymedia.models.state import state
 
 
 def initialize_command(args: Arguments) -> None:
+    setup_logging(debug=args.debug)
     state.set_arguments(args)
     state.set_inputs(args.inputs)
     state.set_media(args.inputs)
