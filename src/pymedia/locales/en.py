@@ -1,3 +1,5 @@
+# ruff: noqa
+
 Cli = {
     "concat_help": "Concatenates videos in the specified order",
     "crop_help": "Crops the specified number of pixels. [dim]E.g.: -c 200,200,0,0[/dim]",
@@ -23,16 +25,16 @@ Cli = {
 
 
 ConfigValidation = {
-    "invalid_audio_bit_rate": "\nInvalid configuration setting: encode.audio_bit_rate is expected one of: {expected}",  # noqa: E501
-    "invalid_audio_codec": "\nInvalid configuration setting: encode.audio_codec is expected one of: {expected}",  # noqa: E501
-    "invalid_channels": "\nInvalid configuration setting: conflictive_join.channels is expected one of: {expected}",  # noqa: E501
-    "invalid_default_container": "\nInvalid configuration setting: encode.default_container is expected one of: {expected}",  # noqa: E501
-    "invalid_fps": "\nInvalid configuration setting: conflictive_join.fps is expected one of: {expected}",  # noqa: E501
-    "invalid_language": "\nInvalid configuration setting: app.language is expected one of: {expected}",  # noqa: E501
-    "invalid_resize_to": "\nInvalid configuration setting: conflictive_join.resize_to is expected one of: {expected}",  # noqa: E501
-    "invalid_video_codec": "\nInvalid configuration setting: encode.video_codec is expected one of: {expected}",  # noqa: E501
-    "invalid_video_crf": "\nInvalid configuration setting: encode.video_crf is expected between {min} and {max}",  # noqa: E501
-    "invalid_video_preset": "\nInvalid configuration setting: encode.video_preset is expected one of: {expected}",  # noqa: E501
+    "invalid_audio_bit_rate": "\nInvalid configuration setting: encode.audio_bit_rate is expected one of: {expected}",
+    "invalid_audio_codec": "\nInvalid configuration setting: encode.audio_codec is expected one of: {expected}",
+    "invalid_channels": "\nInvalid configuration setting: conflictive_join.channels is expected one of: {expected}",
+    "invalid_default_container": "\nInvalid configuration setting: encode.default_container is expected one of: {expected}",
+    "invalid_fps": "\nInvalid configuration setting: conflictive_join.fps is expected one of: {expected}",
+    "invalid_language": "\nInvalid configuration setting: app.language is expected one of: {expected}",
+    "invalid_resize_to": "\nInvalid configuration setting: conflictive_join.resize_to is expected one of: {expected}",
+    "invalid_video_codec": "\nInvalid configuration setting: encode.video_codec is expected one of: {expected}",
+    "invalid_video_crf": "\nInvalid configuration setting: encode.video_crf is expected between {min} and {max}",
+    "invalid_video_preset": "\nInvalid configuration setting: encode.video_preset is expected one of: {expected}",
 }
 
 
@@ -49,13 +51,11 @@ Debug = {
 
 ExecutionError = {
     "cannot_create_directory": "Could not create directory: {path}",
-    "command_execution": (
-        "FFmpeg command '{command_name}' failed during execution. Error: {error}"
-    ),
+    "command_execution": "FFmpeg command '{command_name}' failed during execution. Error: {error}",
     "command_generation": "FFmpeg command '{command_name}' was not generated.",
     "ffmpeg_timeout": "FFmpeg operation exceeded the allowed timeout.",
     "invalid_config": "Invalid configuration: {message}",
-    "invalid_config_setting": "Invalid configuration setting: {setting} is expected {expected}",  # noqa: E501
+    "invalid_config_setting": "Invalid configuration setting: {setting} is expected {expected}",
     "missing_config_section": "Missing configuration section: {section}",
     "missing_config_setting": "Missing configuration setting: {setting}",
     "unexpected_config_setting": "Unexpected configuration setting: {setting}",
@@ -87,13 +87,9 @@ ValidationError = {
     "crop_exceeds_width": "Invalid crop: {total} >= original width {width}.",
     "insufficient_inputs": "At least two videos must be provided for this command.",
     "invalid_crop_format": "Invalid crop format. Expected: LEFT,RIGHT,TOP,BOTTOM",
-    "invalid_directory_name": (
-        "'{directory}' contains invalid characters: '< > : \" / \\ | ? *'"
-    ),
-    "invalid_extension": "Invalid extension '{extension}'. Codec '{codec}' requires one of: {supported}",  # noqa: E501
-    "invalid_filename": (
-        "'{filename}' contains invalid characters: '< > : \" / \\ | ? *'"
-    ),
+    "invalid_directory_name": "'{directory}' contains invalid characters: '< > : \" / \\ | ? *'",
+    "invalid_extension": "Invalid extension '{extension}'. Codec '{codec}' requires one of: {supported}",
+    "invalid_filename": "'{filename}' contains invalid characters: '< > : \" / \\ | ? *'",
     "invalid_gyrate": "Invalid rotation format. Expected: 90 | 180 | 270.",
     "invalid_time_format": "Invalid timestamp format. Expected: hh:mm:ss.",
     "invalid_trim_points": "Invalid trim points.",
@@ -107,8 +103,5 @@ Warnings = {
     "missing_options": "At least one option is required.",
     "output_exist": "File already exist: {file_path}",
     "scale_rejected_equal": "Scaling rejected: {scale} = original height {height}.",
-    "scale_rejected_increase": (
-        "Scaling to {scale}p not applied: resolution is higher than the original "
-        "({height}p)."
-    ),
+    "scale_rejected_increase": "Scaling to {scale}p not applied: resolution is higher than the original ({height}p).",
 }

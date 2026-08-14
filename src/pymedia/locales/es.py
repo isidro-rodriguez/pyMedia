@@ -1,3 +1,5 @@
+# ruff: noqa
+
 Cli = {
     "concat_help": "Concatena vídeos en el orden especificado",
     "crop_help": "Recorta el número de píxeles especificado. [dim]E.g.: -c 200,200,0,0[/dim]",
@@ -23,16 +25,16 @@ Cli = {
 
 
 ConfigValidation = {
-    "invalid_audio_bit_rate": "\nConfiguración inválida: se espera que encode.audio_bit_rate sea uno de: {expected}",  # noqa: E501
-    "invalid_audio_codec": "\nConfiguración inválida: se espera que encode.audio_codec sea uno de: {expected}",  # noqa: E501
-    "invalid_channels": "\nConfiguración inválida: se espera que conflictive_join.channels sea uno de: {expected}",  # noqa: E501
-    "invalid_default_container": "\nConfiguración inválida: se espera que encode.default_container sea uno de: {expected}",  # noqa: E501
-    "invalid_fps": "\nConfiguración inválida: se espera que conflictive_join.fps sea uno de: {expected}",  # noqa: E501
-    "invalid_language": "\nConfiguración inválida: se espera que app.language sea uno de: {expected}",  # noqa: E501
-    "invalid_resize_to": "\nConfiguración inválida: se espera que conflictive_join.resize_to sea uno de: {expected}",  # noqa: E501
-    "invalid_video_codec": "\nConfiguración inválida: se espera que encode.video_codec sea uno de: {expected}",  # noqa: E501
-    "invalid_video_crf": "\nConfiguración inválida: se espera que encode.video_crf esté entre {min} y {max}",  # noqa: E501
-    "invalid_video_preset": "\nConfiguración inválida: se espera que encode.video_preset sea uno de: {expected}",  # noqa: E501
+    "invalid_audio_bit_rate": "\nConfiguración inválida: se espera que encode.audio_bit_rate sea uno de: {expected}",
+    "invalid_audio_codec": "\nConfiguración inválida: se espera que encode.audio_codec sea uno de: {expected}",
+    "invalid_channels": "\nConfiguración inválida: se espera que conflictive_join.channels sea uno de: {expected}",
+    "invalid_default_container": "\nConfiguración inválida: se espera que encode.default_container sea uno de: {expected}",
+    "invalid_fps": "\nConfiguración inválida: se espera que conflictive_join.fps sea uno de: {expected}",
+    "invalid_language": "\nConfiguración inválida: se espera que app.language sea uno de: {expected}",
+    "invalid_resize_to": "\nConfiguración inválida: se espera que conflictive_join.resize_to sea uno de: {expected}",
+    "invalid_video_codec": "\nConfiguración inválida: se espera que encode.video_codec sea uno de: {expected}",
+    "invalid_video_crf": "\nConfiguración inválida: se espera que encode.video_crf esté entre {min} y {max}",
+    "invalid_video_preset": "\nConfiguración inválida: se espera que encode.video_preset sea uno de: {expected}",
 }
 
 
@@ -49,13 +51,11 @@ Debug = {
 
 ExecutionError = {
     "cannot_create_directory": "No se pudo crear el directorio: {path}",
-    "command_execution": (
-        "El comando FFmpeg '{command_name}' falló durante la ejecución. Error: {error}"
-    ),
+    "command_execution": "El comando FFmpeg '{command_name}' falló durante la ejecución. Error: {error}",
     "command_generation": "El comando FFmpeg '{command_name}' no se generó.",
     "ffmpeg_timeout": "La operación FFmpeg superó el tiempo de espera permitido.",
     "invalid_config": "Configuración inválida: {message}",
-    "invalid_config_setting": "Configuración inválida: se espera que {setting} sea {expected}",  # noqa: E501
+    "invalid_config_setting": "Configuración inválida: se espera que {setting} sea {expected}",
     "missing_config_section": "Falta la sección de configuración: {section}",
     "missing_config_setting": "Falta la configuración: {setting}",
     "unexpected_config_setting": "Configuración inesperada: {setting}",
@@ -76,7 +76,7 @@ PipelineError = {
     "missing_arguments": "Faltan argumentos recuperados de Typer.",
     "missing_argument": "Falta el argumento: {argument}",
     "missing_media": "No se pudo encontrar la información del medio para '{path}'.",
-    "missing_media_property": "No se pudo encontrar la propiedad del medio '{property_name}'.",  # noqa: E501
+    "missing_media_property": "No se pudo encontrar la propiedad del medio '{property_name}'.",
     "output_on_conflict": "Proceso detenido porque el archivo de salida ya existe.",
 }
 
@@ -87,19 +87,15 @@ ValidationError = {
     "crop_exceeds_width": "Recorte inválido: {total} >= ancho original {width}.",
     "insufficient_inputs": "Se deben proporcionar al menos dos vídeos para este comando.",
     "invalid_crop_format": "Formato de recorte inválido. Esperado: IZQUIERDA,DERECHA,ARRIBA,ABAJO",
-    "invalid_directory_name": (
-        "'{directory}' contiene caracteres inválidos: '< > : \" / \\ | ? *'"
-    ),
-    "invalid_extension": "Extensión '{extension}' inválida. El códec '{codec}' requiere uno de: {supported}",  # noqa: E501
-    "invalid_filename": (
-        "'{filename}' contiene caracteres inválidos: '< > : \" / \\ | ? *'"
-    ),
+    "invalid_directory_name": "'{directory}' contiene caracteres inválidos: '< > : \" / \\ | ? *'",
+    "invalid_extension": "Extensión '{extension}' inválida. El códec '{codec}' requiere uno de: {supported}",
+    "invalid_filename": "'{filename}' contiene caracteres inválidos: '< > : \" / \\ | ? *'",
     "invalid_gyrate": "Formato de rotación inválido. Esperado: 90 | 180 | 270.",
     "invalid_time_format": "Formato de marca de tiempo inválido. Esperado: hh:mm:ss.",
     "invalid_trim_points": "Puntos de división inválidos.",
     "missing_options": "Se requiere al menos una opción.",
     "negative_time": "La marca de tiempo no puede ser negativa.",
-    "time_exceeds_duration": "La marca de tiempo {time} supera la duración del vídeo {duration}.",  # noqa: E501
+    "time_exceeds_duration": "La marca de tiempo {time} supera la duración del vídeo {duration}.",
 }
 
 
@@ -107,8 +103,5 @@ Warnings = {
     "missing_options": "Se requiere al menos una opción.",
     "output_exist": "El archivo ya existe: {file_path}",
     "scale_rejected_equal": "Escalado rechazado: {scale} = altura original {height}.",
-    "scale_rejected_increase": (
-        "Escalado a {scale}p no aplicado: la resolución es mayor que la original "
-        "({height}p)."
-    ),
+    "scale_rejected_increase": "Escalado a {scale}p no aplicado: la resolución es mayor que la original ({height}p).",
 }
