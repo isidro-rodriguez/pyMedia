@@ -13,7 +13,7 @@ from pymedia.ffmpeg.concat_filter_cmd import concat_filter_cmd
 from pymedia.logger import get_logger, log_debug, log_info
 from pymedia.models.arguments import Arguments
 from pymedia.models.state import state
-from pymedia.services.commands_service import (
+from pymedia.services.command_service import (
     initialize_command,
     resolve_output_conflict,
 )
