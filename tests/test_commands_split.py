@@ -3,7 +3,7 @@
 `split_cmd`, `initialize_command`, `resolve_output_conflict`, `run_ffmpeg` y
 `encode_command` se mockean: esta suite comprueba la orquestación de
 `split_command`, no la lógica que ya cubren `test_ffmpeg_split.py` (si existe) y
-`test_command_service.py`.
+`test_services_command.py`.
 """
 
 from pathlib import Path

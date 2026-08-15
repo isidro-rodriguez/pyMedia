@@ -2,7 +2,7 @@
 
 `encode_cmd`, `initialize_command`, `resolve_output_conflict` y `run_ffmpeg` se
 mockean: esta suite comprueba la orquestación de `encode_command`, no la lógica
-que ya cubren `test_ffmpeg_encode.py` y `test_command_service.py`.
+que ya cubren `test_ffmpeg_encode.py` y `test_services_command.py`.
 """
 
 from pathlib import Path

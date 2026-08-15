@@ -2,7 +2,7 @@
 
 `gif_cmd`, `initialize_command`, `resolve_output_conflict` y `run_ffmpeg` se
 mockean: esta suite comprueba la orquestación de `gif_command`, no la lógica
-que ya cubren `test_ffmpeg_gif.py` (si existe) y `test_command_service.py`.
+que ya cubren `test_ffmpeg_gif.py` (si existe) y `test_services_command.py`.
 """
 
 from pathlib import Path
