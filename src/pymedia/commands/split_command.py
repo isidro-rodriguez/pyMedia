@@ -41,6 +41,8 @@ def split_command(args: Arguments) -> None:
     else:
         output = Path(state.inputs[0].name)
 
+    output = Path(output.parent / (output.stem + "_%02d" + output.suffix)).absolute()
+
     output = resolve_output_conflict(output, logger)
 
     if output is None:

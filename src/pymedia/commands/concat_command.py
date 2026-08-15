@@ -20,9 +20,6 @@ from pymedia.services.command_service import (
 
 logger = get_logger("concat")
 
-# Timeout en segundos para la ejecución de ffmpeg (30 minutos)
-FFMPEG_TIMEOUT = 1800
-
 
 def _compatible_videos() -> bool:
     reference = state.media[0].concat_signature

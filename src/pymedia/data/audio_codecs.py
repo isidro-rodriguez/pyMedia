@@ -77,8 +77,15 @@ _flac = AudioCodecData(
     containers=(".flac", ".mka", ".mkv", ".ogg"),
 )
 
-_maven1 = AudioCodecData(
-    name="maven1",
+# Lossless: FFmpeg no requiere ni acepta el flag -b:a
+_mlp = AudioCodecData(
+    name="mlp",
+    library="mlp",
+    containers=(".mlp", ".mka", ".mkv"),
+)
+
+_mp1 = AudioCodecData(
+    name="MPEG-1 Layer I",
     library="mp1",
     containers=(".mp1", ".mkv", ".avi", ".mov"),
     bit_rates=(
@@ -94,37 +101,8 @@ _maven1 = AudioCodecData(
     ),
 )
 
-_maven2 = AudioCodecData(
-    name="maven2",
-    library="mp2",
-    containers=(".mp2", ".mkv", ".avi", ".mov"),
-    bit_rates=(
-        "32k",
-        "48k",
-        "56k",
-        "64k",
-        "80k",
-        "96k",
-        "112k",
-        "128k",
-        "160k",
-        "192k",
-        "224k",
-        "256k",
-        "320k",
-        "384k",
-    ),
-)
-
-# Lossless: FFmpeg no requiere ni acepta el flag -b:a
-_mlp = AudioCodecData(
-    name="mlp",
-    library="mlp",
-    containers=(".mlp", ".mka", ".mkv"),
-)
-
 _mp2 = AudioCodecData(
-    name="mp2",
+    name="MPEG-1 Layer II",
     library="mp2",
     containers=(".mp2", ".mkv", ".avi", ".mpg", ".mpeg", ".ts", ".vob"),
     bit_rates=(
@@ -141,7 +119,7 @@ _mp2 = AudioCodecData(
 )
 
 _mp3 = AudioCodecData(
-    name="mp3",
+    name="MPEG-1 Layer III",
     library="libmp3lame",
     containers=(".mp3", ".mka", ".mkv"),
     bit_rates=("96k", "128k", "160k", "192k", "224k", "256k", "320k"),
@@ -219,9 +197,8 @@ AUDIO_CODECS = {
     "amr_wb": _amr_wb,
     "eac3": _eac3,
     "flac": _flac,
-    "maven1": _maven1,
-    "maven2": _maven2,
     "mlp": _mlp,
+    "mp1": _mp1,
     "mp2": _mp2,
     "mp3": _mp3,
     "opus": _opus,

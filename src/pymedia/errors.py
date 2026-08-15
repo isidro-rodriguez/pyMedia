@@ -35,144 +35,6 @@ class PyMediaError(Exception):
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-#  ValidationError (nivel ERROR)
-# ─────────────────────────────────────────────────────────────────────────────
-
-
-class ValidationError(PyMediaError):
-    """Errores de validación de la entrada del usuario."""
-
-    category = "ValidationError"
-
-
-class InsufficientInputError(ValidationError):
-    message_key = "insufficient_inputs"
-
-
-class InvalidPathError(ValidationError):
-    """Errores de validación de rutas de archivo."""
-
-
-class InvalidDirectoryError(InvalidPathError):
-    message_key = "invalid_directory_name"
-
-
-class InvalidGifExtensionError(InvalidPathError):
-    message_key = "invalid_gif_extension"
-
-
-class InvalidFileNameError(InvalidPathError):
-    message_key = "invalid_filename"
-
-
-class InvalidFileExtensionError(InvalidPathError):
-    message_key = "invalid_extension"
-
-
-class InvalidOptionError(ValidationError):
-    """Base de errores de opciones CLI inválidas."""
-
-
-class InvalidCropError(InvalidOptionError):
-    """Errores de la opción --crop."""
-
-
-class InvalidCropFormatError(InvalidCropError):
-    message_key = "invalid_crop_format"
-
-
-class InvalidVideoExtensionError(InvalidPathError):
-    message_key = "invalid_video_extension"
-
-
-class CropAllZeroError(InvalidCropError):
-    message_key = "crop_all_zero"
-
-
-class CropExceedsWidthError(InvalidCropError):
-    message_key = "crop_exceeds_width"
-
-
-class CropExceedsHeightError(InvalidCropError):
-    message_key = "crop_exceeds_height"
-
-
-class InvalidGyrateError(InvalidOptionError):
-    message_key = "invalid_gyrate"
-
-
-class InvalidTimeError(InvalidOptionError):
-    """Errores de marcas de tiempo."""
-
-
-class InvalidTimeFormatError(InvalidTimeError):
-    message_key = "invalid_time_format"
-
-
-class NegativeTimeError(InvalidTimeError):
-    message_key = "negative_time"
-
-
-class TimeExceedsDurationError(InvalidTimeError):
-    message_key = "time_exceeds_duration"
-
-
-class InvalidTrimPointsError(ValidationError):
-    message_key = "invalid_trim_points"
-
-
-class MissingOptionsError(ValidationError):
-    message_key = "missing_options"
-
-
-class InvalidSettingError(ValidationError):
-    message_key = "invalid_setting"
-
-
-# ─────────────────────────────────────────────────────────────────────────────
-#  PipelineError (nivel ERROR)
-# ─────────────────────────────────────────────────────────────────────────────
-
-
-class PipelineError(PyMediaError):
-    """Errores del pipeline de procesamiento de vídeo."""
-
-    category = "PipelineError"
-
-
-class ArgumentError(PipelineError):
-    """Errores relacionados con los argumentos recogidos por Typer."""
-
-
-class MissingArgumentsError(ArgumentError):
-    message_key = "missing_arguments"
-
-
-class MissingArgumentError(ArgumentError):
-    message_key = "missing_argument"
-
-
-class MediaError(PipelineError):
-    """Errores relacionados con los datos del medio (ffprobe)."""
-
-
-class MissingMediaError(MediaError):
-    message_key = "missing_media"
-
-
-class MissingMediaPropertyError(MediaError):
-    message_key = "missing_media_property"
-
-
-class IncompatibleFilesError(PipelineError):
-    message_key = "incompatible_files"
-
-
-class OutputOnConflictError(PipelineError):
-    message_key = "output_on_conflict"
-
-
-# ─────────────────────────────────────────────────────────────────────────────
 #  ExecutionError (nivel CRITICAL)
 # ─────────────────────────────────────────────────────────────────────────────
 
@@ -182,6 +44,10 @@ class ExecutionError(PyMediaError):
 
     category = "ExecutionError"
     level = "CRITICAL"
+
+
+class CannotCreateDirectoryError(ExecutionError):
+    message_key = "cannot_create_directory"
 
 
 class CommandExecutionError(ExecutionError):
@@ -196,13 +62,119 @@ class FFmpegTimeoutError(ExecutionError):
     message_key = "ffmpeg_timeout"
 
 
-class CannotCreateDirectoryError(ExecutionError):
-    message_key = "cannot_create_directory"
-
-
-class ConfigError(ExecutionError):
-    """Errores relacionados con el fichero de configuración."""
-
-
-class InvalidConfigError(ConfigError):
+class InvalidConfigError(ExecutionError):
     message_key = "invalid_config"
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+#  PipelineError
+# ─────────────────────────────────────────────────────────────────────────────
+
+
+class PipelineError(PyMediaError):
+    """Errores del pipeline de procesamiento de vídeo."""
+
+    category = "PipelineError"
+
+
+class IncompatibleFilesError(PipelineError):
+    message_key = "incompatible_files"
+
+
+class MissingArgumentError(PipelineError):
+    message_key = "missing_argument"
+
+
+class MissingArgumentsError(PipelineError):
+    message_key = "missing_arguments"
+
+
+class MissingMediaError(PipelineError):
+    message_key = "missing_media"
+
+
+class MissingMediaPropertyError(PipelineError):
+    message_key = "missing_media_property"
+
+
+class OutputOnConflictError(PipelineError):
+    message_key = "output_on_conflict"
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+#  ValidationError
+# ─────────────────────────────────────────────────────────────────────────────
+
+
+class ValidationError(PyMediaError):
+    """Errores de validación de la entrada del usuario."""
+
+    category = "ValidationError"
+
+
+class CropAllZeroError(ValidationError):
+    message_key = "crop_all_zero"
+
+
+class CropExceedsHeightError(ValidationError):
+    message_key = "crop_exceeds_height"
+
+
+class CropExceedsWidthError(ValidationError):
+    message_key = "crop_exceeds_width"
+
+
+class InsufficientInputError(ValidationError):
+    message_key = "insufficient_inputs"
+
+
+class InvalidCropFormatError(ValidationError):
+    message_key = "invalid_crop_format"
+
+
+class InvalidDirectoryError(ValidationError):
+    message_key = "invalid_directory_name"
+
+
+class InvalidFileNameError(ValidationError):
+    message_key = "invalid_filename"
+
+
+class InvalidFileExtensionError(ValidationError):
+    message_key = "invalid_extension"
+
+
+class InvalidGifExtensionError(ValidationError):
+    message_key = "invalid_gif_extension"
+
+
+class InvalidGyrateError(ValidationError):
+    message_key = "invalid_gyrate"
+
+
+class InvalidSettingError(ValidationError):
+    message_key = "invalid_setting"
+
+
+class InvalidTimeFormatError(ValidationError):
+    message_key = "invalid_time_format"
+
+
+class InvalidTrimPointsError(ValidationError):
+    message_key = "invalid_trim_points"
+
+
+class InvalidVideoExtensionError(ValidationError):
+    message_key = "invalid_video_extension"
+
+
+class MissingOptionsError(ValidationError):
+    message_key = "missing_options"
+
+
+class NegativeTimeError(ValidationError):
+    message_key = "negative_time"
+
+
+class TimeExceedsDurationError(ValidationError):
+    message_key = "time_exceeds_duration"

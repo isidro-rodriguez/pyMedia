@@ -4,7 +4,10 @@ GIF_CONTAINER = [".gif"]
 VIDEO_CONTAINERS = {
     ".3gp",
     ".3g2",
+    ".aiff",
+    ".avi",
     ".f4v",
+    ".flac",
     ".flv",
     ".m4v",
     ".mkv",
@@ -19,6 +22,7 @@ VIDEO_CONTAINERS = {
     ".qt",
     ".ts",
     ".vob",
+    ".wav",
     ".webm",
     ".wmv",
 }

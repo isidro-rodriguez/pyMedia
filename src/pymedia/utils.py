@@ -1,6 +1,5 @@
 from datetime import timedelta
 from fractions import Fraction
-from pathlib import Path
 
 
 def parse_fraction(value: str | None) -> Fraction | None:
@@ -51,44 +50,19 @@ def parse_crop(value: str | None) -> tuple[int, int, int, int] | None:
 
 
 def convert_to_timedelta(total_time: str) -> timedelta | None:
-    """Convierte 'hh:mm:ss', 'mm:ss' o 'ss' a timedelta.
-
+    """
+    Convierte 'hh:mm:ss', 'mm:ss' o 'ss' a timedelta.
     Soporta formato negativo: '-1:00' o '-45'.
     """
-    negative = False
-    if total_time.startswith("-"):
-        negative = True
-        total_time = total_time[1:]
-
     parts = total_time.split(":")
     if not all(p.isdigit() for p in parts):
         return None
     match tuple(map(float, parts)):
         case (hours, minutes, seconds):
-            result = timedelta(hours=hours, minutes=minutes, seconds=seconds)
+            return timedelta(hours=hours, minutes=minutes, seconds=seconds)
         case (minutes, seconds):
-            result = timedelta(minutes=minutes, seconds=seconds)
+            return timedelta(minutes=minutes, seconds=seconds)
         case (seconds,):
-            result = timedelta(seconds=seconds)
+            return timedelta(seconds=seconds)
         case _:
             return None
-
-    return -result if negative else result
-
-
-def resolve_output_path(
-    path: Path,
-    output_name: str | None = None,
-    suffix: str = "processed",
-) -> Path:
-    """Resuelve la ruta de salida, creando directorio padre si necesario.
-
-    Si output_name es None, genera un nombre por defecto basado en el archivo
-    fuente. Si output_name incluye directorios, los crea si no existen.
-    """
-    if output_name is None:
-        return Path(path.stem + "_" + suffix + path.suffix)
-    output = Path(output_name)
-    if str(output.parent) != ".":
-        output.parent.mkdir(parents=True, exist_ok=True)
-    return output

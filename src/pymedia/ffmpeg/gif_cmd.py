@@ -29,7 +29,7 @@ def gif_cmd(output: Path) -> list[str]:
         cmd.extend(["-ss", str(pipeline.start_point)])
 
     if pipeline.end_point:
-        cmd.extend(["-t", str(pipeline.end_point)])
+        cmd.extend(["-to", str(pipeline.end_point)])
 
     cmd.extend(
         [

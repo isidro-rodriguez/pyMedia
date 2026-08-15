@@ -9,7 +9,6 @@ from pymedia.errors import (
     InvalidCropFormatError,
     InvalidGyrateError,
     InvalidTimeFormatError,
-    InvalidTrimPointsError,
     MissingMediaError,
     MissingMediaPropertyError,
     NegativeTimeError,
@@ -160,10 +159,12 @@ def process_trim_points(
 
     for tp in trim_points.split(","):
         t = convert_to_timedelta(tp)
-        if t is None:
+        if t is None or t < timedelta(0):
             raise InvalidTimeFormatError()
         if t > video_duration:
-            raise InvalidTrimPointsError()
+            raise TimeExceedsDurationError(time=t, duration=video_duration)
         times_timedelta.append(t)
+
+    times_timedelta.sort()
 
     return ",".join(str(t.total_seconds()) for t in times_timedelta)

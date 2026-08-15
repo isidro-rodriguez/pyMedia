@@ -75,7 +75,7 @@
     ]
   },
   "encode_multiple": {
-    "base_command": "uv run pymedia encode ./.local/fixtures/cell_h264_720p.mp4 .local/fixtures/solid_av1_720p.mp4 ",
+    "base_command": "uv run pymedia encode ./.local/fixtures/cell_h264_720p.mp4 ./.local/fixtures/solid_av1_720p.mp4 ",
     "variants": [
       {
         "name": "ENCODE MULTIPLE REMUX",

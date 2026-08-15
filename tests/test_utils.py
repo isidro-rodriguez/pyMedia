@@ -2,13 +2,11 @@
 
 from datetime import timedelta
 from fractions import Fraction
-from pathlib import Path
 
 from pymedia.utils import (
     convert_to_timedelta,
     parse_crop,
     parse_fraction,
-    resolve_output_path,
     to_float,
     to_int,
 )
@@ -132,30 +130,3 @@ def test_convert_to_timedelta_invalid():
 
 def test_convert_to_timedelta_too_many_parts():
     assert convert_to_timedelta("1:2:3:4") is None
-
-
-# -----------------------------------------------------------------------------
-#  resolve_output_path()
-# -----------------------------------------------------------------------------
-
-
-def test_resolve_output_path_default_name():
-    result = resolve_output_path(Path("video.mp4"))
-    assert result == Path("video_processed.mp4")
-
-
-def test_resolve_output_path_custom_suffix():
-    result = resolve_output_path(Path("video.mp4"), suffix="out")
-    assert result == Path("video_out.mp4")
-
-
-def test_resolve_output_path_explicit_name():
-    result = resolve_output_path(Path("video.mp4"), output_name="out.mp4")
-    assert result == Path("out.mp4")
-
-
-def test_resolve_output_path_creates_parent(tmp_path):
-    target = tmp_path / "sub" / "out.mp4"
-    result = resolve_output_path(Path("video.mp4"), output_name=str(target))
-    assert result == target
-    assert target.parent.exists()

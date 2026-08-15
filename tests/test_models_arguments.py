@@ -1,10 +1,10 @@
 """Tests para la validación del modelo Arguments (pymedia.models.arguments)."""
 
-import pytest
 from pathlib import Path
 
-from pymedia.models.arguments import Arguments, CommandName
+import pytest
 
+from pymedia.models.arguments import Arguments, CommandName
 
 # -----------------------------------------------------------------------------
 #  CommandName
@@ -54,7 +54,11 @@ def test_arguments_minimal():
 
 def test_arguments_with_all_fields():
     """Test que Arguments se crea con todos los campos poblados."""
-    from pymedia.models.arguments import GyrateMode, OutputOnConflictMode, ScaleVideoMode, ScaleGifMode
+    from pymedia.cli_params import GyrateMode
+    from pymedia.models.arguments import (
+        OutputOnConflictMode,
+        ScaleVideoMode,
+    )
 
     args = Arguments(
         command=CommandName.CONCAT,
@@ -95,7 +99,9 @@ def test_arguments_invalid_command():
 
 def test_arguments_with_inputs():
     """Test que Arguments acepta lista de inputs."""
-    args = Arguments(command=CommandName.CONCAT, inputs=[Path("file1.mp4"), Path("file2.mp4")])
+    args = Arguments(
+        command=CommandName.CONCAT, inputs=[Path("file1.mp4"), Path("file2.mp4")]
+    )
     assert args.inputs == [Path("file1.mp4"), Path("file2.mp4")]
 
 

@@ -32,7 +32,7 @@ def gif_command(args: Arguments) -> None:
     cmd = gif_cmd(output)
 
     if cmd is None:
-        raise CommandGenerationError(command_name="concat")
+        raise CommandGenerationError(command_name="gif")
 
     log_debug(logger, "ffmpeg_command", cmd=cmd)
     run_ffmpeg(

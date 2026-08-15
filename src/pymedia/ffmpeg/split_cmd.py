@@ -9,10 +9,6 @@ def split_cmd(
     output: Path,
 ):
 
-    video_outputs = Path(
-        output.parent / (output.stem + "_%02d" + output.suffix)
-    ).absolute()
-
     cmd = ["ffmpeg"]
 
     if state.output_on_conflict == OutputOnConflictMode.REPLACE:
@@ -35,7 +31,7 @@ def split_cmd(
             "-progress",
             "pipe:1",
             "-nostats",
-            str(video_outputs),
+            str(output),
         ]
     )
 

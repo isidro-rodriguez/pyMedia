@@ -1,11 +1,12 @@
 """Servicio de detección y carga de idiomas."""
 
 import importlib
+import locale
 import os
+import tomllib
 from pathlib import Path
 
 import platformdirs
-import tomllib
 
 LANGUAGE_MAP = {
     "system": None,
@@ -33,8 +34,16 @@ def _read_config_language() -> str:
 
 
 def _detect_system_language() -> str:
-    """Detecta el idioma del sistema (LANG, LC_ALL, fallback 'en')."""
+    """Detecta el idioma del sistema (env vars POSIX, locale, fallback 'en')."""
     lang = os.environ.get("LANG") or os.environ.get("LC_ALL") or ""
+
+    if not lang:
+        try:
+            locale.setlocale(locale.LC_ALL, "")
+            lang = locale.getlocale()[0] or ""
+        except (locale.Error, ValueError, TypeError):
+            lang = ""
+
     code = lang.split("_")[0].lower()
     return code if code in SUPPORTED_LANGUAGES else "en"
 
