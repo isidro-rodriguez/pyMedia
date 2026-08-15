@@ -100,6 +100,7 @@ ValidationError = {
     "invalid_filename": "'{filename}' contiene caratteri non validi: '< > : \" / \\ | ? *'",
     "invalid_gif_extension": "Estensione non valida '{extension}'. Le immagini GIF richiedono il contenitore '.gif'.",
     "invalid_gyrate": "Formato di rotazione non valido. Previsto: 90 | 180 | 270.",
+    "invalid_setting": "Impostazione non valida: {parameter}",
     "invalid_time_format": "Formato del timestamp non valido. Previsto: hh:mm:ss.",
     "invalid_trim_points": "Punti di divisione non validi.",
     "invalid_video_extension": "Estensione video non valida '{extension}'. I file video richiedono una delle seguenti: {supported}.",

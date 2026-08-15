@@ -9,7 +9,7 @@ import pytest
 from utils.factories import make_audio, make_config, make_media, make_video, reset_state
 
 from pymedia.cli_params import OutputOnConflictMode, ScaleVideoMode
-from pymedia.errors import InvalidConfigError
+from pymedia.errors import InvalidConfigError, InvalidSettingError
 from pymedia.ffmpeg.concat_filter_cmd import concat_filter_cmd
 from pymedia.models.arguments import Arguments, CommandName
 from pymedia.models.video_pipeline import VideoPipeline
@@ -384,9 +384,7 @@ class TestConcatFilterCmdErrors:
             config=make_config(fps="invalid_fps"),
         )
 
-        # InvalidSettingError.__init__ raises KeyError because the locale
-        # key "invalid_setting" is missing from ValidationError dict.
-        with pytest.raises(KeyError):
+        with pytest.raises(InvalidSettingError):
             concat_filter_cmd()
 
     def test_invalid_resize_to_raises(self):

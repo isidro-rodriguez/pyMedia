@@ -100,6 +100,7 @@ ValidationError = {
     "invalid_filename": "'{filename}' enthält ungültige Zeichen: '< > : \" / \\ | ? *'",
     "invalid_gif_extension": "Ungültige Erweiterung '{extension}'. Für GIF-Bilder ist der Container '.gif' erforderlich.",
     "invalid_gyrate": "Ungültiges Drehformat. Erwartet: 90 | 180 | 270.",
+    "invalid_setting": "Ungültige Einstellung: {parameter}",
     "invalid_time_format": "Ungültiges Zeitstempelformat. Erwartet: hh:mm:ss.",
     "invalid_trim_points": "Ungültige Trennpunkte.",
     "invalid_video_extension": "Ungültige Videoerweiterung '{extension}'. Videodateien erfordern eine der folgenden Erweiterungen: {supported}.",

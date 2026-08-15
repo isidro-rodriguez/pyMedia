@@ -200,14 +200,11 @@ def test_missing_options_error():
 
 
 def test_invalid_setting_error():
-    """Test InvalidSettingError - usa message_key 'invalid_setting' que no existe en ValidationError."""
-    # Este error fallará porque 'invalid_setting' no es una clave válida en ValidationError
-    # Probaremos que lanza la excepción esperada
+    """Test InvalidSettingError - usa message_key 'invalid_setting'."""
     try:
-        raise InvalidSettingError(setting="audio_bit_rate", expected="mp3,aac")
-    except KeyError as e:
-        # Esperamos KeyError porque la clave no existe en locales
-        assert "invalid_setting" in str(e)
+        raise InvalidSettingError(parameter="fps")
+    except InvalidSettingError as e:
+        assert "Invalid setting: fps" in str(e)
 
 
 # -----------------------------------------------------------------------------
