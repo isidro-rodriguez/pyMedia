@@ -9,6 +9,8 @@ from pymedia.errors import (
     InvalidDirectoryError,
     InvalidFileExtensionError,
     InvalidFileNameError,
+    InvalidGifExtensionError,
+    InvalidVideoExtensionError,
     MissingMediaPropertyError,
 )
 from pymedia.models.arguments import CommandName
@@ -21,11 +23,12 @@ def _format_supported(extensions: set[str] | list[str]) -> str:
 
 def _is_valid_video_extension(video: Path) -> bool:
     if video.suffix is None:
-        raise InvalidFileExtensionError(
-            extension=None, supported=_format_supported(VIDEO_CONTAINERS)
+        raise InvalidVideoExtensionError(
+            extension=None,
+            supported=_format_supported(VIDEO_CONTAINERS),
         )
     if video.suffix not in VIDEO_CONTAINERS:
-        raise InvalidFileExtensionError(
+        raise InvalidVideoExtensionError(
             extension=video.suffix,
             supported=_format_supported(VIDEO_CONTAINERS),
         )
@@ -96,19 +99,19 @@ def process_output(
 
     # Comprobación de la extensión
     if output.suffix is None:
-        raise InvalidFileExtensionError(
-            extension="", supported=_format_supported(VIDEO_CONTAINERS)
+        raise InvalidVideoExtensionError(
+            extension="",
+            supported=_format_supported(VIDEO_CONTAINERS),
         )
 
     if command is CommandName.GIF:
         if output.suffix != GIF_CONTAINER[0]:
-            raise InvalidFileExtensionError(
+            raise InvalidGifExtensionError(
                 extension=output.suffix,
-                supported=_format_supported(GIF_CONTAINER),
             )
     else:
         if output.suffix not in VIDEO_CONTAINERS:
-            raise InvalidFileExtensionError(
+            raise InvalidVideoExtensionError(
                 extension=output.suffix,
                 supported=_format_supported(VIDEO_CONTAINERS),
             )

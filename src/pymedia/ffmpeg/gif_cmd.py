@@ -12,7 +12,7 @@ def gif_cmd(output: Path) -> list[str]:
         filters += pipeline.crop[0] + ","
     if pipeline.gyrate:
         filters += pipeline.gyrate + ","
-    if pipeline.scale != [None]:
+    if pipeline.scale and pipeline.scale[0] is not None:
         filters += pipeline.scale[0] + ","
 
     filters += (

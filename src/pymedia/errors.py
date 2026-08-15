@@ -57,6 +57,10 @@ class InvalidDirectoryError(InvalidPathError):
     message_key = "invalid_directory_name"
 
 
+class InvalidGifExtensionError(InvalidPathError):
+    message_key = "invalid_gif_extension"
+
+
 class InvalidFileNameError(InvalidPathError):
     message_key = "invalid_filename"
 
@@ -75,6 +79,10 @@ class InvalidCropError(InvalidOptionError):
 
 class InvalidCropFormatError(InvalidCropError):
     message_key = "invalid_crop_format"
+
+
+class InvalidVideoExtensionError(InvalidPathError):
+    message_key = "invalid_video_extension"
 
 
 class CropAllZeroError(InvalidCropError):
