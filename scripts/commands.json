@@ -1,0 +1,173 @@
+{
+  "concat_comp": {
+    "base_command": "uv run pymedia concat ./.local/fixtures/src_h265_720p.mp4 ./.local/fixtures/vsrc_h265_720p.mp4 ",
+    "variants": [
+      {
+        "name": "CONCAT DEMUX",
+        "args": "-o ./.local/qt/concat_compatible_demux.mp4"
+      },
+      {
+        "name": "CONCAT GYRATE",
+        "args": "-o ./.local/qt/concat_compatible_gyrate.mp4 -g 90"
+      },
+      {
+        "name": "CONCAT SCALE",
+        "args": "-o ./.local/qt/concat_compatible_scale.mp4 -s 480"
+      },
+      {
+        "name": "CONCAT CROP",
+        "args": "-o ./.local/qt/concat_compatible_crop.mp4 -c 0,0,100,100"
+      },
+      {
+        "name": "CONCAT FULL",
+        "args": "-o ./.local/qt/concat_compatible_full.mp4 -g 180 -s 480 -c 0,0,100,100"
+      }
+    ]
+  },
+  "concat_incomp": {
+    "base_command": "uv run pymedia concat ./.local/fixtures/src_h265_720p.mp4 ./.local/fixtures/solid_av1_1080p.mp4 ",
+    "variants": [
+      {
+        "name": "CONCAT DEMUX",
+        "args": "-o ./.local/qt/concat_incompatible_demux.mp4"
+      },
+      {
+        "name": "CONCAT GYRATE",
+        "args": "-o ./.local/qt/concat_incompatible_gyrate.mp4 -g 90"
+      },
+      {
+        "name": "CONCAT SCALE",
+        "args": "-o ./.local/qt/concat_incompatible_scale.mp4 -s 480"
+      },
+      {
+        "name": "CONCAT CROP",
+        "args": "-o ./.local/qt/concat_incompatible_crop.mp4 -c 0,0,100,100"
+      },
+      {
+        "name": "CONCAT FULL",
+        "args": "-o ./.local/qt/concat_incompatible_full.mp4 -g 180 -s 480 -c 0,0,100,100"
+      }
+    ]
+  },
+  "encode": {
+    "base_command": "uv run pymedia encode ./.local/fixtures/cell_h264_720p.mp4 ",
+    "variants": [
+      {
+        "name": "ENCODE REMUX",
+        "args": "-o ./.local/qt/encode_remux.mp4 -r"
+      },
+      {
+        "name": "ENCODE GYRATE",
+        "args": "-o ./.local/qt/encode_gyrate.mp4 -g 90"
+      },
+      {
+        "name": "ENCODE SCALE",
+        "args": "-o ./.local/qt/encode_scale.mp4 -s 480"
+      },
+      {
+        "name": "ENCODE CROP",
+        "args": "-o ./.local/qt/encode_crop.mp4 -c 0,0,100,100"
+      },
+      {
+        "name": "ENCODE FULL",
+        "args": "-o ./.local/qt/encode_full.mp4 -g 180 -s 480 -c 0,0,100,100"
+      }
+    ]
+  },
+  "encode_multiple": {
+    "base_command": "uv run pymedia encode ./.local/fixtures/cell_h264_720p.mp4 .local/fixtures/solid_av1_720p.mp4 ",
+    "variants": [
+      {
+        "name": "ENCODE MULTIPLE REMUX",
+        "args": "-o ./.local/qt/encode_multiple_remux.mp4 -r"
+      },
+      {
+        "name": "ENCODE MULTIPLE GYRATE",
+        "args": "-o ./.local/qt/encode_multiple_gyrate.mp4 -g 90"
+      },
+      {
+        "name": "ENCODE MULTIPLE SCALE",
+        "args": "-o ./.local/qt/encode_multiple_scale.mp4 -s 480"
+      },
+      {
+        "name": "ENCODE MULTIPLE CROP",
+        "args": "-o ./.local/qt/encode_multiple_crop.mp4 -c 0,0,100,100"
+      },
+      {
+        "name": "ENCODE MULTIPLE FULL",
+        "args": "-o ./.local/qt/encode_multiple_full.mp4 -g 180 -s 480 -c 0,0,100,100"
+      }
+    ]
+  },
+  "gif": {
+    "base_command": "uv run pymedia gif ./.local/fixtures/vsrc_h265_720p.mp4 ",
+    "variants": [
+      {
+        "name": "GIF DEFAULT",
+        "args": "-o ./.local/qt/gif_default.gif"
+      },
+      {
+        "name": "GIF CROP",
+        "args": "-o ./.local/qt/gif_crop.gif -c 0,0,200,200"
+      },
+      {
+        "name": "GIF END POINT",
+        "args": "-o ./.local/qt/gif_end_point.gif -ep 4"
+      },
+      {
+        "name": "GIF FPS",
+        "args": "-o ./.local/qt/gif_fps.gif -f 4"
+      },
+      {
+        "name": "GIF START POINT",
+        "args": "-o ./.local/qt/gif_start_point.gif -sp 7"
+      },
+      {
+        "name": "GIF GYRATE",
+        "args": "-o ./.local/qt/gif_gyrate.gif -g 90"
+      },
+      {
+        "name": "GIF SCALE",
+        "args": "-o ./.local/qt/gif_scale.gif -s 240"
+      },
+      {
+        "name": "GIF FULL",
+        "args": "-o ./.local/qt/gif_full.gif -f 4 -s 240 -c 0,0,200,200 -sp 4 -ep 7 -g 90"
+      }
+    ]
+  },
+  "split": {
+    "base_command": "uv run pymedia split ./.local/fixtures/solid_av1_720p.mp4 ",
+    "variants": [
+      {
+        "name": "SPLIT SIMPLE",
+        "args": "-o ./.local/qt/split_simple.mp4 -t 3"
+      },
+      {
+        "name": "SPLIT GYRATE",
+        "args": "-o ./.local/qt/split_gyrate.mp4 -t 3 -g 90"
+      },
+      {
+        "name": "SPLIT SCALE",
+        "args": "-o ./.local/qt/split_scale.mp4 -t 3 -s 480"
+      },
+      {
+        "name": "SPLIT CROP",
+        "args": "-o ./.local/qt/split_crop.mp4 -t 3 -c 0,0,100,100"
+      },
+      {
+        "name": "SPLIT FULL",
+        "args": "-o ./.local/qt/split_full.mp4 -t 3 -g 180 -s 480 -c 0,0,100,100"
+      }
+    ]
+  },
+  "clean": {
+    "base_command": "rm -r ",
+    "variants": [
+      {
+        "name": "BORRADO QUICK TEST",
+        "args": "./.local/qt/"
+      }
+    ]
+  }
+}
