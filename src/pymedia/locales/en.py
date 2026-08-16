@@ -1,5 +1,3 @@
-# ruff: noqa
-
 Cli = {
     "concat_help": "Concatenates videos in the specified order",
     "crop_help": "Crops the specified number of pixels.",
@@ -51,8 +49,8 @@ Debug = {
 
 ExecutionError = {
     "cannot_create_directory": "Could not create directory: {path}",
-    "command_execution": "FFmpeg command '{command_name}' failed during execution. Error: {error}",
-    "command_generation": "FFmpeg command '{command_name}' was not generated.",
+    "command_execution": "FFmpeg command {command_name} failed during execution. Error: {error}",
+    "command_generation": "FFmpeg command {command_name} was not generated.",
     "ffmpeg_timeout": "FFmpeg operation exceeded the allowed timeout.",
     "invalid_config": "Invalid configuration: {message}",
     "invalid_config_setting": "Invalid configuration setting: {setting} is expected {expected}",
@@ -75,8 +73,8 @@ PipelineError = {
     "incompatible_files": "Video files are incompatible with each other.",
     "missing_arguments": "Missing arguments retrieved from Typer.",
     "missing_argument": "Missing argument: {argument}",
-    "missing_media": "Media information for '{path}' could not be found.",
-    "missing_media_property": "Media property '{property_name}' could not be found.",
+    "missing_media": "Media information for {path} could not be found.",
+    "missing_media_property": "Media property {property_name} could not be found.",
     "output_on_conflict": "Stopped process because output file already exist.",
 }
 
@@ -95,15 +93,15 @@ ValidationError = {
     "crop_exceeds_width": "Invalid crop: {total} >= original width {width}.",
     "insufficient_inputs": "At least two videos must be provided for this command.",
     "invalid_crop_format": "Invalid crop format. Expected: LEFT,RIGHT,TOP,BOTTOM.",
-    "invalid_directory_name": "'{directory}' contains invalid characters: '< > : \" / \\ | ? *'",
-    "invalid_extension": "Invalid extension '{extension}'. Codec '{codec}' requires one of: {supported}.",
-    "invalid_filename": "'{filename}' contains invalid characters: '< > : \" / \\ | ? *'",
-    "invalid_gif_extension": "Invalid extension '{extension}'. Gif images requires '.gif' container.",
+    "invalid_directory_name": '{directory} contains invalid characters: < > : " / \\ | ? *',
+    "invalid_extension": "Invalid extension {extension}. Codec {codec} requires one of: {supported}.",
+    "invalid_filename": '{filename} contains invalid characters: < > : " / \\ | ? *',
+    "invalid_gif_extension": "Invalid extension {extension}. Gif images requires .gif container.",
     "invalid_gyrate": "Invalid rotation format. Expected: 90 | 180 | 270.",
     "invalid_setting": "Invalid setting: {parameter}",
     "invalid_time_format": "Invalid timestamp format. Expected: hh:mm:ss.",
     "invalid_trim_points": "Invalid trim points.",
-    "invalid_video_extension": "Invalid video extension '{extension}'. Video files requires one of: {supported}.",
+    "invalid_video_extension": "Invalid video extension {extension}. Video files requires one of: {supported}.",
     "missing_options": "At least one option is required.",
     "negative_time": "Timestamp cannot be negative.",
     "time_exceeds_duration": "Timestamp {time} exceeds video duration {duration}.",

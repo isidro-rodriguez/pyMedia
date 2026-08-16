@@ -56,6 +56,10 @@ line-ending = "auto"
 [tool.ruff.lint]
 select = ["E", "F", "I", "UP", "B"]
 
+[tool.ruff.lint.per-file-ignores]
+# Ignora las reglas en todos los archivos de la carpeta de locales
+"**/locales/*.py" = ["E501", "D"]
+
 # Configuración de Pytest
 [tool.pytest.ini_options]
 testpaths = ["tests"]
