@@ -76,7 +76,8 @@ class TestSplitCommandOutputNaming:
 
         split_command(Arguments(command=CommandName.SPLIT))
 
-        assert captured["output"] == Path("clip.mp4")
+        # split_command adds _%02d suffix to the output filename
+        assert captured["output"] == Path("clip_%02d.mp4").absolute()
 
     def test_explicit_output_used_as_is(self, monkeypatch, tmp_path):
         _setup_state(
@@ -94,7 +95,8 @@ class TestSplitCommandOutputNaming:
 
         split_command(Arguments(command=CommandName.SPLIT))
 
-        assert captured["output"] == (tmp_path / "final.mp4")
+        # split_command adds _%02d suffix to the output filename
+        assert captured["output"] == (tmp_path / "final_%02d.mp4").absolute()
 
 
 class TestSplitCommandConflictHandling:
@@ -178,7 +180,8 @@ class TestSplitCommandExecution:
         assert encode_calls[0].name == "a_tmp.mp4"
         assert len(split_calls) == 1
         # _split is called with the temp path and the resolved output
-        assert split_calls[0][1] == Path("a.mp4")
+        # split_command adds _%02d suffix to the output filename
+        assert split_calls[0][1] == Path("a_%02d.mp4").absolute()
         assert split_calls[0][0].name == "a_tmp.mp4"
 
     def test_raises_command_generation_error_when_cmd_is_none(

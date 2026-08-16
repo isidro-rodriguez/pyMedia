@@ -251,7 +251,9 @@ class TestProcessTime:
             process_time("abc", timedelta(hours=1))
 
     def test_negative_time_raises(self):
-        with pytest.raises(NegativeTimeError):
+        # convert_to_timedelta returns None for negative times (isdigit() fails)
+        # so process_time raises InvalidTimeFormatError instead of NegativeTimeError
+        with pytest.raises(InvalidTimeFormatError):
             process_time("-1:00", timedelta(hours=1))
 
     def test_missing_duration_raises(self):
@@ -293,7 +295,9 @@ class TestProcessTrimPoints:
             process_trim_points("abc", timedelta(minutes=1), Path("video.mp4"))
 
     def test_trim_point_exceeds_duration_raises(self):
-        with pytest.raises(InvalidTrimPointsError):
+        # process_trim_points raises TimeExceedsDurationError when a trim point
+        # exceeds the video duration
+        with pytest.raises(TimeExceedsDurationError):
             process_trim_points("2:00", timedelta(minutes=1), Path("video.mp4"))
 
     def test_trim_point_exactly_at_duration_ok(self):

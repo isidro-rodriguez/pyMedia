@@ -4,30 +4,18 @@ from pymedia.errors import (
     PyMediaError,
     ValidationError,
     InsufficientInputError,
-    InvalidPathError,
     InvalidDirectoryError,
     InvalidGifExtensionError,
     InvalidFileNameError,
     InvalidFileExtensionError,
-    InvalidOptionError,
-    InvalidCropError,
     InvalidCropFormatError,
-    CropAllZeroError,
-    CropExceedsWidthError,
-    CropExceedsHeightError,
-    InvalidGyrateError,
-    InvalidTimeError,
     InvalidTimeFormatError,
-    NegativeTimeError,
-    TimeExceedsDurationError,
     InvalidTrimPointsError,
-    MissingOptionsError,
+    InvalidGyrateError,
     InvalidSettingError,
     PipelineError,
-    ArgumentError,
     MissingArgumentsError,
     MissingArgumentError,
-    MediaError,
     MissingMediaError,
     MissingMediaPropertyError,
     IncompatibleFilesError,
@@ -37,8 +25,14 @@ from pymedia.errors import (
     CommandGenerationError,
     FFmpegTimeoutError,
     CannotCreateDirectoryError,
-    ConfigError,
     InvalidConfigError,
+    CropAllZeroError,
+    CropExceedsWidthError,
+    CropExceedsHeightError,
+    NegativeTimeError,
+    TimeExceedsDurationError,
+    MissingOptionsError,
+    InvalidVideoExtensionError,
 )
 
 
@@ -52,8 +46,8 @@ def test_insufficient_input_error():
     try:
         raise InsufficientInputError()
     except InsufficientInputError as e:
-        # El mensaje formateado es: "At least two videos must be provided for this command."
-        assert "At least two videos must be provided" in str(e)
+        # El mensaje formateado es: "Se deben proporcionar al menos dos videos para este comando."
+        assert "Se deben proporcionar al menos dos videos" in str(e)
 
 
 def test_invalid_directory_error():
@@ -102,7 +96,8 @@ def test_invalid_crop_format_error():
     try:
         raise InvalidCropFormatError()
     except InvalidCropFormatError as e:
-        assert "Invalid crop format" in str(e)
+        # El mensaje es: "Formato de recorte no válido. Se esperaba: LEFT,RIGHT,TOP,BOTTOM."
+        assert "Formato de recorte" in str(e)
 
 
 def test_crop_all_zero_error():
@@ -110,7 +105,8 @@ def test_crop_all_zero_error():
     try:
         raise CropAllZeroError()
     except CropAllZeroError as e:
-        assert "all values are 0" in str(e)
+        # El mensaje es: "Recorte no válido: todos los valores son 0."
+        assert "todos los valores son 0" in str(e)
 
 
 def test_crop_exceeds_width_error():
@@ -134,8 +130,8 @@ def test_invalid_gyrate_error():
     try:
         raise InvalidGyrateError(angle=45)
     except InvalidGyrateError as e:
-        # El mensaje es: "Invalid rotation format. Expected: 90 | 180 | 270."
-        assert "Invalid rotation format" in str(e)
+        # El mensaje es: "Formato de rotación no válido. Se esperaba: 90 | 180 | 270."
+        assert "Formato de rotación" in str(e)
 
 
 # -----------------------------------------------------------------------------
@@ -148,7 +144,8 @@ def test_invalid_time_format_error():
     try:
         raise InvalidTimeFormatError()
     except InvalidTimeFormatError as e:
-        assert "Invalid timestamp format" in str(e)
+        # El mensaje es: "Formato de marca de tiempo no válido. Se esperaba: hh:mm:ss."
+        assert "Formato de marca de tiempo" in str(e)
 
 
 def test_negative_time_error():
@@ -156,8 +153,8 @@ def test_negative_time_error():
     try:
         raise NegativeTimeError(time="-5:00")
     except NegativeTimeError as e:
-        # El mensaje es: "Timestamp cannot be negative."
-        assert "Timestamp cannot be negative" in str(e)
+        # El mensaje es: "La marca de tiempo no puede ser negativa."
+        assert "marca de tiempo no puede ser negativa" in str(e)
 
 
 def test_time_exceeds_duration_error():
@@ -178,7 +175,7 @@ def test_invalid_trim_points_error():
     try:
         raise InvalidTrimPointsError(points="invalid")
     except InvalidTrimPointsError as e:
-        assert "Invalid trim points" in str(e)
+        assert "Puntos de corte" in str(e)
 
 
 # -----------------------------------------------------------------------------
@@ -191,7 +188,8 @@ def test_missing_options_error():
     try:
         raise MissingOptionsError()
     except MissingOptionsError as e:
-        assert "At least one option is required" in str(e)
+        # El mensaje es: "Se requiere al menos una opción."
+        assert "Se requiere al menos una opción" in str(e)
 
 
 # -----------------------------------------------------------------------------
@@ -204,7 +202,8 @@ def test_invalid_setting_error():
     try:
         raise InvalidSettingError(parameter="fps")
     except InvalidSettingError as e:
-        assert "Invalid setting: fps" in str(e)
+        # El mensaje es: "Ajuste no válido: fps"
+        assert "Ajuste no válido" in str(e)
 
 
 # -----------------------------------------------------------------------------
@@ -217,7 +216,8 @@ def test_missing_arguments_error():
     try:
         raise MissingArgumentsError()
     except MissingArgumentsError as e:
-        assert "Missing arguments retrieved from Typer" in str(e)
+        # El mensaje es: "Faltan argumentos recuperados de Typer."
+        assert "Faltan argumentos recuperados de Typer" in str(e)
 
 
 def test_missing_argument_error():
@@ -249,7 +249,8 @@ def test_incompatible_files_error():
     try:
         raise IncompatibleFilesError()
     except IncompatibleFilesError as e:
-        assert "incompatible with each other" in str(e)
+        # El mensaje es: "Los archivos de video son incompatibles entre sí."
+        assert "incompatible" in str(e)
 
 
 def test_output_on_conflict_error():
@@ -257,7 +258,8 @@ def test_output_on_conflict_error():
     try:
         raise OutputOnConflictError()
     except OutputOnConflictError as e:
-        assert "output file already exist" in str(e)
+        # El mensaje es: "Proceso detenido porque el archivo de salida ya existe."
+        assert "archivo de salida ya existe" in str(e)
 
 
 # -----------------------------------------------------------------------------
@@ -289,7 +291,8 @@ def test_ffmpeg_timeout_error():
     try:
         raise FFmpegTimeoutError()
     except FFmpegTimeoutError as e:
-        assert "timeout" in str(e)
+        # El mensaje es: "La operación de FFmpeg excedió el tiempo de espera permitido."
+        assert "tiempo de espera" in str(e)
 
 
 def test_cannot_create_directory_error():
@@ -310,4 +313,5 @@ def test_invalid_config_error():
     try:
         raise InvalidConfigError(message="invalid key")
     except InvalidConfigError as e:
-        assert "invalid key" in str(e) and "Invalid configuration" in str(e)
+        # El mensaje es: "Configuración no válida: invalid key"
+        assert "Configuración no válida" in str(e) and "invalid key" in str(e)

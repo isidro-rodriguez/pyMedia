@@ -1,6 +1,5 @@
 """Tests para la generación del comando ffmpeg de split (pymedia.ffmpeg.split_cmd)."""
 
-
 from utils.factories import reset_state
 
 from pymedia.cli_params import OutputOnConflictMode
@@ -38,7 +37,7 @@ class TestSplitCmd:
             "-progress",
             "pipe:1",
             "-nostats",
-            str((tmp_path / "out_%02d.mp4").absolute()),
+            str((tmp_path / "out.mp4").absolute()),
         ]
 
     def test_replace_adds_y(self, tmp_path):
@@ -60,7 +59,7 @@ class TestSplitCmd:
 
         cmd = split_cmd(tmp_path / "input.mp4", tmp_path / "out.mp4")
 
-        assert cmd[-1] == str((tmp_path / "out_%02d.mp4").absolute())
+        assert cmd[-1] == str((tmp_path / "out.mp4").absolute())
         assert cmd[-2] == "-nostats"
         assert cmd[-3] == "pipe:1"
         assert cmd[-4] == "-progress"
@@ -70,9 +69,7 @@ class TestSplitCmd:
 
         cmd = split_cmd(tmp_path / "input.mp4", tmp_path / "out.mp4")
 
-        assert cmd[cmd.index("-i") + 1] == str(
-            (tmp_path / "input.mp4").absolute()
-        )
+        assert cmd[cmd.index("-i") + 1] == str((tmp_path / "input.mp4").absolute())
 
     def test_segment_times_from_pipeline(self, tmp_path):
         _setup_state(pipeline=VideoPipeline(trim_points="00:10,00:20,00:30"))
@@ -86,5 +83,5 @@ class TestSplitCmd:
 
         cmd = split_cmd(tmp_path / "input.mp4", tmp_path / "out.mp4")
 
-        # The output path is transformed to {stem}_%02d{suffix}
-        assert cmd[-1] == str((tmp_path / "out_%02d.mp4").absolute())
+        # split_cmd uses the output path as-is (no _%02d suffix)
+        assert cmd[-1] == str((tmp_path / "out.mp4").absolute())

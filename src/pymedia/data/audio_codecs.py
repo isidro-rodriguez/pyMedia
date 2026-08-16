@@ -85,7 +85,7 @@ _mlp = AudioCodecData(
 )
 
 _mp1 = AudioCodecData(
-    name="MPEG-1 Layer I",
+    name="mp1",
     library="mp1",
     containers=(".mp1", ".mkv", ".avi", ".mov"),
     bit_rates=(
@@ -102,7 +102,7 @@ _mp1 = AudioCodecData(
 )
 
 _mp2 = AudioCodecData(
-    name="MPEG-1 Layer II",
+    name="mp2",
     library="mp2",
     containers=(".mp2", ".mkv", ".avi", ".mpg", ".mpeg", ".ts", ".vob"),
     bit_rates=(
@@ -119,7 +119,7 @@ _mp2 = AudioCodecData(
 )
 
 _mp3 = AudioCodecData(
-    name="MPEG-1 Layer III",
+    name="mp3",
     library="libmp3lame",
     containers=(".mp3", ".mka", ".mkv"),
     bit_rates=("96k", "128k", "160k", "192k", "224k", "256k", "320k"),

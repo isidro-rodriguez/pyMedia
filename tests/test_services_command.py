@@ -7,13 +7,28 @@ import pytest
 
 from pymedia.services.command_service import (
     initialize_command,
-    _get_available_output_path,
     resolve_output_conflict,
     run_ffmpeg,
 )
 from pymedia.models.arguments import Arguments, CommandName
 from pymedia.models.state import state
 from pymedia.cli_params import OutputOnConflictMode
+
+
+def _mock_logger():
+    """Crea un logger mock para los tests."""
+    import logging
+    logger = logging.getLogger("test")
+    logger.setLevel(0)  # Disable logging
+    return logger
+
+
+def _setup_state(*, inputs, output=None, output_on_conflict=OutputOnConflictMode.RENAME):
+    """Configura el estado para los tests."""
+    state.inputs = inputs
+    state.output = output
+    state.output_on_conflict = output_on_conflict
+    return state
 
 
 class TestInitializeCommand:
@@ -56,14 +71,18 @@ class TestGetAvailableOutputPath:
     def test_returns_same_path_if_not_exists(self, tmp_path):
         """Si el archivo no existe, devuelve la misma ruta."""
         output = tmp_path / "unique.mp4"
-        result = _get_available_output_path(output)
+        # Asegurar modo RENAME para la prueba
+        state.output_on_conflict = OutputOnConflictMode.RENAME
+        result = resolve_output_conflict(output, _mock_logger())
         assert result == output
 
     def test_returns_new_path_if_exists(self, tmp_path):
         """Si el archivo existe, devuelve una ruta con sufijo numérico."""
         output = tmp_path / "existing.mp4"
         output.touch()  # crear el archivo
-        result = _get_available_output_path(output)
+        # Asegurar modo RENAME para la prueba
+        state.output_on_conflict = OutputOnConflictMode.RENAME
+        result = resolve_output_conflict(output, _mock_logger())
         assert result != output
         assert result.stem == "existing_1"
 
@@ -73,7 +92,9 @@ class TestGetAvailableOutputPath:
         output.touch()
         (tmp_path / "existing_1.mp4").touch()
         (tmp_path / "existing_2.mp4").touch()
-        result = _get_available_output_path(output)
+        # Asegurar modo RENAME para la prueba
+        state.output_on_conflict = OutputOnConflictMode.RENAME
+        result = resolve_output_conflict(output, _mock_logger())
         # existing.mp4, existing_1.mp4, existing_2.mp4 existen -> existing_3.mp4
         assert result == tmp_path / "existing_3.mp4"
 
@@ -81,10 +102,7 @@ class TestGetAvailableOutputPath:
 class TestResolveOutputConflict:
     def test_fail_raises(self, monkeypatch, tmp_path):
         """OutputOnConflictMode.FAIL lanza OutputOnConflictError."""
-        monkeypatch.setattr(
-            "pymedia.services.command_service.state.output_on_conflict",
-            OutputOnConflictMode.FAIL,
-        )
+        state.output_on_conflict = OutputOnConflictMode.FAIL
         monkeypatch.setattr(
             "pymedia.services.command_service.log_warning", lambda *a, **k: None
         )
@@ -92,15 +110,13 @@ class TestResolveOutputConflict:
         output = tmp_path / "output.mp4"
         output.touch()  # crear el archivo para que exista
 
-        with pytest.raises(Exception):  # OutputOnConflictError
-            resolve_output_conflict(output, None)
+        from pymedia.errors import OutputOnConflictError
+        with pytest.raises(OutputOnConflictError):
+            resolve_output_conflict(output, _mock_logger())
 
     def test_rename_returns_new_path(self, monkeypatch, tmp_path):
         """OutputOnConflictMode.RENAME devuelve una nueva ruta."""
-        monkeypatch.setattr(
-            "pymedia.services.command_service.state.output_on_conflict",
-            OutputOnConflictMode.RENAME,
-        )
+        state.output_on_conflict = OutputOnConflictMode.RENAME
         monkeypatch.setattr(
             "pymedia.services.command_service.log_warning", lambda *a, **k: None
         )
@@ -108,29 +124,23 @@ class TestResolveOutputConflict:
         output = tmp_path / "output.mp4"
         output.touch()
 
-        result = resolve_output_conflict(output, None)
+        result = resolve_output_conflict(output, _mock_logger())
         assert result != output
         assert result.stem == "output_1"
 
     def test_replace_returns_same_path(self, monkeypatch, tmp_path):
         """OutputOnConflictMode.REPLACE devuelve la misma ruta."""
-        monkeypatch.setattr(
-            "pymedia.services.command_service.state.output_on_conflict",
-            OutputOnConflictMode.REPLACE,
-        )
+        state.output_on_conflict = OutputOnConflictMode.REPLACE
 
         output = tmp_path / "output.mp4"
         # No tocar el archivo, debe devolverla tal cual
 
-        result = resolve_output_conflict(output, None)
+        result = resolve_output_conflict(output, _mock_logger())
         assert result == output
 
     def test_skip_returns_none(self, monkeypatch, tmp_path):
         """OutputOnConflictMode.SKIP devuelve None."""
-        monkeypatch.setattr(
-            "pymedia.services.command_service.state.output_on_conflict",
-            OutputOnConflictMode.SKIP,
-        )
+        state.output_on_conflict = OutputOnConflictMode.SKIP
         monkeypatch.setattr(
             "pymedia.services.command_service.log_warning", lambda *a, **k: None
         )
@@ -138,7 +148,7 @@ class TestResolveOutputConflict:
         output = tmp_path / "output.mp4"
         output.touch()
 
-        result = resolve_output_conflict(output, None)
+        result = resolve_output_conflict(output, _mock_logger())
         assert result is None
 
 

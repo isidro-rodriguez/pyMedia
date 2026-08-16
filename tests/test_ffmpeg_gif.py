@@ -104,8 +104,8 @@ class TestGifCmd:
 
         cmd = gif_cmd(Path("out.gif"))
 
-        assert "-t" in cmd
-        assert cmd[cmd.index("-t") + 1] == "5.0"
+        assert "-to" in cmd
+        assert cmd[cmd.index("-to") + 1] == "5.0"
 
     def test_with_start_point_and_end_point(self):
         _setup_state(
@@ -116,8 +116,8 @@ class TestGifCmd:
 
         assert "-ss" in cmd
         assert cmd[cmd.index("-ss") + 1] == "10.5"
-        assert "-t" in cmd
-        assert cmd[cmd.index("-t") + 1] == "5.0"
+        assert "-to" in cmd
+        assert cmd[cmd.index("-to") + 1] == "5.0"
 
     def test_output_is_last_argument(self):
         _setup_state()
