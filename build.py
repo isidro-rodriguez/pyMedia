@@ -12,6 +12,8 @@ from pathlib import Path
 OUTPUT_DIR = Path("build")
 ENTRY = "src/pymedia/main.py"
 FINAL_NAME = "pymedia.exe"
+RESOURCES = Path("src/pymedia/resources")
+ICON = RESOURCES / "icon.ico"
 
 
 def main() -> None:
@@ -24,6 +26,7 @@ def main() -> None:
         f"--output-dir={OUTPUT_DIR}",
         "--include-package=pymedia",
         "--include-package-data=pymedia",
+        f"--windows-icon-from-ico={ICON}",
         "--assume-yes-for-downloads",
         "--remove-output",
         ENTRY,

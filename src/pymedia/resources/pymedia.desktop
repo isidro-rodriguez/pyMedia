@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=pyMedia
+Comment=FFmpeg video editing CLI
+Exec=/home/usuario/.local/share/pymedia/pymedia
+Icon=/home/usuario/.local/share/pymedia/icon.png
+Terminal=true
+Categories=AudioVideo;Video;Utility;
+StartupNotify=false
