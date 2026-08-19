@@ -1,7 +1,8 @@
 from pathlib import Path
 
-from pymedia.cli_params import OutputOnConflictMode
-from pymedia.models.state import state
+from pymedia.models._state import state
+
+from pymedia.typer_options import OutputOnConflictMode
 
 
 def concat_demux_cmd(list_txt: Path):

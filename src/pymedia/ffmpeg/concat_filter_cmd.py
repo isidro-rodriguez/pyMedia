@@ -1,12 +1,13 @@
 from dataclasses import dataclass
 
-from pymedia.cli_params import OutputOnConflictMode
+from pymedia.models._state import state
+from pymedia.services.pipeline_service import process_crop
+
 from pymedia.data.video_codecs import VIDEO_CODECS
 from pymedia.errors import InvalidConfigError, InvalidSettingError
 from pymedia.logger import get_logger
 from pymedia.models.media import Media
-from pymedia.models.state import state
-from pymedia.services.pipeline_service import process_crop
+from pymedia.typer_options import OutputOnConflictMode
 from pymedia.utils import parse_crop
 
 logger = get_logger("concat")

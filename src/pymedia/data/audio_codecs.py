@@ -128,7 +128,7 @@ _mp3 = AudioCodecData(
 _opus = AudioCodecData(
     name="opus",
     library="libopus",
-    containers=(".mka", ".mkv", ".ogg", ".opus", ".webm"),
+    containers=(".mka", ".mkv", ".mp4", ".ogg", ".opus", ".webm"),
     bit_rates=("64k", "96k", "128k", "160k", "192k", "256k"),
 )
 

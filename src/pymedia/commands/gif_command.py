@@ -1,13 +1,9 @@
-from pathlib import Path
-
 from pymedia import locales
 from pymedia.errors import CommandGenerationError
 from pymedia.ffmpeg.gif_cmd import gif_cmd
-from pymedia.logger import get_logger, log_debug, log_info
-from pymedia.models.arguments import Arguments
-from pymedia.models.state import state
+from pymedia.logger import get_logger, log_debug, log_info, log_warning
+from pymedia.models.gif_parameters import GifParameters
 from pymedia.services.command_service import (
-    initialize_command,
     resolve_output_conflict,
     run_ffmpeg,
 )
@@ -15,29 +11,47 @@ from pymedia.services.command_service import (
 logger = get_logger("gif")
 
 
-def gif_command(args: Arguments) -> None:
-    initialize_command(args)
-    path = state.inputs[0]
+def gif_command(params: GifParameters) -> None:
+    """
+    Proceso de generación de cmd ffmpeg y ejecución.
 
-    if state.output:
-        output = state.output.absolute()
-    else:
-        output = Path(path.stem + ".gif").absolute()
+    Args:
+        params: Parámetros validados y parseados obtenidos de los argumentos de CLI.
 
-    output = resolve_output_conflict(output, logger)
+    Returns:
+        Fin de aplicación.
 
-    if output is None:
+    Raises:
+        CommandGenerationError: Si no se ha podido generar el comando ffmpeg.
+
+    Warnings:
+        skip_on_conflit: Si el fichero de salida ya existe y se ha activado
+                la opción de resolver conflicto mediante SKIP.
+    """
+
+    output_tmp = resolve_output_conflict(
+        output=params.output,
+        output_on_conflict=params.output_on_conflict,
+        logger=logger,
+    )
+
+    if output_tmp is None:
+        log_warning(logger=logger, key="skip_on_conflit", file_path=params.output)
         return
 
-    cmd = gif_cmd(output)
+    params.output = output_tmp
+
+    cmd = gif_cmd(params=params)
 
     if cmd is None:
         raise CommandGenerationError(command_name="gif")
 
     log_debug(logger, "ffmpeg_command", cmd=cmd)
+
     run_ffmpeg(
         cmd=cmd,
-        duration=state.media[0].duration.total_seconds(),
+        duration=params.media.duration,
         description=locales.Progress["gif"],
     )
-    log_info(logger, "gif_success", output=output)
+
+    log_info(logger, "gif_success", output=params.output)

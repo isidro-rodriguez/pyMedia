@@ -1,4 +1,3 @@
-from datetime import timedelta
 from fractions import Fraction
 
 
@@ -47,22 +46,3 @@ def parse_crop(value: str | None) -> tuple[int, int, int, int] | None:
         return None
 
     return left, right, top, bottom
-
-
-def convert_to_timedelta(total_time: str) -> timedelta | None:
-    """
-    Convierte 'hh:mm:ss', 'mm:ss' o 'ss' a timedelta.
-    Soporta formato negativo: '-1:00' o '-45'.
-    """
-    parts = total_time.split(":")
-    if not all(p.isdigit() for p in parts):
-        return None
-    match tuple(map(float, parts)):
-        case (hours, minutes, seconds):
-            return timedelta(hours=hours, minutes=minutes, seconds=seconds)
-        case (minutes, seconds):
-            return timedelta(minutes=minutes, seconds=seconds)
-        case (seconds,):
-            return timedelta(seconds=seconds)
-        case _:
-            return None

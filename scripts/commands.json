@@ -169,5 +169,14 @@
         "args": "./.local/qt/"
       }
     ]
+  },
+  "purge": {
+    "base_command": "",
+    "variants:": [
+      {
+        "name": "BORRADO CACHÉ EN SRC Y TESTS",
+        "args": "find src tests -type d -name __pycache__ -exec rm -rf {} +"
+      }
+    ]
   }
 }

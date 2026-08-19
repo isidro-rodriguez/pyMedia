@@ -1,1 +1,0 @@
-# Utilidades y fixtures compartidos para los tests.

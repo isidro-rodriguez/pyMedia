@@ -1,82 +1,90 @@
 import queue
 import subprocess
 import threading
+from datetime import timedelta
 from pathlib import Path
 
 from rich.progress import Progress
 
-from pymedia.cli_params import OutputOnConflictMode
 from pymedia.errors import CommandExecutionError, OutputOnConflictError
-from pymedia.logger import log_warning, setup_logging
-from pymedia.models.arguments import Arguments, CommandName
-from pymedia.models.state import state
+from pymedia.logger import log_warning
+from pymedia.typer_options import OutputOnConflictMode
 
 DEFAULT_STALL_TIMEOUT = 60  # segundos sin progreso antes de abortar
 
 
-def initialize_command(args: Arguments) -> None:
-    setup_logging(debug=args.debug)
-    state.set_arguments(args)
-    state.set_inputs(args.inputs)
-    state.set_media(args.inputs)
-    if args.command is CommandName.GIF:
-        state.set_gif_pipeline()
-    else:
-        state.set_video_pipeline()
-    if args.output is not None:
-        state.set_output(args.output)
-    state.set_output_on_conflict()
+def resolve_output_conflict(
+    output: Path,
+    output_on_conflict: OutputOnConflictMode,
+    logger,
+) -> Path | None:
+    """
+    Resuelve la resolución de conflicto de salida de fichero.
 
+    Args:
+        output: Ruta de fichero de salida.
+        output_on_conflict: Actuación ante un conflicto de salida.
+        logger: Servicio de registro de mensajes.
 
-def resolve_output_conflict(output: Path, logger) -> Path | None:
+    Returns:
+        Ruta (Path) resuelta de fichero de salida.
+    """
+
     def _get_available_output_path(output_path: Path) -> Path:
+        """Añade sufijo incremental ante una resolución de conflicto por renombre."""
         candidate = output_path
         index = 1
-
         while candidate.exists():
             candidate = output_path.with_stem(f"{output_path.stem}_{index}")
             index += 1
-
         return candidate
 
     if not output.exists():
         return output
 
-    log_warning(logger, "output_exist", file_path=output)
+    log_warning(logger=logger, file_path=output, key="output_exist")
 
-    match state.output_on_conflict:
+    match output_on_conflict:
         case OutputOnConflictMode.FAIL:
             raise OutputOnConflictError()
-
         case OutputOnConflictMode.RENAME:
             return _get_available_output_path(output)
-
         case OutputOnConflictMode.REPLACE:
             return output
-
         case OutputOnConflictMode.SKIP:
             return None
-
-    return None
 
 
 def run_ffmpeg(
     cmd: list[str],
-    duration: float,
     description: str,
+    duration: timedelta | None = None,
     stall_timeout: float = DEFAULT_STALL_TIMEOUT,
 ) -> None:
     """
-    Ejecuta ffmpeg mostrando progreso.
-    `cmd` debe incluir ya -progress pipe:1 -nostats.
+    Ejecuta el cmd ffmpeg generado mientras registra la salida para
+    mostrar una barra de progreso.
+
+    Args:
+        cmd: Comando ffmpeg a ejecutar.
+        duration: duración estimada de la duración de procedimiento del comando.
+        description: Mensaje a mostrar junto a la barra de progreso
+                (el nombre del comando).
+        stall_timeout: Tiempo de espera, en segundos, de la aplicación para matar
+                el proceso si no se recibe avance.
+
+    Raises:
+        CommandExecutionError: Si falla el cmd o se bloquea.
     """
 
     def _read_stdout() -> None:
+        """Recepción de la evolución del comando ffmpeg."""
         for line_ in proc.stdout:  # type: ignore[union-attr]
             lines.put(line_)
         lines.put(None)  # sentinel: fin de stream
 
     def _abort(reason: str) -> None:
+        """Mata el proceso si no se ha recibido avance durante el tiempo establecido."""
         proc.kill()
         proc.wait()
         stderr_thread.join()
@@ -107,7 +115,9 @@ def run_ffmpeg(
     stdout_thread.start()
 
     with Progress() as progress:
+        duration = duration.total_seconds() if duration else None
         task = progress.add_task(description, total=duration)
+
         while True:
             try:
                 line = lines.get(timeout=stall_timeout)
@@ -117,7 +127,9 @@ def run_ffmpeg(
                 break
             if line.startswith("out_time_ms="):
                 progress.update(task, completed=int(line.split("=")[1]) / 1_000_000)
-        progress.update(task, completed=duration)
+
+        if duration is not None:
+            progress.update(task, completed=duration)
 
     proc.wait()
     stderr_thread.join()

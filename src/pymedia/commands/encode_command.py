@@ -6,8 +6,8 @@ from pymedia.errors import (
 )
 from pymedia.ffmpeg.encode_cmd import encode_cmd
 from pymedia.logger import get_logger, log_debug, log_info
+from pymedia.models._state import state
 from pymedia.models.arguments import Arguments
-from pymedia.models.state import state
 from pymedia.services.command_service import (
     initialize_command,
     resolve_output_conflict,

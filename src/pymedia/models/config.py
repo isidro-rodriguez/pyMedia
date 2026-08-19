@@ -1,10 +1,10 @@
+import tomllib
 from dataclasses import dataclass
 from enum import Enum
 from importlib.resources import files
 from pathlib import Path
 
 import platformdirs
-import tomllib
 
 from pymedia import locales
 from pymedia.data.audio_codecs import AUDIO_CODECS
@@ -40,23 +40,21 @@ class Language(Enum):
 
 
 class ResizeTo(Enum):
-    """Refiere la altura en que se redimensionan los vídeos en uniones conflictivas."""
+    """Altura en que se redimensionan los vídeos en uniones conflictivas."""
 
     MAX_HEIGHT = "max_height"
     MIN_HEIGHT = "min_height"
 
 
 class TargetFPS(Enum):
-    """
-    Refiere al FPS en el que se transcodificarán los vídeos en uniones conflictivas.
-    """
+    """FPS en el que se transcodificarán los vídeos en uniones conflictivas."""
 
     MAX_FPS = "max_fps"
     MIN_FPS = "min_fps"
 
 
 class VideoCodec(Enum):
-    """Lista de códecs de vídeo disponibles en esta aplicación."""
+    """Lista de códecs de vídeo modernos disponibles en esta aplicación."""
 
     AV1 = "av1"
     H264 = "h264"
@@ -66,30 +64,72 @@ class VideoCodec(Enum):
 
 @dataclass(frozen=True)
 class Encode:
+    """
+    Parámetros de transcodificación que se usarán en ffmpeg.
+
+    Attributes:
+        video_codec: Códec de vídeo a utilizar en transcodificación.
+        video_preset: Relación entre la velocidad de codificación
+                y la calidad de compresión.
+        video_crf: Parámetro de control de calidad para la codificación de vídeo.
+        audio_codec: Códec de vídeo a utilizar en transcodificación.
+        audio_bit_rate: Define cantidad datos digitales que se procesan por segundo
+    """
+
     video_codec: str
     video_preset: str
     video_crf: int
     audio_codec: str
     audio_bit_rate: str
-    default_container: str
 
 
 @dataclass(frozen=True)
 class ConflictiveJoin:
+    """
+    Actuaciones ante valores conflictivos en CONCAT filter.
+
+    Attributes:
+        resize_to: Si re-escalan los vídeos al de menor altura o mayor.
+        fps: Si transcodifica los vídeos al de menor FPS o el mayor.
+        channels: Canales de salida de audio por defecto si los vídeos a
+                concatenar tienes pistas de audio con canales incompatibles.
+    """
+
     resize_to: str
     fps: str
     channels: str
-    confirm_encode: bool
 
 
 @dataclass(frozen=True)
 class App:
+    """
+    Opciones de configuración de la aplicación.
+
+    Attributes:
+        language: Lenguaje de la aplicación.
+        default_container: Formato que agrupa y sincroniza video, audio y subtítulos.
+        stall_timeout: Retardo, en segundos, para matar el proceso ante bloqueo.
+        disable_resolution_increase: Impide la reescalada de altura a dimensiones
+                mayores a las del vídeo original.
+    """
+
     language: str
+    default_container: str
+    stall_timeout: int
     disable_resolution_increase: bool
 
 
 @dataclass(frozen=True)
 class Config:
+    """
+    Actuaciones ante valores conflictivos en CONCAT filter.
+
+    Attributes:
+        encode: Parámetros de transcodificación que se usarán en ffmpeg.
+        conflictive_join: Actuaciones ante valores conflictivos en CONCAT filter.
+        app: Opciones de configuración de la aplicación.
+    """
+
     encode: Encode
     conflictive_join: ConflictiveJoin
     app: App
@@ -97,7 +137,11 @@ class Config:
     @classmethod
     def load(cls) -> "Config":
         path = (
-            Path(platformdirs.user_config_dir("pymedia", appauthor=False, roaming=True))
+            Path(
+                platformdirs.user_config_dir(
+                    appname="pymedia", appauthor=False, roaming=True
+                )
+            )
             / "config.toml"
         )
         if not path.exists():
@@ -186,22 +230,6 @@ class Config:
                     )
                 )
 
-        # encode.default_container
-        default_container = encode["default_container"]
-        if video_codec in VIDEO_CODECS and audio_codec in AUDIO_CODECS:
-            video_containers = VIDEO_CODECS[video_codec].containers
-            audio_containers = AUDIO_CODECS[audio_codec].containers
-            if (
-                default_container not in video_containers
-                or default_container not in audio_containers
-            ):
-                common = sorted(set(video_containers) & set(audio_containers))
-                errors.append(
-                    locales.ConfigValidation["invalid_default_container"].format(
-                        expected=", ".join(common)
-                    )
-                )
-
         # conflictive_join.resize_to
         resize_to = conflictive_join["resize_to"]
         valid_resize_to = {r.value for r in ResizeTo}
@@ -234,13 +262,34 @@ class Config:
 
         # app.language
         language = app["language"]
-        valid_languages = {l.value for l in Language}
+        valid_languages = {lang.value for lang in Language}
         if language not in valid_languages:
             errors.append(
                 locales.ConfigValidation["invalid_language"].format(
                     expected=", ".join(sorted(valid_languages))
                 )
             )
+
+        # app.default_container
+        default_container = app["default_container"]
+        if video_codec in VIDEO_CODECS and audio_codec in AUDIO_CODECS:
+            video_containers = VIDEO_CODECS[video_codec].containers
+            audio_containers = AUDIO_CODECS[audio_codec].containers
+            if (
+                default_container not in video_containers
+                or default_container not in audio_containers
+            ):
+                common = sorted(set(video_containers) & set(audio_containers))
+                errors.append(
+                    locales.ConfigValidation["invalid_default_container"].format(
+                        expected=", ".join(common)
+                    )
+                )
+
+        # app.stall_timeout
+        stall_timeout = app["stall_timeout"]
+        if stall_timeout is not None and not 30 <= stall_timeout <= 600:
+            errors.append(locales.ConfigValidation["invalid_stall_timeout"].format())
 
         if errors:
             raise InvalidConfigError(message="; ".join(errors))

@@ -4,7 +4,7 @@
 # |             | Códec | Preset | CRF | Códec | bit rate |
 # +-------------+-------+--------+-----+-------+----------+
 # | Rápido      | h264  |  fast  |  22 | aac   |     160k |
-# | Equilibrado | hevc  |  slow  |  24 | opus  |     128k |
+# | Equilibrado | h265  |  slow  |  24 | opus  |     128k |
 # | Máximo      | av1   |     4  |  32 | opus  |      96k |
 # +-------------+-------+--------+-----+-------+----------+
 # - Rápido: transcodifica sin esperar mucho
@@ -12,19 +12,19 @@
 # - Máximo: 15% menos espacio que equilibrado, pero aún más lento
 
 [encode]
-video_codec = "h264"                # h264 | h265 | av1
-video_preset = "fast"
-video_crf = 22
-audio_codec = "aac"                 # aac | opus | eac3
-audio_bit_rate = "160k"
-default_container = ".mp4"
+video_codec = "h265"                # h264 | h265 | av1
+video_preset = "slow"
+video_crf = 24
+audio_codec = "opus"                # aac | opus | eac3
+audio_bit_rate = "128k"
 
 [conflictive_join]
 resize_to = "min_height"            # min_height | max_height
 fps = "min_fps"                     # min_fps | max_fps
 channels = "stereo"                 # stereo | mono | 5.1
-confirm_encode = true
 
 [app]
 language = "system"                 # system | english | spanish | italian | french | german
+default_container = ".mkv"          # .mkv | .mp4 | .mov (recomendados)
+stall_timeout = 60                  # in seconds
 disable_resolution_increase = true

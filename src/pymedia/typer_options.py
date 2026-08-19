@@ -1,94 +1,81 @@
-from enum import Enum
 from pathlib import Path
 from typing import Annotated
 
 import typer
 
 from pymedia import locales
-
-# -----------------------------------------------------------------------------
-#  Enums de opciones
-# -----------------------------------------------------------------------------
-
-
-class GyrateMode(int, Enum):
-    """Ángulos de giro disponibles"""
-
-    d90 = 90
-    d180 = 180
-    d270 = 270
-
-
-class OutputOnConflictMode(Enum):
-    """Resolución de conflicto si ya existe un fichero con el mismo nombre"""
-
-    FAIL = "fail"
-    REPLACE = "replace"
-    RENAME = "rename"
-    SKIP = "skip"
-
-
-class ScaleGifMode(int, Enum):
-    """Alturas de fotograma disponibles"""
-
-    P240 = 240
-    P480 = 480
-    P720 = 720
-
-
-class ScaleVideoMode(int, Enum):
-    """Alturas de fotograma disponibles"""
-
-    P480 = 480
-    P720 = 720
-    P1080 = 1080
-    P1440 = 1440
-    P2160 = 2160
-
-
-# -----------------------------------------------------------------------------
-#  Auxiliar typer functions
-# -----------------------------------------------------------------------------
+from pymedia.models.base_parameters import (
+    GyrateMode,
+    OutputOnConflictMode,
+    ScaleGifMode,
+    ScaleVideoMode,
+)
 
 
 def _show_help(ctx: typer.Context, value: bool) -> None:
+    """Callback para mostar el texto de ayuda en múltiples idiomas."""
     if value:
         typer.echo(ctx.get_help())
         raise typer.Exit()
 
 
 def _validate_path(path: Path) -> Path | None:
+    """Valida la ruta indicada."""
     if not path.is_file():
         raise typer.BadParameter(locales.Cli["invalid_path"].format(path=path))
     return path
 
 
 def _validate_path_list(path_list: list[Path]) -> list[Path] | None:
+    """Valida la lista de rutas indicada."""
     for path in path_list:
         _validate_path(path)
     return path_list
 
 
 # -----------------------------------------------------------------------------
-#  Arguments
+#  Opciones requeridas
 # -----------------------------------------------------------------------------
 
 
-PathArgument = Annotated[
+InputOption = Annotated[
     Path,
-    typer.Argument(help=locales.Cli["path_argument_help"], callback=_validate_path),
+    typer.Option(
+        "--input",
+        "-i",
+        rich_help_panel="Required options",
+        help=locales.Cli["path_argument_help"],
+        callback=_validate_path,
+    ),
 ]
 
-PathsArgument = Annotated[
+
+InputsOption = Annotated[
     list[Path],
-    typer.Argument(
-        help=locales.Cli["paths_argument_help"], callback=_validate_path_list
+    typer.Option(
+        "--input",
+        "-i",
+        rich_help_panel="Required options",
+        help=locales.Cli["paths_argument_help"],
+        callback=_validate_path_list,
+    ),
+]
+
+
+TrimPointsOption = Annotated[
+    str,
+    typer.Option(
+        "--trim-points",
+        "-t",
+        metavar="00:10,00:20,00:30",
+        rich_help_panel="Required options",
+        help=locales.Cli["trim_points_help"],
     ),
 ]
 
 
 # -----------------------------------------------------------------------------
-#  Transcode options
+#  Opciones de transcodificación
 # -----------------------------------------------------------------------------
 
 
@@ -155,6 +142,7 @@ HelpOption = Annotated[
     ),
 ]
 
+
 ScaleGifOption = Annotated[
     ScaleGifMode | None,
     typer.Option(
@@ -196,20 +184,8 @@ RemuxOption = Annotated[
     ),
 ]
 
-TrimPointsOption = Annotated[
-    str,
-    typer.Option(
-        "--trim-points",
-        "-t",
-        metavar="00:10,00:20,00:30",
-        rich_help_panel="Encode options",
-        help=locales.Cli["trim_points_help"],
-    ),
-]
-
-
 # -----------------------------------------------------------------------------
-#  Output options
+#  Opciones de salida
 # -----------------------------------------------------------------------------
 
 

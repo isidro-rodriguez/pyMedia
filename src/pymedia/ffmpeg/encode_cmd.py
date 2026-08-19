@@ -1,8 +1,9 @@
 from pathlib import Path
 
-from pymedia.cli_params import OutputOnConflictMode
+from pymedia.models._state import state
+
 from pymedia.data.video_codecs import VIDEO_CODECS
-from pymedia.models.state import state
+from pymedia.typer_options import OutputOnConflictMode
 
 
 def encode_cmd(

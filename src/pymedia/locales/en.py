@@ -23,16 +23,17 @@ Cli = {
 
 
 ConfigValidation = {
-    "invalid_audio_bit_rate": "\nInvalid configuration setting: encode.audio_bit_rate is expected one of: {expected}",
-    "invalid_audio_codec": "\nInvalid configuration setting: encode.audio_codec is expected one of: {expected}",
-    "invalid_channels": "\nInvalid configuration setting: conflictive_join.channels is expected one of: {expected}",
-    "invalid_default_container": "\nInvalid configuration setting: encode.default_container is expected one of: {expected}",
-    "invalid_fps": "\nInvalid configuration setting: conflictive_join.fps is expected one of: {expected}",
-    "invalid_language": "\nInvalid configuration setting: app.language is expected one of: {expected}",
-    "invalid_resize_to": "\nInvalid configuration setting: conflictive_join.resize_to is expected one of: {expected}",
-    "invalid_video_codec": "\nInvalid configuration setting: encode.video_codec is expected one of: {expected}",
-    "invalid_video_crf": "\nInvalid configuration setting: encode.video_crf is expected between {min} and {max}",
-    "invalid_video_preset": "\nInvalid configuration setting: encode.video_preset is expected one of: {expected}",
+    "invalid_audio_bit_rate": "\nInvalid configuration setting: encode.audio_bit_rate is expected one of: {expected}.",
+    "invalid_audio_codec": "\nInvalid configuration setting: encode.audio_codec is expected one of: {expected}.",
+    "invalid_channels": "\nInvalid configuration setting: conflictive_join.channels is expected one of: {expected}.",
+    "invalid_default_container": "\nInvalid configuration setting: encode.default_container is expected one of: {expected}.",
+    "invalid_fps": "\nInvalid configuration setting: conflictive_join.fps is expected one of: {expected}.",
+    "invalid_language": "\nInvalid configuration setting: app.language is expected one of: {expected}.",
+    "invalid_resize_to": "\nInvalid configuration setting: conflictive_join.resize_to is expected one of: {expected}.",
+    "invalid_stall_timeout": "\nInvalid configuration setting: app.stall_timeout is expected to an integer between 30 to 600.",
+    "invalid_video_codec": "\nInvalid configuration setting: encode.video_codec is expected one of: {expected}.",
+    "invalid_video_crf": "\nInvalid configuration setting: encode.video_crf is expected between {min} and {max}.",
+    "invalid_video_preset": "\nInvalid configuration setting: encode.video_preset is expected one of: {expected}.",
 }
 
 
@@ -89,19 +90,17 @@ Progress = {
 
 ValidationError = {
     "crop_all_zero": "Invalid crop: all values are 0.",
-    "crop_exceeds_height": "Invalid crop: {total} >= original height {height}.",
-    "crop_exceeds_width": "Invalid crop: {total} >= original width {width}.",
+    "crop_exceeds_dimensions": "Invalid crop: {crop_dimensions} >= original dimensions {video_dimensions}.",
     "insufficient_inputs": "At least two videos must be provided for this command.",
     "invalid_crop_format": "Invalid crop format. Expected: LEFT,RIGHT,TOP,BOTTOM.",
     "invalid_directory_name": '{directory} contains invalid characters: < > : " / \\ | ? *',
     "invalid_extension": "Invalid extension {extension}. Codec {codec} requires one of: {supported}.",
     "invalid_filename": '{filename} contains invalid characters: < > : " / \\ | ? *',
-    "invalid_gif_extension": "Invalid extension {extension}. Gif images requires .gif container.",
     "invalid_gyrate": "Invalid rotation format. Expected: 90 | 180 | 270.",
+    "invalid_output_extension": "Invalid extension {extension}. Requires one of: {supported}.",
     "invalid_setting": "Invalid setting: {parameter}",
     "invalid_time_format": "Invalid timestamp format. Expected: hh:mm:ss.",
     "invalid_trim_points": "Invalid trim points.",
-    "invalid_video_extension": "Invalid video extension {extension}. Video files requires one of: {supported}.",
     "missing_options": "At least one option is required.",
     "negative_time": "Timestamp cannot be negative.",
     "time_exceeds_duration": "Timestamp {time} exceeds video duration {duration}.",
@@ -111,6 +110,7 @@ ValidationError = {
 Warnings = {
     "missing_options": "At least one option is required.",
     "output_exist": "File already exist: {file_path}.",
+    "skip_on_conflit": "Skipping process cause file already exists: {file_path}.",
     "scale_rejected_equal": "Scaling rejected: {scale} = original height {height}.",
     "scale_rejected_increase": "Scaling to {scale}p not applied: resolution is higher than the original ({height}p).",
 }

@@ -1,8 +1,7 @@
 from dataclasses import dataclass
-from enum import StrEnum
 from pathlib import Path
 
-from pymedia.cli_params import (
+from pymedia.typer_options import (
     GyrateMode,
     OutputOnConflictMode,
     ScaleGifMode,
@@ -10,29 +9,18 @@ from pymedia.cli_params import (
 )
 
 
-class CommandName(StrEnum):
-    """Nombres de los comandos disponibles en la CLI."""
-
-    CONCAT = "concat"
-    ENCODE = "encode"
-    SPLIT = "split"
-    GIF = "gif"
-
-
 @dataclass
 class Arguments:
-    # Required arguments
-    command: CommandName
-    inputs: list[Path] | None = None
-    trim_points: str | None = None
-    # Optional arguments
+    output_on_conflict: OutputOnConflictMode
     crop: str | None = None
     debug: bool = False
     end_point: str | None = None
     fps: int | None = None
     gyrate: GyrateMode | None = None
+    input_single: Path | None = None
+    inputs: list[Path] | None = None
     output: Path | None = None
-    output_on_conflict: OutputOnConflictMode | None = None
     remux: bool = False
     scale: ScaleVideoMode | ScaleGifMode | None = None
     start_point: str | None = None
+    trim_points: str | None = None

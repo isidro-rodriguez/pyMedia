@@ -1,46 +1,53 @@
-from pathlib import Path
-
-from pymedia.cli_params import OutputOnConflictMode
-from pymedia.models.state import state
+from pymedia.models.gif_parameters import GifParameters
+from pymedia.typer_options import OutputOnConflictMode
 
 
-def gif_cmd(output: Path) -> list[str]:
-    pipeline = state.gif_pipeline
+def gif_cmd(params: GifParameters) -> list[str]:
+    """
+    Composición de cmd ffmpeg para generar un gif.
+
+    Args:
+        params: Parámetros validados y parseados obtenidos de los argumentos de CLI.
+
+    Returns:
+        cmd: comando de ffmpeg listo para consumo.
+    """
+
     filters: str = ""
 
-    if pipeline.crop:
-        filters += pipeline.crop[0] + ","
-    if pipeline.gyrate:
-        filters += pipeline.gyrate + ","
-    if pipeline.scale and pipeline.scale[0] is not None:
-        filters += pipeline.scale[0] + ","
+    if params.crop:
+        filters += f"{params.crop},"
+    if params.gyrate:
+        filters += f"{params.gyrate},"
+    if params.scale:
+        filters += f"{params.scale},"
 
     filters += (
-        f"fps={pipeline.fps},split[a][b];[a]palettegen[p];"
+        f"fps={params.fps},split[a][b];[a]palettegen[p];"
         f"[b][p]paletteuse=dither=floyd_steinberg"
     )
 
     cmd = ["ffmpeg"]
 
-    if state.output_on_conflict == OutputOnConflictMode.REPLACE:
+    if params.output_on_conflict == OutputOnConflictMode.REPLACE:
         cmd.extend(["-y"])
 
-    if pipeline.start_point:
-        cmd.extend(["-ss", str(pipeline.start_point)])
+    if params.start_point:
+        cmd.extend(["-ss", str(params.start_point)])
 
-    if pipeline.end_point:
-        cmd.extend(["-to", str(pipeline.end_point)])
+    if params.end_point:
+        cmd.extend(["-to", str(params.end_point)])
 
     cmd.extend(
         [
             "-i",
-            str(state.inputs[0]),
+            str(params.media.path),
             "-filter_complex",
             filters,
             "-progress",
             "pipe:1",
             "-nostats",
-            str(output),
+            str(params.output),
         ]
     )
 
