@@ -1,7 +1,8 @@
-"""Paquete de idiomas de pyMedia.
+"""
+Paquete de idiomas de pyMedia.
 
 Los diccionarios del idioma activo se exponen como atributos de este paquete
-(Cli, ConfigValidation, Debug, ExecutionError, Info, PipelineError,
+(Cli, ConfigValidation, Debug, ExecutionError, Info, ParameterError,
 ValidationError, Warnings) mediante `services.locale_service.set_language()`.
 """
 

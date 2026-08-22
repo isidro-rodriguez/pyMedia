@@ -7,8 +7,8 @@ from pathlib import Path
 from rich.progress import Progress
 
 from pymedia.errors import CommandExecutionError, OutputOnConflictError
-from pymedia.logger import log_warning
-from pymedia.typer_options import OutputOnConflictMode
+from pymedia.logger import Logger
+from pymedia.models.enums import OutputOnConflictMode
 
 DEFAULT_STALL_TIMEOUT = 60  # segundos sin progreso antes de abortar
 
@@ -16,7 +16,7 @@ DEFAULT_STALL_TIMEOUT = 60  # segundos sin progreso antes de abortar
 def resolve_output_conflict(
     output: Path,
     output_on_conflict: OutputOnConflictMode,
-    logger,
+    logger: Logger,
 ) -> Path | None:
     """
     Resuelve la resolución de conflicto de salida de fichero.
@@ -42,7 +42,7 @@ def resolve_output_conflict(
     if not output.exists():
         return output
 
-    log_warning(logger=logger, file_path=output, key="output_exist")
+    logger.warning(key="output_exist", file_path=output)
 
     match output_on_conflict:
         case OutputOnConflictMode.FAIL:
@@ -115,8 +115,8 @@ def run_ffmpeg(
     stdout_thread.start()
 
     with Progress() as progress:
-        duration = duration.total_seconds() if duration else None
-        task = progress.add_task(description, total=duration)
+        total_seconds = duration.total_seconds() if duration is not None else None
+        task = progress.add_task(description, total=total_seconds)
 
         while True:
             try:
@@ -126,10 +126,12 @@ def run_ffmpeg(
             if line is None:
                 break
             if line.startswith("out_time_ms="):
-                progress.update(task, completed=int(line.split("=")[1]) / 1_000_000)
+                value = line.partition("=")[2].strip()
+                if value.isdigit():
+                    progress.update(task, completed=int(value) / 1_000_000)
 
-        if duration is not None:
-            progress.update(task, completed=duration)
+        if total_seconds is not None:
+            progress.update(task, completed=total_seconds)
 
     proc.wait()
     stderr_thread.join()

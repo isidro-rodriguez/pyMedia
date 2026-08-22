@@ -16,33 +16,45 @@ from pymedia.errors import (
     InvalidNameError,
     InvalidOutputExtensionError,
     InvalidTimeFormatError,
+    MissingArgumentError,
     MissingMediaError,
     MissingMediaPropertyError,
     TimeExceedsDurationError,
 )
-from pymedia.logger import get_logger, log_warning
-from pymedia.models.base_parameters import (
-    CommandMode,
-    CropMargins,
-    ScaleModeT,
-)
-from pymedia.models.config import Config
+from pymedia.logger import Logger
+from pymedia.models.config import Config, Height
+from pymedia.models.enums import CommandMode, CropMargins
 from pymedia.models.media import Media
 
-logger = get_logger("parameters")
+
+def _is_valid_name(name: str) -> bool:
+    """
+    Valida si el nombre de archivo, o directorio,
+    no contiene caracteres no permitidos en Windows
+    """
+    _INVALID_CHARS = re.compile(r'[<>:"/\\|?*\x00-\x1F]')
+    _RESERVED_NAMES = {"CON", "PRN", "AUX", "NUL"} | {
+        f"{p}{n}" for p in ("COM", "LPT") for n in range(1, 10)
+    }
+    return bool(
+        name
+        and not _INVALID_CHARS.search(name)
+        and not name.endswith((" ", "."))
+        and name.upper().split(".")[0] not in _RESERVED_NAMES
+    )
 
 
 def load_media(
-    paths: list[Path],
-) -> list[Media]:
+    path: Path,
+) -> Media:
     """
     Carga la lista de metadatos de los vídeos a procesar
 
     Args:
-        paths: rutas absolutas de los vídeos
+        path: ruta absoluta del vídeo.
 
     Returns:
-        Lista de metadatos
+        Metadatos del vídeo a procesar.
 
     Raises:
         MissingMediaError: Si no se pueden obtener metadatos del vídeo.
@@ -50,50 +62,37 @@ def load_media(
 
     def _validate_video_extension() -> None:
         """Valida que la lista de ficheros tengan extensiones de vídeos."""
-        for path in paths:
-            if path.suffix is None:
-                raise InvalidOutputExtensionError(
-                    extension="None",
-                    supported=", ".join(VIDEO_CONTAINERS),
-                )
-            if path.suffix not in VIDEO_CONTAINERS:
-                raise InvalidOutputExtensionError(
-                    extension=path.suffix,
-                    supported=", ".join(VIDEO_CONTAINERS),
-                )
+        if path.suffix not in VIDEO_CONTAINERS:
+            raise InvalidOutputExtensionError(
+                extension=path.suffix,
+                supported=", ".join(VIDEO_CONTAINERS),
+            )
 
     _validate_video_extension()
 
-    media: list[Media] = []
-
-    for p in paths:
-        try:
-            m: Media = Media.load(p)
-        except (
-            ValueError,
-            subprocess.CalledProcessError,
-            JSONDecodeError,
-            OSError,
-        ) as e:
-            raise MissingMediaError(path=str(p)) from e
-
-        media.append(m)
+    try:
+        media: Media = Media.load(path)
+    except (
+        ValueError,
+        subprocess.CalledProcessError,
+        JSONDecodeError,
+        OSError,
+    ) as e:
+        raise MissingMediaError(path=str(path)) from e
 
     return media
 
 
 def process_crop(
-    crop: str | None,
-    media: list[Media],
-    dimensions: list[tuple[int, int]] | None = None,
-) -> list[CropMargins]:
+    crop: str,
+    media: Media,
+) -> CropMargins:
     """
     Procesa la opción de corte de imagen.
 
     Args:
         crop: Valor de las dimensiones de corte.
         media: Metadatos de los vídeos a procesar.
-        dimensions: Dimensiones normalizadas para CONCAT incompatible.
 
     Returns:
         Lista de las dimensiones de corte.
@@ -104,12 +103,10 @@ def process_crop(
         MissingMediaPropertyError: Si falta metadata necesaria en `media`.
     """
 
-    crop_list: list[CropMargins] = []
-
-    def _validate_crop(values_str: str) -> None:
+    def _validate_crop() -> None:
         """Valida el formato y los valores del corte."""
         try:
-            values = tuple(int(v) for v in values_str.split(","))
+            values = tuple(int(v) for v in crop.split(","))
         except ValueError as exc:
             raise InvalidCropFormatError() from exc
         if (
@@ -127,191 +124,83 @@ def process_crop(
                 video_dimensions=f"{width}x{height}",
             )
 
-    def _parse_to_tuple(values: str) -> tuple[int, ...]:
+    def _parse_to_tuple() -> tuple[int, ...]:
         """Transforma el str validado a tuple con tipos."""
-        return tuple(map(int, values.split(",")))
+        return tuple(map(int, crop.split(",")))
 
-    if crop is None:
-        raise InvalidCropFormatError()
+    _validate_crop()
 
-    _validate_crop(crop)
+    (left, right, top, bottom) = _parse_to_tuple()
 
-    left, right, top, bottom = _parse_to_tuple(crop)
+    if media.video is None or media.video.width is None or media.video.height is None:
+        raise MissingMediaPropertyError(property_name="Crop")
 
-    for i, media_item in enumerate(media):
-        if (
-            media_item.video is None
-            or media_item.video.width is None
-            or media_item.video.height is None
-        ):
-            raise MissingMediaPropertyError(property_name="Crop")
+    width, height = media.video.width, media.video.height
 
-        if dimensions is not None:
-            width, height = dimensions[i]
-        else:
-            width, height = media_item.video.width, media_item.video.height
+    _validate_crop_dimensions()
 
-        _validate_crop_dimensions()
-
-        crop_list.append(
-            CropMargins(
-                width=width - left - right,
-                height=height - top - bottom,
-                x=left,
-                y=top,
-            )
-        )
-
-    return crop_list
+    return CropMargins(
+        width=width - left - right,
+        height=height - top - bottom,
+        x=left,
+        y=top,
+    )
 
 
-def process_output(
-    output: Path,
-    command: CommandMode,
-    config: Config,
-    media: list[Media],
-    requires_audio_transcode: bool = False,
-    requires_video_transcode: bool = False,
-) -> Path:
+def process_output(command: CommandMode, media: Media, output: Path | None) -> Path:
     """
-    Comprueba el fichero de salida tenga un nombre y extensión válido.
+    Procesa la ruta del fichero de salida.
 
     Args:
-        output: Path absoluto del nombre de salida.
-        command: Commando ejecutado en la CLI.
-        config: Parámetros de configuración de la aplicación.
-        media: Lista de metadatos, obtenidos por ffprobe, de los vídeos a procesar.
-        requires_audio_transcode: Si los vídeos va a tener el audio transcodificado.
-        requires_video_transcode: Si los vídeos va a tener el video transcodificado.
+        command: Comando que se va a ejecutar.
+        media: Metadatos del vídeo a procesar.
+        output: Ruta del fichero de salida especificada por el usuario.
 
     Returns:
-        Path absoluto de salida.
+        Ruta absoluta del fichero de salida.
+    """
+    if output:
+        path = output
+    else:
+        p = media.path
+        match command:
+            case CommandMode.GIF:
+                path = p.with_suffix(".gif")
+            case _:
+                raise MissingArgumentError(argument="command")
+
+    return path.absolute()
+
+
+def process_output_directory(directory: Path) -> Path:
+    """
+    Comprueba y crea la ruta del directorio de salida si no existiese.
+
+    Args:
+        directory: Ruta del directorio de salida.
 
     Raises:
-        MissingMediaPropertyError: No se ha podido obtener una propiedad de media.
-        InvalidFileExtensionError: Extensión de fichero inválida según el criterio.
-        CannotCreateDirectoryError: El usuario no tiene permisos de escritura
-                en la ruta aportada.
-        InvalidNameError: Nombre de archivo, o directorio, con caracteres inválidos.
-        InvalidGifExtensionError: Fichero GIF de salida con extensión incorrecta.
+        CannotCreateDirectoryError: Si el usuario no tiene permisos para crear
+                el directorio en la ubicación especificada.
+
+    Returns:
+        Ruta absoluta del directorio de salida.
     """
-
-    def _is_valid_name(name: str) -> bool:
-        """
-        Valida si el nombre de archivo, o directorio,
-        no contiene caracteres no permitidos en Windows
-        """
-        _INVALID_CHARS = re.compile(r'[<>:"/\\|?*\x00-\x1F]')
-        _RESERVED_NAMES = {"CON", "PRN", "AUX", "NUL"} | {
-            f"{p}{n}" for p in ("COM", "LPT") for n in range(1, 10)
-        }
-        return bool(
-            name
-            and not _INVALID_CHARS.search(name)
-            and not name.endswith((" ", "."))
-            and name.upper().split(".")[0] not in _RESERVED_NAMES
-        )
-
-    def _validate_video_codec_container(video_codec: str, video_container: str) -> None:
-        """Valida que se utiliza un container adecuado para el códec de vídeo."""
-        video_codec_data = VIDEO_CODECS[video_codec]
-
-        if (
-            video_codec_data.containers
-            and video_container not in video_codec_data.containers
-        ):
-            raise InvalidFileExtensionError(
-                extension=output.suffix,
-                codec=video_codec_data.name,
-                supported=",".join(video_codec_data.containers),
-            )
-
-    def _validate_audio_codec_container(audio_codec: str, audio_container: str) -> None:
-        """Valida que se utiliza un container adecuado para el códec de audio."""
-        if config.encode.audio_codec is not None:
-            audio_codec_data = AUDIO_CODECS[audio_codec]
-
-            if (
-                audio_codec_data.containers
-                and audio_container not in audio_codec_data.containers
-            ):
-                raise InvalidFileExtensionError(
-                    extension=output.suffix,
-                    codec=audio_codec_data.name,
-                    supported=",".join(audio_codec_data.containers),
-                )
-
-    # Comprobación del directorio (solo si se va a crear/escritura en subdirectorio)
-    if output.parent != Path(".") and not _is_valid_name(output.parent.name):
-        raise InvalidDirectoryError(directory=output.parent.name)
+    if directory != Path(".") and not _is_valid_name(directory.name):
+        raise InvalidDirectoryError(directory=directory.name)
     try:
-        output.parent.mkdir(parents=True, exist_ok=True)
+        directory.mkdir(parents=True, exist_ok=True)
     except OSError as e:
-        raise CannotCreateDirectoryError(path=str(output.parent)) from e
-
-    # Comprobación del nombre de fichero
-    if output.stem is None:
-        raise InvalidNameError(filename="None")
-    if not _is_valid_name(output.stem):
-        raise InvalidNameError(filename=output.stem)
-
-    # Comprobación de extensión en la generación de GIF
-    if command is CommandMode.GIF:
-        if output.suffix != ".gif":
-            raise InvalidOutputExtensionError(extension=output.suffix, supported=".gif")
-        return output
-
-    # Comprobación de que se usa una extensión de vídeo válida
-    if output.suffix not in VIDEO_CONTAINERS:
-        raise InvalidOutputExtensionError(
-            extension=output.suffix,
-            supported=",".join(VIDEO_CONTAINERS),
-        )
-
-    for m in media:
-        # Comprobación de extensión respecto al codec de vídeo utilizado en la
-        # transcodificación o respecto al del vídeo origen si no la hubiese.
-        if requires_video_transcode:
-            if config.encode.video_codec is None:
-                raise MissingMediaPropertyError(property_name="Video codec")
-            _validate_video_codec_container(
-                video_codec=config.encode.video_codec,
-                video_container=output.suffix,
-            )
-        else:
-            if m.video is None or m.video.codec is None:
-                raise MissingMediaPropertyError(property_name="Video codec")
-            _validate_video_codec_container(
-                video_codec=m.video.codec,
-                video_container=output.suffix,
-            )
-
-        # Comprobación de extensión respecto al codec de audio utilizado en la
-        # transcodificación o respecto al del vídeo origen si no la hubiese.
-        if m.audio is not None:
-            if requires_audio_transcode:
-                if config.encode.audio_codec is None:
-                    raise MissingMediaPropertyError(property_name="Audio codec")
-                _validate_audio_codec_container(
-                    audio_codec=config.encode.audio_codec,
-                    audio_container=output.suffix,
-                )
-            else:
-                if m.audio.codec is None:
-                    raise MissingMediaPropertyError(property_name="Audio codec")
-                _validate_audio_codec_container(
-                    audio_codec=m.audio.codec,
-                    audio_container=output.suffix,
-                )
-
-    return output
+        raise CannotCreateDirectoryError(path=str(directory)) from e
+    return directory
 
 
 def process_scale(
-    scale: ScaleModeT,
-    media: list[Media],
+    scale: int,
+    media: Media,
     config: Config,
-) -> list[ScaleModeT | None]:
+    logger: Logger,
+) -> int | None:
     """
     Valida y procesa la opción de escalado.
 
@@ -319,9 +208,10 @@ def process_scale(
         scale: Valor de las dimensiones de scale.
         media: Metadatos de los vídeos a procesar.
         config: Parámetros de configuración.
+        logger: Servicio de registro de mensajes.
 
     Returns:
-        Lista de las dimensiones de escalado.
+        Altura a la que se va a realizar el escalado.
 
     Raises:
         MissingMediaPropertyError: Si no se puede obtener la altura del vídeo.
@@ -332,35 +222,29 @@ def process_scale(
         scale_rejected_increase: Si está activada la opción en configuración, informa
                 que no se escala si la altura elegida es mayor a la altura del vídeo.
     """
-    scale_list: list[ScaleModeT | None] = []
+    if media.video is None or media.video.height is None:
+        raise MissingMediaPropertyError(property_name="height")
 
-    for media_item in media:
-        if media_item.video is None or media_item.video.height is None:
-            raise MissingMediaPropertyError(property_name="height")
+    if scale == media.video.height:
+        logger.warning(
+            key="scale_rejected_equal",
+            scale=scale,
+            height=media.video.height,
+        )
+        return None
 
-        if scale == media_item.video.height:
-            log_warning(
-                logger=logger,
-                key="scale_rejected_equal",
-                scale=scale.value,
-                height=media_item.video.height,
-            )
-            scale_list.append(None)
-            continue
+    if (
+        config.conflictive_concat.height == Height.REJECT_INCREASE
+        and scale > media.video.height
+    ):
+        logger.warning(
+            key="scale_rejected_increase",
+            scale=scale,
+            height=media.video.height,
+        )
+        return None
 
-        if config.app.disable_resolution_increase and scale > media_item.video.height:
-            log_warning(
-                logger=logger,
-                key="scale_rejected_increase",
-                scale=scale.value,
-                height=media_item.video.height,
-            )
-            scale_list.append(None)
-            continue
-
-        scale_list.append(scale)
-
-    return scale_list
+    return scale
 
 
 def process_time(
@@ -443,3 +327,118 @@ def process_trim_points(
     trim_points_timedelta.sort()
 
     return trim_points_timedelta
+
+
+def validate_output(
+    output: Path,
+    command: CommandMode,
+    config: Config,
+    media: Media,
+    requires_audio_transcode: bool = False,
+    requires_video_transcode: bool = False,
+) -> None:
+    """
+    Comprueba el fichero de salida tenga un nombre y extensión válido.
+
+    Args:
+        output: Path absoluto del nombre de salida.
+        command: Commando ejecutado en la CLI.
+        config: Parámetros de configuración de la aplicación.
+        media: Lista de metadatos, obtenidos por ffprobe, de los vídeos a procesar.
+        requires_audio_transcode: Si los vídeos va a tener el audio transcodificado.
+        requires_video_transcode: Si los vídeos va a tener el video transcodificado.
+
+    Returns:
+        Path absoluto de salida.
+
+    Raises:
+        MissingMediaPropertyError: No se ha podido obtener una propiedad de media.
+        InvalidFileExtensionError: Extensión de fichero inválida según el criterio.
+        CannotCreateDirectoryError: El usuario no tiene permisos de escritura
+                en la ruta aportada.
+        InvalidNameError: Nombre de archivo, o directorio, con caracteres inválidos.
+        InvalidGifExtensionError: Fichero GIF de salida con extensión incorrecta.
+    """
+
+    def _validate_video_codec_container(video_codec: str, video_container: str) -> None:
+        """Valida que se utiliza un container adecuado para el códec de vídeo."""
+        video_codec_data = VIDEO_CODECS[video_codec]
+
+        if (
+            video_codec_data.containers
+            and video_container not in video_codec_data.containers
+        ):
+            raise InvalidFileExtensionError(
+                extension=output.suffix,
+                codec=video_codec_data.name,
+                supported=",".join(video_codec_data.containers),
+            )
+
+    def _validate_audio_codec_container(audio_codec: str, audio_container: str) -> None:
+        """Valida que se utiliza un container adecuado para el códec de audio."""
+        audio_codec_data = AUDIO_CODECS[audio_codec]
+
+        if (
+            audio_codec_data.containers
+            and audio_container not in audio_codec_data.containers
+        ):
+            raise InvalidFileExtensionError(
+                extension=output.suffix,
+                codec=audio_codec_data.name,
+                supported=",".join(audio_codec_data.containers),
+            )
+
+    # Valida el nombre de directorio y lo crea si el usuario tiene permisos de escritura
+    process_output_directory(output.parent)
+
+    # Comprobación del nombre de fichero
+    if not _is_valid_name(output.stem):
+        raise InvalidNameError(filename=output.stem)
+
+    # Comprobación de extensión en la generación de GIF
+    if command is CommandMode.GIF:
+        if output.suffix != ".gif":
+            raise InvalidOutputExtensionError(extension=output.suffix, supported=".gif")
+        return
+
+    # Comprobación de que se usa una extensión de vídeo válida
+    if output.suffix not in VIDEO_CONTAINERS:
+        raise InvalidOutputExtensionError(
+            extension=output.suffix,
+            supported=",".join(VIDEO_CONTAINERS),
+        )
+
+    # Comprobación de extensión respecto al codec de vídeo utilizado en la
+    # transcodificación o respecto al del vídeo origen si no la hubiese.
+    if requires_video_transcode:
+        if config.encode.video_codec is None:
+            raise MissingMediaPropertyError(property_name="Video codec")
+        _validate_video_codec_container(
+            video_codec=config.encode.video_codec,
+            video_container=output.suffix,
+        )
+    else:
+        if media.video is None or media.video.codec is None:
+            raise MissingMediaPropertyError(property_name="Video codec")
+        _validate_video_codec_container(
+            video_codec=media.video.codec,
+            video_container=output.suffix,
+        )
+
+    # Comprobación de extensión respecto al codec de audio utilizado en la
+    # transcodificación o respecto al del vídeo origen si no la hubiese.
+    if media.audio is not None:
+        if requires_audio_transcode:
+            if config.encode.audio_codec is None:
+                raise MissingMediaPropertyError(property_name="Audio codec")
+            _validate_audio_codec_container(
+                audio_codec=config.encode.audio_codec,
+                audio_container=output.suffix,
+            )
+        else:
+            if media.audio.codec is None:
+                raise MissingMediaPropertyError(property_name="Audio codec")
+            _validate_audio_codec_container(
+                audio_codec=media.audio.codec,
+                audio_container=output.suffix,
+            )

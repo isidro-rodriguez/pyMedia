@@ -1,7 +1,7 @@
 from pymedia import locales
-from pymedia.logger import get_logger
+from pymedia.logger import Logger
 
-logger = get_logger("errors")
+logger = Logger.load(__name__)
 
 
 class PyMediaError(Exception):
@@ -17,27 +17,30 @@ class PyMediaError(Exception):
     registra automáticamente en el log al levantarse la excepción.
     """
 
-    level = "ERROR"
     category = ""
+    level = ""
     message_key = ""
+
+    TEMPLATES = {
+        "ExecutionError": locales.ExecutionError,
+        "ParameterError": locales.ParameterError,
+        "ValidationError": locales.ValidationError,
+    }
 
     def __init__(self, **kwargs) -> None:
         """Inicializa el sistema de locales para errores."""
-        templates = {
-            "ValidationError": locales.ValidationError,
-            "PipelineError": locales.PipelineError,
-            "ExecutionError": locales.ExecutionError,
-        }[self.category]
 
-        self.message = templates[self.message_key].format(**kwargs)
+        self.message = self.TEMPLATES[self.category][self.message_key].format(**kwargs)
         super().__init__(self.message)
 
-        log_method = logger.critical if self.level == "CRITICAL" else logger.error
-        log_method(self.message)
+        if self.level == "CRITICAL":
+            logger.critical(self.message)
+        else:
+            logger.error(self.message)
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-#  ExecutionError (nivel CRITICAL)
+#  Errores de ejecución (Errores críticos)
 # ─────────────────────────────────────────────────────────────────────────────
 
 
@@ -69,10 +72,6 @@ class CommandGenerationError(ExecutionError):
         super().__init__(command_name=command_name)
 
 
-class FFmpegTimeoutError(ExecutionError):
-    message_key = "ffmpeg_timeout"
-
-
 class InvalidConfigError(ExecutionError):
     message_key = "invalid_config"
 
@@ -81,51 +80,51 @@ class InvalidConfigError(ExecutionError):
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-#  PipelineError
+#  Errores en la obtención de parámetros
 # ─────────────────────────────────────────────────────────────────────────────
 
 
-class PipelineError(PyMediaError):
+class ParameterError(PyMediaError):
     """Errores del pipeline de procesamiento de vídeo."""
 
-    category = "PipelineError"
+    category = "ParameterError"
+    level = "ERROR"
 
 
-class IncompatibleFilesError(PipelineError):
-    message_key = "incompatible_files"
-
-
-class MissingArgumentError(PipelineError):
+class MissingArgumentError(ParameterError):
     message_key = "missing_argument"
 
     def __init__(self, argument: str):
         super().__init__(argument=argument)
 
 
-class MissingArgumentsError(PipelineError):
-    message_key = "missing_arguments"
-
-
-class MissingMediaError(PipelineError):
+class MissingMediaError(ParameterError):
     message_key = "missing_media"
 
     def __init__(self, path: str):
         super().__init__(path=path)
 
 
-class MissingMediaPropertyError(PipelineError):
+class MissingMediaPropertyError(ParameterError):
     message_key = "missing_media_property"
 
     def __init__(self, property_name: str):
         super().__init__(property_name=property_name)
 
 
-class OutputOnConflictError(PipelineError):
+class MissingParameterError(ParameterError):
+    message_key = "missing_parameter"
+
+    def __init__(self, parameter: str):
+        super().__init__(parameter=parameter)
+
+
+class OutputOnConflictError(ParameterError):
     message_key = "output_on_conflict"
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-#  ValidationError
+#  Errores de validación
 # ─────────────────────────────────────────────────────────────────────────────
 
 
@@ -133,10 +132,7 @@ class ValidationError(PyMediaError):
     """Errores de validación de la entrada del usuario."""
 
     category = "ValidationError"
-
-
-class CropAllZeroError(ValidationError):
-    message_key = "crop_all_zero"
+    level = "ERROR"
 
 
 class CropExceedsDimensionsError(ValidationError):
@@ -146,6 +142,10 @@ class CropExceedsDimensionsError(ValidationError):
         super().__init__(
             crop_dimensions=crop_dimensions, video_dimensions=video_dimensions
         )
+
+
+class IncompatibleFilesError(ValidationError):
+    message_key = "incompatible_files"
 
 
 class InsufficientInputError(ValidationError):
@@ -186,10 +186,6 @@ class InvalidOutputExtensionError(ValidationError):
         super().__init__(extension=extension, supported=supported)
 
 
-class InvalidGyrateError(ValidationError):
-    message_key = "invalid_gyrate"
-
-
 class InvalidSettingError(ValidationError):
     message_key = "invalid_setting"
 
@@ -201,16 +197,8 @@ class InvalidTimeFormatError(ValidationError):
     message_key = "invalid_time_format"
 
 
-class InvalidTrimPointsError(ValidationError):
-    message_key = "invalid_trim_points"
-
-
 class MissingOptionsError(ValidationError):
     message_key = "missing_options"
-
-
-class NegativeTimeError(ValidationError):
-    message_key = "negative_time"
 
 
 class TimeExceedsDurationError(ValidationError):

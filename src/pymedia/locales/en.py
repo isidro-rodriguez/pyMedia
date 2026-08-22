@@ -9,12 +9,11 @@ Cli = {
     "gyrate_help": "Rotate the media by the specified angle in degrees.",
     "invalid_path": "{path} is not a file.",
     "output_help": "Output file name.",
-    "output_on_conflict_help": "Action to take if a file with the same name already exists.",
+    "output_on_conflict_help": "Action if output file already exists.",
     "path_argument_help": "Video to process.",
     "paths_argument_help": "Video list to process.",
     "remux_help": "Re-encodes using the profile specified in the configuration.",
-    "scale_gif_help": "Resize the media proportionally to the specified height.",
-    "scale_video_help": "Resize the media proportionally to the specified height.",
+    "scale_help": "Resize proportionally to the specified height.",
     "show_help": "Show this message and exit.",
     "split_help": "Splits a video at the specified points",
     "start_point_help": "Time point at which GIF generation starts.",
@@ -25,11 +24,11 @@ Cli = {
 ConfigValidation = {
     "invalid_audio_bit_rate": "\nInvalid configuration setting: encode.audio_bit_rate is expected one of: {expected}.",
     "invalid_audio_codec": "\nInvalid configuration setting: encode.audio_codec is expected one of: {expected}.",
-    "invalid_channels": "\nInvalid configuration setting: conflictive_join.channels is expected one of: {expected}.",
+    "invalid_channels": "\nInvalid configuration setting: conflictive_concat.channels is expected one of: {expected}.",
     "invalid_default_container": "\nInvalid configuration setting: encode.default_container is expected one of: {expected}.",
-    "invalid_fps": "\nInvalid configuration setting: conflictive_join.fps is expected one of: {expected}.",
+    "invalid_fps": "\nInvalid configuration setting: conflictive_concat.fps is expected one of: {expected}.",
     "invalid_language": "\nInvalid configuration setting: app.language is expected one of: {expected}.",
-    "invalid_resize_to": "\nInvalid configuration setting: conflictive_join.resize_to is expected one of: {expected}.",
+    "invalid_resize_to": "\nInvalid configuration setting: conflictive_concat.resize_to is expected one of: {expected}.",
     "invalid_stall_timeout": "\nInvalid configuration setting: app.stall_timeout is expected to an integer between 30 to 600.",
     "invalid_video_codec": "\nInvalid configuration setting: encode.video_codec is expected one of: {expected}.",
     "invalid_video_crf": "\nInvalid configuration setting: encode.video_crf is expected between {min} and {max}.",
@@ -52,6 +51,7 @@ ExecutionError = {
     "cannot_create_directory": "Could not create directory: {path}",
     "command_execution": "FFmpeg command {command_name} failed during execution. Error: {error}",
     "command_generation": "FFmpeg command {command_name} was not generated.",
+    "convert_execution": "Unable to convert params {params_src} to {params_target}. Error: {error}",
     "ffmpeg_timeout": "FFmpeg operation exceeded the allowed timeout.",
     "invalid_config": "Invalid configuration: {message}",
     "invalid_config_setting": "Invalid configuration setting: {setting} is expected {expected}",
@@ -70,12 +70,12 @@ Info = {
 }
 
 
-PipelineError = {
-    "incompatible_files": "Video files are incompatible with each other.",
+ParameterError = {
     "missing_arguments": "Missing arguments retrieved from Typer.",
     "missing_argument": "Missing argument: {argument}",
-    "missing_media": "Media information for {path} could not be found.",
-    "missing_media_property": "Media property {property_name} could not be found.",
+    "missing_media": "Missing media information: {path}",
+    "missing_media_property": "Missing media property: {property_name}",
+    "missing_parameter": "Missing parameter: {parameter}",
     "output_on_conflict": "Stopped process because output file already exist.",
 }
 
@@ -91,6 +91,7 @@ Progress = {
 ValidationError = {
     "crop_all_zero": "Invalid crop: all values are 0.",
     "crop_exceeds_dimensions": "Invalid crop: {crop_dimensions} >= original dimensions {video_dimensions}.",
+    "incompatible_files": "Video files are incompatible with each other.",
     "insufficient_inputs": "At least two videos must be provided for this command.",
     "invalid_crop_format": "Invalid crop format. Expected: LEFT,RIGHT,TOP,BOTTOM.",
     "invalid_directory_name": '{directory} contains invalid characters: < > : " / \\ | ? *',

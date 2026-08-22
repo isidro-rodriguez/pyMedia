@@ -1,5 +1,7 @@
-from pymedia.models.gif_parameters import GifParameters
-from pymedia.typer_options import OutputOnConflictMode
+from pymedia.errors import MissingParameterError
+from pymedia.models.enums import OutputOnConflictMode
+from pymedia.models.gif_model import GifParameters
+from pymedia.services.ffmpeg_service import scale_to_cmd
 
 
 def gif_cmd(params: GifParameters) -> list[str]:
@@ -15,12 +17,11 @@ def gif_cmd(params: GifParameters) -> list[str]:
 
     filters: str = ""
 
-    if params.crop:
-        filters += f"{params.crop},"
-    if params.gyrate:
-        filters += f"{params.gyrate},"
     if params.scale:
-        filters += f"{params.scale},"
+        filters += scale_to_cmd(scale=params.scale) + ","
+
+    if params.fps is None:
+        raise MissingParameterError(parameter="fps")
 
     filters += (
         f"fps={params.fps},split[a][b];[a]palettegen[p];"

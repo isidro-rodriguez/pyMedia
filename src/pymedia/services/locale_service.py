@@ -8,7 +8,7 @@ from pathlib import Path
 
 import platformdirs
 
-import pymedia.locales as package
+from pymedia import locales as package
 
 LANGUAGE_MAP = {
     "system": None,
@@ -18,7 +18,9 @@ LANGUAGE_MAP = {
     "italian": "it",
     "spanish": "es",
 }
+
 SUPPORTED_LANGUAGES = {"de", "en", "es", "it", "fr"}
+
 _current_locale = None
 
 
@@ -77,6 +79,14 @@ def get_locale():
         El módulo del idioma actualmente activo.
     """
 
+    if _current_locale is None:
+        set_language(detect_language())
+    return _current_locale
+
+
+def set_language(lang: str) -> None:
+    """Carga el módulo de idioma y expone sus dicts en `pymedia.locales`."""
+
     def _update_package_attributes() -> None:
         """Expone los dicts del idioma activo como atributos de `pymedia.locales`."""
         for name in (
@@ -85,21 +95,15 @@ def get_locale():
             "Debug",
             "ExecutionError",
             "Info",
-            "PipelineError",
+            "ParameterError",
             "Progress",
             "ValidationError",
             "Warnings",
         ):
             setattr(package, name, getattr(_current_locale, name))
 
-    def set_language(lang: str) -> None:
-        """Carga el módulo de idioma y expone sus dicts en `pymedia.locales`."""
-        global _current_locale
-        if lang not in SUPPORTED_LANGUAGES:
-            lang = "en"
-        _current_locale = importlib.import_module(f"pymedia.locales.{lang}")
-        _update_package_attributes()
-
-    if _current_locale is None:
-        set_language(detect_language())
-    return _current_locale
+    global _current_locale
+    if lang not in SUPPORTED_LANGUAGES:
+        lang = "en"
+    _current_locale = importlib.import_module(f"pymedia.locales.{lang}")
+    _update_package_attributes()

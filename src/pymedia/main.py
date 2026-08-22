@@ -1,44 +1,36 @@
-# ruff: noqa
-from pathlib import Path
-
-from dataclasses import fields
+import inspect
 
 import typer
 
-from pymedia.models.config import Config
-from pymedia.services.locale_service import detect_language, set_language
 from pymedia import locales
+from pymedia.commands.gif_command import gif_command
+from pymedia.logger import Logger
+from pymedia.models.config import Config
+from pymedia.models.gif_model import GifArguments, GifParameters
+from pymedia.services.locale_service import detect_language, set_language
 
-# Cargar el idioma ANTES de importar cli_params (que usa locales en los help=)
+# Cargar el idioma ANTES de importar typer_options (que usa locales en los help=)
 set_language(detect_language())
 
-from pymedia.typer_options import (
-    CropOption,
+from pymedia.typer_options import (  # noqa: E402
     DebugOption,
     EndPointOption,
     FpsOption,
-    GyrateOption,
     HelpOption,
     OutputOnConflictMode,
     OutputOnConflictOption,
     OutputOption,
-    InputOption,
-    InputsOption,
-    RemuxOption,
-    ScaleGifMode,
-    ScaleGifOption,
-    ScaleVideoOption,
+    PathArgument,
+    ScaleOption,
     StartPointOption,
-    TrimPointsOption,
 )
-from pymedia.commands.concat_command import concat_command
-from pymedia.commands.encode_command import encode_command
-from pymedia.commands.gif_command import gif_command
-from pymedia.commands.split_command import split_command
-from pymedia.errors import InsufficientInputError, MissingOptionsError
-from pymedia.models.arguments import Arguments
-from pymedia.models.gif_parameters import GifParameters
-from pymedia.models.split_parameters import SplitParameters
+
+
+def _build_args(args_cls, local_vars: dict):
+    """Recoge todos los argumentos de la lista de parámetros"""
+    valid_params = inspect.signature(args_cls).parameters
+    return args_cls(**{k: v for k, v in local_vars.items() if k in valid_params})
+
 
 app = typer.Typer(
     name="pyMedia",
@@ -48,100 +40,36 @@ app = typer.Typer(
 )
 
 
-def _build_arguments(local_vars: dict) -> Arguments:
-    """Recoge todos los argumentos de las llamadas a comandos."""
-    valid = {f.name for f in fields(Arguments)}
-    return Arguments(**{k: v for k, v in local_vars.items() if k in valid})
-
-
 @app.callback()
 def main(
+    debug: bool = False,
     help_: HelpOption = False,
 ) -> None:
     pass
 
 
-@app.command(help=locales.Cli["concat_help"])
-def concat(
-    inputs: InputsOption,
-    crop: CropOption = None,
-    debug: DebugOption = False,
-    gyrate: GyrateOption = None,
-    help_: HelpOption = False,
-    output: OutputOption = None,
-    output_on_conflict: OutputOnConflictOption = OutputOnConflictMode.FAIL,
-    remux: RemuxOption = False,
-    scale: ScaleVideoOption = None,
-) -> None:
-    if len(inputs) < 2:
-        raise InsufficientInputError()
-
-    concat_command(_build_arguments(locals()))
-
-
-@app.command(help=locales.Cli["encode_help"])
-def encode(
-    inputs: InputsOption,
-    crop: CropOption = None,
-    debug: DebugOption = False,
-    gyrate: GyrateOption = None,
-    help_: HelpOption = False,
-    output: OutputOption = None,
-    output_on_conflict: OutputOnConflictOption = OutputOnConflictMode.FAIL,
-    remux: RemuxOption = False,
-    scale: ScaleVideoOption = None,
-) -> None:
-    if crop is None and scale is None and gyrate is None and remux is False:
-        raise MissingOptionsError()
-
-    args = _build_arguments(locals())
-    encode_command(args)
-
-
-@app.command(help=locales.Cli["split_help"])
-def split(
-    input_single: InputOption,
-    trim_points: TrimPointsOption,
-    debug: DebugOption = False,
-    crop: CropOption = None,
-    gyrate: GyrateOption = None,
-    help_: HelpOption = False,
-    output: OutputOption = None,
-    output_on_conflict: OutputOnConflictOption = OutputOnConflictMode.FAIL,
-    remux: RemuxOption = False,
-    scale: ScaleVideoOption = None,
-) -> None:
-    config = Config.load()
-
-    split_command(
-        SplitParameters(
-            args=_build_arguments(locals()),
-            config=config,
-        ),
-        config=config,
-    )
-
-
 @app.command(help=locales.Cli["gif_help"])
 def gif(
-    input_single: InputOption,
-    debug: DebugOption = False,
-    crop: CropOption = None,
-    end_point: EndPointOption = None,
-    fps: FpsOption = 15,
-    gyrate: GyrateOption = None,
-    help_: HelpOption = False,
+    input_single: PathArgument,
     output: OutputOption = None,
     output_on_conflict: OutputOnConflictOption = OutputOnConflictMode.FAIL,
-    scale: ScaleGifOption = ScaleGifMode.P480,
+    fps: FpsOption = 15,
+    scale: ScaleOption = 480,
     start_point: StartPointOption = None,
+    end_point: EndPointOption = None,
+    help_: HelpOption = False,
+    debug: DebugOption = False,
 ) -> None:
+    """Proceso para la ejecución del comando de generación de gifs."""
+    config = Config.load()
+    Logger.create(debug=debug)
 
     gif_command(
-        GifParameters(
-            args=_build_arguments(locals()),
-            config=Config.load(),
-        )
+        config=config,
+        params=GifParameters.create(
+            args=_build_args(args_cls=GifArguments, local_vars=locals()),
+            config=config,
+        ),
     )
 
 

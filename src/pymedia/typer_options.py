@@ -4,11 +4,8 @@ from typing import Annotated
 import typer
 
 from pymedia import locales
-from pymedia.models.base_parameters import (
-    GyrateMode,
+from pymedia.models.enums import (
     OutputOnConflictMode,
-    ScaleGifMode,
-    ScaleVideoMode,
 )
 
 
@@ -19,76 +16,31 @@ def _show_help(ctx: typer.Context, value: bool) -> None:
         raise typer.Exit()
 
 
-def _validate_path(path: Path) -> Path | None:
+def _validate_path(path: Path) -> Path:
     """Valida la ruta indicada."""
     if not path.is_file():
         raise typer.BadParameter(locales.Cli["invalid_path"].format(path=path))
     return path
 
 
-def _validate_path_list(path_list: list[Path]) -> list[Path] | None:
-    """Valida la lista de rutas indicada."""
-    for path in path_list:
-        _validate_path(path)
-    return path_list
-
-
 # -----------------------------------------------------------------------------
-#  Opciones requeridas
+#  Argumentos
 # -----------------------------------------------------------------------------
 
 
-InputOption = Annotated[
+PathArgument = Annotated[
     Path,
-    typer.Option(
-        "--input",
-        "-i",
-        rich_help_panel="Required options",
+    typer.Argument(
         help=locales.Cli["path_argument_help"],
         callback=_validate_path,
     ),
 ]
 
 
-InputsOption = Annotated[
-    list[Path],
-    typer.Option(
-        "--input",
-        "-i",
-        rich_help_panel="Required options",
-        help=locales.Cli["paths_argument_help"],
-        callback=_validate_path_list,
-    ),
-]
-
-
-TrimPointsOption = Annotated[
-    str,
-    typer.Option(
-        "--trim-points",
-        "-t",
-        metavar="00:10,00:20,00:30",
-        rich_help_panel="Required options",
-        help=locales.Cli["trim_points_help"],
-    ),
-]
-
-
 # -----------------------------------------------------------------------------
-#  Opciones de transcodificación
+#  Opciones de aplicación
 # -----------------------------------------------------------------------------
 
-
-CropOption = Annotated[
-    str | None,
-    typer.Option(
-        "--crop",
-        "-c",
-        metavar="left,right,top,bottom",
-        rich_help_panel="Encode options",
-        help=locales.Cli["crop_help"],
-    ),
-]
 
 DebugOption = Annotated[
     bool,
@@ -98,38 +50,6 @@ DebugOption = Annotated[
     ),
 ]
 
-EndPointOption = Annotated[
-    str | None,
-    typer.Option(
-        "--end-point",
-        "-ep",
-        metavar="hh:mm:ss",
-        rich_help_panel="Encode options",
-        help=locales.Cli["end_point_help"],
-    ),
-]
-
-FpsOption = Annotated[
-    int | None,
-    typer.Option(
-        "--fps",
-        "-f",
-        min=4,
-        max=20,
-        rich_help_panel="Encode options",
-        help=locales.Cli["fps_help"],
-    ),
-]
-
-GyrateOption = Annotated[
-    GyrateMode | None,
-    typer.Option(
-        "--gyrate",
-        "-g",
-        rich_help_panel="Encode options",
-        help=locales.Cli["gyrate_help"],
-    ),
-]
 
 HelpOption = Annotated[
     bool,
@@ -142,47 +62,6 @@ HelpOption = Annotated[
     ),
 ]
 
-
-ScaleGifOption = Annotated[
-    ScaleGifMode | None,
-    typer.Option(
-        "--scale",
-        "-s",
-        rich_help_panel="Encode options",
-        help=locales.Cli["scale_gif_help"],
-    ),
-]
-
-ScaleVideoOption = Annotated[
-    ScaleVideoMode | None,
-    typer.Option(
-        "--scale",
-        "-s",
-        rich_help_panel="Encode options",
-        help=locales.Cli["scale_video_help"],
-    ),
-]
-
-StartPointOption = Annotated[
-    str | None,
-    typer.Option(
-        "--start-point",
-        "-sp",
-        metavar="hh:mm:ss",
-        rich_help_panel="Encode options",
-        help=locales.Cli["start_point_help"],
-    ),
-]
-
-RemuxOption = Annotated[
-    bool,
-    typer.Option(
-        "--remux",
-        "-r",
-        rich_help_panel="Encode options",
-        help=locales.Cli["remux_help"],
-    ),
-]
 
 # -----------------------------------------------------------------------------
 #  Opciones de salida
@@ -199,6 +78,7 @@ OutputOnConflictOption = Annotated[
     ),
 ]
 
+
 OutputOption = Annotated[
     Path | None,
     typer.Option(
@@ -206,5 +86,60 @@ OutputOption = Annotated[
         "-o",
         rich_help_panel="Output options",
         help=locales.Cli["output_help"],
+    ),
+]
+
+
+# -----------------------------------------------------------------------------
+#  Opciones de comando
+# -----------------------------------------------------------------------------
+
+
+EndPointOption = Annotated[
+    str | None,
+    typer.Option(
+        "--end-point",
+        "-ep",
+        metavar="hh:mm:ss",
+        rich_help_panel="Encode options",
+        help=locales.Cli["end_point_help"],
+    ),
+]
+
+
+FpsOption = Annotated[
+    int | None,
+    typer.Option(
+        "--fps",
+        "-f",
+        min=4,
+        max=20,
+        rich_help_panel="Encode options",
+        help=locales.Cli["fps_help"],
+    ),
+]
+
+
+ScaleOption = Annotated[
+    int | None,
+    typer.Option(
+        "--scale",
+        "-s",
+        min=240,
+        max=2160,
+        rich_help_panel="Encode options",
+        help=locales.Cli["scale_help"],
+    ),
+]
+
+
+StartPointOption = Annotated[
+    str | None,
+    typer.Option(
+        "--start-point",
+        "-sp",
+        metavar="hh:mm:ss",
+        rich_help_panel="Encode options",
+        help=locales.Cli["start_point_help"],
     ),
 ]

@@ -32,18 +32,19 @@ class Language(Enum):
     """Idiomas disponibles para la interfaz de la aplicación."""
 
     ENGLISH = "english"
-    FRENCH = "french"
-    GERMAN = "german"
-    ITALIAN = "italian"
-    SPANISH = "spanish"
+    # FRENCH = "french"
+    # GERMAN = "german"
+    # ITALIAN = "italian"
+    # SPANISH = "spanish"
     SYSTEM = "system"
 
 
-class ResizeTo(Enum):
+class Height(Enum):
     """Altura en que se redimensionan los vídeos en uniones conflictivas."""
 
     MAX_HEIGHT = "max_height"
     MIN_HEIGHT = "min_height"
+    REJECT_INCREASE = "reject_increase"
 
 
 class TargetFPS(Enum):
@@ -62,7 +63,7 @@ class VideoCodec(Enum):
     HEVC = "hevc"
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, kw_only=True, slots=True)
 class Encode:
     """
     Parámetros de transcodificación que se usarán en ffmpeg.
@@ -83,24 +84,23 @@ class Encode:
     audio_bit_rate: str
 
 
-@dataclass(frozen=True)
-class ConflictiveJoin:
+@dataclass(frozen=True, kw_only=True, slots=True)
+class ConflictiveConcat:
     """
     Actuaciones ante valores conflictivos en CONCAT filter.
 
     Attributes:
-        resize_to: Si re-escalan los vídeos al de menor altura o mayor.
         fps: Si transcodifica los vídeos al de menor FPS o el mayor.
         channels: Canales de salida de audio por defecto si los vídeos a
                 concatenar tienes pistas de audio con canales incompatibles.
     """
 
-    resize_to: str
+    height: str
     fps: str
     channels: str
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, kw_only=True, slots=True)
 class App:
     """
     Opciones de configuración de la aplicación.
@@ -109,29 +109,26 @@ class App:
         language: Lenguaje de la aplicación.
         default_container: Formato que agrupa y sincroniza video, audio y subtítulos.
         stall_timeout: Retardo, en segundos, para matar el proceso ante bloqueo.
-        disable_resolution_increase: Impide la reescalada de altura a dimensiones
-                mayores a las del vídeo original.
     """
 
     language: str
     default_container: str
     stall_timeout: int
-    disable_resolution_increase: bool
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, kw_only=True, slots=True)
 class Config:
     """
     Actuaciones ante valores conflictivos en CONCAT filter.
 
     Attributes:
         encode: Parámetros de transcodificación que se usarán en ffmpeg.
-        conflictive_join: Actuaciones ante valores conflictivos en CONCAT filter.
+        conflictive_concat: Actuaciones ante valores conflictivos en CONCAT filter.
         app: Opciones de configuración de la aplicación.
     """
 
     encode: Encode
-    conflictive_join: ConflictiveJoin
+    conflictive_concat: ConflictiveConcat
     app: App
 
     @classmethod
@@ -153,7 +150,7 @@ class Config:
 
         return cls(
             encode=Encode(**data["encode"]),
-            conflictive_join=ConflictiveJoin(**data["conflictive_join"]),
+            conflictive_concat=ConflictiveConcat(**data["conflictive_concat"]),
             app=App(**data["app"]),
         )
 
@@ -174,7 +171,7 @@ class Config:
         errors: list[str] = []
 
         encode = data["encode"]
-        conflictive_join = data["conflictive_join"]
+        conflictive_concat = data["conflictive_concat"]
         app = data["app"]
 
         # encode.video_codec
@@ -230,18 +227,18 @@ class Config:
                     )
                 )
 
-        # conflictive_join.resize_to
-        resize_to = conflictive_join["resize_to"]
-        valid_resize_to = {r.value for r in ResizeTo}
-        if resize_to not in valid_resize_to:
+        # conflictive_concat.height
+        height = conflictive_concat["height"]
+        valid_height = {r.value for r in Height}
+        if height not in valid_height:
             errors.append(
-                locales.ConfigValidation["invalid_resize_to"].format(
-                    expected=", ".join(sorted(valid_resize_to))
+                locales.ConfigValidation["invalid_height"].format(
+                    expected=", ".join(sorted(valid_height))
                 )
             )
 
-        # conflictive_join.fps
-        fps = conflictive_join["fps"]
+        # conflictive_concat.fps
+        fps = conflictive_concat["fps"]
         valid_fps = {f.value for f in TargetFPS}
         if fps not in valid_fps:
             errors.append(
@@ -250,8 +247,8 @@ class Config:
                 )
             )
 
-        # conflictive_join.channels
-        channels = conflictive_join["channels"]
+        # conflictive_concat.channels
+        channels = conflictive_concat["channels"]
         valid_channels = {c.value for c in Channels}
         if channels not in valid_channels:
             errors.append(

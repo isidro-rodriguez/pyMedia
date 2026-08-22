@@ -2,13 +2,22 @@ import json
 import subprocess
 from pathlib import Path
 
-from pymedia.logger import get_logger, log_debug
+from pymedia.logger import Logger
 
-logger = get_logger("probe")
+logger = Logger.load("probe")
 
 
 def probe(path: Path) -> dict:
-    """Ejecuta ffprobe y devuelve el JSON parseado."""
+    """
+    Obtiene metadatos del vídeo a procesar.
+
+    Args:
+        path: Ruta del fichero del que se va a sacar metadatos.
+
+    Returns:
+        Metadatos del vídeo a procesar o errores si no es un vídeo válido.
+    """
+
     cmd = [
         "ffprobe",
         "-v",
@@ -19,7 +28,9 @@ def probe(path: Path) -> dict:
         "-show_streams",
         str(path),
     ]
-    result = subprocess.run(cmd, capture_output=True, text=True, check=True)
+
+    result = subprocess.run(args=cmd, capture_output=True, text=True, check=True)
     data = json.loads(result.stdout)
-    log_debug(logger, "ffprobe_data", data=data)
+    logger.debug(key="ffprobe_data", data=data)
+
     return data

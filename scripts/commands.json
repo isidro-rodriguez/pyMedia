@@ -1,6 +1,6 @@
 {
   "concat_comp": {
-    "base_command": "uv run pymedia concat ./.local/fixtures/src_h265_720p.mp4 ./.local/fixtures/vsrc_h265_720p.mp4 ",
+    "base_command": "uv run pymedia concat -i ./.local/fixtures/src_h265_720p.mp4 -i ./.local/fixtures/vsrc_h265_720p.mp4 ",
     "variants": [
       {
         "name": "CONCAT DEMUX",
@@ -50,7 +50,7 @@
     ]
   },
   "encode": {
-    "base_command": "uv run pymedia encode ./.local/fixtures/cell_h264_720p.mp4 ",
+    "base_command": "uv run pymedia encode -i ./.local/fixtures/cell_h264_720p.mp4 ",
     "variants": [
       {
         "name": "ENCODE REMUX",
@@ -75,32 +75,32 @@
     ]
   },
   "encode_multiple": {
-    "base_command": "uv run pymedia encode ./.local/fixtures/cell_h264_720p.mp4 ./.local/fixtures/solid_av1_720p.mp4 ",
+    "base_command": "uv run pymedia encode -i ./.local/fixtures/cell_h264_720p.mp4 -i ./.local/fixtures/solid_av1_720p.mp4 -od ./.local/qt/",
     "variants": [
       {
         "name": "ENCODE MULTIPLE REMUX",
-        "args": "-o ./.local/qt/encode_multiple_remux.mp4 -r"
+        "args": "-r"
       },
       {
         "name": "ENCODE MULTIPLE GYRATE",
-        "args": "-o ./.local/qt/encode_multiple_gyrate.mp4 -g 90"
+        "args": "-g 90"
       },
       {
         "name": "ENCODE MULTIPLE SCALE",
-        "args": "-o ./.local/qt/encode_multiple_scale.mp4 -s 480"
+        "args": "-s 480"
       },
       {
         "name": "ENCODE MULTIPLE CROP",
-        "args": "-o ./.local/qt/encode_multiple_crop.mp4 -c 0,0,100,100"
+        "args": " -c 0,0,100,100"
       },
       {
         "name": "ENCODE MULTIPLE FULL",
-        "args": "-o ./.local/qt/encode_multiple_full.mp4 -g 180 -s 480 -c 0,0,100,100"
+        "args": "-g 180 -s 480 -c 0,0,100,100"
       }
     ]
   },
   "gif": {
-    "base_command": "uv run pymedia gif ./.local/fixtures/vsrc_h265_720p.mp4 ",
+    "base_command": "uv run pymedia gif -i ./.local/fixtures/vsrc_h265_720p.mp4 ",
     "variants": [
       {
         "name": "GIF DEFAULT",
@@ -167,15 +167,6 @@
       {
         "name": "BORRADO QUICK TEST",
         "args": "./.local/qt/"
-      }
-    ]
-  },
-  "purge": {
-    "base_command": "",
-    "variants:": [
-      {
-        "name": "BORRADO CACHÉ EN SRC Y TESTS",
-        "args": "find src tests -type d -name __pycache__ -exec rm -rf {} +"
       }
     ]
   }

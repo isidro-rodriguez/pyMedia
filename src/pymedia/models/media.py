@@ -8,7 +8,7 @@ from pymedia.ffmpeg.probe import probe as ffprobe
 from pymedia.utils import parse_fraction, to_float, to_int
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, kw_only=True, slots=True)
 class Video:
     codec: str | None = None
     width: int | None = None
@@ -19,7 +19,7 @@ class Video:
     aspect_ratio: str | None = None
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, kw_only=True, slots=True)
 class Audio:
     codec: str | None = None
     sample_rate: int | None = None
@@ -29,7 +29,7 @@ class Audio:
     language: str | None = None
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, kw_only=True, slots=True)
 class Media:
     path: Path
     duration: timedelta | None = None
