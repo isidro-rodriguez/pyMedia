@@ -2,12 +2,6 @@ from enum import Enum
 from typing import NamedTuple
 
 
-class CommandMode(Enum):
-    """Nombres de los comandos disponibles en la CLI."""
-
-    GIF = "gif"
-
-
 class CropMargins(NamedTuple):
     """Datos para el corte de imagen mediante crop."""
 
@@ -15,6 +9,15 @@ class CropMargins(NamedTuple):
     height: int  # Altura del vídeo resultante
     x: int  # Coordenada X del punto de corte
     y: int  # Coordenada Y del punto de corte
+
+
+class ContainerType(Enum):
+    """Tipos de container."""
+
+    ANIMATED = "animated"
+    AUDIO = "audio"
+    IMAGE = "image"
+    VIDEO = "video"
 
 
 class GyrateMode(int, Enum):
@@ -25,10 +28,9 @@ class GyrateMode(int, Enum):
     d270 = 270
 
 
-class OutputOnConflictMode(Enum):
+class OverwriteMode(Enum):
     """Resolución de conflicto si ya existe un fichero con el mismo nombre"""
 
-    FAIL = "fail"
-    REPLACE = "replace"
-    RENAME = "rename"
-    SKIP = "skip"
+    YES = "yes"
+    NO = "no"
+    ASK = "ask"

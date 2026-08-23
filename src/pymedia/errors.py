@@ -72,6 +72,13 @@ class CommandGenerationError(ExecutionError):
         super().__init__(command_name=command_name)
 
 
+class CommandTimeoutError(ExecutionError):
+    message_key = "command_timeout"
+
+    def __init__(self, command_name: str):
+        super().__init__(command_name=command_name)
+
+
 class InvalidConfigError(ExecutionError):
     message_key = "invalid_config"
 
@@ -112,17 +119,6 @@ class MissingMediaPropertyError(ParameterError):
         super().__init__(property_name=property_name)
 
 
-class MissingParameterError(ParameterError):
-    message_key = "missing_parameter"
-
-    def __init__(self, parameter: str):
-        super().__init__(parameter=parameter)
-
-
-class OutputOnConflictError(ParameterError):
-    message_key = "output_on_conflict"
-
-
 # ─────────────────────────────────────────────────────────────────────────────
 #  Errores de validación
 # ─────────────────────────────────────────────────────────────────────────────
@@ -144,12 +140,8 @@ class CropExceedsDimensionsError(ValidationError):
         )
 
 
-class IncompatibleFilesError(ValidationError):
-    message_key = "incompatible_files"
-
-
-class InsufficientInputError(ValidationError):
-    message_key = "insufficient_inputs"
+class InvalidBordersFormatError(ValidationError):
+    message_key = "invalid_borders_format"
 
 
 class InvalidCropFormatError(ValidationError):
@@ -178,27 +170,14 @@ class InvalidFileExtensionError(ValidationError):
 
 
 class InvalidOutputExtensionError(ValidationError):
-    message_key = (
-        "invalid_output_extension"  # ver nota abajo: corregir el typo en en.py
-    )
+    message_key = "invalid_output_extension"
 
     def __init__(self, extension: str, supported: str):
         super().__init__(extension=extension, supported=supported)
 
 
-class InvalidSettingError(ValidationError):
-    message_key = "invalid_setting"
-
-    def __init__(self, parameter: str):
-        super().__init__(parameter=parameter)
-
-
 class InvalidTimeFormatError(ValidationError):
     message_key = "invalid_time_format"
-
-
-class MissingOptionsError(ValidationError):
-    message_key = "missing_options"
 
 
 class TimeExceedsDurationError(ValidationError):

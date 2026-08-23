@@ -1,23 +1,16 @@
 Cli = {
-    "concat_help": "Concatenates videos in the specified order",
-    "crop_help": "Crops the specified number of pixels.",
     "debug_help": "Log level DEBUG",
-    "encode_help": "Transcode using the selected options (requires at least one option)",
     "end_point_help": "Time point at which GIF generation ends.",
     "fps_help": "Frames per second of the animated GIF.",
     "gif_help": "Generates an animated GIF from the specified video",
-    "gyrate_help": "Rotate the media by the specified angle in degrees.",
     "invalid_path": "{path} is not a file.",
     "output_help": "Output file name.",
-    "output_on_conflict_help": "Action if output file already exists.",
+    "overwrite_confirm": "Output file already exists. Overwrite?",
+    "overwrite_help": "Action to use if output file already exists.",
     "path_argument_help": "Video to process.",
-    "paths_argument_help": "Video list to process.",
-    "remux_help": "Re-encodes using the profile specified in the configuration.",
     "scale_help": "Resize proportionally to the specified height.",
     "show_help": "Show this message and exit.",
-    "split_help": "Splits a video at the specified points",
     "start_point_help": "Time point at which GIF generation starts.",
-    "trim_points_help": "Split points for the video.",
 }
 
 
@@ -28,7 +21,6 @@ ConfigValidation = {
     "invalid_default_container": "\nInvalid configuration setting: encode.default_container is expected one of: {expected}.",
     "invalid_fps": "\nInvalid configuration setting: conflictive_concat.fps is expected one of: {expected}.",
     "invalid_language": "\nInvalid configuration setting: app.language is expected one of: {expected}.",
-    "invalid_resize_to": "\nInvalid configuration setting: conflictive_concat.resize_to is expected one of: {expected}.",
     "invalid_stall_timeout": "\nInvalid configuration setting: app.stall_timeout is expected to an integer between 30 to 600.",
     "invalid_video_codec": "\nInvalid configuration setting: encode.video_codec is expected one of: {expected}.",
     "invalid_video_crf": "\nInvalid configuration setting: encode.video_crf is expected between {min} and {max}.",
@@ -39,11 +31,6 @@ ConfigValidation = {
 Debug = {
     "ffmpeg_command": "FFmpeg command: {cmd}",
     "ffprobe_data": "ffprobe data: {data}",
-    "pipeline_crop": "Calculated crop: {crop}",
-    "pipeline_gyrate": "Applied rotation: {gyrate}",
-    "pipeline_scale": "Calculated scale: {scale}",
-    "pipeline_time": "Processed time: {time}",
-    "pipeline_trim": "Trim points: {trim}",
 }
 
 
@@ -51,67 +38,43 @@ ExecutionError = {
     "cannot_create_directory": "Could not create directory: {path}",
     "command_execution": "FFmpeg command {command_name} failed during execution. Error: {error}",
     "command_generation": "FFmpeg command {command_name} was not generated.",
-    "convert_execution": "Unable to convert params {params_src} to {params_target}. Error: {error}",
-    "ffmpeg_timeout": "FFmpeg operation exceeded the allowed timeout.",
+    "command_timeout": "FFmpeg command {command_name} timed out.",
     "invalid_config": "Invalid configuration: {message}",
-    "invalid_config_setting": "Invalid configuration setting: {setting} is expected {expected}",
-    "missing_config_section": "Missing configuration section: {section}",
-    "missing_config_setting": "Missing configuration setting: {setting}",
-    "unexpected_config_setting": "Unexpected configuration setting: {setting}",
 }
 
 
 Info = {
-    "config_saved": "Saving config.toml",
-    "concat_success": "Videos concatenated successfully: {output}",
-    "encode_success": "Transcoding completed successfully: {output}",
     "gif_success": "GIF generated successfully: {output}",
-    "split_success": "Video split successfully: {output}",
 }
 
 
 ParameterError = {
-    "missing_arguments": "Missing arguments retrieved from Typer.",
     "missing_argument": "Missing argument: {argument}",
     "missing_media": "Missing media information: {path}",
     "missing_media_property": "Missing media property: {property_name}",
-    "missing_parameter": "Missing parameter: {parameter}",
-    "output_on_conflict": "Stopped process because output file already exist.",
 }
 
 
 Progress = {
-    "concat": "Concatenating",
-    "encode": "Transcoding",
     "gif": "Generating GIF",
-    "split": "Splitting",
 }
 
 
 ValidationError = {
-    "crop_all_zero": "Invalid crop: all values are 0.",
-    "crop_exceeds_dimensions": "Invalid crop: {crop_dimensions} >= original dimensions {video_dimensions}.",
-    "incompatible_files": "Video files are incompatible with each other.",
-    "insufficient_inputs": "At least two videos must be provided for this command.",
-    "invalid_crop_format": "Invalid crop format. Expected: LEFT,RIGHT,TOP,BOTTOM.",
+    "crop_exceeds_dimensions": "Invalid crop dimensions: {crop_dimensions} >= original {video_dimensions}.",
+    "invalid_borders_format": "Invalid borders format. Expected: LEFT,RIGHT,TOP,BOTTOM.",
+    "invalid_crop_format": "Invalid crop format. Expected: WIDTH,HEIGHT,X,Y.",
     "invalid_directory_name": '{directory} contains invalid characters: < > : " / \\ | ? *',
     "invalid_extension": "Invalid extension {extension}. Codec {codec} requires one of: {supported}.",
     "invalid_filename": '{filename} contains invalid characters: < > : " / \\ | ? *',
-    "invalid_gyrate": "Invalid rotation format. Expected: 90 | 180 | 270.",
     "invalid_output_extension": "Invalid extension {extension}. Requires one of: {supported}.",
-    "invalid_setting": "Invalid setting: {parameter}",
     "invalid_time_format": "Invalid timestamp format. Expected: hh:mm:ss.",
-    "invalid_trim_points": "Invalid trim points.",
-    "missing_options": "At least one option is required.",
-    "negative_time": "Timestamp cannot be negative.",
     "time_exceeds_duration": "Timestamp {time} exceeds video duration {duration}.",
 }
 
 
 Warnings = {
-    "missing_options": "At least one option is required.",
-    "output_exist": "File already exist: {file_path}.",
-    "skip_on_conflit": "Skipping process cause file already exists: {file_path}.",
+    "overwrite_skipped": "Command skipped since output file already exists.",
     "scale_rejected_equal": "Scaling rejected: {scale} = original height {height}.",
     "scale_rejected_increase": "Scaling to {scale}p not applied: resolution is higher than the original ({height}p).",
 }

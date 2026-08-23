@@ -31,7 +31,6 @@ class Audio:
 
 @dataclass(frozen=True, kw_only=True, slots=True)
 class Media:
-    path: Path
     duration: timedelta | None = None
     size: int | None = None
     format_name: str | None = None
@@ -79,7 +78,6 @@ class Media:
             if duration_val is not None
             else None,
             size=to_int(fmt.get("size")),
-            path=path.absolute(),
             format_name=fmt.get("format_name"),
             video=video,
             audio=audio,

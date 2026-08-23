@@ -1,5 +1,4 @@
-from pymedia.errors import MissingParameterError
-from pymedia.models.enums import OutputOnConflictMode
+from pymedia.models.enums import OverwriteMode
 from pymedia.models.gif_model import GifParameters
 from pymedia.services.ffmpeg_service import scale_to_cmd
 
@@ -20,9 +19,6 @@ def gif_cmd(params: GifParameters) -> list[str]:
     if params.scale:
         filters += scale_to_cmd(scale=params.scale) + ","
 
-    if params.fps is None:
-        raise MissingParameterError(parameter="fps")
-
     filters += (
         f"fps={params.fps},split[a][b];[a]palettegen[p];"
         f"[b][p]paletteuse=dither=floyd_steinberg"
@@ -30,19 +26,19 @@ def gif_cmd(params: GifParameters) -> list[str]:
 
     cmd = ["ffmpeg"]
 
-    if params.output_on_conflict == OutputOnConflictMode.REPLACE:
+    if params.overwrite == OverwriteMode.YES:
         cmd.extend(["-y"])
 
-    if params.start_point:
-        cmd.extend(["-ss", str(params.start_point)])
+    if params.timestamp_start:
+        cmd.extend(["-ss", str(params.timestamp_start)])
 
-    if params.end_point:
-        cmd.extend(["-to", str(params.end_point)])
+    if params.timestamp_end:
+        cmd.extend(["-to", str(params.timestamp_end)])
 
     cmd.extend(
         [
             "-i",
-            str(params.media.path),
+            str(params.input_single),
             "-filter_complex",
             filters,
             "-progress",

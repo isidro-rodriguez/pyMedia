@@ -5,34 +5,20 @@ import typer
 
 from pymedia import locales
 from pymedia.models.enums import (
-    OutputOnConflictMode,
+    OverwriteMode,
 )
-
-
-def _show_help(ctx: typer.Context, value: bool) -> None:
-    """Callback para mostar el texto de ayuda en múltiples idiomas."""
-    if value:
-        typer.echo(ctx.get_help())
-        raise typer.Exit()
-
-
-def _validate_path(path: Path) -> Path:
-    """Valida la ruta indicada."""
-    if not path.is_file():
-        raise typer.BadParameter(locales.Cli["invalid_path"].format(path=path))
-    return path
-
+from pymedia.services.typer_service import show_help, validate_path
 
 # -----------------------------------------------------------------------------
 #  Argumentos
 # -----------------------------------------------------------------------------
 
 
-PathArgument = Annotated[
+InputSingleArgument = Annotated[
     Path,
     typer.Argument(
         help=locales.Cli["path_argument_help"],
-        callback=_validate_path,
+        callback=validate_path,
     ),
 ]
 
@@ -56,7 +42,7 @@ HelpOption = Annotated[
     typer.Option(
         "--help",
         help=locales.Cli["show_help"],  # tu texto traducido
-        callback=_show_help,
+        callback=show_help,
         is_eager=True,
         expose_value=False,
     ),
@@ -66,17 +52,6 @@ HelpOption = Annotated[
 # -----------------------------------------------------------------------------
 #  Opciones de salida
 # -----------------------------------------------------------------------------
-
-
-OutputOnConflictOption = Annotated[
-    OutputOnConflictMode | None,
-    typer.Option(
-        "--on-conflict",
-        "-oc",
-        rich_help_panel="Output options",
-        help=locales.Cli["output_on_conflict_help"],
-    ),
-]
 
 
 OutputOption = Annotated[
@@ -89,57 +64,63 @@ OutputOption = Annotated[
     ),
 ]
 
+OverwriteOption = Annotated[
+    OverwriteMode,
+    typer.Option(
+        "--overwrite",
+        "-ov",
+        rich_help_panel="Output options",
+        help=locales.Cli["overwrite_help"],
+    ),
+]
+
 
 # -----------------------------------------------------------------------------
 #  Opciones de comando
 # -----------------------------------------------------------------------------
 
 
-EndPointOption = Annotated[
+EndOption = Annotated[
     str | None,
     typer.Option(
-        "--end-point",
-        "-ep",
+        "--end",
         metavar="hh:mm:ss",
-        rich_help_panel="Encode options",
+        rich_help_panel="Command options",
         help=locales.Cli["end_point_help"],
     ),
 ]
 
 
 FpsOption = Annotated[
-    int | None,
+    int,
     typer.Option(
         "--fps",
-        "-f",
         min=4,
         max=20,
-        rich_help_panel="Encode options",
+        rich_help_panel="Command options",
         help=locales.Cli["fps_help"],
     ),
 ]
 
 
-ScaleOption = Annotated[
-    int | None,
+ScaleGifOption = Annotated[
+    int,
     typer.Option(
         "--scale",
-        "-s",
         min=240,
-        max=2160,
-        rich_help_panel="Encode options",
+        max=720,
+        rich_help_panel="Command options",
         help=locales.Cli["scale_help"],
     ),
 ]
 
 
-StartPointOption = Annotated[
+StartOption = Annotated[
     str | None,
     typer.Option(
-        "--start-point",
-        "-sp",
+        "--start",
         metavar="hh:mm:ss",
-        rich_help_panel="Encode options",
+        rich_help_panel="Command options",
         help=locales.Cli["start_point_help"],
     ),
 ]

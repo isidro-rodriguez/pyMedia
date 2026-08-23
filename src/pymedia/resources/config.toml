@@ -24,6 +24,6 @@ fps = "min_fps"                 # min_fps | max_fps
 channels = "stereo"             # stereo | mono | 5.1
 
 [app]
-language = "system"             # system | english | spanish | italian | french | german
+language = "english"
 default_container = ".mkv"      # .mkv | .mp4 | .mov (recomendados)
 stall_timeout = 60              # in seconds

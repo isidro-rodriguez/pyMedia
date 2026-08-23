@@ -13,13 +13,9 @@ from pymedia import locales as package
 LANGUAGE_MAP = {
     "system": None,
     "english": "en",
-    "french": "fr",
-    "german": "de",
-    "italian": "it",
-    "spanish": "es",
 }
 
-SUPPORTED_LANGUAGES = {"de", "en", "es", "it", "fr"}
+SUPPORTED_LANGUAGES = {"en"}
 
 _current_locale = None
 

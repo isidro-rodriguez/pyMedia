@@ -5,31 +5,30 @@ from json import JSONDecodeError
 from pathlib import Path
 
 from pymedia.data.audio_codecs import AUDIO_CODECS
-from pymedia.data.containers import VIDEO_CONTAINERS
+from pymedia.data.containers import (
+    ANIMATED_CONTAINERS,
+    IMAGE_CONTAINERS,
+    VIDEO_CONTAINERS,
+)
 from pymedia.data.video_codecs import VIDEO_CODECS
 from pymedia.errors import (
     CannotCreateDirectoryError,
-    CropExceedsDimensionsError,
-    InvalidCropFormatError,
     InvalidDirectoryError,
     InvalidFileExtensionError,
     InvalidNameError,
     InvalidOutputExtensionError,
     InvalidTimeFormatError,
-    MissingArgumentError,
     MissingMediaError,
     MissingMediaPropertyError,
     TimeExceedsDurationError,
 )
 from pymedia.logger import Logger
 from pymedia.models.config import Config, Height
-from pymedia.models.enums import CommandMode, CropMargins
 from pymedia.models.media import Media
 
 
 def _is_valid_name(name: str) -> bool:
-    """
-    Valida si el nombre de archivo, o directorio,
+    """Valida si el nombre de archivo, o directorio,
     no contiene caracteres no permitidos en Windows
     """
     _INVALID_CHARS = re.compile(r'[<>:"/\\|?*\x00-\x1F]')
@@ -47,8 +46,7 @@ def _is_valid_name(name: str) -> bool:
 def load_media(
     path: Path,
 ) -> Media:
-    """
-    Carga la lista de metadatos de los vídeos a procesar
+    """Carga la lista de metadatos de los vídeos a procesar
 
     Args:
         path: ruta absoluta del vídeo.
@@ -83,98 +81,36 @@ def load_media(
     return media
 
 
-def process_crop(
-    crop: str,
-    media: Media,
-) -> CropMargins:
-    """
-    Procesa la opción de corte de imagen.
+def process_output(
+    input_single: Path,
+    output: Path | None = None,
+    affix: str | None = None,
+    extension: str | None = None,
+) -> Path:
+    """Procesa la ruta del fichero de salida.
 
     Args:
-        crop: Valor de las dimensiones de corte.
-        media: Metadatos de los vídeos a procesar.
-
-    Returns:
-        Lista de las dimensiones de corte.
-
-    Raises:
-        CropExceedsDimensionsError: Si el corte excede el vídeo original.
-        InvalidCropFormatError: Si el formato no es parseable.
-        MissingMediaPropertyError: Si falta metadata necesaria en `media`.
-    """
-
-    def _validate_crop() -> None:
-        """Valida el formato y los valores del corte."""
-        try:
-            values = tuple(int(v) for v in crop.split(","))
-        except ValueError as exc:
-            raise InvalidCropFormatError() from exc
-        if (
-            not len(values) == 4
-            or not all(v >= 0 for v in values)
-            or not max(values) > 0
-        ):
-            raise InvalidCropFormatError()
-
-    def _validate_crop_dimensions() -> None:
-        """Valida que las dimensiones de corte no igualen o excedan a las del vídeo."""
-        if width <= left + right or height <= top + bottom:
-            raise CropExceedsDimensionsError(
-                crop_dimensions=f"{left + right}x{top + bottom}",
-                video_dimensions=f"{width}x{height}",
-            )
-
-    def _parse_to_tuple() -> tuple[int, ...]:
-        """Transforma el str validado a tuple con tipos."""
-        return tuple(map(int, crop.split(",")))
-
-    _validate_crop()
-
-    (left, right, top, bottom) = _parse_to_tuple()
-
-    if media.video is None or media.video.width is None or media.video.height is None:
-        raise MissingMediaPropertyError(property_name="Crop")
-
-    width, height = media.video.width, media.video.height
-
-    _validate_crop_dimensions()
-
-    return CropMargins(
-        width=width - left - right,
-        height=height - top - bottom,
-        x=left,
-        y=top,
-    )
-
-
-def process_output(command: CommandMode, media: Media, output: Path | None) -> Path:
-    """
-    Procesa la ruta del fichero de salida.
-
-    Args:
-        command: Comando que se va a ejecutar.
-        media: Metadatos del vídeo a procesar.
         output: Ruta del fichero de salida especificada por el usuario.
+        input_single: Ruta del fichero de entrada.
+        affix: Añade afijo en caso de no aportarse fichero de salida.
+        extension: Extensión por defecto del fichero de salida.
 
     Returns:
         Ruta absoluta del fichero de salida.
     """
     if output:
-        path = output
+        return output.absolute()
     else:
-        p = media.path
-        match command:
-            case CommandMode.GIF:
-                path = p.with_suffix(".gif")
-            case _:
-                raise MissingArgumentError(argument="command")
-
-    return path.absolute()
+        path = Path(Path.cwd() / input_single.name).absolute()
+        if affix is not None:
+            path = path.with_stem(f"{path.stem}{affix}")
+        if extension is not None:
+            path = path.with_suffix(extension)
+    return path
 
 
 def process_output_directory(directory: Path) -> Path:
-    """
-    Comprueba y crea la ruta del directorio de salida si no existiese.
+    """Comprueba y crea la ruta del directorio de salida si no existiese.
 
     Args:
         directory: Ruta del directorio de salida.
@@ -201,8 +137,7 @@ def process_scale(
     config: Config,
     logger: Logger,
 ) -> int | None:
-    """
-    Valida y procesa la opción de escalado.
+    """Valida y procesa la opción de escalado.
 
     Args:
         scale: Valor de las dimensiones de scale.
@@ -251,8 +186,7 @@ def process_time(
     time_str: str,
     media: Media,
 ) -> timedelta:
-    """
-    Valida y procesa la marca de tiempo.
+    """Valida y procesa la marca de tiempo.
 
     Args:
         time_str: Marca de tiempo en formato string.
@@ -298,51 +232,63 @@ def process_time(
     return time_delta
 
 
-def process_trim_points(
-    trim_points_str: str,
-    media: Media,
-) -> list[timedelta]:
-    """
-    Valida y procesa una lista de marcas de tiempo.
+def validate_animated_output(output: Path) -> None:
+    """Comprueba el fichero de salida tenga una extensión de animación válida.
 
     Args:
-        trim_points_str: Marcas de tiempo en formato string.
-        media: Metadatos del vídeo a procesar.
-
-    Returns:
-        Lista de marcas de tiempo en formato timedelta.
+        output: Ruta del fichero de salida.
 
     Raises:
-        InvalidTimeFormatError: Si el formato de alguna de las marcas no es válido.
-        MissingMediaPropertyError: Si no se pudo obtener la duración del vídeo.
-        TimeExceedsDurationError: Si alguna de las marcas de tiempo es superior
-                a la duración del vídeo
+        InvalidNameError: Si el nombre del fichero contiene caracteres no válidos.
+        InvalidOutputExtensionError: Si es una extensión inválida.
     """
 
-    trim_points_timedelta: list[timedelta] = []
+    process_output_directory(output.parent)
 
-    for tp in trim_points_str.split(","):
-        trim_points_timedelta.append(process_time(time_str=tp, media=media))
+    if not _is_valid_name(output.stem):
+        raise InvalidNameError(filename=output.stem)
 
-    trim_points_timedelta.sort()
+    if output.suffix not in ANIMATED_CONTAINERS:
+        raise InvalidOutputExtensionError(
+            extension=output.suffix,
+            supported=",".join(ANIMATED_CONTAINERS),
+        )
 
-    return trim_points_timedelta
+
+def validate_image_output(output: Path) -> None:
+    """Comprueba el fichero de salida tenga una extensión de imagen válida.
+
+    Args:
+        output: Ruta del fichero de salida.
+
+    Raises:
+        InvalidNameError: Si el nombre del fichero contiene caracteres no válidos.
+        InvalidOutputExtensionError: Si es una extensión inválida.
+    """
+
+    process_output_directory(output.parent)
+
+    if not _is_valid_name(output.stem):
+        raise InvalidNameError(filename=output.stem)
+
+    if output.suffix not in IMAGE_CONTAINERS:
+        raise InvalidOutputExtensionError(
+            extension=output.suffix,
+            supported=",".join(IMAGE_CONTAINERS),
+        )
 
 
-def validate_output(
+def validate_video_output(
     output: Path,
-    command: CommandMode,
     config: Config,
     media: Media,
     requires_audio_transcode: bool = False,
     requires_video_transcode: bool = False,
 ) -> None:
-    """
-    Comprueba el fichero de salida tenga un nombre y extensión válido.
+    """Comprueba el fichero de salida tenga un nombre y extensión válido.
 
     Args:
         output: Path absoluto del nombre de salida.
-        command: Commando ejecutado en la CLI.
         config: Parámetros de configuración de la aplicación.
         media: Lista de metadatos, obtenidos por ffprobe, de los vídeos a procesar.
         requires_audio_transcode: Si los vídeos va a tener el audio transcodificado.
@@ -394,12 +340,6 @@ def validate_output(
     # Comprobación del nombre de fichero
     if not _is_valid_name(output.stem):
         raise InvalidNameError(filename=output.stem)
-
-    # Comprobación de extensión en la generación de GIF
-    if command is CommandMode.GIF:
-        if output.suffix != ".gif":
-            raise InvalidOutputExtensionError(extension=output.suffix, supported=".gif")
-        return
 
     # Comprobación de que se usa una extensión de vídeo válida
     if output.suffix not in VIDEO_CONTAINERS:
