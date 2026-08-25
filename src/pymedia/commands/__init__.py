@@ -15,4 +15,5 @@ def register_all(app: typer.Typer) -> None:
         importlib.import_module(f"{package}.{module_name}")
 
     for command_cls in Command.__subclasses__():
-        command_cls.register(app)
+        if "cli" in command_cls.__dict__:
+            command_cls.register(app)

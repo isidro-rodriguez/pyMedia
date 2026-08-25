@@ -35,8 +35,7 @@ def gif_cmd(params: GifParameters) -> list[str]:
 
     cmd.extend(
         [
-            "-i",
-            str(params.input_single),
+            *params.to_input_single_cmd(),
             "-filter_complex",
             filters,
             "-progress",
