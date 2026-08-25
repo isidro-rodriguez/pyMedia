@@ -91,15 +91,6 @@ FpsGifOption = Annotated[
     ),
 ]
 
-ResizeChangeRatioOption = Annotated[
-    bool,
-    typer.Option(
-        "--change_ratio",
-        rich_help_panel="Command options",
-        help=locales.Cli["resize_change_ratio_help"],
-    ),
-]
-
 ResizeHeightOption = Annotated[
     int | None,
     typer.Option(

@@ -7,7 +7,7 @@ from pymedia.errors import (
 )
 from pymedia.ffmpeg.gif_cmd import gif_cmd
 from pymedia.models.enums import OverwriteMode
-from pymedia.models.gif_model import GifArguments, GifParameters
+from pymedia.models.pipeline.gif_pipeline import GifArguments, GifParameters
 from pymedia.typer_options import (
     DebugOption,
     FpsGifOption,
@@ -15,7 +15,6 @@ from pymedia.typer_options import (
     InputSingleArgument,
     OutputOption,
     OverwriteOption,
-    ResizeChangeRatioOption,
     ResizeHeightOption,
     ResizeUpscaleOption,
     ResizeWidthOption,
@@ -36,7 +35,6 @@ class GifCommand(Command[GifArguments, GifParameters]):
         resize_width: ResizeWidthOption = None,
         resize_height: ResizeHeightOption = None,
         resize_upscale: ResizeUpscaleOption = False,
-        resize_change_ratio: ResizeChangeRatioOption = False,
         timestamp_start: TimestampStartOption = None,
         timestamp_end: TimestampEndOption = None,
         debug: DebugOption = False,

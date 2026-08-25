@@ -1,5 +1,5 @@
 from pymedia.models.enums import OverwriteMode
-from pymedia.models.gif_model import GifParameters
+from pymedia.models.pipeline.gif_pipeline import GifParameters
 
 
 def gif_cmd(params: GifParameters) -> list[str]:

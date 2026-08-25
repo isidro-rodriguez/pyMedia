@@ -7,7 +7,6 @@ Cli = {
     "overwrite_confirm": "Output file already exists. Overwrite?",
     "overwrite_help": "Action to use if output file already exists.",
     "path_argument_help": "Video to process.",
-    "resize_change_ratio_help": "Allows changing the video's aspect ratio.",
     "resize_height_help": "Target height, in pixels, to resize the video.",
     "resize_upscale_help": "Allows upscaling beyond the source dimensions.",
     "resize_width_help": "Target width, in pixels, to resize the video.",
@@ -55,7 +54,7 @@ Info = {
 
 ParameterError = {
     "conflictive_output_parameters": "It is not allowed to specify an output path and an output directory.",
-    "conflictive_resize_parameters": "It is not allowed to specify a width and a height without change ratio.",
+    "conflictive_resize_dimensions_parameters": "It is not allowed to specify width and height together.",
     "missing_argument": "Missing argument: {argument}",
     "missing_media": "Missing media information: {path}",
     "missing_media_property": "Missing media property: {property_name}",
@@ -84,5 +83,5 @@ ValidationError = {
 Warnings = {
     "overwrite_skipped": "Command skipped since output file already exists.",
     "resize_rejected_equal": "Resize rejected cause {dimension} is equal.",
-    "upscale_rejected": "Resize rejected cause no_upscale is True and target {dimension} is greater than source {dimension}.",
+    "upscale_rejected": "Resize rejected cause no_upscale is True and target {target} is greater than source {source}.",
 }

@@ -25,7 +25,6 @@ class GifArguments:
         resize_width: Ancho objetivo para redimensionado.
         resize_height: Altura objetivo para redimensionado.
         resize_upscale: Permite el incremento de resolución.
-        resize_change_ratio: Permite la modificación de proporciones.
         timestamp_start: Marca temporal que indica el punto inicial.
         timestamp_end: Marca temporal que indica el punto final.
     """
@@ -37,7 +36,6 @@ class GifArguments:
     resize_width: int | None
     resize_height: int | None
     resize_upscale: bool
-    resize_change_ratio: bool
     timestamp_start: str | None
     timestamp_end: str | None
 
@@ -62,7 +60,6 @@ class GifParameters(
         resize_width: Ancho objetivo para redimensionado.
         resize_height: Altura objetivo para redimensionado.
         resize_upscale: Permite el incremento de resolución.
-        resize_change_ratio: Permite la modificación de las proporciones.
         timestamp_start: Marca temporal que indica el punto inicial.
         timestamp_end: Marca temporal que indica el punto final.
     """
@@ -87,7 +84,12 @@ class GifParameters(
             media_type=OutputMediaType.GIF, output=args.output, extension=".gif"
         )
         params.create_fps(fps=args.fps)
-        params.create_resize(logger=logger)
+        params.create_resize(
+            logger=logger,
+            width=args.resize_width,
+            height=args.resize_height,
+            upscale=args.resize_upscale,
+        )
         params.create_timestamp_start(start=args.timestamp_start)
         params.create_timestamp_end(end=args.timestamp_end)
         return params
