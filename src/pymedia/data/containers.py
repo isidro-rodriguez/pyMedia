@@ -1,4 +1,4 @@
-ANIMATED_CONTAINERS = [
+ANIMATION_CONTAINERS = [
     ".apng",
     ".avif",
     ".flif",

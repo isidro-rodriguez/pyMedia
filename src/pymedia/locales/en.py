@@ -1,19 +1,24 @@
 Cli = {
     "debug_help": "Log level DEBUG",
-    "end_point_help": "Time point at which GIF generation ends.",
-    "fps_help": "Frames per second of the animated GIF.",
+    "fps_gif_help": "Frames per second of the animated GIF.",
     "gif_help": "Generates an animated GIF from the specified video",
     "invalid_path": "{path} is not a file.",
     "output_help": "Output file name.",
     "overwrite_confirm": "Output file already exists. Overwrite?",
     "overwrite_help": "Action to use if output file already exists.",
     "path_argument_help": "Video to process.",
-    "scale_help": "Resize proportionally to the specified height.",
+    "resize_change_ratio_help": "Allows changing the video's aspect ratio.",
+    "resize_height_help": "Target height, in pixels, to resize the video.",
+    "resize_upscale_help": "Allows upscaling beyond the source dimensions.",
+    "resize_width_help": "Target width, in pixels, to resize the video.",
     "show_help": "Show this message and exit.",
-    "start_point_help": "Time point at which GIF generation starts.",
+    "timestamp_end_help": "Time point at which GIF generation ends.",
+    "timestamp_start_help": "Time point at which GIF generation starts.",
 }
 
 
+# La validación de `config.toml` devuelve todos los errores en un mensaje,
+# cada entrada se inicializa con un salto de línea para mayor claridad.
 ConfigValidation = {
     "invalid_audio_bit_rate": "\nInvalid configuration setting: encode.audio_bit_rate is expected one of: {expected}.",
     "invalid_audio_codec": "\nInvalid configuration setting: encode.audio_codec is expected one of: {expected}.",
@@ -49,9 +54,12 @@ Info = {
 
 
 ParameterError = {
+    "conflictive_output_parameters": "It is not allowed to specify an output path and an output directory.",
+    "conflictive_resize_parameters": "It is not allowed to specify a width and a height without change ratio.",
     "missing_argument": "Missing argument: {argument}",
     "missing_media": "Missing media information: {path}",
     "missing_media_property": "Missing media property: {property_name}",
+    "output_parameter": "It is not allowed to specify an output if it has been provided multiple video inputs.",
 }
 
 
@@ -67,7 +75,7 @@ ValidationError = {
     "invalid_directory_name": '{directory} contains invalid characters: < > : " / \\ | ? *',
     "invalid_extension": "Invalid extension {extension}. Codec {codec} requires one of: {supported}.",
     "invalid_filename": '{filename} contains invalid characters: < > : " / \\ | ? *',
-    "invalid_output_extension": "Invalid extension {extension}. Requires one of: {supported}.",
+    "invalid_container_type": "Invalid extension {extension}. {media_type} requires one of: {supported}.",
     "invalid_time_format": "Invalid timestamp format. Expected: hh:mm:ss.",
     "time_exceeds_duration": "Timestamp {time} exceeds video duration {duration}.",
 }
@@ -75,6 +83,6 @@ ValidationError = {
 
 Warnings = {
     "overwrite_skipped": "Command skipped since output file already exists.",
-    "scale_rejected_equal": "Scaling rejected: {scale} = original height {height}.",
-    "scale_rejected_increase": "Scaling to {scale}p not applied: resolution is higher than the original ({height}p).",
+    "resize_rejected_equal": "Resize rejected cause {dimension} is equal.",
+    "upscale_rejected": "Resize rejected cause no_upscale is True and target {dimension} is greater than source {dimension}.",
 }

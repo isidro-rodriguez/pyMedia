@@ -13,10 +13,10 @@ from pymedia.data.containers import (
 from pymedia.data.video_codecs import VIDEO_CODECS
 from pymedia.errors import (
     CannotCreateDirectoryError,
+    InvalidContainerTypeError,
     InvalidDirectoryError,
     InvalidFileExtensionError,
     InvalidNameError,
-    InvalidOutputExtensionError,
     InvalidTimeFormatError,
     MissingMediaError,
     MissingMediaPropertyError,
@@ -61,7 +61,7 @@ def load_media(
     def _validate_video_extension() -> None:
         """Valida que la lista de ficheros tengan extensiones de vídeos."""
         if path.suffix not in VIDEO_CONTAINERS:
-            raise InvalidOutputExtensionError(
+            raise InvalidContainerTypeError(
                 extension=path.suffix,
                 supported=", ".join(VIDEO_CONTAINERS),
             )
@@ -98,7 +98,7 @@ def process_output(
     Returns:
         Ruta absoluta del fichero de salida.
     """
-    if output:
+    if output is not None:
         return output.absolute()
     else:
         path = Path(Path.cwd() / input_single.name).absolute()
@@ -240,7 +240,7 @@ def validate_animated_output(output: Path) -> None:
 
     Raises:
         InvalidNameError: Si el nombre del fichero contiene caracteres no válidos.
-        InvalidOutputExtensionError: Si es una extensión inválida.
+        InvalidContainerTypeError: Si es una extensión inválida.
     """
 
     process_output_directory(output.parent)
@@ -249,7 +249,7 @@ def validate_animated_output(output: Path) -> None:
         raise InvalidNameError(filename=output.stem)
 
     if output.suffix not in ANIMATED_CONTAINERS:
-        raise InvalidOutputExtensionError(
+        raise InvalidContainerTypeError(
             extension=output.suffix,
             supported=",".join(ANIMATED_CONTAINERS),
         )
@@ -263,7 +263,7 @@ def validate_image_output(output: Path) -> None:
 
     Raises:
         InvalidNameError: Si el nombre del fichero contiene caracteres no válidos.
-        InvalidOutputExtensionError: Si es una extensión inválida.
+        InvalidContainerTypeError: Si es una extensión inválida.
     """
 
     process_output_directory(output.parent)
@@ -272,7 +272,7 @@ def validate_image_output(output: Path) -> None:
         raise InvalidNameError(filename=output.stem)
 
     if output.suffix not in IMAGE_CONTAINERS:
-        raise InvalidOutputExtensionError(
+        raise InvalidContainerTypeError(
             extension=output.suffix,
             supported=",".join(IMAGE_CONTAINERS),
         )
@@ -343,7 +343,7 @@ def validate_video_output(
 
     # Comprobación de que se usa una extensión de vídeo válida
     if output.suffix not in VIDEO_CONTAINERS:
-        raise InvalidOutputExtensionError(
+        raise InvalidContainerTypeError(
             extension=output.suffix,
             supported=",".join(VIDEO_CONTAINERS),
         )

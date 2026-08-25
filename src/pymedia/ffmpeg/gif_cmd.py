@@ -1,11 +1,9 @@
 from pymedia.models.enums import OverwriteMode
 from pymedia.models.gif_model import GifParameters
-from pymedia.services.ffmpeg_service import scale_to_cmd
 
 
 def gif_cmd(params: GifParameters) -> list[str]:
-    """
-    Composición de cmd ffmpeg para generar un gif.
+    """Composición de llamada ffmpeg para generar un Gif.
 
     Args:
         params: Parámetros validados y parseados obtenidos de los argumentos de CLI.
@@ -16,11 +14,11 @@ def gif_cmd(params: GifParameters) -> list[str]:
 
     filters: str = ""
 
-    if params.scale:
-        filters += scale_to_cmd(scale=params.scale) + ","
+    if params.resize_width or params.resize_height:
+        filters += params.to_resize_cmd() + ","
 
     filters += (
-        f"fps={params.fps},split[a][b];[a]palettegen[p];"
+        f"{params.to_fps_cmd()},split[a][b];[a]palettegen[p];"
         f"[b][p]paletteuse=dither=floyd_steinberg"
     )
 
@@ -30,10 +28,10 @@ def gif_cmd(params: GifParameters) -> list[str]:
         cmd.extend(["-y"])
 
     if params.timestamp_start:
-        cmd.extend(["-ss", str(params.timestamp_start)])
+        cmd.extend(params.to_timestamp_start_cmd())
 
     if params.timestamp_end:
-        cmd.extend(["-to", str(params.timestamp_end)])
+        cmd.extend(params.to_timestamp_end_cmd())
 
     cmd.extend(
         [

@@ -1,20 +1,31 @@
 from pymedia import locales
 from pymedia.commands.command import Command
-from pymedia.errors import CommandGenerationError
+from pymedia.errors import (
+    CommandGenerationError,
+    MissingMediaError,
+    MissingParameterError,
+)
 from pymedia.ffmpeg.gif_cmd import gif_cmd
 from pymedia.models.enums import OverwriteMode
 from pymedia.models.gif_model import GifArguments, GifParameters
 from pymedia.typer_options import (
     DebugOption,
-    EndOption,
-    FpsOption,
+    FpsGifOption,
     HelpOption,
     InputSingleArgument,
     OutputOption,
     OverwriteOption,
-    ScaleGifOption,
-    StartOption,
+    ResizeChangeRatioOption,
+    ResizeHeightOption,
+    ResizeUpscaleOption,
+    ResizeWidthOption,
+    TimestampEndOption,
+    TimestampStartOption,
 )
+
+
+class ResizeHeigthOption:
+    pass
 
 
 class GifCommand(Command[GifArguments, GifParameters]):
@@ -25,10 +36,13 @@ class GifCommand(Command[GifArguments, GifParameters]):
         input_single: InputSingleArgument,
         output: OutputOption = None,
         overwrite: OverwriteOption = OverwriteMode.ASK,
-        fps: FpsOption = 15,
-        scale: ScaleGifOption = 480,
-        timestamp_start: StartOption = None,
-        timestamp_end: EndOption = None,
+        fps: FpsGifOption = 15,
+        resize_width: ResizeWidthOption = None,
+        resize_height: ResizeHeightOption = None,
+        resize_upscale: ResizeUpscaleOption = False,
+        resize_change_ratio: ResizeChangeRatioOption = False,
+        timestamp_start: TimestampStartOption = None,
+        timestamp_end: TimestampEndOption = None,
         debug: DebugOption = False,
         help_: HelpOption = False,
     ) -> None:
@@ -41,9 +55,13 @@ class GifCommand(Command[GifArguments, GifParameters]):
         )
 
     def process_parameters(self) -> None:
-        self.params = GifParameters.create(args=self.args, config=self.config)
+        self.params = GifParameters.create(args=self.args, logger=self.logger)
 
     def process_cmd(self) -> None:
+        if self.params.input_single is None:
+            raise MissingParameterError(parameter="input_single")
+        if self.params.media is None:
+            raise MissingMediaError(path=str(self.params.input_single))
         cmd = gif_cmd(params=self.params)
         if cmd is None:
             raise CommandGenerationError(command_name=self.name)

@@ -34,3 +34,14 @@ class OverwriteMode(Enum):
     YES = "yes"
     NO = "no"
     ASK = "ask"
+
+
+class OutputMediaType(Enum):
+    """Tipos de ficheros multimedia de salida."""
+
+    ANIMATION = "animation"
+    AUDIO = "audio"
+    GIF = "gif"
+    IMAGE = "image"
+    SUBTITLE = "subtitle"
+    VIDEO = "video"

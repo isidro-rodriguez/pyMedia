@@ -80,47 +80,71 @@ OverwriteOption = Annotated[
 # -----------------------------------------------------------------------------
 
 
-EndOption = Annotated[
-    str | None,
-    typer.Option(
-        "--end",
-        metavar="hh:mm:ss",
-        rich_help_panel="Command options",
-        help=locales.Cli["end_point_help"],
-    ),
-]
-
-
-FpsOption = Annotated[
+FpsGifOption = Annotated[
     int,
     typer.Option(
         "--fps",
         min=4,
         max=20,
         rich_help_panel="Command options",
-        help=locales.Cli["fps_help"],
+        help=locales.Cli["fps_gif_help"],
     ),
 ]
 
-
-ScaleGifOption = Annotated[
-    int,
+ResizeChangeRatioOption = Annotated[
+    bool,
     typer.Option(
-        "--scale",
-        min=240,
-        max=720,
+        "--change_ratio",
         rich_help_panel="Command options",
-        help=locales.Cli["scale_help"],
+        help=locales.Cli["resize_change_ratio_help"],
+    ),
+]
+
+ResizeHeightOption = Annotated[
+    int | None,
+    typer.Option(
+        "--height",
+        rich_help_panel="Command options",
+        help=locales.Cli["resize_height_help"],
     ),
 ]
 
 
-StartOption = Annotated[
+ResizeWidthOption = Annotated[
+    int | None,
+    typer.Option(
+        "--width",
+        rich_help_panel="Command options",
+        help=locales.Cli["resize_width_help"],
+    ),
+]
+
+ResizeUpscaleOption = Annotated[
+    bool,
+    typer.Option(
+        "--upscale",
+        rich_help_panel="Command options",
+        help=locales.Cli["resize_upscale_help"],
+    ),
+]
+
+
+TimestampEndOption = Annotated[
+    str | None,
+    typer.Option(
+        "--end",
+        metavar="hh:mm:ss",
+        rich_help_panel="Command options",
+        help=locales.Cli["timestamp_end_help"],
+    ),
+]
+
+TimestampStartOption = Annotated[
     str | None,
     typer.Option(
         "--start",
         metavar="hh:mm:ss",
         rich_help_panel="Command options",
-        help=locales.Cli["start_point_help"],
+        help=locales.Cli["timestamp_start_help"],
     ),
 ]
