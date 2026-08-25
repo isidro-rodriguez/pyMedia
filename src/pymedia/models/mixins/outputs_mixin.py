@@ -143,7 +143,7 @@ class OutputBatchMixin(_HasBatchMedia):
             self.output = _process_output(
                 input_single=self.input_list[0],
                 media_type=media_type,
-                media=self.media,
+                media=self.media_list[0],
                 affix=affix,
                 extension=extension,
                 output=output,
@@ -199,7 +199,7 @@ def _validate_output(output: Path, media: Media, media_type: OutputMediaType) ->
             if output.suffix not in AUDIO_CONTAINERS:
                 raise InvalidContainerTypeError(
                     extension=output.suffix,
-                    media_type=OutputMediaType.ANIMATION.value,
+                    media_type=OutputMediaType.AUDIO.value,
                     supported=",".join(AUDIO_CONTAINERS),
                 )
             if output.suffix not in AUDIO_CODECS[media.audio.codec].containers:
@@ -212,14 +212,14 @@ def _validate_output(output: Path, media: Media, media_type: OutputMediaType) ->
             if output.suffix not in IMAGE_CONTAINERS:
                 raise InvalidContainerTypeError(
                     extension=output.suffix,
-                    media_type=OutputMediaType.ANIMATION.value,
+                    media_type=OutputMediaType.IMAGE.value,
                     supported=",".join(IMAGE_CONTAINERS),
                 )
         case OutputMediaType.SUBTITLE:
             if output.suffix not in SUBTITLE_CONTAINERS:
                 raise InvalidContainerTypeError(
                     extension=output.suffix,
-                    media_type=OutputMediaType.ANIMATION.value,
+                    media_type=OutputMediaType.SUBTITLE.value,
                     supported=",".join(SUBTITLE_CONTAINERS),
                 )
         case OutputMediaType.VIDEO:
@@ -230,7 +230,7 @@ def _validate_output(output: Path, media: Media, media_type: OutputMediaType) ->
             if output.suffix not in VIDEO_CONTAINERS:
                 raise InvalidContainerTypeError(
                     extension=output.suffix,
-                    media_type=OutputMediaType.ANIMATION.value,
+                    media_type=OutputMediaType.VIDEO.value,
                     supported=",".join(VIDEO_CONTAINERS),
                 )
             if output.suffix not in VIDEO_CODECS[media.video.codec].containers:

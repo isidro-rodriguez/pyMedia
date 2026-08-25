@@ -58,6 +58,7 @@ ParameterError = {
     "missing_argument": "Missing argument: {argument}",
     "missing_media": "Missing media information: {path}",
     "missing_media_property": "Missing media property: {property_name}",
+    "missing_parameter": "Missing parameter: {parameter}",
     "output_parameter": "It is not allowed to specify an output if it has been provided multiple video inputs.",
 }
 

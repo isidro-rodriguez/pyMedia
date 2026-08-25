@@ -46,6 +46,11 @@ VIDEO_CODECS = {
         library="dvvideo",
         containers=(".mkv", ".mov", ".mxf"),
     ),
+    "ffv1": VideoCodecData(
+        name="ffv1",
+        library="ffv1",
+        containers=(".avi", ".mkv", ".mov"),
+    ),
     "flv1": VideoCodecData(
         name="flv1",
         library="flv",
@@ -119,6 +124,21 @@ VIDEO_CODECS = {
             "placebo",
         ),
     ),
+    "huffyuv": VideoCodecData(
+        name="huffyuv",
+        library="huffyuv",
+        containers=(".avi", ".mkv", ".mov"),
+    ),
+    "jpeg2000": VideoCodecData(
+        name="jpeg2000",
+        library="jpeg2000",
+        containers=(".avi", ".mkv", ".mov", ".mp4"),
+    ),
+    "mjpeg": VideoCodecData(
+        name="mjpeg",
+        library="mjpeg",
+        containers=(".avi", ".mkv", ".mov", ".mp4", ".ts"),
+    ),
     "mpeg1video": VideoCodecData(
         name="mpeg1video",
         library="mpeg1video",
@@ -170,10 +190,40 @@ VIDEO_CODECS = {
         library="rawvideo",
         containers=(".mkv", ".mov", ".mp4"),
     ),
+    "rv40": VideoCodecData(
+        name="rv40",
+        library="rv40",
+        containers=(".mkv", ".rm", ".rmvb"),
+    ),
+    "snow": VideoCodecData(
+        name="snow",
+        library="snow",
+        containers=(".mkv",),
+    ),
+    "svq3": VideoCodecData(
+        name="svq3",
+        library="svq3",
+        containers=(".mkv", ".mov"),
+    ),
     "theora": VideoCodecData(
         name="theora",
         library="libtheora",
         containers=(".mkv", ".ogg", ".ogv"),
+    ),
+    "utvideo": VideoCodecData(
+        name="utvideo",
+        library="utvideo",
+        containers=(".avi", ".mkv"),
+    ),
+    "vc1": VideoCodecData(
+        name="vc1",
+        library="vc1",
+        containers=(".asf", ".avi", ".m2ts", ".mkv", ".mov", ".mp4", ".ts", ".wmv"),
+    ),
+    "vp6": VideoCodecData(
+        name="vp6",
+        library="vp6",
+        containers=(".f4v", ".flv", ".mkv"),
     ),
     "vp8": VideoCodecData(
         name="vp8",

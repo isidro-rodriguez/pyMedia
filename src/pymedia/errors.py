@@ -106,13 +106,6 @@ class ConflictiveResizeDimensionsParametersError(ParameterError):
     message_key = "conflictive_resize_dimensions_parameters"
 
 
-class IncompleteParametersError(ParameterError):
-    message_key = "incomplete_parameters"
-
-    def __init__(self, fields: str) -> None:
-        super().__init__(fields=fields)
-
-
 class MissingArgumentError(ParameterError):
     message_key = "missing_argument"
 
