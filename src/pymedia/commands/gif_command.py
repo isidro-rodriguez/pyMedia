@@ -24,10 +24,6 @@ from pymedia.typer_options import (
 )
 
 
-class ResizeHeigthOption:
-    pass
-
-
 class GifCommand(Command[GifArguments, GifParameters]):
     name = "gif"
 

@@ -4,6 +4,7 @@ from typing import Self
 
 import platformdirs
 from rich.logging import RichHandler
+from rich.pretty import pretty_repr
 
 from pymedia import locales
 
@@ -69,20 +70,20 @@ class Logger:
         return cls.load()
 
     @classmethod
-    def load(cls, name: str = "") -> Self:
+    def load(cls, debug: bool = False) -> Self:
         """
         Devuelve un Logger con prefijo 'pymedia.*'.
 
         Args:
-            name: Nombre del logger.
+            debug: Activar nivel de log DEBUG.
 
         Returns:
             Logger con prefijo 'pymedia.*'.
         """
 
         if not cls._configured:
-            cls.create()
-        return cls(logging.getLogger(f"pymedia.{name}" if name else "pymedia"))
+            cls.create(debug=debug)
+        return cls(logging.getLogger(__name__))
 
     def critical(self, message: str, exc_info: bool = False) -> None:
         """Muestra log de nivel crítico."""
@@ -102,4 +103,12 @@ class Logger:
 
     def debug(self, key: str, **kwargs) -> None:
         """Muestra log de nivel depuración."""
+
+        def _prettify(value: object) -> object:
+            """Convierte dicts/lists/tuples/sets en texto multilínea legible."""
+            if isinstance(value, (dict, list, tuple, set)):
+                return pretty_repr(value, indent_size=2, expand_all=True)
+            return value
+
+        kwargs = {name: _prettify(value) for name, value in kwargs.items()}
         self._logger.debug(locales.Debug[key].format(**kwargs))

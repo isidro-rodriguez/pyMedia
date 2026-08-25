@@ -109,8 +109,7 @@ class Command[ArgsT, ParamsT](ABC):
         """
 
         config = Config.load()
-        cls.logger = Logger.create(debug=debug)
-        cls.logger.load(__name__)
+        cls.logger = Logger.load(debug=debug)
         instance = cls(args, config)
         instance.process_parameters()
         # TODO: implementar bucle para batch (tendrán input_list en vez de input_single)

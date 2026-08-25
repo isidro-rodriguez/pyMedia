@@ -82,7 +82,7 @@ class GifParameters(
         """
 
         params = cls(overwrite=args.overwrite)
-        params.create_input_single(input_single=args.input_single)
+        params.create_input_single(input_single=args.input_single, logger=logger)
         params.create_output_single(
             media_type=OutputMediaType.GIF, output=args.output, extension=".gif"
         )

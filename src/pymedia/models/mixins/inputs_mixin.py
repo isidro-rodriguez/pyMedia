@@ -9,6 +9,7 @@ from pymedia.errors import (
     MissingMediaError,
     MissingParameterError,
 )
+from pymedia.logger import Logger
 from pymedia.models.media import Media
 
 
@@ -27,18 +28,31 @@ class InputSingleMixin:
     input_single: Path | None = None
     media: Media | None = None
 
-    def create_input_single(self, input_single: Path) -> None:
+    def create_input_single(self, input_single: Path, logger: Logger) -> None:
         """Crea los atributos input_single y media.
 
         Attributes
             input_single: Ruta del vídeo a procesar.
+            logger: Sistema de registro de mensajes.
+
+        Raises:
+            MissingMediaError: Si metadatos no obtenidos.
+            MissingParameterError: Si ruta del fichero no obtenido.
+            InvalidContainerTypeError: Si container no válido.
         """
         input_single = input_single.absolute()
         self.input_single = input_single
-        self.media = _load_media(input_single)
+        self.media = _load_media(path=input_single, logger=logger)
 
     def to_input_single_cmd(self) -> list[str]:
-        """Devuelve lista de str lista para consumo ffmpeg."""
+        """Devuelve lista de str lista para consumo ffmpeg.
+
+        Returns:
+            Lista de str lista para consumo ffmpeg.
+
+        Raises:
+            MissingParameterError: Si parámetro "input_single" no obtenido.
+        """
         if self.input_single is None:
             raise MissingParameterError(parameter="input_single")
         return ["-i", str(self.input_single)]
@@ -59,8 +73,18 @@ class InputListMixin:
     input_list: list[Path] | None = None
     media_list: list[Media] | None = None
 
-    def create_input_list(self, input_list: list[Path]) -> None:
-        """Crea los atributos input_list y media_list."""
+    def create_input_list(self, input_list: list[Path], logger: Logger) -> None:
+        """Crea los atributos input_list y media_list.
+
+        Attributes
+            input_single: Ruta del vídeo a procesar.
+            logger: Sistema de registro de mensajes.
+
+        Raises:
+            MissingMediaError: Si metadatos no obtenidos.
+            MissingParameterError: Si ruta del fichero no obtenido.
+            InvalidContainerTypeError: Si container no válido.
+        """
         if self.input_list is None:
             raise MissingParameterError(parameter="input_list")
         if self.media_list is None:
@@ -68,10 +92,17 @@ class InputListMixin:
         for input_single in input_list:
             input_single = input_single.absolute()
             self.input_list.append(input_single)
-            self.media_list.append(_load_media(input_single))
+            self.media_list.append(_load_media(path=input_single, logger=logger))
 
     def to_input_list_cmd(self) -> list[str]:
-        """Devuelve lista de str lista para consumo ffmpeg."""
+        """Devuelve lista de str lista para consumo ffmpeg.
+
+        Returns:
+            Lista de inputs lista para consumo ffmpeg.
+
+        Raises:
+            MissingParameterError: Si parámetro "input_list" no obtenido.
+        """
         if self.input_list is None:
             raise MissingParameterError(parameter="input_list")
         cmd_list: list[str] = []
@@ -81,9 +112,7 @@ class InputListMixin:
         return cmd_list
 
 
-def _load_media(
-    path: Path,
-) -> Media:
+def _load_media(path: Path, logger: Logger) -> Media:
     """Carga la lista de metadatos de los vídeos a procesar"""
 
     def _validate_video_extension() -> None:
@@ -98,7 +127,7 @@ def _load_media(
     _validate_video_extension()
 
     try:
-        media: Media = Media.load(path)
+        media: Media = Media.load(path=path, logger=logger)
     except (
         ValueError,
         subprocess.CalledProcessError,

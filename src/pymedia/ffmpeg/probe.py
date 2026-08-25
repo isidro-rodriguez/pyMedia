@@ -4,15 +4,14 @@ from pathlib import Path
 
 from pymedia.logger import Logger
 
-logger = Logger.load("probe")
 
-
-def probe(path: Path) -> dict:
+def probe(path: Path, logger: Logger) -> dict:
     """
     Obtiene metadatos del vídeo a procesar.
 
     Args:
         path: Ruta del fichero del que se va a sacar metadatos.
+        logger: Servicio de registro de mensajes.
 
     Returns:
         Metadatos del vídeo a procesar o errores si no es un vídeo válido.

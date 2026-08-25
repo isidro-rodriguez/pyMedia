@@ -4,7 +4,8 @@ from datetime import timedelta
 from fractions import Fraction
 from pathlib import Path
 
-from pymedia.ffmpeg.probe import probe as ffprobe
+from pymedia.ffmpeg.probe import probe
+from pymedia.logger import Logger
 from pymedia.utils import parse_fraction, to_float, to_int
 
 
@@ -38,9 +39,9 @@ class Media:
     audio: Audio | None = None
 
     @classmethod
-    def load(cls, path: Path) -> "Media":
+    def load(cls, path: Path, logger: Logger) -> "Media":
         """Mapea el JSON de ffprobe a MediaInput."""
-        data = ffprobe(path)
+        data = probe(path=path, logger=logger)
 
         video = None
         audio = None
