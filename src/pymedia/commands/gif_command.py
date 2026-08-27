@@ -1,5 +1,5 @@
 from pymedia import locales
-from pymedia.commands.command import Command
+from pymedia.commands.base_command import BaseCommand, SingleCommand
 from pymedia.errors import (
     CommandGenerationError,
     MissingMediaError,
@@ -23,7 +23,7 @@ from pymedia.typer_options import (
 )
 
 
-class GifCommand(Command[GifArguments, GifParameters]):
+class GifCommand(SingleCommand[GifArguments, GifParameters]):
     name = "gif"
 
     @staticmethod
@@ -41,7 +41,7 @@ class GifCommand(Command[GifArguments, GifParameters]):
         help_: HelpOption = False,
     ) -> None:
         GifCommand.run(
-            args=Command.build_args(
+            args=BaseCommand.build_args(
                 args_cls=GifArguments,
                 local_vars=locals(),
             ),

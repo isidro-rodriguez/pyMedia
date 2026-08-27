@@ -1,7 +1,9 @@
+import logging
+
 from pymedia import locales
 from pymedia.logger import Logger
 
-logger = Logger.load(__name__)
+logger = Logger(logging.getLogger("pymedia.logger"))
 
 
 class PyMediaError(Exception):

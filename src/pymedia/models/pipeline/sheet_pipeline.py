@@ -13,14 +13,14 @@ class SheetArguments:
     """Argumentos cargados por Typer para el comando Sheet.
 
     Attributes:
-        input_single: Ruta del vídeo a procesar.
+        input_list: Lista de rutas de los vídeos a procesar.
         output: Ruta del fichero de salida. [defecto: INPUT_SINGLE_sheet.jpg]
         output_directory: Directorio de salida para lotes de varios ficheros.
         overwrite: Indica actuación ante fichero de salida ya existente. [defecto: ask]
         preset_sheet: Indica el estilo de hoja preajustado. [default: HD]
     """
 
-    input_single: Path
+    input_list: list[Path]
     output: Path | None
     output_directory: Path | None
     overwrite: OverwriteMode

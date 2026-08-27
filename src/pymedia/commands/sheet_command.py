@@ -1,7 +1,7 @@
 from pathlib import Path
 
 from pymedia import locales
-from pymedia.commands.command import Command
+from pymedia.commands.base_command import BaseCommand, BatchCommand
 from pymedia.errors import (
     CommandGenerationError,
     MissingMediaError,
@@ -14,44 +14,46 @@ from pymedia.typer_options import (
     DebugOption,
     HelpOption,
     InputListArgument,
+    OutputDirectoryOption,
     OutputOption,
     OverwriteOption,
     PresetSheetOption,
 )
 
 
-class SheetCommand(Command[SheetArguments, SheetParameters]):
+class SheetCommand(BatchCommand[SheetArguments, SheetParameters]):
     name = "sheet"
 
     @staticmethod
     def cli(
         input_list: InputListArgument,
         output: OutputOption = None,
+        output_directory: OutputDirectoryOption = None,
         overwrite: OverwriteOption = OverwriteMode.ASK,
-        preset: PresetSheetOption = PresetsSheetMode.HD,
+        preset_sheet: PresetSheetOption = PresetsSheetMode.HD,
         debug: DebugOption = False,
         help_: HelpOption = False,
     ) -> None:
         SheetCommand.run(
-            args=Command.build_args(
+            args=BaseCommand.build_args(
                 args_cls=SheetArguments,
                 local_vars=locals(),
             ),
             debug=debug,
         )
 
-    def process_parameters(self, args: SheetArguments, input_single: Path) -> None:
-        self.params = SheetParameters.create(
-            args=args, input_single=input_single, logger=self.logger
+    def process_parameters(self, input_single: Path) -> SheetParameters:
+        return SheetParameters.create(
+            args=self.args, logger=self.logger, input_single=input_single
         )
 
-    def process_cmd(self) -> None:
-        if self.params.input_single is None:
+    def process_cmd(self, params: SheetParameters) -> None:
+        if params.input_single is None:
             raise MissingParameterError(name="input_single")
-        if self.params.media is None:
-            raise MissingMediaError(path=str(self.params.input_single))
+        if params.media is None:
+            raise MissingMediaError(path=str(params.input_single))
 
-        snapshots_cmd, header_cmd = sheet_cmd(params=self.params)
+        snapshots_cmd, header_cmd = sheet_cmd(params=params)
 
         if snapshots_cmd is None:
             raise CommandGenerationError(command_name="generate_sheet_cmd")
@@ -63,16 +65,16 @@ class SheetCommand(Command[SheetArguments, SheetParameters]):
 
         self.run_ffmpeg(
             cmd=snapshots_cmd,
-            media=self.params.media,
+            media=params.media,
             description=locales.Progress["sheet_snapshots"],
             stall_timeout=self.config.app.stall_timeout,
         )
 
         self.run_ffmpeg(
             cmd=header_cmd,
-            media=self.params.media,
+            media=params.media,
             description=locales.Progress["sheet_header"],
             stall_timeout=self.config.app.stall_timeout,
         )
 
-        self.logger.info(key="sheet_success", output=self.params.output)
+        self.logger.info(key="sheet_success", output=params.output)

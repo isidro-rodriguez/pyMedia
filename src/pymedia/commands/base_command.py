@@ -20,7 +20,7 @@ ArgsT = TypeVar("ArgsT")
 ParamsT = TypeVar("ParamsT")
 
 
-class Command[ArgsT, ParamsT](ABC):
+class BaseCommand[ArgsT, ParamsT](ABC):
     """Clase abstracta que define la base de los comandos del programa.
 
     Attributes:
@@ -60,18 +60,6 @@ class Command[ArgsT, ParamsT](ABC):
         """
         pass
 
-    @abstractmethod
-    def process_parameters(
-        self, args: ArgsT | None = None, input_single: Path | None = None
-    ) -> None:
-        """Validación y parseo de argumentos (input_single) a atributos de comando."""
-        pass
-
-    @abstractmethod
-    def process_cmd(self) -> None:
-        """Preparación y obtención del cmd de ffmpeg."""
-        pass
-
     @classmethod
     def build_args(cls, args_cls, local_vars: dict) -> ArgsT:
         """Recoge todos los argumentos de la lista de parámetros.
@@ -98,52 +86,26 @@ class Command[ArgsT, ParamsT](ABC):
         """
         app.command(name=cls.name, help=locales.Cli[f"{cls.name}_help"])(cls.cli)
 
-    @classmethod
-    def run(cls, args: ArgsT, debug: bool) -> None:
-        """Carga la config, instancia el comando y ejecuta el flujo de comando.
-
-        Orquesta el ciclo completo: carga de configuración, inicialización
-        del logger, instanciación y llamada secuencial a
-        `process_attributes()`, `process_cmd()` y `execute_cmd()`.
-
-        Args:
-            args: Argumentos ya tipados específicos del comando.
-            debug: Si `True`, habilita el nivel de log de depuración.
-        """
-
-        config = Config.load()
-        cls.logger = Logger.load(debug=debug)
-        instance = cls(args, config)
-        if args.input_list is not None and len(args.input_list) > 1:
-            for i, input_single in enumerate(args.input_list):
-                instance.process_parameters(
-                    args=args.input_list[i], input_single=input_single
-                )
-        instance.process_parameters()
-        if not instance.resolve_overwrite():
-            cls.logger.warning(key="overwrite_skipped")
-            return
-        instance.process_cmd()
-
-    def resolve_overwrite(self) -> bool:
+    @staticmethod
+    def resolve_overwrite(params: ParamsT) -> bool:
         """Comprueba si el fichero de salida existe y resuelve la sobrescritura.
 
         Returns:
             `True`: El proceso continuar con normalidad.
             `False`: El proceso termina.
         """
-        if self.params.overwrite != OverwriteMode.ASK:
+        if params.overwrite != OverwriteMode.ASK:
             return True
-        if not self.params.output.exists():
+        if not params.output.exists():
             return True
 
         overwrite = typer.confirm(
-            locales.Cli["overwrite_confirm"].format(file_path=self.params.output)
+            locales.Cli["overwrite_confirm"].format(file_path=params.output)
         )
         if not overwrite:
             return False
 
-        self.params.overwrite = OverwriteMode.YES
+        params.overwrite = OverwriteMode.YES
         return True
 
     @staticmethod
@@ -233,3 +195,88 @@ class Command[ArgsT, ParamsT](ABC):
             raise CommandExecutionError(
                 command_name=description, error="".join(stderr_lines)
             )
+
+
+class SingleCommand(BaseCommand[ArgsT, ParamsT], ABC):
+    """Clase abstracta para comandos que procesan ficheros individualmente.
+
+    Attributes:
+        params: Parámetros para la generación del comando.
+    """
+
+    @abstractmethod
+    def process_parameters(self) -> None:
+        """Validación y parseo de argumentos (input_single) a atributos de comando."""
+        pass
+
+    @abstractmethod
+    def process_cmd(self) -> None:
+        """Preparación y obtención del cmd de ffmpeg."""
+        pass
+
+    @classmethod
+    def run(cls, args: ArgsT, debug: bool) -> None:
+        """Carga la config, instancia el comando y ejecuta el flujo de comando.
+
+        Orquesta el ciclo completo: carga de configuración, inicialización
+        del logger, instanciación y llamada secuencial a
+        `process_attributes()`, `process_cmd()` y `execute_cmd()`.
+
+        Args:
+            args: Argumentos ya tipados específicos del comando.
+            debug: Si `True`, habilita el nivel de log de depuración.
+        """
+
+        config = Config.load()
+        cls.logger = Logger.load(debug=debug)
+        instance = cls(args, config)
+        instance.process_parameters()
+        if not instance.resolve_overwrite(params=instance.params):
+            cls.logger.warning(key="overwrite_skipped")
+            return
+        instance.process_cmd()
+
+
+class BatchCommand(BaseCommand[ArgsT, list[ParamsT]], ABC):
+    """Clase abstracta para comandos con interés para procesamiento en masa.
+
+    Attributes:
+        params: Lista de parámetros para la generación del comando.
+    """
+
+    params: list[ParamsT]
+
+    @abstractmethod
+    def process_parameters(self, input_single: Path) -> ParamsT:
+        """Validación y parseo de argumentos (input_single) a atributos de comando."""
+        pass
+
+    @abstractmethod
+    def process_cmd(self, params: ParamsT) -> None:
+        """Preparación y obtención del cmd de ffmpeg."""
+        pass
+
+    @classmethod
+    def run(cls, args: ArgsT, debug: bool) -> None:
+        """Flujo para comandos que procesan varios ficheros.
+
+        Orquesta el ciclo completo: carga de configuración, inicialización
+        del logger, instanciación y llamada secuencial a
+        `process_attributes()`, `process_cmd()` y `execute_cmd()`.
+
+        Args:
+            args: Argumentos ya tipados específicos del comando.
+            debug: Si `True`, habilita el nivel de log de depuración.
+        """
+        config = Config.load()
+        cls.logger = Logger.load(debug=debug)
+        instance = cls(args, config)
+        instance.params = []
+        for input_single in args.input_list:
+            params_single = instance.process_parameters(input_single=input_single)
+            instance.params.append(params_single)
+        for params_single in instance.params:
+            if not instance.resolve_overwrite(params=params_single):
+                cls.logger.warning(key="overwrite_skipped")
+                continue
+            instance.process_cmd(params=params_single)

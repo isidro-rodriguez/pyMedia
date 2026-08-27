@@ -2,8 +2,6 @@ import json
 import subprocess
 from pathlib import Path
 
-from rich.json import JSON
-
 from pymedia.logger import Logger
 
 
@@ -32,6 +30,6 @@ def probe(path: Path, logger: Logger) -> dict:
 
     result = subprocess.run(args=cmd, capture_output=True, text=True, check=True)
     data = json.loads(result.stdout)
-    logger.debug(key="ffprobe_data", data=JSON(data))
+    logger.debug(key="ffprobe_data", data=data)
 
     return data

@@ -18,7 +18,7 @@ class GifArguments:
     """Argumentos cargados por Typer para el comando GIF.
 
     Attributes:
-        input_list: Lista de rutas de los vídeos a procesar.
+        input_single: Ruta al fichero a procesar.
         output: Ruta del fichero de salida. [defecto: INPUT_SINGLE.gif]
         overwrite: Indica actuación ante fichero de salida ya existente. [defecto: ask]
         fps: Número de imágenes por segundos. [defecto: 15]
@@ -29,7 +29,7 @@ class GifArguments:
         timestamp_end: Marca temporal que indica el punto final.
     """
 
-    input_list: list[Path]
+    input_single: Path
     output: Path | None
     overwrite: OverwriteMode
     fps: int

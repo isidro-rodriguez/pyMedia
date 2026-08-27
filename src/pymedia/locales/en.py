@@ -3,6 +3,7 @@ Cli = {
     "fps_gif_help": "Frames per second of the animated GIF.",
     "gif_help": "Generates an animated GIF from the specified video",
     "invalid_path": "{path} is not a file.",
+    "output_directory_help": "Output directory for multiple output files.",
     "output_help": "Output file name.",
     "overwrite_confirm": "Output file already exists. Overwrite?",
     "overwrite_help": "Action to use if output file already exists.",
@@ -88,7 +89,7 @@ ValidationError = {
 
 
 Warnings = {
-    "overwrite_skipped": "Command skipped since output file already exists.",
+    "overwrite_skipped": "BaseCommand skipped since output file already exists.",
     "resize_rejected_equal": "Resize rejected cause {dimension} is equal.",
     "upscale_rejected": "Resize rejected cause no_upscale is True and target {target} is greater than source {source}.",
 }
