@@ -1,14 +1,17 @@
-ANIMATION_CONTAINERS = [
+"""Listas globales de extensiones de contenedor soportadas por la aplicación."""
+
+ANIMATED_IMAGE_CONTAINERS: tuple[str, ...] = (
     ".apng",
     ".avif",
     ".flif",
     ".gif",
     ".mng",
     ".webp",
-]
+)
+"""tuple[str, ...]: Extensiones de contenedores para imágenes animadas."""
 
 
-AUDIO_CONTAINERS = [
+AUDIO_CONTAINERS: tuple[str, ...] = (
     ".aac",
     ".ac3",
     ".aif",
@@ -37,10 +40,11 @@ AUDIO_CONTAINERS = [
     ".wav",
     ".wma",
     ".wv",
-]
+)
+"""tuple[str, ...]: Extensiones de contenedores para archivos de audio."""
 
 
-IMAGE_CONTAINERS = [
+IMAGE_CONTAINERS: tuple[str, ...] = (
     ".ai",
     ".avif",
     ".bmp",
@@ -72,10 +76,12 @@ IMAGE_CONTAINERS = [
     ".tiff",
     ".webp",
     ".xcf",
-]
+)
+"""tuple[str, ...]: Extensiones de contenedores para imágenes estáticas o 
+archivos gráficos."""
 
 
-SUBTITLE_CONTAINERS = [
+SUBTITLE_CONTAINERS: tuple[str, ...] = (
     ".aqt",
     ".ass",
     ".cap",
@@ -97,10 +103,12 @@ SUBTITLE_CONTAINERS = [
     ".usf",
     ".vtt",
     ".xml",
-]
+)
+"""tuple[str, ...]: Extensiones de contenedores para formatos de subtítulos 
+autónomos."""
 
 
-VIDEO_CONTAINERS = [
+VIDEO_CONTAINERS: tuple[str, ...] = (
     ".3g2",
     ".3gp",
     ".asf",
@@ -127,4 +135,5 @@ VIDEO_CONTAINERS = [
     ".webm",
     ".wmv",
     ".wtv",
-]
+)
+"""tuple[str, ...]: Extensiones de contenedores para archivos de vídeo."""

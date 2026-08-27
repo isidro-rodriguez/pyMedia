@@ -3,12 +3,32 @@ from dataclasses import dataclass
 
 @dataclass(frozen=True)
 class VideoCodecData:
+    """Representa la configuración e información técnica de un códec de vídeo.
+
+    Esta clase inmutable almacena los parámetros necesarios para la
+    validación y construcción de comandos de transcodificación con FFmpeg.
+
+    Attributes:
+        name: Nombre identificador del códec (p. ej., 'h264', 'av1').
+        library: Nombre del codificador/librería utilizado por FFmpeg
+            (p. ej., 'libx264', 'libsvtav1').
+        containers: Tuple con las extensiones de contenedor soportadas
+            (p. ej., ('.mp4', '.mkv')).
+        crf: Rango del Factor de Tasa Constante (mínimo, máximo). Es None si
+            el códec no soporta CRF o es de solo lectura.
+        pix_fmt: Formato de píxeles por defecto o recomendado
+            (p. ej., 'yuv420p', 'yuv420p10le').
+        presets: Tuple de presets de velocidad/compresión disponibles.
+        profiles: Tuple de perfiles (profiles) soportados por el códec.
+    """
+
     name: str
     library: str
     containers: tuple[str, ...]
     crf: tuple[int, int] | None = None
     pix_fmt: str | None = None
     presets: tuple[str, ...] | None = None
+    profiles: tuple[str, ...] | None = None
 
 
 VIDEO_CODECS = {
@@ -35,6 +55,7 @@ VIDEO_CODECS = {
             "13",
             "14",
         ),
+        profiles=("main", "high", "professional"),
     ),
     "dnxhd": VideoCodecData(
         name="dnxhd",
@@ -96,6 +117,7 @@ VIDEO_CODECS = {
             "veryslow",
             "placebo",
         ),
+        profiles=("baseline", "main", "high", "high10"),
     ),
     "h265": VideoCodecData(
         name="h265",
@@ -123,6 +145,7 @@ VIDEO_CODECS = {
             "veryslow",
             "placebo",
         ),
+        profiles=("main", "main10"),
     ),
     "huffyuv": VideoCodecData(
         name="huffyuv",

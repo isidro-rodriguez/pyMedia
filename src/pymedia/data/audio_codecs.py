@@ -3,6 +3,23 @@ from dataclasses import dataclass
 
 @dataclass(frozen=True)
 class AudioCodecData:
+    """Representa la configuración e información técnica de un códec de audio.
+
+    Esta clase inmutable almacena los parámetros necesarios para la
+    validación, filtrado y construcción de comandos de codificación de audio con FFmpeg.
+
+    Attributes:
+        name: Nombre identificador del códec de audio (p. ej., 'aac', 'flac',
+            'mp3').
+        library: Nombre del codificador/librería utilizado por FFmpeg (p. ej.,
+            'aac', 'libmp3lame', 'flac').
+        containers: Tupla con las extensiones de contenedor soportadas (p. ej.,
+            ('.mp3', '.mkv', '.mp4')).
+        bit_rates: Tupla de tasas de bits (bitrates) comunes o recomendadas en
+            kbps (p. ej., ('128k', '192k', '320k')). Es None si el códec es sin
+            pérdidas (lossless) o no utiliza tasas discretas de bits.
+    """
+
     name: str
     library: str
     containers: tuple[str, ...]
