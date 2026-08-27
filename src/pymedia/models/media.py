@@ -18,6 +18,7 @@ class Video:
     bit_rate: int | None = None
     pix_fmt: str | None = None
     aspect_ratio: str | None = None
+    profile: str | None = None
 
 
 @dataclass(frozen=True, kw_only=True, slots=True)
@@ -31,12 +32,23 @@ class Audio:
 
 
 @dataclass(frozen=True, kw_only=True, slots=True)
+class Subtitle:
+    index: int | None = None
+    codec: str | None = None
+    language: str | None = None
+    title: str | None = None
+    forced: bool | None = None
+    default: bool | None = None
+
+
+@dataclass(frozen=True, kw_only=True, slots=True)
 class Media:
     duration: timedelta | None = None
     size: int | None = None
     format_name: str | None = None
     video: Video | None = None
-    audio: Audio | None = None
+    audio: list[Audio] | None = None
+    subtitles: list[Subtitle] | None = None
 
     @classmethod
     def load(cls, path: Path, logger: Logger) -> "Media":
@@ -45,6 +57,7 @@ class Media:
 
         video = None
         audio = None
+        subtitles = None
 
         for stream in data.get("streams", []):
             codec_type = stream.get("codec_type")
@@ -60,15 +73,34 @@ class Media:
                     bit_rate=to_int(stream.get("bit_rate")),
                     pix_fmt=stream.get("pix_fmt"),
                     aspect_ratio=stream.get("display_aspect_ratio"),
+                    profile=stream.get("profile"),
                 )
             elif codec_type == "audio":
-                audio = Audio(
-                    codec=stream.get("codec_name"),
-                    sample_rate=to_int(stream.get("sample_rate")),
-                    channels=stream.get("channels"),
-                    channel_layout=stream.get("channel_layout"),
-                    bit_rate=to_int(stream.get("bit_rate")),
-                    language=language,
+                if audio is None:
+                    audio = []
+                audio.append(
+                    Audio(
+                        codec=stream.get("codec_name"),
+                        sample_rate=to_int(stream.get("sample_rate")),
+                        channels=stream.get("channels"),
+                        channel_layout=stream.get("channel_layout"),
+                        bit_rate=to_int(stream.get("bit_rate")),
+                        language=language,
+                    )
+                )
+            elif codec_type == "subtitle":
+                if subtitles is None:
+                    subtitles = []
+                disposition = stream.get("disposition", {})
+                subtitles.append(
+                    Subtitle(
+                        index=stream.get("index"),
+                        codec=stream.get("codec_name"),
+                        language=language,
+                        title=tags.get("title"),
+                        forced=bool(disposition.get("forced")),
+                        default=bool(disposition.get("default")),
+                    )
                 )
 
         fmt = data.get("format", {})
@@ -97,7 +129,7 @@ class Media:
             )
         else:
             video = None
-
+        # TODO: valorar a ver que se hace en uniones conflictivas con múltiples pistas de audio.
         if self.audio is not None:
             audio = (
                 self.audio.codec,

@@ -26,4 +26,4 @@ channels = "stereo"             # stereo | mono | 5.1
 [app]
 language = "english"
 default_container = ".mkv"      # .mkv | .mp4 | .mov (recomendados)
-stall_timeout = 60              # in seconds
+stall_timeout = 60              # in time

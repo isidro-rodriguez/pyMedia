@@ -3,6 +3,7 @@ import queue
 import subprocess
 import threading
 from abc import ABC, abstractmethod
+from pathlib import Path
 from typing import TypeVar
 
 import typer
@@ -60,7 +61,9 @@ class Command[ArgsT, ParamsT](ABC):
         pass
 
     @abstractmethod
-    def process_parameters(self) -> None:
+    def process_parameters(
+        self, args: ArgsT | None = None, input_single: Path | None = None
+    ) -> None:
         """Validación y parseo de argumentos (input_single) a atributos de comando."""
         pass
 
@@ -111,8 +114,12 @@ class Command[ArgsT, ParamsT](ABC):
         config = Config.load()
         cls.logger = Logger.load(debug=debug)
         instance = cls(args, config)
+        if args.input_list is not None and len(args.input_list) > 1:
+            for i, input_single in enumerate(args.input_list):
+                instance.process_parameters(
+                    args=args.input_list[i], input_single=input_single
+                )
         instance.process_parameters()
-        # TODO: implementar bucle para batch (tendrán input_list en vez de input_single)
         if not instance.resolve_overwrite():
             cls.logger.warning(key="overwrite_skipped")
             return

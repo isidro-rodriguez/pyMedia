@@ -20,5 +20,5 @@ class FpsGifMixin:
     def to_fps_cmd(self) -> str:
         """Devuelve el filtro listo para consumo de ffmpeg."""
         if self.fps is None:
-            raise MissingParameterError(parameter="fps")
+            raise MissingParameterError(name="fps")
         return f"fps={self.fps}"

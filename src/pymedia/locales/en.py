@@ -7,9 +7,12 @@ Cli = {
     "overwrite_confirm": "Output file already exists. Overwrite?",
     "overwrite_help": "Action to use if output file already exists.",
     "path_argument_help": "Video to process.",
+    "path_list_argument_help": "Video list to process.",
+    "preset_sheet_help": "Preset sheet style.",
     "resize_height_help": "Target height, in pixels, to resize the video.",
     "resize_upscale_help": "Allows upscaling beyond the source dimensions.",
     "resize_width_help": "Target width, in pixels, to resize the video.",
+    "sheet_help": "Generates a thumbnail grid sheet with media info header.",
     "show_help": "Show this message and exit.",
     "timestamp_end_help": "Time point at which GIF generation ends.",
     "timestamp_start_help": "Time point at which GIF generation starts.",
@@ -49,6 +52,7 @@ ExecutionError = {
 
 Info = {
     "gif_success": "GIF generated successfully: {output}",
+    "sheet_success": "Sheet generated successfully: {output}",
 }
 
 
@@ -57,14 +61,16 @@ ParameterError = {
     "conflictive_resize_dimensions_parameters": "It is not allowed to specify width and height together.",
     "missing_argument": "Missing argument: {argument}",
     "missing_media": "Missing media information: {path}",
-    "missing_media_property": "Missing media property: {property_name}",
-    "missing_parameter": "Missing parameter: {parameter}",
+    "missing_media_property": "Missing media property: {name}",
+    "missing_parameter": "Missing name: {name}",
     "output_parameter": "It is not allowed to specify an output if it has been provided multiple video inputs.",
 }
 
 
 Progress = {
     "gif": "Generating GIF",
+    "sheet_header": "Generating sheet header",
+    "sheet_snapshots": "Generating sheet snapshots",
 }
 
 

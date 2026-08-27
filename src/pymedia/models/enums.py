@@ -39,9 +39,17 @@ class OverwriteMode(Enum):
 class OutputMediaType(Enum):
     """Tipos de ficheros multimedia de salida."""
 
-    ANIMATION = "animation"
+    ANIMATED_IMAGE = "animated_image"
     AUDIO = "audio"
     GIF = "gif"
     IMAGE = "image"
     SUBTITLE = "subtitle"
     VIDEO = "video"
+
+
+class PresetsSheetMode(Enum):
+    """Presets de las hojas de concatenación de capturas."""
+
+    FHD = "fhd"
+    HD = "hd"
+    WEB = "web"

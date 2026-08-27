@@ -53,7 +53,7 @@ class GifCommand(Command[GifArguments, GifParameters]):
 
     def process_cmd(self) -> None:
         if self.params.input_single is None:
-            raise MissingParameterError(parameter="input_single")
+            raise MissingParameterError(name="input_single")
         if self.params.media is None:
             raise MissingMediaError(path=str(self.params.input_single))
         cmd = gif_cmd(params=self.params)

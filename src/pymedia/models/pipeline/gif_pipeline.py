@@ -15,11 +15,11 @@ from pymedia.models.mixins.timestamps_mixin import (
 
 @dataclass(frozen=True, kw_only=True, slots=True)
 class GifArguments:
-    """Parámetros utilizados por el comando GIF.
+    """Argumentos cargados por Typer para el comando GIF.
 
     Attributes:
-        input_single: Ruta del vídeo a procesar.
-        output: Ruta del fichero de salida. [defecto: input.gif]
+        input_list: Lista de rutas de los vídeos a procesar.
+        output: Ruta del fichero de salida. [defecto: INPUT_SINGLE.gif]
         overwrite: Indica actuación ante fichero de salida ya existente. [defecto: ask]
         fps: Número de imágenes por segundos. [defecto: 15]
         resize_width: Ancho objetivo para redimensionado.
@@ -29,7 +29,7 @@ class GifArguments:
         timestamp_end: Marca temporal que indica el punto final.
     """
 
-    input_single: Path
+    input_list: list[Path]
     output: Path | None
     overwrite: OverwriteMode
     fps: int

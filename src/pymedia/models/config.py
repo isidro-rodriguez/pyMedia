@@ -35,7 +35,7 @@ class Language(Enum):
     # FRENCH = "french"
     # GERMAN = "german"
     # ITALIAN = "italian"
-    # SPANISH = "spanish"
+    SPANISH = "spanish"
     SYSTEM = "system"
 
 

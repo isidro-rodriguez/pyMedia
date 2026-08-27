@@ -7,7 +7,7 @@ from typing import Protocol
 
 from pymedia.data.audio_codecs import AUDIO_CODECS
 from pymedia.data.containers import (
-    ANIMATION_CONTAINERS,
+    ANIMATED_IMAGE_CONTAINERS,
     AUDIO_CONTAINERS,
     IMAGE_CONTAINERS,
     SUBTITLE_CONTAINERS,
@@ -177,6 +177,7 @@ def _process_output_directory(directory: Path) -> Path:
     return directory
 
 
+# TODO: validar las pistas de audio como listas en vez de singles
 def _validate_output(output: Path, media: Media, media_type: OutputMediaType) -> None:
     """Comprueba el fichero de salida tenga una extensión de animación válida."""
 
@@ -184,30 +185,32 @@ def _validate_output(output: Path, media: Media, media_type: OutputMediaType) ->
     _validate_name(output.stem)
 
     match media_type:
-        case OutputMediaType.ANIMATION:
-            if output.suffix not in ANIMATION_CONTAINERS:
+        case OutputMediaType.ANIMATED_IMAGE:
+            if output.suffix not in ANIMATED_IMAGE_CONTAINERS:
                 raise InvalidContainerTypeError(
                     extension=output.suffix,
-                    media_type=OutputMediaType.ANIMATION.value,
-                    supported=",".join(ANIMATION_CONTAINERS),
+                    media_type=OutputMediaType.ANIMATED_IMAGE.value,
+                    supported=",".join(ANIMATED_IMAGE_CONTAINERS),
                 )
         case OutputMediaType.AUDIO:
             if media.audio is None:
-                raise MissingMediaPropertyError(property_name="audio track")
-            if media.audio.codec is None:
-                raise MissingMediaPropertyError(property_name="audio codec")
+                raise MissingMediaPropertyError(name="audio track")
+            for audio_track in media.audio:
+                if audio_track.codec is None:
+                    raise MissingMediaPropertyError(name="audio codec")
             if output.suffix not in AUDIO_CONTAINERS:
                 raise InvalidContainerTypeError(
                     extension=output.suffix,
                     media_type=OutputMediaType.AUDIO.value,
                     supported=",".join(AUDIO_CONTAINERS),
                 )
-            if output.suffix not in AUDIO_CODECS[media.audio.codec].containers:
-                raise InvalidFileExtensionError(
-                    extension=output.suffix,
-                    codec=AUDIO_CODECS[media.audio.codec].name,
-                    supported=",".join(AUDIO_CODECS[media.audio.codec].containers),
-                )
+            for audio_track in media.audio:
+                if output.suffix not in AUDIO_CODECS[audio_track.codec].containers:
+                    raise InvalidFileExtensionError(
+                        extension=output.suffix,
+                        codec=AUDIO_CODECS[audio_track.codec].name,
+                        supported=",".join(AUDIO_CODECS[audio_track.codec].containers),
+                    )
         case OutputMediaType.IMAGE:
             if output.suffix not in IMAGE_CONTAINERS:
                 raise InvalidContainerTypeError(
@@ -224,9 +227,9 @@ def _validate_output(output: Path, media: Media, media_type: OutputMediaType) ->
                 )
         case OutputMediaType.VIDEO:
             if media.video is None:
-                raise MissingMediaPropertyError(property_name="video")
+                raise MissingMediaPropertyError(name="video")
             if media.video is not None and media.video.codec is None:
-                raise MissingMediaPropertyError(property_name="video codec")
+                raise MissingMediaPropertyError(name="video codec")
             if output.suffix not in VIDEO_CONTAINERS:
                 raise InvalidContainerTypeError(
                     extension=output.suffix,
@@ -241,14 +244,15 @@ def _validate_output(output: Path, media: Media, media_type: OutputMediaType) ->
                 )
             if media.audio is None:
                 return
-            if media.audio.codec is None:
-                raise MissingMediaPropertyError(property_name="audio codec")
-            if output.suffix not in AUDIO_CODECS[media.audio.codec].containers:
-                raise InvalidFileExtensionError(
-                    extension=output.suffix,
-                    codec=AUDIO_CODECS[media.audio.codec].name,
-                    supported=",".join(AUDIO_CODECS[media.audio.codec].containers),
-                )
+            for audio_track in media.audio:
+                if audio_track.codec is None:
+                    raise MissingMediaPropertyError(name="audio codec")
+                if output.suffix not in AUDIO_CODECS[audio_track.codec].containers:
+                    raise InvalidFileExtensionError(
+                        extension=output.suffix,
+                        codec=AUDIO_CODECS[audio_track.codec].name,
+                        supported=",".join(AUDIO_CODECS[audio_track.codec].containers),
+                    )
         case OutputMediaType.GIF:
             if output.suffix != ".gif":
                 raise InvalidContainerTypeError(

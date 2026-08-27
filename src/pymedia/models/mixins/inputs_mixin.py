@@ -54,7 +54,7 @@ class InputSingleMixin:
             MissingParameterError: Si parámetro "input_single" no obtenido.
         """
         if self.input_single is None:
-            raise MissingParameterError(parameter="input_single")
+            raise MissingParameterError(name="input_single")
         return ["-i", str(self.input_single)]
 
 
@@ -106,7 +106,7 @@ class InputListMixin:
             MissingParameterError: Si parámetro "input_list" no obtenido.
         """
         if self.input_list is None:
-            raise MissingParameterError(parameter="input_list")
+            raise MissingParameterError(name="input_list")
 
         cmd_list: list[str] = []
         for input_single in self.input_list:

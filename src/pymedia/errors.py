@@ -123,15 +123,15 @@ class MissingMediaError(ParameterError):
 class MissingMediaPropertyError(ParameterError):
     message_key = "missing_media_property"
 
-    def __init__(self, property_name: str) -> None:
-        super().__init__(property_name=property_name)
+    def __init__(self, name: str) -> None:
+        super().__init__(property_name=name)
 
 
 class MissingParameterError(ParameterError):
     message_key = "missing_parameter"
 
-    def __init__(self, parameter: str) -> None:
-        super().__init__(parameter=parameter)
+    def __init__(self, name: str) -> None:
+        super().__init__(parameter=name)
 
 
 class OutputParameterError(ParameterError):

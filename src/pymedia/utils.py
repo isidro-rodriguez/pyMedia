@@ -1,5 +1,7 @@
 from fractions import Fraction
 
+from pymedia.errors import PyMediaError
+
 
 def parse_fraction(value: str | None) -> Fraction | None:
     """Convierte '25/1' a Fraction(25, 1)."""
@@ -10,6 +12,25 @@ def parse_fraction(value: str | None) -> Fraction | None:
         return Fraction(int(num), int(den))
     except (ValueError, ZeroDivisionError):
         return None
+
+
+def require[T](value: T | None, exc: PyMediaError) -> T:
+    """
+    Comprueba que un valor no sea None y lo devuelve ya validado.
+
+    Args:
+        value: Valor a comprobar.
+        exc: Excepción a lanzar si `value` es None.
+
+    Returns:
+        El valor de entrada, con el tipo estrechado a no-None.
+
+    Raises:
+        PyMediaError: La excepción indicada en `exc`, si `value` es None.
+    """
+    if value is None:
+        raise exc
+    return value
 
 
 def to_int(value: str | int | None) -> int | None:

@@ -10,8 +10,7 @@ from pymedia import locales
 
 
 class Logger:
-    """
-    Wrapper sobre logging estándar con plantillas de locales.
+    """Wrapper sobre logging estándar con plantillas de locales.
 
     Attributes:
         _configured: Estado de configuración del Logger.
@@ -24,8 +23,7 @@ class Logger:
 
     @classmethod
     def create(cls, debug: bool = False) -> Self:
-        """
-        Configura el logger raíz (idempotente).
+        """Configura el logger raíz (idempotente).
 
         Args:
             debug: Activa el modo DEBUG.
@@ -71,8 +69,7 @@ class Logger:
 
     @classmethod
     def load(cls, debug: bool = False) -> Self:
-        """
-        Devuelve un Logger con prefijo 'pymedia.*'.
+        """Devuelve un Logger con prefijo 'pymedia.*'.
 
         Args:
             debug: Activar nivel de log DEBUG.

@@ -116,7 +116,7 @@ class ResizeMixin(_HasSingleMedia):
 
         if dimension == _Dimension.WIDTH:
             if media.video is None or media.video.width is None:
-                raise MissingMediaPropertyError(property_name="width")
+                raise MissingMediaPropertyError(name="width")
 
             if resize == media.video.width:
                 logger.warning(key="resize_rejected_equal", dimension="width")
@@ -132,7 +132,7 @@ class ResizeMixin(_HasSingleMedia):
 
         if dimension == _Dimension.HEIGHT:
             if media.video is None or media.video.height is None:
-                raise MissingMediaPropertyError(property_name="height")
+                raise MissingMediaPropertyError(name="height")
 
             if resize == media.video.height:
                 logger.warning(key="resize_rejected_equal", dimension="height")

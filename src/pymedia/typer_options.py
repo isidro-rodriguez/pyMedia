@@ -6,8 +6,9 @@ import typer
 from pymedia import locales
 from pymedia.models.enums import (
     OverwriteMode,
+    PresetsSheetMode,
 )
-from pymedia.services.typer_service import show_help, validate_path
+from pymedia.services.typer_service import show_help, validate_path, validate_path_list
 
 # -----------------------------------------------------------------------------
 #  Argumentos
@@ -19,6 +20,14 @@ InputSingleArgument = Annotated[
     typer.Argument(
         help=locales.Cli["path_argument_help"],
         callback=validate_path,
+    ),
+]
+
+InputListArgument = Annotated[
+    list[Path],
+    typer.Argument(
+        help=locales.Cli["path_list_argument_help"],
+        callback=validate_path_list,
     ),
 ]
 
@@ -91,6 +100,17 @@ FpsGifOption = Annotated[
     ),
 ]
 
+
+PresetSheetOption = Annotated[
+    PresetsSheetMode,
+    typer.Option(
+        "--preset",
+        rich_help_panel="Command options",
+        help=locales.Cli["preset_sheet_help"],
+    ),
+]
+
+
 ResizeHeightOption = Annotated[
     int | None,
     typer.Option(
@@ -109,6 +129,7 @@ ResizeWidthOption = Annotated[
         help=locales.Cli["resize_width_help"],
     ),
 ]
+
 
 ResizeUpscaleOption = Annotated[
     bool,
@@ -129,6 +150,7 @@ TimestampEndOption = Annotated[
         help=locales.Cli["timestamp_end_help"],
     ),
 ]
+
 
 TimestampStartOption = Annotated[
     str | None,

@@ -38,7 +38,7 @@ class TestCreateResize:
         assert mixin.resize_upscale is False
 
     @pytest.mark.parametrize(
-        ("kwargs", "property_name"),
+        ("kwargs", "name"),
         [
             ({"width": 640}, "width"),
             ({"height": 480}, "height"),

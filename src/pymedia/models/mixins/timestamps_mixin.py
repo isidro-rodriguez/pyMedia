@@ -52,7 +52,7 @@ class TimestampStartMixin(_HasSingleMedia):
             Lista de strings lista para consumo de ffmpeg.
         """
         if self.timestamp_start is None:
-            raise MissingParameterError(parameter="timestamp_start")
+            raise MissingParameterError(name="timestamp_start")
         return ["-ss", str(self.timestamp_start)]
 
 
@@ -89,7 +89,7 @@ class TimestampEndMixin(_HasSingleMedia):
             Lista de strings lista para consumo de ffmpeg.
         """
         if self.timestamp_end is None:
-            raise MissingParameterError(parameter="timestamp_end")
+            raise MissingParameterError(name="timestamp_end")
         return ["-to", str(self.timestamp_end)]
 
 
@@ -117,7 +117,7 @@ def _process_time(
     def _validate_time() -> None:
         """Valida que la marca de tiempo no supere la duración del vídeo."""
         if media.duration is None:
-            raise MissingMediaPropertyError(property_name="video.duration")
+            raise MissingMediaPropertyError(name="video.duration")
         if time_delta > media.duration:
             raise TimeExceedsDurationError(
                 time=str(time_delta), duration=str(media.duration)
