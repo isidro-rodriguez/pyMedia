@@ -83,7 +83,7 @@ def _entry_ids(entries: list[tuple[str, str, str]]) -> list[str]:
 # ─── 1) Estructura ───────────────────────────────────────────────────────
 
 
-@pytest.mark.parametrize("lang", _available_locales() or ["<sin_locales>"])
+@pytest.mark.parametrize("locale", _available_locales() or ["<sin_locales>"])
 def test_estructura_categorias(lang: str) -> None:
     """Todo idioma define las categorías del contrato como dicts no vacíos."""
     if lang == "<sin_locales>":
@@ -146,7 +146,7 @@ def test_formato_aplica_parametros(category: str, key: str, value: str) -> None:
 
 
 @pytest.mark.parametrize(
-    "lang",
+    "locale",
     _non_base_locales() or [_FALLBACK_NO_NON_BASE],
 )
 def test_paridad_claves_parametros(lang: str) -> None:

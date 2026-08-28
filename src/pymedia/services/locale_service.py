@@ -94,7 +94,7 @@ def set_language(lang: str) -> None:
             "Info",
             "ParameterError",
             "Progress",
-            "Sheet",
+            "Metadata",
             "ValidationError",
             "Warnings",
         ):
