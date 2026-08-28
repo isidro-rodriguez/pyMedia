@@ -1,4 +1,3 @@
-import locale
 from datetime import timedelta
 from fractions import Fraction
 from pathlib import Path
@@ -12,13 +11,16 @@ from pymedia.errors import (
 )
 from pymedia.models.media import Audio, Subtitle
 from pymedia.models.pipeline.sheet_pipeline import SheetParameters
-from pymedia.utils import to_ffmpeg_path
+from pymedia.services.locale_service import detect_language
+from pymedia.utils import parse_quantity, to_ffmpeg_path
 
+# =============================================================================
 # Funciones auxiliares
-# -----------------------------------------------------------------------------
+# =============================================================================
 
 
 def _escape_drawtext(text: str) -> str:
+    """Escapa caracteres especiales para el filtro drawtext de FFmpeg."""
     text = text.replace("\\", "\\\\")
     text = text.replace(":", "\\:")
     text = text.replace("%", "\\%")
@@ -27,6 +29,7 @@ def _escape_drawtext(text: str) -> str:
 
 
 def _build_duration_display(time: timedelta) -> str:
+    """Formatea un objeto timedelta a una cadena con formato HH:MM:SS o MM:SS."""
     total = int(time.total_seconds())
     hours, remainder = divmod(total, 3600)
     minutes, secs = divmod(remainder, 60)
@@ -35,18 +38,23 @@ def _build_duration_display(time: timedelta) -> str:
     return f"{minutes}:{secs:02d}"
 
 
+# =============================================================================
 # Generar cuadrícula de capturas
-# -----------------------------------------------------------------------------
+# =============================================================================
 
 
 def _generate_snapshots(params: SheetParameters, output: Path) -> list[str]:
+    """Genera el comando para capturar frames y componer la cuadrícula de miniaturas."""
+
     def _calculate_capture_frames() -> list[int]:
+        """Calcula los índices de los frames que se van a capturar uniformemente."""
         start = int(total_frames * 0.05)
         end = int(total_frames * 0.95)
         step = (end - start) / n_captures
         return [start + int(step * i) for i in range(n_captures)]
 
     def _build_thumb_pad() -> str:
+        """Construye el filtro pad de para bordes y espaciados de cada miniatura."""
         if preset is None:
             raise MissingParameterError(name="preset")
         bw = preset.border_width
@@ -59,6 +67,9 @@ def _generate_snapshots(params: SheetParameters, output: Path) -> list[str]:
         return f"{border},{gap}"
 
     def _build_timestamp_drawtext() -> str:
+        """Construye el filtro drawtext para superponer la marca de tiempo en la
+        miniatura.
+        """
         if preset is None:
             raise MissingParameterError(name="preset")
         ts_margin = 4
@@ -73,6 +84,7 @@ def _generate_snapshots(params: SheetParameters, output: Path) -> list[str]:
         )
 
     def _build_stack_filter() -> str:
+        """Construye filtros hstack y vstack para apilar miniaturas en la cuadrícula."""
         if preset is None:
             raise MissingParameterError(name="preset")
         rows_expr = []
@@ -140,52 +152,53 @@ def _generate_snapshots(params: SheetParameters, output: Path) -> list[str]:
     ]
 
 
+# =============================================================================
 # Generar cabecera con metadatos
-# -----------------------------------------------------------------------------
+# =============================================================================
 
 
 def _generate_header(params: SheetParameters, image_input: Path) -> list[str]:
+    """Genera el comando FFmpeg para superponer la cabecera con metadatos sobre la
+    cuadrícula.
+    """
+
     def _truncate_list_display(prefix: str, items: list[str], max_len: int) -> str:
+        """Trunca la lista agregando puntos suspensivos si supera el ancho máximo."""
         base_template = f"{prefix} [{', '.join(items)}]"
         if len(base_template) <= max_len:
             return base_template
-
         acc = []
         for item in items:
             candidate = f"{prefix} [{', '.join(acc + [item])}, ...]"
             if len(candidate) > max_len:
                 break
             acc.append(item)
-
         if not acc:
             return f"{prefix} [...]"
-
         return f"{prefix} [{', '.join(acc)}, ...]"
 
     def _build_size_display(size_bytes: int) -> str:
-        def _format_number(value: float | int, decimals: int = 0) -> str:
-            fmt = f"%.{decimals}f" if decimals > 0 else "%.0f"
-            return locale.format_string(fmt, value, grouping=True)
-
-        size_gb = size_bytes / (1024**3)
-        size_mb = size_bytes / (1024**2)
-        bytes_str = _format_number(size_bytes)
-
-        if size_gb >= 1.0:
-            gb_str = _format_number(size_gb, 2)
-            return f"{gb_str} GB ({bytes_str} bytes)"
-
-        mb_str = _format_number(size_mb, 2)
-        return f"{mb_str} MB ({bytes_str} bytes)"
+        """Formatea el tamaño del archivo en unidades legibles (GB/MB) e incluye el
+        total en bytes.
+        """
+        lang = detect_language()
+        size_gb = parse_quantity(value=size_bytes / 1024**3, lang=lang)
+        size_mb = parse_quantity(value=size_bytes / 1024**2, lang=lang)
+        size_bt = parse_quantity(value=size_bytes, lang=lang)
+        if size_bytes > 1024**3:
+            return f"{size_gb} GB ({size_bt} bytes)"
+        return f"{size_mb} MB ({size_bt} bytes)"
 
     def _build_audio_line(tracks: list[Audio], max_len: int) -> str | None:
+        """Construye la línea informativa de las pistas de audio para la cabecera."""
+
         def _format_channels(channels: int) -> str:
+            """Convierte el número de canales a su denominación estándar."""
             mapping = {1: "mono", 2: "stereo", 6: "5.1", 8: "7.1"}
             return mapping.get(channels, f"{channels}ch")
 
         if not tracks:
             return None
-
         formatted_items = []
         for t in tracks:
             if t.channels is None:
@@ -196,35 +209,32 @@ def _generate_header(params: SheetParameters, image_input: Path) -> list[str]:
                 raise MissingParameterError(name="track codec")
             ch_str = _format_channels(t.channels)
             formatted_items.append(f"{t.language} ({t.codec} {ch_str})")
-
         prefix = f"Audio: {len(tracks)} tracks"
         return _truncate_list_display(prefix, formatted_items, max_len)
 
     def _build_subtitles_line(subtitles: list[Subtitle], max_len: int) -> str | None:
+        """Construye línea informativa de las pistas de subtítulos para la cabecera."""
         if not subtitles:
             return None
-
         subs: list[str] = []
         for sub in subtitles:
             if sub.language is None:
                 raise MissingParameterError(name="subtitle language")
             subs.append(sub.language)
-
         prefix = f"Subtitles: {len(subtitles)} tracks"
         return _truncate_list_display(prefix, subs, max_len)
 
     preset = params.preset_sheet
     media = params.media
-    video = media.video
-
     if params.input_single is None:
         raise MissingParameterError(name="input_single")
+    if media is None:
+        raise MissingMediaError(path=str(params.input_single))
+    video = media.video
     if params.output is None:
         raise MissingParameterError(name="output")
     if preset is None:
         raise MissingParameterError(name="preset")
-    if media is None:
-        raise MissingMediaError(path=str(params.input_single))
     if media.size is None:
         raise MissingMediaPropertyError(name="size")
     if media.duration is None:
@@ -246,12 +256,14 @@ def _generate_header(params: SheetParameters, image_input: Path) -> list[str]:
     if video.bit_rate is None:
         raise MissingMediaPropertyError(name="video bit_rate")
 
+    bit_rate = parse_quantity(value=video.bit_rate, lang=detect_language())
+
     lines = [
         f"{locales.Sheet['file']}: {params.input_single.name}",
         f"{locales.Sheet['size']}: {_build_size_display(media.size)} | "
         f"{locales.Sheet['duration']}: {_build_duration_display(media.duration)}",
         f"{locales.Sheet['video']}: {video.width}x{video.height}, {video.codec} "
-        f"({video.profile}), {video.pix_fmt}, {video.fps} fps, {video.bit_rate} kb/s",
+        f"({video.profile}), {video.pix_fmt}, {video.fps} fps, {bit_rate} kb/s",
     ]
 
     if media.audio is not None:
@@ -292,8 +304,9 @@ def _generate_header(params: SheetParameters, image_input: Path) -> list[str]:
     ]
 
 
+# =============================================================================
 # Proceso
-# -----------------------------------------------------------------------------
+# =============================================================================
 
 
 def sheet_cmd(params: SheetParameters, tile_tmp: Path) -> list[list[str]]:
@@ -304,10 +317,15 @@ def sheet_cmd(params: SheetParameters, tile_tmp: Path) -> list[list[str]]:
         tile_tmp: Ruta del fichero temporal intermedio (cuadrícula sin cabecera).
 
     Returns:
-        cmd: comando de ffmpeg listo para consumo.
+        list[list[str]]: Lista de comandos ffmpeg listos para su ejecución secuencial.
 
     Raises:
-        CommandGenerationError: Si problema en la generación de comandos.
+        CommandGenerationError: Si ocurre un problema en la generación de los comandos.
+        MissingParameterError: Si falta algún parámetro requerido (preset,
+            input_single, output, pista de audio o subtítulo).
+        MissingMediaError: Si el objeto de metadatos del medio es None.
+        MissingMediaPropertyError: Si falta alguna propiedad técnica requerida en el
+            objeto media (duration, fps, size, video, codec, etc.).
     """
 
     snapshots_cmd = _generate_snapshots(params=params, output=tile_tmp)

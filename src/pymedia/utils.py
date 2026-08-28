@@ -1,8 +1,6 @@
 from fractions import Fraction
 from pathlib import Path
 
-from pymedia.errors import PyMediaError
-
 
 def parse_fraction(value: str | None) -> Fraction | None:
     """Convierte '25/1' a Fraction(25, 1)."""
@@ -15,23 +13,21 @@ def parse_fraction(value: str | None) -> Fraction | None:
         return None
 
 
-def require[T](value: T | None, exc: PyMediaError) -> T:
-    """
-    Comprueba que un valor no sea None y lo devuelve ya validado.
+def parse_quantity(value: int | float | Fraction, lang: str) -> str:
+    if isinstance(value, Fraction):
+        if value.denominator == 1:
+            value = value.numerator
+        else:
+            value = float(value)
 
-    Args:
-        value: Valor a comprobar.
-        exc: Excepción a lanzar si `value` es None.
+    if isinstance(value, int):
+        result = f"{value:,}"
+    else:
+        result = f"{value:,.3f}"
 
-    Returns:
-        El valor de entrada, con el tipo estrechado a no-None.
-
-    Raises:
-        PyMediaError: La excepción indicada en `exc`, si `value` es None.
-    """
-    if value is None:
-        raise exc
-    return value
+    if lang == "en":
+        return result
+    return result.replace(",", "X").replace(".", ",").replace("X", ".")
 
 
 def to_ffmpeg_path(path: Path) -> str:
