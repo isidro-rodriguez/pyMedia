@@ -45,45 +45,43 @@ def _generate_snapshots(params: SheetParameters, output: Path) -> list[str]:
         return [start + int(step * i) for i in range(n_captures)]
 
     def _build_thumb_pad() -> str:
-        if params.preset is None:
+        if preset is None:
             raise MissingParameterError(name="preset")
-        bw = params.preset.border_width
-        half_gap = params.preset.gap // 2
-        border = (
-            f"pad=iw+{bw * 2}:ih+{bw * 2}:{bw}:{bw}:color={params.preset.border_color}"
-        )
+        bw = preset.border_width
+        half_gap = preset.gap // 2
+        border = f"pad=iw+{bw * 2}:ih+{bw * 2}:{bw}:{bw}:color={preset.border_color}"
         gap = (
-            f"pad=iw+{half_gap * 2}:ih+{half_gap * 2}:"
-            f"{half_gap}:{half_gap}:color={params.preset.background}"
+            f"pad=iw+{half_gap * 2}:ih+{half_gap * 2}:{half_gap}:{half_gap}:"
+            f"color={preset.background}"
         )
         return f"{border},{gap}"
 
     def _build_timestamp_drawtext() -> str:
-        if params.preset is None:
+        if preset is None:
             raise MissingParameterError(name="preset")
         ts_margin = 4
         return (
-            f"drawtext=fontfile={params.preset.fontfile.as_posix()}:"
+            f"drawtext=fontfile={preset.fontfile.as_posix()}:"
             f"text='{_escape_drawtext(timestamp_str)}':"
-            f"fontsize={params.preset.timestamp_fontsize}:"
-            f"fontcolor={params.preset.timestamp_color}:"
-            f"bordercolor={params.preset.timestamp_border_color}:"
-            f"borderw={params.preset.timestamp_border_width}:"
+            f"fontsize={preset.timestamp_fontsize}:"
+            f"fontcolor={preset.timestamp_color}:"
+            f"bordercolor={preset.timestamp_border_color}:"
+            f"borderw={preset.timestamp_border_width}:"
             f"x=w-tw-{ts_margin}:y=h-th-{ts_margin}"
         )
 
     def _build_stack_filter() -> str:
-        if params.preset is None:
+        if preset is None:
             raise MissingParameterError(name="preset")
         rows_expr = []
-        for row in range(params.preset.rows):
-            inputs = "".join(f"[t{row}{col}]" for col in range(params.preset.columns))
-            rows_expr.append(f"{inputs}hstack=inputs={params.preset.columns}[row{row}]")
-        row_labels = "".join(f"[row{row}]" for row in range(params.preset.rows))
-        rows_expr.append(f"{row_labels}vstack=inputs={params.preset.rows}[grid]")
+        for row in range(preset.rows):
+            inputs = "".join(f"[t{row}{col}]" for col in range(preset.columns))
+            rows_expr.append(f"{inputs}hstack=inputs={preset.columns}[row{row}]")
+        row_labels = "".join(f"[row{row}]" for row in range(preset.rows))
+        rows_expr.append(f"{row_labels}vstack=inputs={preset.rows}[grid]")
         return ";".join(rows_expr)
 
-    preset = params.preset
+    preset = params.preset_sheet
     media = params.media
 
     if preset is None:
@@ -213,7 +211,7 @@ def _generate_header(params: SheetParameters, input_single: Path) -> list[str]:
         prefix = f"Subtitles: {len(subtitles)} tracks"
         return _truncate_list_display(prefix, subs, max_len)
 
-    preset = params.preset
+    preset = params.preset_sheet
     media = params.media
 
     if params.input_single is None:
@@ -244,10 +242,6 @@ def _generate_header(params: SheetParameters, input_single: Path) -> list[str]:
         raise MissingMediaPropertyError(name="fps")
     if media.video.bit_rate is None:
         raise MissingMediaPropertyError(name="bit_rate")
-    if media.audio is None:
-        raise MissingMediaPropertyError(name="audio")
-    if media.subtitles is None:
-        raise MissingMediaPropertyError(name="subtitles")
 
     lines = [
         f"File: {input_single.name}",
@@ -257,15 +251,19 @@ def _generate_header(params: SheetParameters, input_single: Path) -> list[str]:
         f"{media.video.pix_fmt}, {media.video.fps} fps, {media.video.bit_rate} kb/s",
     ]
 
-    audio_line = _build_audio_line(tracks=media.audio, max_len=preset.max_line_length)
-    if audio_line:
-        lines.append(audio_line)
+    if media.audio is not None:
+        audio_line = _build_audio_line(
+            tracks=media.audio, max_len=preset.max_line_length
+        )
+        if audio_line:
+            lines.append(audio_line)
 
-    sub_line = _build_subtitles_line(
-        subtitles=media.subtitles, max_len=preset.max_line_length
-    )
-    if sub_line:
-        lines.append(sub_line)
+    if media.subtitles is not None:
+        sub_line = _build_subtitles_line(
+            subtitles=media.subtitles, max_len=preset.max_line_length
+        )
+        if sub_line:
+            lines.append(sub_line)
 
     line_height = preset.fontsize + preset.line_gap
     header_height = preset.header_margin_top + line_height * len(lines)

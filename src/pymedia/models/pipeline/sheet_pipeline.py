@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 from pathlib import Path
 
+from pymedia.errors import MissingParameterError
 from pymedia.logger import Logger
 from pymedia.models.enums import OutputMediaType, OverwriteMode, PresetsSheetMode
 from pymedia.models.mixins.inputs_mixin import InputSingleMixin
@@ -38,7 +39,7 @@ class SheetParameters(InputSingleMixin, OutputBatchMixin, SheetPresetsMixin):
             el lote contiene un único fichero.
         output_directory: Directorio de salida para lotes de varios ficheros.
         overwrite: Indica actuación ante fichero de salida ya existente. [defecto: ask]
-        preset: Estilo de hoja preajustado.
+        preset_sheet: Estilo de hoja preajustado.
     """
 
     overwrite: OverwriteMode
@@ -60,10 +61,17 @@ class SheetParameters(InputSingleMixin, OutputBatchMixin, SheetPresetsMixin):
 
         params = cls(overwrite=args.overwrite)
         params.create_input_single(input_single=input_single, logger=logger)
+        if params.input_single is None:
+            raise MissingParameterError(name="input_single")
+        if params.media is None:
+            raise MissingParameterError(name="media")
         params.create_output_batch(
+            input_single=params.input_single,
+            media=params.media,
             media_type=OutputMediaType.IMAGE,
             output=args.output,
             affix="_sheet",
             extension=".jpg",
         )
+        params.create_preset_sheet(preset=args.preset_sheet)
         return params

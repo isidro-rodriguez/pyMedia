@@ -20,9 +20,7 @@ from pymedia.errors import (
     InvalidContainerTypeError,
     InvalidFileExtensionError,
     InvalidNameError,
-    MissingMediaError,
     MissingMediaPropertyError,
-    OutputParameterError,
 )
 from pymedia.models.enums import OutputMediaType
 from pymedia.models.media import Media
@@ -102,6 +100,8 @@ class OutputBatchMixin(_HasBatchMedia):
 
     def create_output_batch(
         self,
+        input_single: Path,
+        media: Media,
         media_type: OutputMediaType,
         output: Path | None = None,
         output_directory: Path | None = None,
@@ -135,21 +135,17 @@ class OutputBatchMixin(_HasBatchMedia):
         """
         if output is not None and output_directory is not None:
             raise ConflictiveOutputParametersError()
-        if output is not None:
-            if len(self.input_list) > 1:
-                raise OutputParameterError()
-            if self.media is None:
-                raise MissingMediaError(path=str(self.input_list[0]))
-            self.output = _process_output(
-                input_single=self.input_list[0],
-                media_type=media_type,
-                media=self.media_list[0],
-                affix=affix,
-                extension=extension,
-                output=output,
-            )
         if output_directory is not None:
             self.output_directory = _process_output_directory(output_directory)
+            return
+        self.output = _process_output(
+            input_single=input_single,
+            media_type=media_type,
+            media=media,
+            affix=affix,
+            extension=extension,
+            output=output,
+        )
 
 
 def _validate_name(name: str) -> None:

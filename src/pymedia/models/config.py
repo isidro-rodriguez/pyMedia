@@ -133,6 +133,18 @@ class Config:
 
     @classmethod
     def load(cls) -> "Config":
+        """Carga la configuración almacenada en el `config.toml` del usuario.
+
+        Comprueba la existencia de todas las llaves y si estas son valores válidos.
+        Si no existiese `config.toml` en el directorio de la aplicación, copia la
+        configuración por defecto de `resources` al directorio del usuario.
+
+        Returns:
+            Configuración validada y cargada lista para consumo de la pyMedia.
+
+        Raises:
+            InvalidConfigError: Si `config.toml` presenta parámetros no válidos.
+        """
         path = (
             Path(
                 platformdirs.user_config_dir(

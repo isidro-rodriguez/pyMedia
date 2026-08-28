@@ -3,10 +3,10 @@ from pathlib import Path
 
 from pymedia.errors import MissingParameterError
 from pymedia.models.enums import PresetsSheetMode
-from pymedia.models.sheet_preset import SheetPreset
+from pymedia.models.sheet_preset import PresetSheet
 
-_PRESETS: dict[str, SheetPreset] = {
-    "fhd": SheetPreset(
+_PRESETS: dict[str, PresetSheet] = {
+    "fhd": PresetSheet(
         canvas_width=1920,
         columns=5,
         rows=4,
@@ -27,7 +27,7 @@ _PRESETS: dict[str, SheetPreset] = {
         timestamp_border_width=2,
         timestamp_border_color="0x222222",
     ),
-    "hd": SheetPreset(
+    "hd": PresetSheet(
         canvas_width=1280,
         columns=4,
         rows=3,
@@ -48,7 +48,7 @@ _PRESETS: dict[str, SheetPreset] = {
         timestamp_border_width=1,
         timestamp_border_color="0x222222",
     ),
-    "web": SheetPreset(
+    "web": PresetSheet(
         canvas_width=800,
         columns=3,
         rows=3,
@@ -77,26 +77,26 @@ class SheetPresetsMixin:
     """Establece el estilo preajustado indicado por el usuario.
 
     Parameters:
-        preset: Estilo de hoja preajustado.
+        preset_sheet: Estilo de hoja preajustado.
     """
 
-    preset: SheetPreset | None = None
+    preset_sheet: PresetSheet | None = None
 
-    def create_sheet_presets(self, preset: PresetsSheetMode) -> None:
+    def create_preset_sheet(self, preset: PresetsSheetMode) -> None:
         """Carga el estilo de hoja preajustado.
 
         Args:
             preset: Elección del estilo de hoja preajustado.
         """
-        self.preset = _PRESETS[preset.value]
+        self.preset_sheet = _PRESETS[preset.value]
 
     @property
     def thumb_width(self) -> int:
         """Calcula el ancho dinámico de la captura respetando el canvas total."""
-        preset = self.preset
+        preset = self.preset_sheet
 
         if preset is None:
-            raise MissingParameterError(name="preset")
+            raise MissingParameterError(name="preset_sheet")
 
         total_gaps = (preset.columns - 1) * preset.gap
         total_margins = 2 * preset.margin

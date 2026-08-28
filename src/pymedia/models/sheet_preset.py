@@ -3,7 +3,7 @@ from pathlib import Path
 
 
 @dataclass(kw_only=True, slots=True, frozen=True)
-class SheetPreset:
+class PresetSheet:
     """Configuración del estilo gráfico usado en las hojas de captura consecutivas.
 
     Attributes:
