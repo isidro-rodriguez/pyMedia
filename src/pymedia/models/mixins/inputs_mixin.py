@@ -85,16 +85,16 @@ class InputListMixin:
             MissingParameterError: Si ruta del fichero no obtenido.
             InvalidContainerTypeError: Si container no válido.
         """
-        resolved: list[Path] = []
-        media_list: list[Media] = []
+        inputs: list[Path] = []
+        medias: list[Media] = []
 
         for input_single in input_list:
             input_single = input_single.absolute()
-            input_list.append(input_single)
-            media_list.append(_load_media(path=input_single, logger=logger))
+            inputs.append(input_single)
+            medias.append(_load_media(path=input_single, logger=logger))
 
-        self.input_list = resolved
-        self.media_list = media_list
+        self.input_list = inputs
+        self.media_list = medias
 
     def to_input_list_cmd(self) -> list[str]:
         """Devuelve lista de str lista para consumo ffmpeg.
