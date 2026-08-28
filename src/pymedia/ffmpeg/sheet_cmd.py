@@ -209,10 +209,16 @@ def _generate_header(params: SheetParameters, image_input: Path) -> list[str]:
         return _truncate_list_display(prefix, formatted_items, max_len)
 
     def _build_subtitles_line(subtitles: list[Subtitle], max_len: int) -> str | None:
-        """Formatea el texto que muestra las pistas de subtítulos del vídeo."""
+        """Construye línea informativa de las pistas de subtítulos para la cabecera."""
         if not subtitles:
             return None
-        subs = [sub.language or "und" for sub in subtitles]
+
+        subs: list[str] = []
+        for sub in subtitles:
+            # Usar 'und' (undefined) si sub.language es None o está vacío
+            lang = sub.language if sub.language else "und"
+            subs.append(lang)
+
         prefix = f"Subtitles: {len(subtitles)} tracks"
         return _truncate_list_display(prefix, subs, max_len)
 
@@ -279,14 +285,14 @@ def _generate_header(params: SheetParameters, image_input: Path) -> list[str]:
 
     lines.append(f"{locales.Sheet['video']}: {', '.join(video_parts)}")
 
-    if media.audio:
+    if media.audio and len(media.audio) > 0:
         audio_line = _build_audio_line(
             tracks=media.audio, max_len=preset.max_line_length
         )
         if audio_line:
             lines.append(audio_line)
 
-    if media.subtitles:
+    if media.subtitles and len(media.subtitles) > 0:
         sub_line = _build_subtitles_line(
             subtitles=media.subtitles, max_len=preset.max_line_length
         )

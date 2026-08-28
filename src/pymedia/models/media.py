@@ -114,6 +114,7 @@ class Media:
             format_name=fmt.get("format_name"),
             video=video,
             audio=audio,
+            subtitles=subtitles,
         )
 
     @property
