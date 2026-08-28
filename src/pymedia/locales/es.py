@@ -3,14 +3,17 @@ Cli = {
     "fps_gif_help": "Fotogramas por segundo del GIF animado.",
     "gif_help": "Genera un GIF animado a partir del vídeo indicado",
     "invalid_path": "{path} no es un archivo.",
+    "output_directory_help": "Directorio de salida para varios archivos de salida.",
     "output_help": "Nombre del archivo de salida.",
     "overwrite_confirm": "El archivo de salida ya existe. ¿Sobrescribir?",
     "overwrite_help": "Acción a usar si el archivo de salida ya existe.",
     "path_argument_help": "Vídeo a procesar.",
     "path_list_argument_help": "Lista de vídeos a procesar.",
+    "preset_sheet_help": "Estilo de hoja preestablecido.",
     "resize_height_help": "Altura objetivo, en píxeles, para redimensionar el vídeo.",
     "resize_upscale_help": "Permite ampliar más allá de las dimensiones de origen.",
     "resize_width_help": "Anchura objetivo, en píxeles, para redimensionar el vídeo.",
+    "sheet_help": "Genera una hoja de cuadrícula de miniaturas con cabecera de información del vídeo.",
     "show_help": "Muestra este mensaje y sale.",
     "timestamp_end_help": "Punto temporal en que termina la generación del GIF.",
     "timestamp_start_help": "Punto temporal en que comienza la generación del GIF.",
@@ -50,11 +53,13 @@ ExecutionError = {
 
 Info = {
     "gif_success": "GIF generado correctamente: {output}",
+    "sheet_success": "Hoja generada correctamente: {output}",
 }
 
 
 ParameterError = {
     "conflictive_output_parameters": "No se permite especificar una ruta de salida y un directorio de salida a la vez.",
+    "conflictive_output_ammount_parameter": "No se permite especificar una salida con varias entradas; usa el directorio de salida en su lugar.",
     "conflictive_resize_dimensions_parameters": "No se permite especificar anchura y altura a la vez.",
     "missing_argument": "Falta el argumento: {argument}",
     "missing_media": "Falta información de vídeo: {path}",
@@ -66,6 +71,16 @@ ParameterError = {
 
 Progress = {
     "gif": "Generando GIF",
+    "sheet_header": "Generando la cabecera de la hoja",
+    "sheet_snapshots": "Generando las capturas de la hoja",
+}
+
+Sheet = {
+    "audio": "Audio",
+    "duration": "Duración",
+    "file": "Archivo",
+    "size": "Tamaño",
+    "video": "Vídeo",
 }
 
 
