@@ -1,3 +1,4 @@
+import re
 from dataclasses import dataclass
 from datetime import timedelta
 from pathlib import Path
@@ -102,7 +103,12 @@ def _process_time(
     def _parse_to_timedelta() -> timedelta:
         """Convierte str ('hh:mm:ss', 'mm:ss', 'ss') a timedelta."""
         parts = time_str.split(":")
-        if not all(p.isdigit() for p in parts):
+        if not parts:
+            raise InvalidTimeFormatError()
+        *measured, seconds = parts
+        if not all(re.fullmatch(r"\d+", p) for p in measured):
+            raise InvalidTimeFormatError()
+        if not re.fullmatch(r"\d+(?:\.\d+)?", seconds):
             raise InvalidTimeFormatError()
         match tuple(map(float, parts)):
             case (hours, minutes, seconds):

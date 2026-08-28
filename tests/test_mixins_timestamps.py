@@ -1,4 +1,4 @@
-"""Tests para los mixins de marcas de tiempo (pymedia.models.mixins.timestamps_mixin)."""
+"""Tests de mixins de marcas de tiempo (pymedia.models.mixins.timestamps_mixin)."""
 
 from datetime import timedelta
 
@@ -160,20 +160,18 @@ class TestToTimestampEndCmd:
             mixin.to_timestamp_end_cmd()
 
 
-@pytest.mark.xfail(
-    reason="Bug: isdigit() impide los segundos fraccionarios pese a usar float()",
-    strict=False,
+@pytest.mark.parametrize(
+    ("start", "expected"),
+    [
+        ("5.5", timedelta(seconds=5.5)),
+        ("01:30.5", timedelta(minutes=1, seconds=30.5)),
+    ],
 )
-def test_fractional_seconds_should_be_allowed():
-    """Los segundos fraccionarios deberían funcionar, como en ffmpeg.
-
-    Ver timestamps_mixin._parse_to_timedelta: el guard `p.isdigit()` rechaza
-    '5.5' o '01:30.5' aunque el parsing posterior use `float()`. El test
-    documenta el fallo actual (XFAIL); se elimina el marcador al arreglarlo.
-    """
+def test_fractional_seconds_should_be_allowed(start, expected):
+    """Los segundos fraccionarios funcionan, como en ffmpeg."""
     mixin = TimestampStartMixin()
     mixin.media = _media(duration=timedelta(minutes=10))
 
-    mixin.create_timestamp_start(start="5.5")
+    mixin.create_timestamp_start(start=start)
 
-    assert mixin.timestamp_start == timedelta(seconds=5.5)
+    assert mixin.timestamp_start == expected
