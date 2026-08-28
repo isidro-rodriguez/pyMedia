@@ -3,6 +3,7 @@ from pathlib import Path
 from typing import Self
 
 import platformdirs
+from rich.console import Console, RenderableType
 from rich.logging import RichHandler
 from rich.pretty import pretty_repr
 
@@ -17,6 +18,7 @@ class Logger:
     """
 
     _configured = False
+    _console = Console()
 
     def __init__(self, logger: logging.Logger) -> None:
         self._logger = logger
@@ -39,6 +41,7 @@ class Logger:
         root.setLevel(level)
 
         console = RichHandler(
+            console=cls._console,
             show_time=False,
             show_path=debug,
             markup=True,
@@ -109,3 +112,11 @@ class Logger:
 
         kwargs = {name: _prettify(value) for name, value in kwargs.items()}
         self._logger.debug(locales.Debug[key].format(**kwargs))
+
+    def print(self, renderable: RenderableType) -> None:
+        """Imprime un objeto Rich (Table, Panel, etc.) por consola.
+
+        Args:
+            renderable: Objeto Rich a imprimir (Table, Panel, texto...).
+        """
+        self._console.print(renderable)

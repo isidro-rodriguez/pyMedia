@@ -28,7 +28,14 @@ def probe(path: Path, logger: Logger) -> dict:
         str(path),
     ]
 
-    result = subprocess.run(args=cmd, capture_output=True, text=True, check=True)
+    result = subprocess.run(
+        args=cmd,
+        capture_output=True,
+        text=True,
+        check=True,
+        encoding="utf-8",
+        errors="strict",
+    )
     data = json.loads(result.stdout)
     logger.debug(key="ffprobe_data", data=data)
 

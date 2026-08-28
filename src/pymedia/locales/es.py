@@ -2,6 +2,7 @@ Cli = {
     "debug_help": "Nivel de log DEBUG",
     "fps_gif_help": "Fotogramas por segundo del GIF animado.",
     "gif_help": "Genera un GIF animado a partir del vídeo indicado",
+    "info_help": "Muestra la información de metadatos del vídeo indicado.",
     "invalid_path": "{path} no es un archivo.",
     "output_directory_help": "Directorio de salida para varios archivos de salida.",
     "output_help": "Nombre del archivo de salida.",
@@ -57,6 +58,35 @@ Info = {
 }
 
 
+Metadata = {
+    "audio": "Audio",
+    "bitrate": "Bitrate",
+    "bitrate_bps": "{bit_rate:,} bps",
+    "channels": "Canales",
+    "codec": "Códec",
+    "container": "Contenedor",
+    "default": "Defecto",
+    "duration": "Duración",
+    "field": "Campo",
+    "file": "Archivo",
+    "forced": "Forzado",
+    "fps": "FPS",
+    "general": "General",
+    "language": "Lenguaje",
+    "not_available": "-",
+    "panel_title": "Metadatos",
+    "resolution": "Resolución",
+    "sample_rate": "Sample rate",
+    "size": "Tamaño",
+    "size_gb": "{value} GB ({raw} bytes)",
+    "size_mb": "{value} MB ({raw} bytes)",
+    "subtitle_title": "Título",
+    "subtitles": "Subtítulos",
+    "value": "Valor",
+    "video": "Vídeo",
+}
+
+
 ParameterError = {
     "conflictive_output_parameters": "No se permite especificar una ruta de salida y un directorio de salida a la vez.",
     "conflictive_output_ammount_parameter": "No se permite especificar una salida con varias entradas; usa el directorio de salida en su lugar.",
@@ -73,14 +103,6 @@ Progress = {
     "gif": "Generando GIF",
     "sheet_header": "Generando la cabecera de la hoja",
     "sheet_snapshots": "Generando las capturas de la hoja",
-}
-
-Sheet = {
-    "audio": "Audio",
-    "duration": "Duración",
-    "file": "Archivo",
-    "size": "Tamaño",
-    "video": "Vídeo",
 }
 
 

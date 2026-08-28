@@ -13,7 +13,7 @@ def parse_fraction(value: str | None) -> Fraction | None:
         return None
 
 
-def parse_quantity(value: int | float | Fraction, lang: str) -> str:
+def parse_quantity(value: int | float | Fraction, locale: str) -> str:
     if isinstance(value, Fraction):
         if value.denominator == 1:
             value = value.numerator
@@ -25,7 +25,7 @@ def parse_quantity(value: int | float | Fraction, lang: str) -> str:
     else:
         result = f"{value:,.3f}"
 
-    if lang == "en":
+    if locale == "en":
         return result
     return result.replace(",", "X").replace(".", ",").replace("X", ".")
 

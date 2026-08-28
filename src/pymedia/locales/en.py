@@ -1,7 +1,8 @@
 Cli = {
     "debug_help": "Log level DEBUG",
     "fps_gif_help": "Frames per second of the animated GIF.",
-    "gif_help": "Generates an animated GIF from the specified video",
+    "gif_help": "Generates an animated GIF from the specified video.",
+    "info_help": "Shows metadata information from selected video.",
     "invalid_path": "{path} is not a file.",
     "output_directory_help": "Output directory for multiple output files.",
     "output_help": "Output file name.",
@@ -53,7 +54,36 @@ ExecutionError = {
 
 Info = {
     "gif_success": "GIF generated successfully: {output}",
-    "sheet_success": "Sheet generated successfully: {output}",
+    "sheet_success": "Metadata generated successfully: {output}",
+}
+
+
+Metadata = {
+    "audio": "Audio",
+    "bitrate": "Bitrate",
+    "bitrate_bps": "{bit_rate:,} bps",
+    "channels": "Channels",
+    "codec": "Codec",
+    "container": "Container",
+    "default": "Default",
+    "duration": "Duration",
+    "field": "Field",
+    "file": "File",
+    "forced": "Forced",
+    "fps": "FPS",
+    "general": "General",
+    "language": "Language",
+    "not_available": "-",
+    "panel_title": "Metadata",
+    "resolution": "Resolution",
+    "sample_rate": "Sample rate",
+    "size": "Size",
+    "size_gb": "{value} GB ({raw} bytes)",
+    "size_mb": "{value} MB ({raw} bytes)",
+    "subtitle_title": "Title",
+    "subtitles": "Subtitles",
+    "value": "Value",
+    "video": "Video",
 }
 
 
@@ -73,14 +103,6 @@ Progress = {
     "gif": "Generating GIF",
     "sheet_header": "Generating sheet header",
     "sheet_snapshots": "Generating sheet snapshots",
-}
-
-Sheet = {
-    "audio": "Audio",
-    "duration": "Duration",
-    "file": "File",
-    "size": "Size",
-    "video": "Video",
 }
 
 

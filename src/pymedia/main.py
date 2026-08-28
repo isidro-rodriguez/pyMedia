@@ -1,3 +1,6 @@
+import io
+import sys
+
 import typer
 
 from pymedia.commands import register_all
@@ -24,6 +27,9 @@ def main(
 ) -> None:
     pass
 
+
+if sys.platform == "win32" and isinstance(sys.stdout, io.TextIOWrapper):
+    sys.stdout.reconfigure(encoding="utf-8")
 
 register_all(app)
 
