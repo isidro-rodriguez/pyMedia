@@ -1,3 +1,4 @@
+import tempfile
 from pathlib import Path
 
 from pymedia import locales
@@ -53,28 +54,31 @@ class SheetCommand(BatchCommand[SheetArguments, SheetParameters]):
         if params.media is None:
             raise MissingMediaError(path=str(params.input_single))
 
-        snapshots_cmd, header_cmd = sheet_cmd(params=params)
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            tile_tmp = Path(tmp_dir) / "tile_tmp.jpg"
 
-        if snapshots_cmd is None:
-            raise CommandGenerationError(command_name="generate_sheet_cmd")
-        self.logger.debug(key="ffmpeg_command", cmd=snapshots_cmd)
+            snapshots_cmd, header_cmd = sheet_cmd(params=params, tile_tmp=tile_tmp)
 
-        if header_cmd is None:
-            raise CommandGenerationError(command_name="generate_header_cmd")
-        self.logger.debug(key="ffmpeg_command", cmd=header_cmd)
+            if snapshots_cmd is None:
+                raise CommandGenerationError(command_name="generate_sheet_cmd")
+            self.logger.debug(key="ffmpeg_command", cmd=snapshots_cmd)
 
-        self.run_ffmpeg(
-            cmd=snapshots_cmd,
-            media=params.media,
-            description=locales.Progress["sheet_snapshots"],
-            stall_timeout=self.config.app.stall_timeout,
-        )
+            if header_cmd is None:
+                raise CommandGenerationError(command_name="generate_header_cmd")
+            self.logger.debug(key="ffmpeg_command", cmd=header_cmd)
 
-        self.run_ffmpeg(
-            cmd=header_cmd,
-            media=params.media,
-            description=locales.Progress["sheet_header"],
-            stall_timeout=self.config.app.stall_timeout,
-        )
+            self.run_ffmpeg(
+                cmd=snapshots_cmd,
+                media=params.media,
+                description=locales.Progress["sheet_snapshots"],
+                stall_timeout=self.config.app.stall_timeout,
+            )
+
+            self.run_ffmpeg(
+                cmd=header_cmd,
+                media=params.media,
+                description=locales.Progress["sheet_header"],
+                stall_timeout=self.config.app.stall_timeout,
+            )
 
         self.logger.info(key="sheet_success", output=params.output)

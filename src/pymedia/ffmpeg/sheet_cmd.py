@@ -143,7 +143,7 @@ def _generate_snapshots(params: SheetParameters, output: Path) -> list[str]:
 # -----------------------------------------------------------------------------
 
 
-def _generate_header(params: SheetParameters, input_single: Path) -> list[str]:
+def _generate_header(params: SheetParameters, image_input: Path) -> list[str]:
     def _truncate_list_display(prefix: str, items: list[str], max_len: int) -> str:
         base_template = f"{prefix} [{', '.join(items)}]"
         if len(base_template) <= max_len:
@@ -245,7 +245,7 @@ def _generate_header(params: SheetParameters, input_single: Path) -> list[str]:
         raise MissingMediaPropertyError(name="bit_rate")
 
     lines = [
-        f"File: {input_single.name}",
+        f"File: {params.input_single.name}",
         f"Size: {_build_size_display(media.size)} | "
         f"Duration: {_build_duration_display(media.duration)}",
         f"Video: {media.video.width}x{media.video.height}, {media.video.codec}, "
@@ -283,7 +283,7 @@ def _generate_header(params: SheetParameters, input_single: Path) -> list[str]:
         "ffmpeg",
         "-y",
         "-i",
-        str(input_single),
+        str(image_input),
         "-vf",
         ",".join(filters),
         str(params.output),
@@ -294,11 +294,12 @@ def _generate_header(params: SheetParameters, input_single: Path) -> list[str]:
 # -----------------------------------------------------------------------------
 
 
-def sheet_cmd(params: SheetParameters) -> list[list[str]]:
+def sheet_cmd(params: SheetParameters, tile_tmp: Path) -> list[list[str]]:
     """Composición de llamada ffmpeg para generar una hoja de captura encadenada.
 
     Args:
         params: Parámetros validados y parseados obtenidos de los argumentos de CLI.
+        tile_tmp: Ruta del fichero temporal intermedio (cuadrícula sin cabecera).
 
     Returns:
         cmd: comando de ffmpeg listo para consumo.
@@ -307,14 +308,12 @@ def sheet_cmd(params: SheetParameters) -> list[list[str]]:
         CommandGenerationError: Si problema en la generación de comandos.
     """
 
-    tile_tmp = Path("tile_tmp.jpg")
-
     snapshots_cmd = _generate_snapshots(params=params, output=tile_tmp)
 
     if snapshots_cmd is None:
         raise CommandGenerationError(command_name="snapshots_cmd")
 
-    header_cmd = _generate_header(params=params, input_single=tile_tmp)
+    header_cmd = _generate_header(params=params, image_input=tile_tmp)
 
     if header_cmd is None:
         raise CommandGenerationError(command_name="header_cmd")
