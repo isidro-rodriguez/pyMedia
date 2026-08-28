@@ -104,7 +104,7 @@ FpsGifOption = Annotated[
         "--fps",
         min=4,
         max=20,
-        rich_help_panel="BaseCommand options",
+        rich_help_panel="Command options",
         help=locales.Cli["fps_gif_help"],
     ),
 ]
@@ -114,7 +114,7 @@ PresetSheetOption = Annotated[
     PresetsSheetMode,
     typer.Option(
         "--preset",
-        rich_help_panel="BaseCommand options",
+        rich_help_panel="Command options",
         help=locales.Cli["preset_sheet_help"],
     ),
 ]
@@ -124,7 +124,7 @@ ResizeHeightOption = Annotated[
     int | None,
     typer.Option(
         "--height",
-        rich_help_panel="BaseCommand options",
+        rich_help_panel="Command options",
         help=locales.Cli["resize_height_help"],
     ),
 ]
@@ -134,7 +134,7 @@ ResizeWidthOption = Annotated[
     int | None,
     typer.Option(
         "--width",
-        rich_help_panel="BaseCommand options",
+        rich_help_panel="Command options",
         help=locales.Cli["resize_width_help"],
     ),
 ]
@@ -144,7 +144,7 @@ ResizeUpscaleOption = Annotated[
     bool,
     typer.Option(
         "--upscale",
-        rich_help_panel="BaseCommand options",
+        rich_help_panel="Command options",
         help=locales.Cli["resize_upscale_help"],
     ),
 ]
@@ -155,7 +155,7 @@ TimestampEndOption = Annotated[
     typer.Option(
         "--end",
         metavar="hh:mm:ss",
-        rich_help_panel="BaseCommand options",
+        rich_help_panel="Command options",
         help=locales.Cli["timestamp_end_help"],
     ),
 ]
@@ -166,7 +166,7 @@ TimestampStartOption = Annotated[
     typer.Option(
         "--start",
         metavar="hh:mm:ss",
-        rich_help_panel="BaseCommand options",
+        rich_help_panel="Command options",
         help=locales.Cli["timestamp_start_help"],
     ),
 ]

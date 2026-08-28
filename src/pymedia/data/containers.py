@@ -1,5 +1,9 @@
 """Listas globales de extensiones de contenedor soportadas por la aplicación."""
 
+# =============================================================================
+# Extensión genéricas de containers para validaciones de entrada
+# =============================================================================
+
 ANIMATED_IMAGE_CONTAINERS: tuple[str, ...] = (
     ".apng",
     ".avif",
@@ -137,3 +141,16 @@ VIDEO_CONTAINERS: tuple[str, ...] = (
     ".wtv",
 )
 """tuple[str, ...]: Extensiones de contenedores para archivos de vídeo."""
+
+# =============================================================================
+#  Extensiones de containers válidos para salidas de ffmpeg
+# =============================================================================
+
+
+OUTPUT_IMAGE_CONTAINERS: tuple[str, ...] = (
+    ".jpeg",
+    ".jpg",
+    ".png",
+    ".webp",
+)
+"""tuple[str, ...]: Extensiones de contenedores para imágenes de salida."""

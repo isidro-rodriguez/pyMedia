@@ -9,7 +9,7 @@ from pymedia.data.audio_codecs import AUDIO_CODECS
 from pymedia.data.containers import (
     ANIMATED_IMAGE_CONTAINERS,
     AUDIO_CONTAINERS,
-    IMAGE_CONTAINERS,
+    OUTPUT_IMAGE_CONTAINERS,
     SUBTITLE_CONTAINERS,
     VIDEO_CONTAINERS,
 )
@@ -208,11 +208,11 @@ def _validate_output(output: Path, media: Media, media_type: OutputMediaType) ->
                         supported=",".join(AUDIO_CODECS[audio_track.codec].containers),
                     )
         case OutputMediaType.IMAGE:
-            if output.suffix not in IMAGE_CONTAINERS:
+            if output.suffix not in OUTPUT_IMAGE_CONTAINERS:
                 raise InvalidContainerTypeError(
                     extension=output.suffix,
                     media_type=OutputMediaType.IMAGE.value,
-                    supported=",".join(IMAGE_CONTAINERS),
+                    supported=",".join(OUTPUT_IMAGE_CONTAINERS),
                 )
         case OutputMediaType.SUBTITLE:
             if output.suffix not in SUBTITLE_CONTAINERS:
