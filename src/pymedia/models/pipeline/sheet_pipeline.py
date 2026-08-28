@@ -68,6 +68,7 @@ class SheetParameters(InputSingleMixin, OutputBatchMixin, SheetPresetsMixin):
         params.create_output_batch(
             input_single=params.input_single,
             media=params.media,
+            output_directory=args.output_directory,
             media_type=OutputMediaType.IMAGE,
             output=args.output,
             affix="_sheet",

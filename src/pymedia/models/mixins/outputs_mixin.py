@@ -112,6 +112,8 @@ class OutputBatchMixin(_HasBatchMedia):
         Procesa y asigna la ruta o directorio de salida para un lote de entradas.
 
         Args:
+            input_single: Ruta al fichero a procesar.
+            media: Metadatos del fichero a procesar.
             media_type: Tipo de medio de salida esperado.
             output: Ruta de salida explícita, válida solo para lotes de un
                 único fichero.
@@ -137,7 +139,6 @@ class OutputBatchMixin(_HasBatchMedia):
             raise ConflictiveOutputParametersError()
         if output_directory is not None:
             self.output_directory = _process_output_directory(output_directory)
-            return
         self.output = _process_output(
             input_single=input_single,
             media_type=media_type,
@@ -145,6 +146,7 @@ class OutputBatchMixin(_HasBatchMedia):
             affix=affix,
             extension=extension,
             output=output,
+            output_directory=self.output_directory,
         )
 
 
@@ -265,13 +267,15 @@ def _process_output(
     affix: str | None = None,
     extension: str | None = None,
     output: Path | None = None,
+    output_directory: Path | None = None,
 ) -> Path:
     """Procesa la ruta del fichero de salida."""
 
     if output is not None:
         output = output.absolute()
     else:
-        output = Path(Path.cwd() / input_single.name).absolute()
+        parent = output_directory if output_directory is not None else Path.cwd()
+        output = Path(parent / input_single.name).absolute()
         if affix is not None:
             output = output.with_stem(f"{output.stem}{affix}")
         if extension is not None:
