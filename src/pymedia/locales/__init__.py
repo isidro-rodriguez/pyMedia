@@ -17,6 +17,7 @@ ExecutionError: dict[str, Any]
 Info: dict[str, Any]
 ParameterError: dict[str, Any]
 Progress: dict[str, Any]
+Sheet: dict[str, Any]
 ValidationError: dict[str, Any]
 Warnings: dict[str, Any]
 

@@ -5,13 +5,12 @@ from pathlib import Path
 import pytest
 
 from pymedia.errors import (
+    ConflictiveOutputAmmountParameterError,
     ConflictiveOutputParametersError,
     InvalidContainerTypeError,
     InvalidFileExtensionError,
     InvalidNameError,
-    MissingMediaError,
     MissingMediaPropertyError,
-    OutputParameterError,
 )
 from pymedia.models.enums import OutputMediaType
 from pymedia.models.media import Audio, Media, Video
@@ -35,7 +34,7 @@ def _audio(codec: str | None = "aac") -> Audio:
 
 def _media(video: Video | None = None, audio: Audio | None = None) -> Media:
     """Media de ayuda con vídeo h264 y audio opcional."""
-    return Media(video=video, audio=audio)
+    return Media(video=video, audio=[audio] if audio else None)
 
 
 def _single_mixin(
@@ -290,7 +289,10 @@ class TestOutputBatch:
 
         with pytest.raises(ConflictiveOutputParametersError):
             mixin.create_output_batch(
-                OutputMediaType.GIF,
+                input_single=Path("a.mp4"),
+                input_counter=1,
+                media=_media(),
+                media_type=OutputMediaType.GIF,
                 output=tmp_path / "o.gif",
                 output_directory=tmp_path / "dir",
             )
@@ -298,36 +300,52 @@ class TestOutputBatch:
     def test_output_rejected_with_multiple_inputs(self, tmp_path):
         mixin = _batch_mixin([Path("a.mp4"), Path("b.mp4")])
 
-        with pytest.raises(OutputParameterError):
-            mixin.create_output_batch(OutputMediaType.GIF, output=tmp_path / "o.gif")
-
-    def test_output_requires_media(self, tmp_path):
-        mixin = _batch_mixin([Path("a.mp4")], media_list=[None])
-
-        with pytest.raises(MissingMediaError):
-            mixin.create_output_batch(OutputMediaType.GIF, output=tmp_path / "o.gif")
+        with pytest.raises(ConflictiveOutputAmmountParameterError):
+            mixin.create_output_batch(
+                input_single=Path("a.mp4"),
+                input_counter=2,
+                media=_media(),
+                media_type=OutputMediaType.GIF,
+                output=tmp_path / "o.gif",
+            )
 
     def test_output_with_single_input(self, tmp_path):
         mixin = _batch_mixin([Path("a.mp4")])
 
-        mixin.create_output_batch(OutputMediaType.GIF, output=tmp_path / "o.gif")
+        mixin.create_output_batch(
+            input_single=Path("a.mp4"),
+            input_counter=1,
+            media=_media(),
+            media_type=OutputMediaType.GIF,
+            output=tmp_path / "o.gif",
+        )
 
         assert mixin.output == (tmp_path / "o.gif").absolute()
         assert mixin.output_directory is None
 
     def test_output_directory_created(self, tmp_path):
-        mixin = _batch_mixin([Path("a.mp4"), Path("b.mp4")])
+        mixin = _batch_mixin([Path("a.gif"), Path("b.gif")])
         target = tmp_path / "out"
 
-        mixin.create_output_batch(OutputMediaType.GIF, output_directory=target)
+        mixin.create_output_batch(
+            input_single=Path("a.gif"),
+            input_counter=2,
+            media=_media(),
+            media_type=OutputMediaType.GIF,
+            output_directory=target,
+        )
 
         assert mixin.output_directory == target
         assert target.is_dir()
 
     def test_output_directory_invalid_name(self, tmp_path):
-        mixin = _batch_mixin([Path("a.mp4"), Path("b.mp4")])
+        mixin = _batch_mixin([Path("a.gif"), Path("b.gif")])
 
         with pytest.raises(InvalidNameError):
             mixin.create_output_batch(
-                OutputMediaType.GIF, output_directory=tmp_path / "out<bad>"
+                input_single=Path("a.gif"),
+                input_counter=2,
+                media=_media(),
+                media_type=OutputMediaType.GIF,
+                output_directory=tmp_path / "out<bad>",
             )

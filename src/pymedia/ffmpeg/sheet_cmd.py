@@ -3,6 +3,7 @@ from datetime import timedelta
 from fractions import Fraction
 from pathlib import Path
 
+from pymedia import locales
 from pymedia.errors import (
     CommandGenerationError,
     MissingMediaError,
@@ -214,6 +215,7 @@ def _generate_header(params: SheetParameters, image_input: Path) -> list[str]:
 
     preset = params.preset_sheet
     media = params.media
+    video = media.video
 
     if params.input_single is None:
         raise MissingParameterError(name="input_single")
@@ -227,29 +229,29 @@ def _generate_header(params: SheetParameters, image_input: Path) -> list[str]:
         raise MissingMediaPropertyError(name="size")
     if media.duration is None:
         raise MissingMediaPropertyError(name="duration")
-    if media.video is None:
+    if video is None:
         raise MissingMediaPropertyError(name="video")
-    if media.video.width is None:
-        raise MissingMediaPropertyError(name="width")
-    if media.video.height is None:
-        raise MissingMediaPropertyError(name="height")
-    if media.video.codec is None:
-        raise MissingMediaPropertyError(name="codec")
-    if media.video.profile is None:
-        raise MissingMediaPropertyError(name="profile")
-    if media.video.pix_fmt is None:
-        raise MissingMediaPropertyError(name="pix_fmt")
-    if media.video.fps is None:
-        raise MissingMediaPropertyError(name="fps")
-    if media.video.bit_rate is None:
-        raise MissingMediaPropertyError(name="bit_rate")
+    if video.width is None:
+        raise MissingMediaPropertyError(name="video width")
+    if video.height is None:
+        raise MissingMediaPropertyError(name="video height")
+    if video.codec is None:
+        raise MissingMediaPropertyError(name="video codec")
+    if video.profile is None:
+        raise MissingMediaPropertyError(name="video profile")
+    if video.pix_fmt is None:
+        raise MissingMediaPropertyError(name="video pix_fmt")
+    if video.fps is None:
+        raise MissingMediaPropertyError(name="video fps")
+    if video.bit_rate is None:
+        raise MissingMediaPropertyError(name="video bit_rate")
 
     lines = [
-        f"File: {params.input_single.name}",
-        f"Size: {_build_size_display(media.size)} | "
-        f"Duration: {_build_duration_display(media.duration)}",
-        f"Video: {media.video.width}x{media.video.height}, {media.video.codec}, "
-        f"{media.video.pix_fmt}, {media.video.fps} fps, {media.video.bit_rate} kb/s",
+        f"{locales.Sheet['file']}: {params.input_single.name}",
+        f"{locales.Sheet['size']}: {_build_size_display(media.size)} | "
+        f"{locales.Sheet['duration']}: {_build_duration_display(media.duration)}",
+        f"{locales.Sheet['video']}: {video.width}x{video.height}, {video.codec} "
+        f"({video.profile}), {video.pix_fmt}, {video.fps} fps, {video.bit_rate} kb/s",
     ]
 
     if media.audio is not None:

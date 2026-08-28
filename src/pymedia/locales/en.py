@@ -75,6 +75,14 @@ Progress = {
     "sheet_snapshots": "Generating sheet snapshots",
 }
 
+Sheet = {
+    "audio": "Audio",
+    "duration": "Duration",
+    "file": "File",
+    "size": "Size",
+    "video": "Video",
+}
+
 
 ValidationError = {
     "crop_exceeds_dimensions": "Invalid crop dimensions: {crop_dimensions} >= original {video_dimensions}.",
