@@ -1,4 +1,5 @@
 from fractions import Fraction
+from pathlib import Path
 
 from pymedia.errors import PyMediaError
 
@@ -33,14 +34,10 @@ def require[T](value: T | None, exc: PyMediaError) -> T:
     return value
 
 
-def to_int(value: str | int | None) -> int | None:
-    """Convierte strings numéricos a int."""
-    if value is None:
-        return None
-    try:
-        return int(value)
-    except (ValueError, TypeError):
-        return None
+def to_ffmpeg_path(path: Path) -> str:
+    """Convierte una ruta a formato seguro para filtros ffmpeg (drawtext, etc.)."""
+    posix = path.as_posix()  # normaliza \ a / (no-op en Linux/Mac)
+    return posix.replace(":", r"\:")
 
 
 def to_float(value: str | float | None) -> float | None:
@@ -49,5 +46,15 @@ def to_float(value: str | float | None) -> float | None:
         return None
     try:
         return float(value)
+    except (ValueError, TypeError):
+        return None
+
+
+def to_int(value: str | int | None) -> int | None:
+    """Convierte strings numéricos a int."""
+    if value is None:
+        return None
+    try:
+        return int(value)
     except (ValueError, TypeError):
         return None

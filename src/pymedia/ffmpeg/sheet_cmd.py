@@ -11,6 +11,7 @@ from pymedia.errors import (
 )
 from pymedia.models.media import Audio, Subtitle
 from pymedia.models.pipeline.sheet_pipeline import SheetParameters
+from pymedia.utils import to_ffmpeg_path
 
 # Funciones auxiliares
 # -----------------------------------------------------------------------------
@@ -61,7 +62,7 @@ def _generate_snapshots(params: SheetParameters, output: Path) -> list[str]:
             raise MissingParameterError(name="preset")
         ts_margin = 4
         return (
-            f"drawtext=fontfile={preset.fontfile.as_posix()}:"
+            f"drawtext=fontfile='{to_ffmpeg_path(preset.fontfile)}':"
             f"text='{_escape_drawtext(timestamp_str)}':"
             f"fontsize={preset.timestamp_fontsize}:"
             f"fontcolor={preset.timestamp_color}:"
@@ -272,7 +273,7 @@ def _generate_header(params: SheetParameters, input_single: Path) -> list[str]:
     for i, line in enumerate(lines):
         y = preset.header_margin_top + i * line_height
         filters.append(
-            f"drawtext=fontfile={preset.fontfile.as_posix()}:"
+            f"drawtext=fontfile='{to_ffmpeg_path(preset.fontfile)}':"
             f"text='{_escape_drawtext(line)}':"
             f"fontsize={preset.fontsize}:fontcolor={preset.text_color}:"
             f"x={preset.header_margin_left}:y={y}"

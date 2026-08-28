@@ -1,9 +1,15 @@
+import dataclasses
 from dataclasses import dataclass
+from importlib.resources import files
 from pathlib import Path
+
+import platformdirs
 
 from pymedia.errors import MissingParameterError
 from pymedia.models.enums import PresetsSheetMode
 from pymedia.models.sheet_preset import PresetSheet
+
+_FONT_FILENAME = "SourceCodePro-Bold.ttf"
 
 _PRESETS: dict[str, PresetSheet] = {
     "fhd": PresetSheet(
@@ -20,7 +26,7 @@ _PRESETS: dict[str, PresetSheet] = {
         border_width=2,
         max_line_length=120,
         fontsize=22,
-        fontfile=Path("SourceCodePro-Bold.ttf"),
+        fontfile=Path(_FONT_FILENAME),
         text_color="0x222222",
         timestamp_fontsize=15,
         timestamp_color="white",
@@ -40,7 +46,7 @@ _PRESETS: dict[str, PresetSheet] = {
         border_color="0x222222",
         border_width=2,
         max_line_length=80,
-        fontfile=Path("SourceCodePro-Bold.ttf"),
+        fontfile=Path(_FONT_FILENAME),
         fontsize=14,
         text_color="0x222222",
         timestamp_fontsize=12,
@@ -61,7 +67,7 @@ _PRESETS: dict[str, PresetSheet] = {
         border_color="0x222222",
         border_width=2,
         max_line_length=50,
-        fontfile=Path("SourceCodePro-Bold.ttf"),
+        fontfile=Path(_FONT_FILENAME),
         fontsize=12,
         text_color="0x222222",
         timestamp_fontsize=11,
@@ -83,12 +89,14 @@ class SheetPresetsMixin:
     preset_sheet: PresetSheet | None = None
 
     def create_preset_sheet(self, preset: PresetsSheetMode) -> None:
-        """Carga el estilo de hoja preajustado.
+        """Carga el estilo de hoja preajustado con la fuente instalada.
 
         Args:
             preset: Elección del estilo de hoja preajustado.
         """
-        self.preset_sheet = _PRESETS[preset.value]
+        base = _PRESETS[preset.value]
+        font_path = self._resolve_font_asset()
+        self.preset_sheet = dataclasses.replace(base, fontfile=font_path)
 
     @property
     def thumb_width(self) -> int:
@@ -105,3 +113,25 @@ class SheetPresetsMixin:
             preset.canvas_width - total_margins - total_gaps - total_borders
         )
         return available_width // preset.columns
+
+    @staticmethod
+    def _resolve_font_asset() -> Path:
+        """Devuelve la ruta de la fuente en el directorio de la app, instalándola si
+        falta.
+        """
+        assets_dir = (
+            Path(
+                platformdirs.user_config_dir(
+                    appname="pymedia", appauthor=False, roaming=True
+                )
+            )
+            / "assets"
+        )
+        font_path = assets_dir / _FONT_FILENAME
+
+        if not font_path.exists():
+            assets_dir.mkdir(parents=True, exist_ok=True)
+            data = files("pymedia.resources").joinpath(_FONT_FILENAME).read_bytes()
+            font_path.write_bytes(data)
+
+        return font_path
