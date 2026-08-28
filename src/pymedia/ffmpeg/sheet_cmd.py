@@ -159,11 +159,11 @@ def _generate_snapshots(params: SheetParameters, output: Path) -> list[str]:
 
 def _generate_header(params: SheetParameters, image_input: Path) -> list[str]:
     """Genera el comando FFmpeg para superponer la cabecera con metadatos sobre la
-    cuadrícula.
-    """
+    cuadrícula de forma resiliente a propiedades ausentes."""
 
     def _truncate_list_display(prefix: str, items: list[str], max_len: int) -> str:
-        """Trunca la lista agregando puntos suspensivos si supera el ancho máximo."""
+        """Recorta la cadena de texto en cabecera si excede cierta longitud según el
+        preset utilizado por el usuario."""
         base_template = f"{prefix} [{', '.join(items)}]"
         if len(base_template) <= max_len:
             return base_template
@@ -178,9 +178,7 @@ def _generate_header(params: SheetParameters, image_input: Path) -> list[str]:
         return f"{prefix} [{', '.join(acc)}, ...]"
 
     def _build_size_display(size_bytes: int) -> str:
-        """Formatea el tamaño del archivo en unidades legibles (GB/MB) e incluye el
-        total en bytes.
-        """
+        """Formatea el texto que muestra el tamaño del vídeo."""
         lang = detect_language()
         size_gb = parse_quantity(value=size_bytes / 1024**3, lang=lang)
         size_mb = parse_quantity(value=size_bytes / 1024**2, lang=lang)
@@ -190,10 +188,12 @@ def _generate_header(params: SheetParameters, image_input: Path) -> list[str]:
         return f"{size_mb} MB ({size_bt} bytes)"
 
     def _build_audio_line(tracks: list[Audio], max_len: int) -> str | None:
-        """Construye la línea informativa de las pistas de audio para la cabecera."""
+        """Formatea el texto que muestra las pistas de audio del vídeo."""
 
-        def _format_channels(channels: int) -> str:
-            """Convierte el número de canales a su denominación estándar."""
+        def _format_channels(channels: int | None) -> str:
+            """Formatea los canales de audio."""
+            if channels is None:
+                return "unk"
             mapping = {1: "mono", 2: "stereo", 6: "5.1", 8: "7.1"}
             return mapping.get(channels, f"{channels}ch")
 
@@ -201,79 +201,92 @@ def _generate_header(params: SheetParameters, image_input: Path) -> list[str]:
             return None
         formatted_items = []
         for t in tracks:
-            if t.channels is None:
-                raise MissingParameterError(name="track channels")
-            if t.language is None:
-                raise MissingParameterError(name="track language")
-            if t.codec is None:
-                raise MissingParameterError(name="track codec")
+            lang_str = t.language or "und"
+            codec_str = t.codec or "audio"
             ch_str = _format_channels(t.channels)
-            formatted_items.append(f"{t.language} ({t.codec} {ch_str})")
+            formatted_items.append(f"{lang_str} ({codec_str} {ch_str})")
         prefix = f"Audio: {len(tracks)} tracks"
         return _truncate_list_display(prefix, formatted_items, max_len)
 
     def _build_subtitles_line(subtitles: list[Subtitle], max_len: int) -> str | None:
-        """Construye línea informativa de las pistas de subtítulos para la cabecera."""
+        """Formatea el texto que muestra las pistas de subtítulos del vídeo."""
         if not subtitles:
             return None
-        subs: list[str] = []
-        for sub in subtitles:
-            if sub.language is None:
-                raise MissingParameterError(name="subtitle language")
-            subs.append(sub.language)
+        subs = [sub.language or "und" for sub in subtitles]
         prefix = f"Subtitles: {len(subtitles)} tracks"
         return _truncate_list_display(prefix, subs, max_len)
 
     preset = params.preset_sheet
     media = params.media
+
+    # Validaciones críticas de estructura básica
     if params.input_single is None:
         raise MissingParameterError(name="input_single")
     if media is None:
         raise MissingMediaError(path=str(params.input_single))
-    video = media.video
     if params.output is None:
         raise MissingParameterError(name="output")
     if preset is None:
         raise MissingParameterError(name="preset")
-    if media.size is None:
-        raise MissingMediaPropertyError(name="size")
-    if media.duration is None:
-        raise MissingMediaPropertyError(name="duration")
-    if video is None:
-        raise MissingMediaPropertyError(name="video")
-    if video.width is None:
-        raise MissingMediaPropertyError(name="video width")
-    if video.height is None:
-        raise MissingMediaPropertyError(name="video height")
-    if video.codec is None:
-        raise MissingMediaPropertyError(name="video codec")
-    if video.profile is None:
-        raise MissingMediaPropertyError(name="video profile")
-    if video.pix_fmt is None:
-        raise MissingMediaPropertyError(name="video pix_fmt")
-    if video.fps is None:
-        raise MissingMediaPropertyError(name="video fps")
-    if video.bit_rate is None:
-        raise MissingMediaPropertyError(name="video bit_rate")
 
-    bit_rate = parse_quantity(value=video.bit_rate, lang=detect_language())
+    video = media.video
+    if video is None or video.width is None or video.height is None:
+        raise MissingMediaPropertyError(name="width/height")
 
-    lines = [
-        f"{locales.Sheet['file']}: {params.input_single.name}",
-        f"{locales.Sheet['size']}: {_build_size_display(media.size)} | "
-        f"{locales.Sheet['duration']}: {_build_duration_display(media.duration)}",
-        f"{locales.Sheet['video']}: {video.width}x{video.height}, {video.codec} "
-        f"({video.profile}), {video.pix_fmt}, {video.fps} fps, {bit_rate} kb/s",
-    ]
+    # Construcción dinámica de detalles de vídeo (manejando opcionales)
+    video_parts = [f"{video.width}x{video.height}"]
 
-    if media.audio is not None:
+    if video.codec:
+        codec_info = video.codec
+        if video.profile:
+            codec_info += f" ({video.profile})"
+        video_parts.append(codec_info)
+
+    if video.pix_fmt:
+        video_parts.append(video.pix_fmt)
+
+    if video.fps:
+        video_parts.append(f"{video.fps} fps")
+
+    # Bitrate: Usar el explícito, o calcularlo aproximadamente por tamaño/duración
+    bit_rate_val = video.bit_rate
+    if (
+        bit_rate_val is None
+        and media.size
+        and media.duration
+        and media.duration.total_seconds() > 0
+    ):
+        bit_rate_val = (media.size * 8) / (media.duration.total_seconds() * 1000)
+
+    if bit_rate_val:
+        bit_rate_str = parse_quantity(value=bit_rate_val, lang=detect_language())
+        video_parts.append(f"{bit_rate_str} kb/s")
+
+    # Ensamblado de líneas
+    lines = [f"{locales.Sheet['file']}: {params.input_single.name}"]
+
+    size_dur_parts = []
+    if media.size:
+        size_dur_parts.append(
+            f"{locales.Sheet['size']}: {_build_size_display(media.size)}"
+        )
+    if media.duration:
+        size_dur_parts.append(
+            f"{locales.Sheet['duration']}: {_build_duration_display(media.duration)}"
+        )
+    if size_dur_parts:
+        lines.append(" | ".join(size_dur_parts))
+
+    lines.append(f"{locales.Sheet['video']}: {', '.join(video_parts)}")
+
+    if media.audio:
         audio_line = _build_audio_line(
             tracks=media.audio, max_len=preset.max_line_length
         )
         if audio_line:
             lines.append(audio_line)
 
-    if media.subtitles is not None:
+    if media.subtitles:
         sub_line = _build_subtitles_line(
             subtitles=media.subtitles, max_len=preset.max_line_length
         )
@@ -320,7 +333,7 @@ def sheet_cmd(params: SheetParameters, tile_tmp: Path) -> list[list[str]]:
         list[list[str]]: Lista de comandos ffmpeg listos para su ejecución secuencial.
 
     Raises:
-        CommandGenerationError: Si ocurre un problema en la generación de los comandos.
+        CommandGenerationError: Cuando ocurre un problema en generación de comandos.
         MissingParameterError: Si falta algún parámetro requerido (preset,
             input_single, output, pista de audio o subtítulo).
         MissingMediaError: Si el objeto de metadatos del medio es None.
