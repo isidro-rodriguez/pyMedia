@@ -59,6 +59,7 @@ Info = {
 
 ParameterError = {
     "conflictive_output_parameters": "It is not allowed to specify an output path and an output directory.",
+    "conflictive_output_ammount_parameter": "It is not allowed to specify an output with multiple inputs, use output directory instead.",
     "conflictive_resize_dimensions_parameters": "It is not allowed to specify width and height together.",
     "missing_argument": "Missing argument: {argument}",
     "missing_media": "Missing media information: {path}",

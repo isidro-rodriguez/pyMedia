@@ -67,6 +67,7 @@ class SheetParameters(InputSingleMixin, OutputBatchMixin, SheetPresetsMixin):
             raise MissingParameterError(name="media")
         params.create_output_batch(
             input_single=params.input_single,
+            input_counter=len(args.input_list),
             media=params.media,
             output_directory=args.output_directory,
             media_type=OutputMediaType.IMAGE,

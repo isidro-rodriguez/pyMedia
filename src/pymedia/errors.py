@@ -100,6 +100,10 @@ class ParameterError(PyMediaError):
     level = "ERROR"
 
 
+class ConflictiveOutputAmmountParameterError(ParameterError):
+    message_key = "conflictive_output_ammount_parameter"
+
+
 class ConflictiveOutputParametersError(ParameterError):
     message_key = "conflictive_output_parameters"
 

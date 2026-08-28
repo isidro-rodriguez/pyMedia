@@ -16,6 +16,7 @@ from pymedia.data.containers import (
 from pymedia.data.video_codecs import VIDEO_CODECS
 from pymedia.errors import (
     CannotCreateDirectoryError,
+    ConflictiveOutputAmmountParameterError,
     ConflictiveOutputParametersError,
     InvalidContainerTypeError,
     InvalidFileExtensionError,
@@ -101,6 +102,7 @@ class OutputBatchMixin(_HasBatchMedia):
     def create_output_batch(
         self,
         input_single: Path,
+        input_counter: int,
         media: Media,
         media_type: OutputMediaType,
         output: Path | None = None,
@@ -113,6 +115,8 @@ class OutputBatchMixin(_HasBatchMedia):
 
         Args:
             input_single: Ruta al fichero a procesar.
+            input_counter: Número de ficheros a procesar para validar si se puede
+                indicar parámetro output.
             media: Metadatos del fichero a procesar.
             media_type: Tipo de medio de salida esperado.
             output: Ruta de salida explícita, válida solo para lotes de un
@@ -125,7 +129,7 @@ class OutputBatchMixin(_HasBatchMedia):
         Raises:
             ConflictiveOutputParametersError: Si se indican output y
                 output_directory a la vez.
-            OutputParameterError: Si se indica output con más de un
+            ConflictiveOutputAmmountParameterError: Si se indica output con más de un
                 fichero de entrada.
             MissingMediaError: Si se indica output sin proporcionar media.
             MissingMediaPropertyError: Si no se pudo obtener un property relevante.
@@ -137,6 +141,8 @@ class OutputBatchMixin(_HasBatchMedia):
         """
         if output is not None and output_directory is not None:
             raise ConflictiveOutputParametersError()
+        if output is not None and input_counter > 1:
+            raise ConflictiveOutputAmmountParameterError()
         if output_directory is not None:
             self.output_directory = _process_output_directory(output_directory)
         self.output = _process_output(
@@ -175,7 +181,6 @@ def _process_output_directory(directory: Path) -> Path:
     return directory
 
 
-# TODO: validar las pistas de audio como listas en vez de singles
 def _validate_output(output: Path, media: Media, media_type: OutputMediaType) -> None:
     """Comprueba el fichero de salida tenga una extensión de animación válida."""
 
