@@ -7,7 +7,6 @@ Uso:
     uv run python scripts/backup.py
 """
 
-import os
 import pathlib
 import zipfile
 
@@ -34,7 +33,7 @@ def _limpiar_pycache() -> int:
     return eliminados
 
 
-def _crear_zip() -> tuple[int, int]:
+def _crear_zip() -> None:
     """Crea el zip con directorios y ficheros de raíz. Devuelve (dirs, ficheros)."""
     with zipfile.ZipFile(BACKUP_PATH, "w", zipfile.ZIP_DEFLATED) as zf:
         for nombre_dir in DIRS:
@@ -62,8 +61,8 @@ def main() -> None:
         BACKUP_PATH.unlink()
     _crear_zip()
 
-    tamaño = BACKUP_PATH.stat().st_size
-    print(f"  {BACKUP_PATH} ({tamaño:,} bytes)")
+    size = BACKUP_PATH.stat().st_size
+    print(f"  {BACKUP_PATH} ({size:,} bytes)")
 
 
 if __name__ == "__main__":
