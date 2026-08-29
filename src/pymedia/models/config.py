@@ -6,10 +6,10 @@ from pathlib import Path
 
 import platformdirs
 
-from pymedia import locales
 from pymedia.data.audio_codecs import AUDIO_CODECS
 from pymedia.data.video_codecs import VIDEO_CODECS
 from pymedia.errors import InvalidConfigError
+from pymedia.locales import _
 
 
 class AudioCodec(Enum):
@@ -191,9 +191,12 @@ class Config:
         valid_video_codecs = {v.value for v in VideoCodec}
         if video_codec not in valid_video_codecs:
             errors.append(
-                locales.ConfigValidation["invalid_video_codec"].format(
-                    expected=", ".join(sorted(valid_video_codecs))
+                "\n"
+                + _(
+                    "Invalid configuration setting: encode.video_codec is expected "
+                    "one of: %(expected)s."
                 )
+                % {"expected": ", ".join(sorted(valid_video_codecs))}
             )
 
         # encode.video_preset
@@ -202,9 +205,12 @@ class Config:
             presets = VIDEO_CODECS[video_codec].presets
             if presets is not None and video_preset not in presets:
                 errors.append(
-                    locales.ConfigValidation["invalid_video_preset"].format(
-                        expected=", ".join(presets)
+                    "\n"
+                    + _(
+                        "Invalid configuration setting: encode.video_preset is "
+                        "expected one of: %(expected)s."
                     )
+                    % {"expected": ", ".join(presets)}
                 )
 
         # encode.video_crf
@@ -213,9 +219,12 @@ class Config:
             crf = VIDEO_CODECS[video_codec].crf
             if crf is not None and not crf[0] <= video_crf <= crf[1]:
                 errors.append(
-                    locales.ConfigValidation["invalid_video_crf"].format(
-                        min=crf[0], max=crf[1]
+                    "\n"
+                    + _(
+                        "Invalid configuration setting: encode.video_crf is expected "
+                        "between %(min)s and %(max)s."
                     )
+                    % {"min": crf[0], "max": crf[1]}
                 )
 
         # encode.audio_codec
@@ -223,9 +232,12 @@ class Config:
         valid_audio_codecs = {a.value for a in AudioCodec}
         if audio_codec not in valid_audio_codecs:
             errors.append(
-                locales.ConfigValidation["invalid_audio_codec"].format(
-                    expected=", ".join(sorted(valid_audio_codecs))
+                "\n"
+                + _(
+                    "Invalid configuration setting: encode.audio_codec is expected "
+                    "one of: %(expected)s."
                 )
+                % {"expected": ", ".join(sorted(valid_audio_codecs))}
             )
 
         # encode.audio_bit_rate
@@ -234,9 +246,12 @@ class Config:
             bit_rates = AUDIO_CODECS[audio_codec].bit_rates
             if bit_rates is not None and audio_bit_rate not in bit_rates:
                 errors.append(
-                    locales.ConfigValidation["invalid_audio_bit_rate"].format(
-                        expected=", ".join(bit_rates)
+                    "\n"
+                    + _(
+                        "Invalid configuration setting: encode.audio_bit_rate is "
+                        "expected one of: %(expected)s."
                     )
+                    % {"expected": ", ".join(bit_rates)}
                 )
 
         # conflictive_concat.height
@@ -244,9 +259,12 @@ class Config:
         valid_height = {r.value for r in Height}
         if height not in valid_height:
             errors.append(
-                locales.ConfigValidation["invalid_height"].format(
-                    expected=", ".join(sorted(valid_height))
+                "\n"
+                + _(
+                    "Invalid configuration setting: conflictive_concat.height is "
+                    "expected one of: %(expected)s."
                 )
+                % {"expected": ", ".join(sorted(valid_height))}
             )
 
         # conflictive_concat.fps
@@ -254,9 +272,12 @@ class Config:
         valid_fps = {f.value for f in TargetFPS}
         if fps not in valid_fps:
             errors.append(
-                locales.ConfigValidation["invalid_fps"].format(
-                    expected=", ".join(sorted(valid_fps))
+                "\n"
+                + _(
+                    "Invalid configuration setting: conflictive_concat.fps is "
+                    "expected one of: %(expected)s."
                 )
+                % {"expected": ", ".join(sorted(valid_fps))}
             )
 
         # conflictive_concat.channels
@@ -264,9 +285,12 @@ class Config:
         valid_channels = {c.value for c in Channels}
         if channels not in valid_channels:
             errors.append(
-                locales.ConfigValidation["invalid_channels"].format(
-                    expected=", ".join(sorted(valid_channels))
+                "\n"
+                + _(
+                    "Invalid configuration setting: conflictive_concat.channels is "
+                    "expected one of: %(expected)s."
                 )
+                % {"expected": ", ".join(sorted(valid_channels))}
             )
 
         # app.language
@@ -274,9 +298,12 @@ class Config:
         valid_languages = {lang.value for lang in Language}
         if language not in valid_languages:
             errors.append(
-                locales.ConfigValidation["invalid_language"].format(
-                    expected=", ".join(sorted(valid_languages))
+                "\n"
+                + _(
+                    "Invalid configuration setting: app.language is expected one of: "
+                    "%(expected)s."
                 )
+                % {"expected": ", ".join(sorted(valid_languages))}
             )
 
         # app.default_container
@@ -290,15 +317,24 @@ class Config:
             ):
                 common = sorted(set(video_containers) & set(audio_containers))
                 errors.append(
-                    locales.ConfigValidation["invalid_default_container"].format(
-                        expected=", ".join(common)
+                    "\n"
+                    + _(
+                        "Invalid configuration setting: encode.default_container is "
+                        "expected one of: %(expected)s."
                     )
+                    % {"expected": ", ".join(common)}
                 )
 
         # app.stall_timeout
         stall_timeout = app["stall_timeout"]
         if stall_timeout is not None and not 30 <= stall_timeout <= 600:
-            errors.append(locales.ConfigValidation["invalid_stall_timeout"].format())
+            errors.append(
+                "\n"
+                + _(
+                    "Invalid configuration setting: app.stall_timeout is expected to "
+                    "an integer between 30 to 600."
+                )
+            )
 
         if errors:
             raise InvalidConfigError(message="; ".join(errors))

@@ -7,6 +7,7 @@ from pymedia.errors import (
     ConflictiveResizeDimensionsParametersError,
     MissingMediaPropertyError,
 )
+from pymedia.locales import _
 from pymedia.logger import Logger
 from pymedia.models.media import Media
 
@@ -119,12 +120,20 @@ class ResizeMixin(_HasSingleMedia):
                 raise MissingMediaPropertyError(name="width")
 
             if resize == media.video.width:
-                logger.warning(key="resize_rejected_equal", dimension="width")
+                logger.warning(
+                    _("Resize rejected cause %(dimension)s is equal."),
+                    dimension="width",
+                )
                 return None
 
             if resize > media.video.width and upscale is False:
                 logger.warning(
-                    key="upscale_rejected", target=resize, source=media.video.width
+                    _(
+                        "Resize rejected cause no_upscale is True and target "
+                        "%(target)s is greater than source %(source)s."
+                    ),
+                    target=resize,
+                    source=media.video.width,
                 )
                 return None
 
@@ -135,12 +144,20 @@ class ResizeMixin(_HasSingleMedia):
                 raise MissingMediaPropertyError(name="height")
 
             if resize == media.video.height:
-                logger.warning(key="resize_rejected_equal", dimension="height")
+                logger.warning(
+                    _("Resize rejected cause %(dimension)s is equal."),
+                    dimension="height",
+                )
                 return None
 
             if resize > media.video.height and upscale is False:
                 logger.warning(
-                    key="upscale_rejected", target=resize, source=media.video.height
+                    _(
+                        "Resize rejected cause no_upscale is True and target "
+                        "%(target)s is greater than source %(source)s."
+                    ),
+                    target=resize,
+                    source=media.video.height,
                 )
                 return None
 

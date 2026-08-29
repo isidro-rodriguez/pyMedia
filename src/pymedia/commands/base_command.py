@@ -9,8 +9,8 @@ from typing import TypeVar
 import typer
 from rich.progress import Progress
 
-from pymedia import locales
 from pymedia.errors import CommandExecutionError, CommandTimeoutError
+from pymedia.locales import _
 from pymedia.logger import Logger
 from pymedia.models.config import Config
 from pymedia.models.enums import OverwriteMode
@@ -84,7 +84,7 @@ class BaseCommand[ArgsT, ParamsT](ABC):
         Args:
             app: Instancia de la aplicación Typer donde se registra el comando.
         """
-        app.command(name=cls.name, help=locales.Cli[f"{cls.name}_help"])(cls.cli)
+        app.command(name=cls.name, help=getattr(cls, "help", None))(cls.cli)
 
     @staticmethod
     def resolve_overwrite(params: ParamsT) -> bool:
@@ -99,9 +99,7 @@ class BaseCommand[ArgsT, ParamsT](ABC):
         if not params.output.exists():
             return True
 
-        overwrite = typer.confirm(
-            locales.Cli["overwrite_confirm"].format(file_path=params.output)
-        )
+        overwrite = typer.confirm(_("Output file already exists. Overwrite?"))
         if not overwrite:
             return False
 
@@ -110,7 +108,11 @@ class BaseCommand[ArgsT, ParamsT](ABC):
 
     @staticmethod
     def run_ffmpeg(
-        cmd: list[str], media: Media, description: str, stall_timeout: int
+        cmd: list[str],
+        media: Media,
+        description: str,
+        stall_timeout: int,
+        command_name: str | None = None,
     ) -> None:
         """Ejecuta el cmd ffmpeg generado mientras registra la salida para
         mostrar una barra de progreso.
@@ -118,9 +120,9 @@ class BaseCommand[ArgsT, ParamsT](ABC):
         Args:
             cmd: Comando ffmpeg ya construido, listo para ejecutar.
             media: Datos del vídeo, usados para conocer la duración total.
-            description: Mensaje a mostrar junto a la barra de progreso
-                (el nombre del comando).
+            description: Mensaje ya traducido a mostrar junto a la barra.
             stall_timeout: Tiempo de espera en caso de comando ffmpeg bloqueado.
+            command_name: Nombre interno del comando para los mensajes de error.
 
         Raises:
             CommandExecutionError: Si falla el cmd o se bloquea.
@@ -138,7 +140,7 @@ class BaseCommand[ArgsT, ParamsT](ABC):
             proc.wait()
             stderr_thread.join()
             stdout_thread.join()
-            raise CommandTimeoutError(command_name=description)
+            raise CommandTimeoutError(command_name=command_name or description)
 
         proc = subprocess.Popen(
             args=cmd,
@@ -193,7 +195,7 @@ class BaseCommand[ArgsT, ParamsT](ABC):
 
         if proc.returncode != 0:
             raise CommandExecutionError(
-                command_name=description, error="".join(stderr_lines)
+                command_name=command_name or description, error="".join(stderr_lines)
             )
 
 
@@ -232,7 +234,9 @@ class SingleCommand(BaseCommand[ArgsT, ParamsT], ABC):
         instance = cls(args, config)
         instance.process_parameters()
         if not instance.resolve_overwrite(params=instance.params):
-            cls.logger.warning(key="overwrite_skipped")
+            cls.logger.warning(
+                _("BaseCommand skipped since output file already exists.")
+            )
             return
         instance.process_cmd()
 
@@ -277,6 +281,8 @@ class BatchCommand(BaseCommand[ArgsT, list[ParamsT]], ABC):
             instance.params.append(params_single)
         for params_single in instance.params:
             if not instance.resolve_overwrite(params=params_single):
-                cls.logger.warning(key="overwrite_skipped")
+                cls.logger.warning(
+                    _("BaseCommand skipped since output file already exists.")
+                )
                 continue
             instance.process_cmd(params=params_single)

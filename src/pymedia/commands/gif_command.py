@@ -1,4 +1,3 @@
-from pymedia import locales
 from pymedia.commands.base_command import BaseCommand, SingleCommand
 from pymedia.errors import (
     CommandGenerationError,
@@ -6,6 +5,7 @@ from pymedia.errors import (
     MissingParameterError,
 )
 from pymedia.ffmpeg.gif_cmd import gif_cmd
+from pymedia.locales import _
 from pymedia.models.enums import OverwriteMode
 from pymedia.models.pipeline.gif_pipeline import GifArguments, GifParameters
 from pymedia.typer_options import (
@@ -25,6 +25,7 @@ from pymedia.typer_options import (
 
 class GifCommand(SingleCommand[GifArguments, GifParameters]):
     name = "gif"
+    help = _("Generates an animated GIF from the specified video.")
 
     @staticmethod
     def cli(
@@ -61,13 +62,16 @@ class GifCommand(SingleCommand[GifArguments, GifParameters]):
             raise CommandGenerationError(command_name=self.name)
         self.cmd = cmd
 
-        self.logger.debug(key="ffmpeg_command", cmd=self.cmd)
+        self.logger.debug(_("FFmpeg command: %(cmd)s"), cmd=self.cmd)
 
         self.run_ffmpeg(
             cmd=self.cmd,
             media=self.params.media,
-            description=locales.Progress[self.name],
+            description=_("Generating GIF"),
             stall_timeout=self.config.app.stall_timeout,
+            command_name=self.name,
         )
 
-        self.logger.info(key="gif_success", output=self.params.output)
+        self.logger.info(
+            _("GIF generated successfully: %(output)s"), output=self.params.output
+        )

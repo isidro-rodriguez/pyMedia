@@ -1,7 +1,6 @@
 import tempfile
 from pathlib import Path
 
-from pymedia import locales
 from pymedia.commands.base_command import BaseCommand, BatchCommand
 from pymedia.errors import (
     CommandGenerationError,
@@ -9,6 +8,7 @@ from pymedia.errors import (
     MissingParameterError,
 )
 from pymedia.ffmpeg.sheet_cmd import sheet_cmd
+from pymedia.locales import _
 from pymedia.models.enums import OverwriteMode, PresetsSheetMode
 from pymedia.models.pipeline.sheet_pipeline import SheetArguments, SheetParameters
 from pymedia.typer_options import (
@@ -24,6 +24,7 @@ from pymedia.typer_options import (
 
 class SheetCommand(BatchCommand[SheetArguments, SheetParameters]):
     name = "sheet"
+    help = _("Generates a thumbnail grid sheet with media info header.")
 
     @staticmethod
     def cli(
@@ -61,24 +62,28 @@ class SheetCommand(BatchCommand[SheetArguments, SheetParameters]):
 
             if snapshots_cmd is None:
                 raise CommandGenerationError(command_name="generate_sheet_cmd")
-            self.logger.debug(key="ffmpeg_command", cmd=snapshots_cmd)
+            self.logger.debug(_("FFmpeg command: %(cmd)s"), cmd=snapshots_cmd)
 
             if header_cmd is None:
                 raise CommandGenerationError(command_name="generate_header_cmd")
-            self.logger.debug(key="ffmpeg_command", cmd=header_cmd)
+            self.logger.debug(_("FFmpeg command: %(cmd)s"), cmd=header_cmd)
 
             self.run_ffmpeg(
                 cmd=snapshots_cmd,
                 media=params.media,
-                description=locales.Progress["sheet_snapshots"],
+                description=_("Generating sheet snapshots"),
                 stall_timeout=self.config.app.stall_timeout,
+                command_name=self.name,
             )
 
             self.run_ffmpeg(
                 cmd=header_cmd,
                 media=params.media,
-                description=locales.Progress["sheet_header"],
+                description=_("Generating sheet header"),
                 stall_timeout=self.config.app.stall_timeout,
+                command_name=self.name,
             )
 
-        self.logger.info(key="sheet_success", output=params.output)
+        self.logger.info(
+            _("Metadata generated successfully: %(output)s"), output=params.output
+        )

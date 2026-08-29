@@ -1,237 +1,139 @@
-"""Tests de integridad del sistema de locales.
+"""Tests de integridad del sistema gettext de pyMedia.
 
-El local base es `en`. Se valida tanto el propio base (estructura, valores y
-formato de plantillas) como el conjunto de locales (paridad entre idiomas y
-uso de cada llave en el código fuente).
-
-Los módulos de idioma se cargan aislados del paquete `pymedia` para no
-disparar la detección de idioma global ni depender del entorno.
+Valida la plantilla POT, los catálogos PO y los compilados MO:
+- Existencia y validez sintáctica.
+- Unicidad de msgid y msgstr no vacío.
+- Paridad de placeholders `%(name)s` entre msgid y msgstr.
+- Compilación en memoria sin error.
+- Todo msgid del POT se usa en `src/`.
 """
 
-import importlib.util
+import io
 import re
 from pathlib import Path
-from string import Formatter
-from typing import Any
 
 import pytest
+from babel.messages.catalog import Catalog
+from babel.messages.extract import extract_from_dir
+from babel.messages.mofile import write_mo
+from babel.messages.pofile import read_po
 
-BASE_LOCALE = "en"
-
-# Categorías expuestas por `pymedia.locales` vía `locale_service.set_language()`.
-CATEGORIES = (
-    "Cli",
-    "Debug",
-    "Info",
-    "Progress",
-    "ConfigValidation",
-    "ExecutionError",
-    "ParameterError",
-    "ValidationError",
-    "Warnings",
-)
-
-_PACKAGE_DIR = Path(__file__).resolve().parents[1] / "src" / "pymedia" / "locales"
 _SRC_DIR = Path(__file__).resolve().parents[1] / "src"
+_LOCALEDIR = _SRC_DIR / "pymedia" / "locales"
+_DOMAIN = "pymedia"
+_LANGUAGES = ["es"]
 
 
-def _load_locale(lang: str) -> Any:
-    """Carga un módulo de idioma desde su archivo, sin tocar el paquete."""
-    spec = importlib.util.spec_from_file_location(
-        f"pymedia.locales.{lang}", _PACKAGE_DIR / f"{lang}.py"
-    )
-    module = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(module)
-    return module
+def _read_po(path: Path) -> Catalog:
+    """Lee un archivo PO y devuelve el catálogo."""
+    with path.open("rb") as f:
+        return read_po(f)
 
 
-def _available_locales() -> list[str]:
-    """Devuelve los nombres de los idiomas definidos en el paquete de locales."""
-    return sorted(p.stem for p in _PACKAGE_DIR.glob("*.py") if p.name != "__init__.py")
+def _pot_path() -> Path:
+    return _LOCALEDIR / f"{_DOMAIN}.pot"
 
 
-def _non_base_locales() -> list[str]:
-    """Idiomas distintos del base, para el test de paridad."""
-    return [lang for lang in _available_locales() if lang != BASE_LOCALE]
+def _po_path(lang: str) -> Path:
+    return _LOCALEDIR / lang / "LC_MESSAGES" / f"{_DOMAIN}.po"
 
 
-# Sentinela usada para que el test de paridad se ejecute (y quede visible)
-# aunque hoy solo exista el local base.
-_FALLBACK_NO_NON_BASE = "<sin_locales_alternos>"
+def _placeholder_params(text: str) -> set[str]:
+    """Extrae los nombres de placeholder `%(name)s` de un texto."""
+    return set(re.findall(r"%\(\w+\)s", text))
 
 
-def _parameters(template: str) -> set[str]:
-    """Extrae los nombres de parámetros de una plantilla de `str.format`."""
-    return {name for _, name, _, _ in Formatter().parse(template) if name}
+# ─── 1) POT existe y es válido ────────────────────────────────────────────
 
 
-def _base_entries() -> list[tuple[str, str, str]]:
-    """Lista (categoría, llave, valor) del local base."""
-    base = _load_locale(BASE_LOCALE)
-    return [
-        (category, key, value)
-        for category in CATEGORIES
-        for key, value in getattr(base, category).items()
-    ]
+def test_pot_existe() -> None:
+    """La plantilla POT existe y contiene al menos un msgid."""
+    pot = _pot_path()
+    assert pot.exists(), f"Falta la plantilla: {pot}"
+    catalog = _read_po(pot)
+    assert len(catalog) > 0, "La plantilla POT está vacía"
 
 
-def _entry_ids(entries: list[tuple[str, str, str]]) -> list[str]:
-    """IDs legibles `Categoria["llave"]` para parametrizar por cada entrada."""
-    return [f'{category}["{key}"]' for category, key, _ in entries]
+# ─── 2) PO existe para cada idioma ────────────────────────────────────────
 
 
-# ─── 1) Estructura ───────────────────────────────────────────────────────
+@pytest.mark.parametrize("lang", _LANGUAGES)
+def test_po_existe(lang: str) -> None:
+    """Existe un catálogo PO para cada idioma soportado."""
+    po = _po_path(lang)
+    assert po.exists(), f"Falta el catálogo: {po}"
 
 
-@pytest.mark.parametrize("locale", _available_locales() or ["<sin_locales>"])
-def test_estructura_categorias(lang: str) -> None:
-    """Todo idioma define las categorías del contrato como dicts no vacíos."""
-    if lang == "<sin_locales>":
-        pytest.skip("No hay módulos de idioma definidos")
-
-    module = _load_locale(lang)
-    errores = []
-    for category in CATEGORIES:
-        if not hasattr(module, category):
-            errores.append(f"{lang}: falta la categoría {category!r}")
-            continue
-        value = getattr(module, category)
-        if not isinstance(value, dict):
-            errores.append(f"{lang}.{category}: no es un dict")
-        elif not value:
-            errores.append(f"{lang}.{category}: está vacío")
-    assert not errores, "\n".join(errores)
+# ─── 3) Unicidad y msgstr no vacío ───────────────────────────────────────
 
 
-# ─── 2) Valores sanos (solo local base) ──────────────────────────────────
+@pytest.mark.parametrize("lang", _LANGUAGES)
+def test_msgid_unicos_y_msgstr_no_vacio(lang: str) -> None:
+    """Los msgid son únicos y todo msgstr no vacío (salvo el header)."""
+    catalog = _read_po(_po_path(lang))
+    seen: set[str] = set()
+    errores: list[str] = []
 
-
-@pytest.mark.parametrize(
-    "category,key,value", _base_entries(), ids=_entry_ids(_base_entries())
-)
-def test_valores_no_vacios(category: str, key: str, value: str) -> None:
-    """Todo valor del local base es una cadena no vacía."""
-    assert isinstance(value, str), f"{category}[{key}]: no es str"
-    assert value.strip(), f"{category}[{key}]: valor vacío"
-
-
-# ─── 3) Formato de plantillas (solo local base) ──────────────────────────
-
-
-@pytest.mark.parametrize(
-    "category,key,value", _base_entries(), ids=_entry_ids(_base_entries())
-)
-def test_formato_balanceado(category: str, key: str, value: str) -> None:
-    """Las llaves de la plantilla están balanceadas (sin llaves huérfanas)."""
-    try:
-        list(Formatter().parse(value))
-    except ValueError as exc:
-        pytest.fail(f"{category}[{key}]: llaves desbalanceadas: {exc}")
-
-
-@pytest.mark.parametrize(
-    "category,key,value", _base_entries(), ids=_entry_ids(_base_entries())
-)
-def test_formato_aplica_parametros(category: str, key: str, value: str) -> None:
-    """La plantilla se puede formatear rellenando sus parámetros con dummy."""
-    params = _parameters(value)
-    kwargs = {name: "x" for name in params}
-    try:
-        value.format(**kwargs)
-    except (KeyError, IndexError, ValueError) as exc:
-        pytest.fail(f"{category}[{key}]: no formatea con sus parámetros: {exc}")
-
-
-# ─── 4) Paridad entre locales ────────────────────────────────────────────
-
-
-@pytest.mark.parametrize(
-    "locale",
-    _non_base_locales() or [_FALLBACK_NO_NON_BASE],
-)
-def test_paridad_claves_parametros(lang: str) -> None:
-    """Un local alterno no añade ni elimina llaves ni parámetros respecto al base."""
-    if lang == _FALLBACK_NO_NON_BASE:
-        pytest.skip("No hay locales alternos definidos")
-
-    base = _load_locale(BASE_LOCALE)
-    other = _load_locale(lang)
-    errores = []
-
-    for category in CATEGORIES:
-        base_category = getattr(base, category)
-        other_category = getattr(other, category)
-        base_keys = set(base_category)
-        other_keys = set(other_category)
-
-        for llave in sorted(base_keys - other_keys):
-            errores.append(f"{lang}.{category} pierde la llave {llave!r} del base")
-        for llave in sorted(other_keys - base_keys):
-            errores.append(
-                f"{lang}.{category} añade la llave extra {llave!r} "
-                f"no presente en el base"
-            )
-
-        for llave in sorted(base_keys & other_keys):
-            base_params = _parameters(base_category[llave])
-            other_params = _parameters(other_category[llave])
-            for param in sorted(base_params - other_params):
-                errores.append(
-                    f"{lang}.{category}[{llave!r}] pierde el parámetro {{{param}}}"
-                )
-            for param in sorted(other_params - base_params):
-                errores.append(
-                    f"{lang}.{category}[{llave!r}] añade el parámetro extra {{{param}}}"
-                )
+    for message in catalog:
+        msgid = message.id
+        if not msgid:
+            continue  # header del PO
+        if msgid in seen:
+            errores.append(f"msgid duplicado: {msgid!r}")
+        seen.add(msgid)
+        if not message.string:
+            errores.append(f"msgstr vacío: {msgid!r}")
 
     assert not errores, "\n".join(errores)
 
 
-# ─── 5) Uso de cada llave en el proyecto ─────────────────────────────────
+# ─── 4) Paridad de placeholders ───────────────────────────────────────────
 
 
-def _source_text() -> str:
-    """Concatena el contenido de los .py de `src/` (excluyendo el paquete locales)."""
-    bloques = []
-    for path in _SRC_DIR.rglob("*.py"):
-        if _PACKAGE_DIR in path.parents:
+@pytest.mark.parametrize("lang", _LANGUAGES)
+def test_paridad_placeholders(lang: str) -> None:
+    """msgid y msgstr tienen los mismos placeholders `%(name)s`."""
+    catalog = _read_po(_po_path(lang))
+    errores: list[str] = []
+
+    for message in catalog:
+        msgid = message.id
+        msgstr = message.string
+        if not msgid or not msgstr:
             continue
-        bloques.append(path.read_text(encoding="utf-8"))
-    return "\n".join(bloques)
+        if _placeholder_params(msgid) != _placeholder_params(msgstr):
+            errores.append(f"placeholders distintos: {msgid!r} vs {msgstr!r}")
+
+    assert not errores, "\n".join(errores)
 
 
-def _referenced_loci(category: str, key: str, source: str) -> bool:
-    """Indica si la llave `key` de `category` se referencia en `source`.
+# ─── 5) Compilación en memoria ────────────────────────────────────────────
 
-    La llave puede aparecer literalmente (con comillas, en cualquier acceso
-    `locales.*["..."]`, `logger.*(key="...")` o `message_key = "..."`) o ser
-    referenciada de forma dinámica, caso de los comandos:
-    - `Cli["{comando}_help"]` se construye con un f-string.
-    - `Progress[self.name]` usa el nombre del comando en tiempo de ejecución.
-    """
-    if re.search(r'["\']' + re.escape(key) + r'["\']', source):
-        return True
-    if (
-        category == "Cli"
-        and key.endswith("_help")
-        and re.search(r'f"\{[^}]*}_help"', source)
+
+@pytest.mark.parametrize("lang", _LANGUAGES)
+def test_compila_en_memoria(lang: str) -> None:
+    """El catálogo PO compila a MO sin errores."""
+    catalog = _read_po(_po_path(lang))
+    stream = io.BytesIO()
+    write_mo(stream, catalog)
+    assert stream.tell() > 0, "El MO generado está vacío"
+
+
+# ─── 6) Todo msgid del POT se usa en src/ ────────────────────────────────
+
+
+def test_todo_msgid_se_usa_en_src() -> None:
+    """Cada msgid del POT aparece en el código fuente de `src/`."""
+    pot = _read_po(_pot_path())
+    extraido = Catalog(domain=_DOMAIN)
+    for filename, lineno, message, _comments, context in extract_from_dir(
+        str(_SRC_DIR),
+        keywords={"_": None, "ngettext": (1, 2)},
+        directory_filter=lambda d: Path(d).name != "locales",
     ):
-        return True
-    if category == "Progress" and re.search(r"Progress\[\s*\w+\s*\]", source):
-        return True
-    return False
+        if message is None or context is not None:
+            continue
+        extraido.add(message, locations=[(filename, lineno)])
 
-
-def test_cada_llave_se_usa_en_el_proyecto() -> None:
-    """Cada llave del local base se referencia en el código de `src/`."""
-    if not list(_SRC_DIR.rglob("*.py")):
-        pytest.skip("No hay código en src/ que consultar")
-
-    base = _load_locale(BASE_LOCALE)
-    source = _source_text()
-    errores = []
-    for category in CATEGORIES:
-        for key in getattr(base, category):
-            if not _referenced_loci(category, key, source):
-                errores.append(f"{category}[{key}]: no parece usarse en src/")
-    assert not errores, "\n".join(errores)
+    faltan = [m.id for m in pot if m.id and m.id not in extraido]
+    assert not faltan, f"msgids en POT no usados en src/:\n" + "\n".join(faltan)

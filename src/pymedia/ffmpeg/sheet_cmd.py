@@ -2,16 +2,16 @@ from datetime import timedelta
 from fractions import Fraction
 from pathlib import Path
 
-from pymedia import locales
 from pymedia.errors import (
     CommandGenerationError,
     MissingMediaError,
     MissingMediaPropertyError,
     MissingParameterError,
 )
+from pymedia.locale_manager import locale_manager
+from pymedia.locales import _
 from pymedia.models.media import Audio, Subtitle
 from pymedia.models.pipeline.sheet_pipeline import SheetParameters
-from pymedia.services.locale_service import detect_language
 from pymedia.utils import parse_quantity, to_ffmpeg_path
 
 # =============================================================================
@@ -179,7 +179,7 @@ def _generate_header(params: SheetParameters, image_input: Path) -> list[str]:
 
     def _build_size_display(size_bytes: int) -> str:
         """Formatea el texto que muestra el tamaño del vídeo."""
-        lang = detect_language()
+        lang = locale_manager.detect_language()
         size_gb = parse_quantity(value=size_bytes / 1024**3, locale=lang)
         size_mb = parse_quantity(value=size_bytes / 1024**2, locale=lang)
         size_bt = parse_quantity(value=size_bytes, locale=lang)
@@ -265,25 +265,25 @@ def _generate_header(params: SheetParameters, image_input: Path) -> list[str]:
         bit_rate_val = (media.size * 8) / (media.duration.total_seconds() * 1000)
 
     if bit_rate_val:
-        bit_rate_str = parse_quantity(value=bit_rate_val, locale=detect_language())
+        bit_rate_str = parse_quantity(
+            value=bit_rate_val, locale=locale_manager.detect_language()
+        )
         video_parts.append(f"{bit_rate_str} kb/s")
 
     # Ensamblado de líneas
-    lines = [f"{locales.Metadata['file']}: {params.input_single.name}"]
+    lines = [f"{_('File')}: {params.input_single.name}"]
 
     size_dur_parts = []
     if media.size:
-        size_dur_parts.append(
-            f"{locales.Metadata['size']}: {_build_size_display(media.size)}"
-        )
+        size_dur_parts.append(f"{_('Size')}: {_build_size_display(media.size)}")
     if media.duration:
         size_dur_parts.append(
-            f"{locales.Metadata['duration']}: {_build_duration_display(media.duration)}"
+            f"{_('Duration')}: {_build_duration_display(media.duration)}"
         )
     if size_dur_parts:
         lines.append(" | ".join(size_dur_parts))
 
-    lines.append(f"{locales.Metadata['video']}: {', '.join(video_parts)}")
+    lines.append(f"{_('Video')}: {', '.join(video_parts)}")
 
     if media.audio and len(media.audio) > 0:
         audio_line = _build_audio_line(

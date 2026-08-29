@@ -4,10 +4,10 @@ import sys
 import typer
 
 from pymedia.commands import register_all
-from pymedia.services.locale_service import detect_language, set_language
+from pymedia.locale_manager import locale_manager
 
 # Cargar el idioma ANTES de importar typer_options (que usa locales en los help=)
-set_language(detect_language())
+locale_manager.set_language(locale_manager.detect_language())
 
 from pymedia.typer_options import (  # noqa: E402
     HelpOption,

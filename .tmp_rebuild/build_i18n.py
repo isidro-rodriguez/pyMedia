@@ -1,0 +1,257 @@
+import pathlib
+
+CONTENT = '''\
+"""Gestión de los catálogos gettext de pyMedia.
+
+Comandos:
+    extract             Genera `pymedia.pot` a partir de los msgid de `src/`.
+    seed -l <lang>      Siembra el catálogo `<lang>` desde los antiguos
+                        módulos `en.py`/`<lang>.py` (migración one-shot).
+    update -l <lang>    Sincroniza `<lang>.po` con el POT actual.
+    compile -l <lang>   Compila `pymedia.po` a `pymedia.mo`.
+    check               Valida los catálogos y el POT.
+
+Uso:
+    uv run python scripts/locale_manager.py extract
+    uv run python scripts/locale_manager.py seed -l es
+    uv run python scripts/locale_manager.py update -l es
+    uv run python scripts/locale_manager.py compile -l es
+    uv run python scripts/locale_manager.py check
+"""
+
+import argparse
+import importlib.util
+import io
+import re
+import sys
+from pathlib import Path
+
+from babel.messages.catalog import Catalog
+from babel.messages.extract import extract_from_dir
+from babel.messages.mofile import write_mo
+from babel.messages.pofile import read_po, write_po
+
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
+SRC_DIR = PROJECT_ROOT / "src"
+LOCALEDIR = SRC_DIR / "pymedia" / "locales"
+DOMAIN = "pymedia"
+LANGUAGES = ["es"]
+
+# Categorías de los antiguos módulos en.py/es.py usados en la siembra.
+_CATEGORIES_LEGACY = (
+    "Cli",
+    "ConfigValidation",
+    "Debug",
+    "ExecutionError",
+    "Info",
+    "Metadata",
+    "ParameterError",
+    "Progress",
+    "ValidationError",
+    "Warnings",
+)
+
+_BRACE_PATTERN = re.compile(r"\\{(\\w+)(?::[^}]*)?\\}")
+
+
+def _normalize_legacy(text: str) -> str:
+    """Convierte `{param}` a `%(param)s` y quita los `\\n` iniciales."""
+    text = _BRACE_PATTERN.sub(r"%(\\1)s", text)
+    return text.lstrip("\\n")
+
+
+def _load_legacy_module(path: Path) -> object:
+    """Carga un antiguo módulo `en.py`/`es.py` solo-con-dicts sin efectos."""
+    if not path.exists():
+        return None
+    spec = importlib.util.spec_from_file_location(f"legacy_{path.stem}", path)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+def _po_path(lang: str) -> Path:
+    return LOCALEDIR / lang / "LC_MESSAGES" / f"{DOMAIN}.po"
+
+
+def _extract_catalog() -> Catalog:
+    """Extrae los msgid de los archivos Python de `src/` (con `_` y `ngettext`)."""
+    catalog = Catalog(domain=DOMAIN)
+    for filename, lineno, message, _comments, context in extract_from_dir(
+        str(SRC_DIR),
+        keywords={"_": None, "ngettext": (1, 2)},
+        directory_filter=lambda dirname: Path(dirname).name != "locales",
+    ):
+        if message is None or context is not None:
+            continue
+        catalog.add(message, locations=[(filename, lineno)])
+    return catalog
+
+
+def cmd_extract() -> None:
+    """Regenera `pymedia.pot` desde el código fuente."""
+    catalog = _extract_catalog()
+    pot = LOCALEDIR / f"{DOMAIN}.pot"
+    pot.parent.mkdir(parents=True, exist_ok=True)
+    with pot.open("wb") as f:
+        write_po(f, catalog)
+    print(f"POT actualizado: {pot} ({len(catalog)} msgid)")
+
+
+def cmd_seed(lang: str) -> None:
+    """Siembra `<lang>.po` desde los antiguos `en.py`/`<lang>.py`.
+
+    Empareja por (categoría, clave): normaliza el valor de `en.py` para hallar
+    el msgid en el POT y usa el valor normalizado de `<lang>.po>` como msgstr.
+    """
+    legacy_en = _load_legacy_module(LOCALEDIR / "en.py")
+    legacy_lang = _load_legacy_module(LOCALEDIR / f"{lang}.py")
+    if legacy_en is None or legacy_lang is None:
+        missing = LOCALEDIR / "en.py" if legacy_en is None else LOCALEDIR / f"{lang}.py"
+        sys.exit(f"No se encontró {missing} para sembrar")
+
+    # normalized_en_text -> normalized_lang_text con traducción real.
+    translations: dict[str, str] = {}
+    for category in _CATEGORIES_LEGACY:
+        en_cat = getattr(legacy_en, category, None)
+        lang_cat = getattr(legacy_lang, category, None)
+        if en_cat is None or lang_cat is None:
+            continue
+        for key in en_cat:
+            if key not in lang_cat:
+                continue
+            norm_en = _normalize_legacy(en_cat[key])
+            norm_lang = _normalize_legacy(lang_cat[key])
+            translations[norm_en] = norm_lang
+
+    pot_path = LOCALEDIR / f"{DOMAIN}.pot"
+    pot = read_po(pot_path.open("rb"))
+    po_path = _po_path(lang)
+
+    new_catalog = Catalog(domain=DOMAIN)
+    for message in pot:
+        if not message.id:
+            continue
+        msgstr = translations.get(message.id, "")
+        new_catalog.add(message.id, string=msgstr, locations=list(message.locations))
+
+    write_catalog(new_catalog, po_path)
+    print(f"Catálogo sembrado: {po_path} ({len(new_catalog)} entradas)")
+
+
+def cmd_update(lang: str) -> None:
+    """Sincroniza `<lang>.po` con el POT (añade msgid nuevos, quita huérfanos)."""
+    pot_path = LOCALEDIR / f"{DOMAIN}.pot"
+    pot = read_po(pot_path.open("rb"))
+    po_path = _po_path(lang)
+
+    old = {}
+    if po_path.exists():
+        for msg in read_po(po_path.open("rb")):
+            if msg.id:
+                old[msg.id] = msg.string
+
+    new_catalog = Catalog(domain=DOMAIN)
+    for message in pot:
+        if not message.id:
+            continue
+        msgstr = old.get(message.id, "")
+        new_catalog.add(message.id, string=msgstr, locations=list(message.locations))
+
+    write_catalog(new_catalog, po_path)
+    print(f"Catálogo actualizado: {po_path} ({len(new_catalog)} entradas)")
+
+
+def cmd_compile(lang: str) -> None:
+    """Compila `<lang>.po` a `<lang>.mo`."""
+    po_path = _po_path(lang)
+    if not po_path.exists():
+        sys.exit(f"No existe {po_path}")
+    catalog = read_po(po_path.open("rb"))
+    mo_path = po_path.with_suffix(".mo")
+    with mo_path.open("wb") as f:
+        write_mo(f, catalog)
+    print(f"Compilado: {mo_path}")
+
+
+def write_catalog(catalog: Catalog, po_path: Path) -> None:
+    """Escribe un catálogo en `po_path` creando el directorio padre."""
+    po_path.parent.mkdir(parents=True, exist_ok=True)
+    with po_path.open("wb") as f:
+        write_po(f, catalog)
+
+
+def cmd_check() -> None:
+    """Valida la sintaxis, unicidad, placeholders y compilación de los catálogos."""
+    problems: list[str] = []
+
+    pot_path = LOCALEDIR / f"{DOMAIN}.pot"
+    if not pot_path.exists():
+        problems.append(f"Falta el POT: {pot_path} (ejecuta `extract`)")
+
+    for lang in LANGUAGES:
+        po_path = _po_path(lang)
+        if not po_path.exists():
+            problems.append(f"Falta el catálogo: {po_path}")
+            continue
+        catalog = read_po(po_path.open("rb"))
+        # Compilación en memoria
+        try:
+            stream = io.BytesIO()
+            write_mo(stream, catalog)
+        except Exception as exc:  # noqa: BLE001 - cualquier fallo de compilación
+            problems.append(f"{lang}: no compila: {exc}")
+
+        seen: set[str] = set()
+        for message in catalog:
+            msgid = message.id
+            if not message.string or not msgid:
+                problems.append(f"{lang}: msgstr vacío para {msgid!r}")
+            if msgid in seen:
+                problems.append(f"{lang}: msgid duplicado {msgid!r}")
+            seen.add(msgid)
+            if not _same_placeholders(msgid, message.string):
+                problems.append(
+                    f"{lang}: placeholders distintos entre msgid y msgstr: {msgid!r}"
+                )
+
+    if problems:
+        print("\\n".join(sorted(set(problems))))
+        sys.exit(1)
+    print(f"Catálogos válidos: {', '.join(LANGUAGES)}")
+
+
+def _same_placeholders(msgid: str, msgstr: str) -> bool:
+    """Comprueba que msgid y msgstr tienen los mismos `%(name)s`."""
+    pattern = re.compile(r"%\\(\\w+\\)s")
+    return set(pattern.findall(msgid)) == set(pattern.findall(msgstr))
+
+
+def main() -> None:
+    parser = argparse.ArgumentParser(prog="locale_manager", description=__doc__)
+    sub = parser.add_subparsers(dest="command", required=True)
+    sub.add_parser("extract", help="Genera pymedia.pot desde src/")
+    for name in ("seed", "update", "compile"):
+        p = sub.add_parser(name, help=f"{name.capitalize()} de catálogos")
+        p.add_argument("-l", "--lang", default="es")
+    sub.add_parser("check", help="Valida los catálogos")
+
+    args = parser.parse_args()
+    if args.command == "extract":
+        cmd_extract()
+    elif args.command == "check":
+        cmd_check()
+    elif args.command == "seed":
+        cmd_seed(args.lang)
+    elif args.command == "update":
+        cmd_update(args.lang)
+    elif args.command == "compile":
+        cmd_compile(args.lang)
+
+
+if __name__ == "__main__":
+    main()
+'''
+
+pathlib.Path("scripts/locale_manager.py").write_text(CONTENT, encoding="utf-8")
+print("OK: scripts/locale_manager.py reescrito con cmd_seed corregido")

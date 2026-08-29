@@ -7,8 +7,6 @@ from rich.console import Console, RenderableType
 from rich.logging import RichHandler
 from rich.pretty import pretty_repr
 
-from pymedia import locales
-
 
 class Logger:
     """Wrapper sobre logging estándar con plantillas de locales.
@@ -93,16 +91,23 @@ class Logger:
         """Muestra log de nivel error."""
         self._logger.error(msg=message, exc_info=exc_info)
 
-    def warning(self, key: str, **kwargs) -> None:
-        """Muestra log de nivel aviso."""
-        self._logger.warning(locales.Warnings[key].format(**kwargs))
+    @staticmethod
+    def _render(message: str, kwargs: dict) -> str:
+        """Aplica `%(name)s` a `message` si hay valores que sustituir."""
+        if kwargs:
+            return message % kwargs
+        return message
 
-    def info(self, key: str, **kwargs) -> None:
-        """Muestra log de nivel información."""
-        self._logger.info(locales.Info[key].format(**kwargs))
+    def warning(self, message: str, **kwargs) -> None:
+        """Muestra log de nivel aviso (mensaje ya traducido)."""
+        self._logger.warning(self._render(message, kwargs))
 
-    def debug(self, key: str, **kwargs) -> None:
-        """Muestra log de nivel depuración."""
+    def info(self, message: str, **kwargs) -> None:
+        """Muestra log de nivel información (mensaje ya traducido)."""
+        self._logger.info(self._render(message, kwargs))
+
+    def debug(self, message: str, **kwargs) -> None:
+        """Muestra log de nivel depuración (mensaje ya traducido)."""
 
         def _prettify(value: object) -> object:
             """Convierte dicts/lists/tuples/sets en texto multilínea legible."""
@@ -111,7 +116,7 @@ class Logger:
             return value
 
         kwargs = {name: _prettify(value) for name, value in kwargs.items()}
-        self._logger.debug(locales.Debug[key].format(**kwargs))
+        self._logger.debug(self._render(message, kwargs))
 
     def print(self, renderable: RenderableType) -> None:
         """Imprime un objeto Rich (Table, Panel, etc.) por consola.

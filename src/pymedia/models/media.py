@@ -130,7 +130,8 @@ class Media:
             )
         else:
             video = None
-        # TODO: valorar a ver que se hace en uniones conflictivas con múltiples pistas de audio.
+        # TODO: definir cómo se comporta el audio con múltiples pistas en
+        # uniones conflictivas.
         if self.audio is not None:
             audio = (
                 self.audio.codec,

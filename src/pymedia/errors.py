@@ -1,38 +1,26 @@
 import logging
 
-from pymedia import locales
+from pymedia.locales import _
 from pymedia.logger import Logger
 
 logger = Logger(logging.getLogger("pymedia.logger"))
 
 
 class PyMediaError(Exception):
-    """
-    Base de todos los errores de pyMedia.
+    """Base de todos los errores de pyMedia.
 
-    Cada subclase define:
-    - `level`: nivel de logging ("ERROR" | "CRITICAL")
-    - `category`: diccionario de plantillas en en.py
-    - `message_key`: clave de la plantilla a usar
+    Cada subclase construye su mensaje con `_("msgid") % kwargs` en el
+    momento de lanzarse, de modo que usa el idioma activo del catálogo.
+    El mensaje se registra automáticamente en el log.
 
-    El mensaje se formatea desde `locales/*.py` y se
-    registra automáticamente en el log al levantarse la excepción.
+    Attributes:
+        level: Nivel de logging ("ERROR" | "CRITICAL").
     """
 
-    category = ""
     level = ""
-    message_key = ""
 
-    TEMPLATES = {
-        "ExecutionError": locales.ExecutionError,
-        "ParameterError": locales.ParameterError,
-        "ValidationError": locales.ValidationError,
-    }
-
-    def __init__(self, **kwargs) -> None:
-        """Inicializa el sistema de locales para errores."""
-
-        self.message = self.TEMPLATES[self.category][self.message_key].format(**kwargs)
+    def __init__(self, message: str) -> None:
+        self.message = message
         super().__init__(self.message)
 
         if self.level == "CRITICAL":
@@ -49,43 +37,44 @@ class PyMediaError(Exception):
 class ExecutionError(PyMediaError):
     """Errores de ejecución. Implican salida de la aplicación."""
 
-    category = "ExecutionError"
     level = "CRITICAL"
 
 
 class CannotCreateDirectoryError(ExecutionError):
-    message_key = "cannot_create_directory"
-
     def __init__(self, path: str) -> None:
-        super().__init__(path=path)
+        super().__init__(_("Could not create directory: %(path)s") % {"path": path})
 
 
 class CommandExecutionError(ExecutionError):
-    message_key = "command_execution"
-
     def __init__(self, command_name: str, error: str) -> None:
-        super().__init__(command_name=command_name, error=error)
+        super().__init__(
+            _(
+                "FFmpeg command %(command_name)s failed during execution. Error: "
+                "%(error)s"
+            )
+            % {"command_name": command_name, "error": error}
+        )
 
 
 class CommandGenerationError(ExecutionError):
-    message_key = "command_generation"
-
     def __init__(self, command_name: str) -> None:
-        super().__init__(command_name=command_name)
+        super().__init__(
+            _("FFmpeg command %(command_name)s was not generated.")
+            % {"command_name": command_name}
+        )
 
 
 class CommandTimeoutError(ExecutionError):
-    message_key = "command_timeout"
-
     def __init__(self, command_name: str) -> None:
-        super().__init__(command_name=command_name)
+        super().__init__(
+            _("FFmpeg command %(command_name)s timed out.")
+            % {"command_name": command_name}
+        )
 
 
 class InvalidConfigError(ExecutionError):
-    message_key = "invalid_config"
-
     def __init__(self, message: str) -> None:
-        super().__init__(message=message)
+        super().__init__(_("Invalid configuration: %(message)s") % {"message": message})
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -96,52 +85,59 @@ class InvalidConfigError(ExecutionError):
 class ParameterError(PyMediaError):
     """Errores del pipeline de procesamiento de vídeo."""
 
-    category = "ParameterError"
     level = "ERROR"
 
 
 class ConflictiveOutputAmmountParameterError(ParameterError):
-    message_key = "conflictive_output_ammount_parameter"
+    def __init__(self) -> None:
+        super().__init__(
+            _(
+                "It is not allowed to specify an output with multiple inputs, "
+                "use output directory instead."
+            )
+        )
 
 
 class ConflictiveOutputParametersError(ParameterError):
-    message_key = "conflictive_output_parameters"
+    def __init__(self) -> None:
+        super().__init__(
+            _("It is not allowed to specify an output path and an output directory.")
+        )
 
 
 class ConflictiveResizeDimensionsParametersError(ParameterError):
-    message_key = "conflictive_resize_dimensions_parameters"
+    def __init__(self) -> None:
+        super().__init__(_("It is not allowed to specify width and height together."))
 
 
 class MissingArgumentError(ParameterError):
-    message_key = "missing_argument"
-
     def __init__(self, argument: str) -> None:
-        super().__init__(argument=argument)
+        super().__init__(_("Missing argument: %(argument)s") % {"argument": argument})
 
 
 class MissingMediaError(ParameterError):
-    message_key = "missing_media"
-
     def __init__(self, path: str) -> None:
-        super().__init__(path=path)
+        super().__init__(_("Missing media information: %(path)s") % {"path": path})
 
 
 class MissingMediaPropertyError(ParameterError):
-    message_key = "missing_media_property"
-
     def __init__(self, name: str) -> None:
-        super().__init__(name=name)
+        super().__init__(_("Missing media property: %(name)s") % {"name": name})
 
 
 class MissingParameterError(ParameterError):
-    message_key = "missing_parameter"
-
     def __init__(self, name: str) -> None:
-        super().__init__(name=name)
+        super().__init__(_("Missing name: %(name)s") % {"name": name})
 
 
 class OutputParameterError(ParameterError):
-    message_key = "output_parameter"
+    def __init__(self) -> None:
+        super().__init__(
+            _(
+                "It is not allowed to specify an output if it has been provided "
+                "multiple video inputs."
+            )
+        )
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -152,63 +148,80 @@ class OutputParameterError(ParameterError):
 class ValidationError(PyMediaError):
     """Errores de validación de la entrada del usuario."""
 
-    category = "ValidationError"
     level = "ERROR"
 
 
 class CropExceedsDimensionsError(ValidationError):
-    message_key = "crop_exceeds_dimensions"
-
     def __init__(self, crop_dimensions: str, video_dimensions: str) -> None:
         super().__init__(
-            crop_dimensions=crop_dimensions, video_dimensions=video_dimensions
+            _(
+                "Invalid crop dimensions: %(crop_dimensions)s >= original "
+                "%(video_dimensions)s."
+            )
+            % {"crop_dimensions": crop_dimensions, "video_dimensions": video_dimensions}
         )
 
 
 class InvalidBordersFormatError(ValidationError):
-    message_key = "invalid_borders_format"
+    def __init__(self) -> None:
+        super().__init__(_("Invalid borders format. Expected: LEFT,RIGHT,TOP,BOTTOM."))
 
 
 class InvalidCropFormatError(ValidationError):
-    message_key = "invalid_crop_format"
+    def __init__(self) -> None:
+        super().__init__(_("Invalid crop format. Expected: WIDTH,HEIGHT,X,Y."))
 
 
 class InvalidDirectoryError(ValidationError):
-    message_key = "invalid_directory_name"
-
     def __init__(self, directory: str) -> None:
-        super().__init__(directory=directory)
+        super().__init__(
+            _(r'%(directory)s contains invalid characters: < > : " / \ | ? *')
+            % {"directory": directory}
+        )
 
 
 class InvalidNameError(ValidationError):
-    message_key = "invalid_filename"
-
     def __init__(self, filename: str) -> None:
-        super().__init__(filename=filename)
+        super().__init__(
+            _(r'%(filename)s contains invalid characters: < > : " / \ | ? *')
+            % {"filename": filename}
+        )
 
 
 class InvalidFileExtensionError(ValidationError):
-    message_key = "invalid_extension"
-
     def __init__(self, extension: str, codec: str, supported: str) -> None:
-        super().__init__(extension=extension, codec=codec, supported=supported)
+        super().__init__(
+            _(
+                "Invalid extension %(extension)s. Codec %(codec)s requires one of: "
+                "%(supported)s."
+            )
+            % {"extension": extension, "codec": codec, "supported": supported}
+        )
 
 
 class InvalidContainerTypeError(ValidationError):
-    message_key = "invalid_container_type"
-
     def __init__(self, extension: str, media_type: str, supported: str) -> None:
         super().__init__(
-            extension=extension, media_type=media_type.capitalize(), supported=supported
+            _(
+                "Invalid extension %(extension)s. %(media_type)s requires one of: "
+                "%(supported)s."
+            )
+            % {
+                "extension": extension,
+                "media_type": media_type.capitalize(),
+                "supported": supported,
+            }
         )
 
 
 class InvalidTimeFormatError(ValidationError):
-    message_key = "invalid_time_format"
+    def __init__(self) -> None:
+        super().__init__(_("Invalid timestamp format. Expected: hh:mm:ss."))
 
 
 class TimeExceedsDurationError(ValidationError):
-    message_key = "time_exceeds_duration"
-
     def __init__(self, time: str, duration: str) -> None:
-        super().__init__(time=time, duration=duration)
+        super().__init__(
+            _("Timestamp %(time)s exceeds video duration %(duration)s.")
+            % {"time": time, "duration": duration}
+        )

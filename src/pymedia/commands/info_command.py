@@ -5,17 +5,17 @@ from rich.console import Group
 from rich.panel import Panel
 from rich.table import Table
 
-from pymedia import locales
 from pymedia.commands.base_command import SingleCommand
 from pymedia.errors import (
     MissingMediaError,
     MissingParameterError,
 )
+from pymedia.locale_manager import locale_manager
+from pymedia.locales import _
 from pymedia.logger import Logger
 from pymedia.models.config import Config
 from pymedia.models.media import Audio, Media, Subtitle, Video
 from pymedia.models.pipeline.info_pipeline import InfoArguments, InfoParameters
-from pymedia.services.locale_service import detect_language
 from pymedia.typer_options import (
     DebugOption,
     HelpOption,
@@ -53,7 +53,7 @@ class InfoCommand(SingleCommand[InfoArguments, InfoParameters]):
         panel = _build_info_panel(
             media=self.params.media,
             single_input=self.params.input_single,
-            locale=detect_language(),
+            locale=locale_manager.detect_language(),
         )
         self.logger.print(panel)
 
@@ -69,7 +69,7 @@ class InfoCommand(SingleCommand[InfoArguments, InfoParameters]):
 def _build_info_panel(media: Media, single_input: Path, locale: str = "en") -> Panel:
     """Construye el panel Rich con los metadatos del vídeo."""
     panel_width = 80
-    na = locales.Metadata["not_available"]
+    na = _("-")
 
     def _format_duration(duration: timedelta) -> str:
         """Trunca los microsegundos para mostrar solo H:MM:SS."""
@@ -80,52 +80,49 @@ def _build_info_panel(media: Media, single_input: Path, locale: str = "en") -> P
         bt = parse_quantity(value=size, locale=locale)
         if size >= 1024**3:
             gb = parse_quantity(value=size / 1024**3, locale=locale)
-            return locales.Metadata["size_gb"].format(value=gb, raw=bt)
+            return _("%(value)s GB (%(raw)s bytes)") % {"value": gb, "raw": bt}
         mb = parse_quantity(value=size / 1024**2, locale=locale)
-        return locales.Metadata["size_mb"].format(value=mb, raw=bt)
+        return _("%(value)s MB (%(raw)s bytes)") % {"value": mb, "raw": bt}
 
     def _build_general_table() -> Table:
-        table = Table(
-            title=f"📁 {locales.Metadata['general']}", show_header=True, expand=True
-        )
-        table.add_column(locales.Metadata["field"], style="bold", ratio=1)
-        table.add_column(locales.Metadata["value"], ratio=3)
-        table.add_row(locales.Metadata["file"], single_input.name)
-        table.add_row(locales.Metadata["container"], media.format_name or na)
+        table = Table(title=f"📁 {_('General')}", show_header=True, expand=True)
+        table.add_column(_("Field"), style="bold", ratio=1)
+        table.add_column(_("Value"), ratio=3)
+        table.add_row(_("File"), single_input.name)
+        table.add_row(_("Container"), media.format_name or na)
         table.add_row(
-            locales.Metadata["duration"],
+            _("Duration"),
             _format_duration(media.duration) if media.duration else na,
         )
         if media.size is not None:
-            table.add_row(locales.Metadata["size"], _format_size(media.size))
+            table.add_row(_("Size"), _format_size(media.size))
         return table
 
     def _build_video_table(video: Video) -> Table:
-        table = Table(
-            title=f"🎬 {locales.Metadata['video']}", show_header=True, expand=True
-        )
-        table.add_column(locales.Metadata["field"], style="bold", ratio=1)
-        table.add_column(locales.Metadata["value"], ratio=3)
-        table.add_row(locales.Metadata["codec"], video.codec or na)
+        table = Table(title=f"🎬 {_('Video')}", show_header=True, expand=True)
+        table.add_column(_("Field"), style="bold", ratio=1)
+        table.add_column(_("Value"), ratio=3)
+        table.add_row(_("Codec"), video.codec or na)
         if video.width is None or video.height is None:
             raise MissingParameterError(name="video dimension")
-        table.add_row(locales.Metadata["resolution"], f"{video.width}x{video.height}")
-        table.add_row(locales.Metadata["fps"], str(video.fps) if video.fps else na)
+        table.add_row(_("Resolution"), f"{video.width}x{video.height}")
+        table.add_row(_("FPS"), str(video.fps) if video.fps else na)
         table.add_row(
-            locales.Metadata["bitrate"],
-            locales.Metadata["bitrate_bps"].format(bit_rate=video.bit_rate)
+            _("Bitrate"),
+            _("%(bit_rate)s bps")
+            % {"bit_rate": parse_quantity(value=video.bit_rate, locale=locale)}
             if video.bit_rate
             else na,
         )
         return table
 
     def _build_audio_table(audio: list[Audio]) -> Table:
-        table = Table(title=f"🎵 {locales.Metadata['audio']}", expand=True)
+        table = Table(title=f"🎵 {_('Audio')}", expand=True)
         for column in (
-            locales.Metadata["codec"],
-            locales.Metadata["sample_rate"],
-            locales.Metadata["channels"],
-            locales.Metadata["language"],
+            _("Codec"),
+            _("Sample rate"),
+            _("Channels"),
+            _("Language"),
         ):
             table.add_column(header=column, ratio=1)
         for track in audio:
@@ -138,12 +135,12 @@ def _build_info_panel(media: Media, single_input: Path, locale: str = "en") -> P
         return table
 
     def _build_subtitles_table(subtitles: list[Subtitle]) -> Table:
-        table = Table(title=f"💬 {locales.Metadata['subtitles']}", expand=True)
+        table = Table(title=f"💬 {_('Subtitles')}", expand=True)
         for column in (
-            locales.Metadata["language"],
-            locales.Metadata["subtitle_title"],
-            locales.Metadata["forced"],
-            locales.Metadata["default"],
+            _("Language"),
+            _("Title"),
+            _("Forced"),
+            _("Default"),
         ):
             table.add_column(header=column, ratio=1)
         for sub in subtitles:
@@ -166,7 +163,7 @@ def _build_info_panel(media: Media, single_input: Path, locale: str = "en") -> P
 
     return Panel(
         Group(*sections),
-        title=locales.Metadata["panel_title"],
+        title=_("Metadata"),
         border_style="cyan",
         width=panel_width,
     )

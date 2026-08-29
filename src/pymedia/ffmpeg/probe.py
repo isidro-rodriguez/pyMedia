@@ -2,6 +2,7 @@ import json
 import subprocess
 from pathlib import Path
 
+from pymedia.locales import _
 from pymedia.logger import Logger
 
 
@@ -37,6 +38,6 @@ def probe(path: Path, logger: Logger) -> dict:
         errors="strict",
     )
     data = json.loads(result.stdout)
-    logger.debug(key="ffprobe_data", data=data)
+    logger.debug(_("ffprobe data: %(data)s"), data=data)
 
     return data

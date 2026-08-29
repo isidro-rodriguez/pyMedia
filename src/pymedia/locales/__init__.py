@@ -1,24 +1,20 @@
+"""Paquete de idiomas de pyMedia (estándar gettext).
+
+Los mensajes se escriben en inglés en el código fuente (msgid) y se traducen
+mediante los catálogos `.po`/`.mo` alojados en
+`pymedia/locales/<lang>/LC_MESSAGES/pymedia.mo`. Los idiomas sin catálogo
+(caso de `en`) usan los msgid tal cual.
+
+Uso típico:
+
+    from pymedia.locales import _
+
+    print(_("Hello, world!"))
 """
-Paquete de idiomas de pyMedia.
 
-Los diccionarios del idioma activo se exponen como atributos de este paquete
-(Cli, ConfigValidation, Debug, ExecutionError, Info, ParameterError,
-ValidationError, Warnings) mediante `services.locale_service.set_language()`.
-"""
+from pymedia.locale_manager import locale_manager
 
-from typing import Any
+_ = locale_manager.translate
+ngettext = locale_manager.ngettext
 
-from pymedia.services.locale_service import detect_language, set_language
-
-Cli: dict[str, Any]
-ConfigValidation: dict[str, Any]
-Debug: dict[str, Any]
-ExecutionError: dict[str, Any]
-Info: dict[str, Any]
-Metadata: dict[str, Any]
-ParameterError: dict[str, Any]
-Progress: dict[str, Any]
-ValidationError: dict[str, Any]
-Warnings: dict[str, Any]
-
-set_language(detect_language())
+locale_manager.set_language(locale_manager.detect_language())

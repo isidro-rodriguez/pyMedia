@@ -3,7 +3,7 @@ from typing import Annotated
 
 import typer
 
-from pymedia import locales
+from pymedia.locales import _
 from pymedia.models.enums import (
     OverwriteMode,
     PresetsSheetMode,
@@ -24,7 +24,7 @@ def _show_help(ctx: typer.Context, value: bool) -> None:
 def _validate_path(path: Path) -> Path:
     """Valida la ruta indicada."""
     if not path.is_file():
-        raise typer.BadParameter(locales.Cli["invalid_path"].format(path=path))
+        raise typer.BadParameter(_("%(path)s is not a file.") % {"path": path})
     return path
 
 
@@ -32,7 +32,7 @@ def _validate_path_list(paths: list[Path]) -> list[Path]:
     """Valida la ruta indicada."""
     for p in paths:
         if not p.is_file():
-            raise typer.BadParameter(locales.Cli["invalid_path"].format(path=p))
+            raise typer.BadParameter(_("%(path)s is not a file.") % {"path": p})
     return paths
 
 
@@ -44,7 +44,7 @@ def _validate_path_list(paths: list[Path]) -> list[Path]:
 InputSingleArgument = Annotated[
     Path,
     typer.Argument(
-        help=locales.Cli["path_argument_help"],
+        help=_("Video to process."),
         callback=_validate_path,
     ),
 ]
@@ -52,7 +52,7 @@ InputSingleArgument = Annotated[
 InputListArgument = Annotated[
     list[Path],
     typer.Argument(
-        help=locales.Cli["path_list_argument_help"],
+        help=_("Video list to process."),
         callback=_validate_path_list,
     ),
 ]
@@ -67,7 +67,7 @@ DebugOption = Annotated[
     bool,
     typer.Option(
         "--debug",
-        help=locales.Cli["debug_help"],
+        help=_("Log level DEBUG"),
     ),
 ]
 
@@ -76,7 +76,7 @@ HelpOption = Annotated[
     bool,
     typer.Option(
         "--help",
-        help=locales.Cli["show_help"],  # tu texto traducido
+        help=_("Show this message and exit."),
         callback=_show_help,
         is_eager=True,
         expose_value=False,
@@ -93,8 +93,8 @@ OutputDirectoryOption = Annotated[
     typer.Option(
         "--directory",
         "-d",
-        rich_help_panel="Output options",
-        help=locales.Cli["output_directory_help"],
+        rich_help_panel=_("Output options"),
+        help=_("Output directory for multiple output files."),
     ),
 ]
 
@@ -103,8 +103,8 @@ OutputOption = Annotated[
     typer.Option(
         "--output",
         "-o",
-        rich_help_panel="Output options",
-        help=locales.Cli["output_help"],
+        rich_help_panel=_("Output options"),
+        help=_("Output file name."),
     ),
 ]
 
@@ -113,8 +113,8 @@ OverwriteOption = Annotated[
     typer.Option(
         "--overwrite",
         "-ov",
-        rich_help_panel="Output options",
-        help=locales.Cli["overwrite_help"],
+        rich_help_panel=_("Output options"),
+        help=_("Action to use if output file already exists."),
     ),
 ]
 
@@ -130,8 +130,8 @@ FpsGifOption = Annotated[
         "--fps",
         min=4,
         max=20,
-        rich_help_panel="Command options",
-        help=locales.Cli["fps_gif_help"],
+        rich_help_panel=_("Command options"),
+        help=_("Frames per second of the animated GIF."),
     ),
 ]
 
@@ -140,8 +140,8 @@ PresetSheetOption = Annotated[
     PresetsSheetMode,
     typer.Option(
         "--preset",
-        rich_help_panel="Command options",
-        help=locales.Cli["preset_sheet_help"],
+        rich_help_panel=_("Command options"),
+        help=_("Preset sheet style."),
     ),
 ]
 
@@ -150,8 +150,8 @@ ResizeHeightOption = Annotated[
     int | None,
     typer.Option(
         "--height",
-        rich_help_panel="Command options",
-        help=locales.Cli["resize_height_help"],
+        rich_help_panel=_("Command options"),
+        help=_("Target height, in pixels, to resize the video."),
     ),
 ]
 
@@ -160,8 +160,8 @@ ResizeWidthOption = Annotated[
     int | None,
     typer.Option(
         "--width",
-        rich_help_panel="Command options",
-        help=locales.Cli["resize_width_help"],
+        rich_help_panel=_("Command options"),
+        help=_("Target width, in pixels, to resize the video."),
     ),
 ]
 
@@ -170,8 +170,8 @@ ResizeUpscaleOption = Annotated[
     bool,
     typer.Option(
         "--upscale",
-        rich_help_panel="Command options",
-        help=locales.Cli["resize_upscale_help"],
+        rich_help_panel=_("Command options"),
+        help=_("Allows upscaling beyond the source dimensions."),
     ),
 ]
 
@@ -181,8 +181,8 @@ TimestampEndOption = Annotated[
     typer.Option(
         "--end",
         metavar="hh:mm:ss",
-        rich_help_panel="Command options",
-        help=locales.Cli["timestamp_end_help"],
+        rich_help_panel=_("Command options"),
+        help=_("Time point at which GIF generation ends."),
     ),
 ]
 
@@ -192,7 +192,7 @@ TimestampStartOption = Annotated[
     typer.Option(
         "--start",
         metavar="hh:mm:ss",
-        rich_help_panel="Command options",
-        help=locales.Cli["timestamp_start_help"],
+        rich_help_panel=_("Command options"),
+        help=_("Time point at which GIF generation starts."),
     ),
 ]
