@@ -8,18 +8,44 @@ from pymedia.models.enums import (
     OverwriteMode,
     PresetsSheetMode,
 )
-from pymedia.services.typer_service import show_help, validate_path, validate_path_list
 
-# -----------------------------------------------------------------------------
+# =============================================================================
+#  Callbacks
+# =============================================================================
+
+
+def _show_help(ctx: typer.Context, value: bool) -> None:
+    """Callback para mostar el texto de ayuda en múltiples idiomas."""
+    if value:
+        typer.echo(ctx.get_help())
+        raise typer.Exit()
+
+
+def _validate_path(path: Path) -> Path:
+    """Valida la ruta indicada."""
+    if not path.is_file():
+        raise typer.BadParameter(locales.Cli["invalid_path"].format(path=path))
+    return path
+
+
+def _validate_path_list(paths: list[Path]) -> list[Path]:
+    """Valida la ruta indicada."""
+    for p in paths:
+        if not p.is_file():
+            raise typer.BadParameter(locales.Cli["invalid_path"].format(path=p))
+    return paths
+
+
+# =============================================================================
 #  Argumentos
-# -----------------------------------------------------------------------------
+# =============================================================================
 
 
 InputSingleArgument = Annotated[
     Path,
     typer.Argument(
         help=locales.Cli["path_argument_help"],
-        callback=validate_path,
+        callback=_validate_path,
     ),
 ]
 
@@ -27,14 +53,14 @@ InputListArgument = Annotated[
     list[Path],
     typer.Argument(
         help=locales.Cli["path_list_argument_help"],
-        callback=validate_path_list,
+        callback=_validate_path_list,
     ),
 ]
 
 
-# -----------------------------------------------------------------------------
+# =============================================================================
 #  Opciones de aplicación
-# -----------------------------------------------------------------------------
+# =============================================================================
 
 
 DebugOption = Annotated[
@@ -51,16 +77,16 @@ HelpOption = Annotated[
     typer.Option(
         "--help",
         help=locales.Cli["show_help"],  # tu texto traducido
-        callback=show_help,
+        callback=_show_help,
         is_eager=True,
         expose_value=False,
     ),
 ]
 
 
-# -----------------------------------------------------------------------------
+# =============================================================================
 #  Opciones de salida
-# -----------------------------------------------------------------------------
+# =============================================================================
 
 OutputDirectoryOption = Annotated[
     Path | None,
@@ -93,9 +119,9 @@ OverwriteOption = Annotated[
 ]
 
 
-# -----------------------------------------------------------------------------
+# =============================================================================
 #  Opciones de comando
-# -----------------------------------------------------------------------------
+# =============================================================================
 
 
 FpsGifOption = Annotated[

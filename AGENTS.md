@@ -2,9 +2,9 @@
 
 ## Core Principles
 
-- Prefer readable, straightforward code over micro-optimized code. Don't over-engineer for scale this project will never see.
-- Reuse well-known standard-library or lightweight third-party tools instead of reinventing them, but don't add dependencies for trivial things.
-- Avoid unnecessary complexity or speculative features ("no, we might need this later").
+- Readable, straightforward code.
+- Reuse well-known standard-library or lightweight third-party tools.
+- Avoid unnecessary complexity.
 
 ## Code Style
 
@@ -14,17 +14,12 @@
 - Use list/generator comprehensions and `enumerate()` where they read better than the manual version.
 - Skip comments that just restate the code. Comment on _why_, not _what_, when it's not obvious.
 - Don't leave debug prints, commented-out code, or leak prompt/task context into comments.
+- Use type hints on function signatures.
 
 ## Documentation
 
-- Docstrings for public functions/classes, especially if the purpose or parameters aren't obvious from the signature.
-- No need to over-document trivial one-liners or private helpers.
-- Public functions must use Google-style docstrings (Args:, Returns:, Raises: sections).
-- Private or anidate functions must have one line comment.
-
-## Type Hints
-
-- Use type hints on function signatures.
+- Docstrings for all public functions/classes, google style (Args:, Returns:, Raises: sections).
+- Short comments for private or anidated functions.
 
 ## Error Handling
 
@@ -57,8 +52,3 @@
 
 - No secrets/API keys hardcoded — use environment variables or a `.env` (gitignored).
 - Don't log tokens, passwords, or PII.
-
-## Version Control
-
-- Clear commit messages.
-- Don't commit commented-out code, debug prints, or credentials.
