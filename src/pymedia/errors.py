@@ -1,6 +1,6 @@
 import logging
 
-from pymedia.locales import _
+from pymedia.locales import _  # noqa
 from pymedia.logger import Logger
 
 logger = Logger(logging.getLogger("pymedia.logger"))

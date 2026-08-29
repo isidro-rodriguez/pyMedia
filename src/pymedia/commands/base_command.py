@@ -10,7 +10,7 @@ import typer
 from rich.progress import Progress
 
 from pymedia.errors import CommandExecutionError, CommandTimeoutError
-from pymedia.locales import _
+from pymedia.locales import _  # noqa
 from pymedia.logger import Logger
 from pymedia.models.config import Config
 from pymedia.models.enums import OverwriteMode

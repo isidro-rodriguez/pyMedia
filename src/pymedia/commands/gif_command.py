@@ -5,7 +5,7 @@ from pymedia.errors import (
     MissingParameterError,
 )
 from pymedia.ffmpeg.gif_cmd import gif_cmd
-from pymedia.locales import _
+from pymedia.locales import _  # noqa
 from pymedia.models.enums import OverwriteMode
 from pymedia.models.pipeline.gif_pipeline import GifArguments, GifParameters
 from pymedia.typer_options import (

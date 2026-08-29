@@ -11,7 +11,7 @@ from pymedia.errors import (
     MissingParameterError,
 )
 from pymedia.locale_manager import locale_manager
-from pymedia.locales import _
+from pymedia.locales import _  # noqa
 from pymedia.logger import Logger
 from pymedia.models.config import Config
 from pymedia.models.media import Audio, Media, Subtitle, Video

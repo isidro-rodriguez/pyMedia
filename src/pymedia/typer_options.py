@@ -3,7 +3,7 @@ from typing import Annotated
 
 import typer
 
-from pymedia.locales import _
+from pymedia.locales import _  # noqa
 from pymedia.models.enums import (
     OverwriteMode,
     PresetsSheetMode,

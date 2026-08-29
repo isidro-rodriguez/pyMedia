@@ -7,7 +7,7 @@ from pymedia.errors import (
     ConflictiveResizeDimensionsParametersError,
     MissingMediaPropertyError,
 )
-from pymedia.locales import _
+from pymedia.locales import _  # noqa
 from pymedia.logger import Logger
 from pymedia.models.media import Media
 

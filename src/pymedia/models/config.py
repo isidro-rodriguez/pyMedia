@@ -9,7 +9,7 @@ import platformdirs
 from pymedia.data.audio_codecs import AUDIO_CODECS
 from pymedia.data.video_codecs import VIDEO_CODECS
 from pymedia.errors import InvalidConfigError
-from pymedia.locales import _
+from pymedia.locales import _  # noqa
 
 
 class AudioCodec(Enum):

@@ -23,7 +23,7 @@ app = typer.Typer(
 
 @app.callback()
 def main(
-    help_: HelpOption = False,
+    help_: HelpOption = False,  # noqa
 ) -> None:
     pass
 

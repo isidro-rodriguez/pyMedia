@@ -9,11 +9,11 @@ Comandos:
     check               Valida los catálogos y el POT.
 
 Uso:
-    uv run python scripts/locale_manager.py extract
-    uv run python scripts/locale_manager.py seed -l es
-    uv run python scripts/locale_manager.py update -l es
-    uv run python scripts/locale_manager.py compile -l es
-    uv run python scripts/locale_manager.py check
+    uv run python scripts/i18n.py extract
+    uv run python scripts/i18n.py seed -l es
+    uv run python scripts/i18n.py update -l es
+    uv run python scripts/i18n.py compile -l es
+    uv run python scripts/i18n.py check
 """
 
 import argparse
@@ -195,7 +195,9 @@ def cmd_check() -> None:
         seen: set[str] = set()
         for message in catalog:
             msgid = message.id
-            if not message.string or not msgid:
+            if not msgid:
+                continue  # header del PO
+            if not message.string:
                 problems.append(f"{lang}: msgstr vacío para {msgid!r}")
             if msgid in seen:
                 problems.append(f"{lang}: msgid duplicado {msgid!r}")

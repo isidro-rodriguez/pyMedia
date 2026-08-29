@@ -9,7 +9,7 @@ from pymedia.errors import (
     MissingParameterError,
 )
 from pymedia.locale_manager import locale_manager
-from pymedia.locales import _
+from pymedia.locales import _  # noqa
 from pymedia.models.media import Audio, Subtitle
 from pymedia.models.pipeline.sheet_pipeline import SheetParameters
 from pymedia.utils import parse_quantity, to_ffmpeg_path

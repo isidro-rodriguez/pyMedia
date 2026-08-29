@@ -1,3 +1,4 @@
+from pymedia.errors import MissingParameterError
 from pymedia.models.enums import OverwriteMode
 from pymedia.models.pipeline.gif_pipeline import GifParameters
 
@@ -11,11 +12,15 @@ def gif_cmd(params: GifParameters) -> list[str]:
     Returns:
         cmd: comando de ffmpeg listo para consumo.
     """
+    if params.output is None:
+        raise MissingParameterError(name="output")
 
     filters: str = ""
 
     if params.resize_width or params.resize_height:
-        filters += params.to_resize_cmd() + ","
+        resize_cmd = params.to_resize_cmd()
+        if resize_cmd:
+            filters += f"{resize_cmd},"
 
     filters += (
         f"{params.to_fps_cmd()},split[a][b];[a]palettegen[p];"

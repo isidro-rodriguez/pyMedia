@@ -14,6 +14,8 @@ Uso típico:
 
 from pymedia.locale_manager import locale_manager
 
+__all__ = ["_", "ngettext"]
+
 _ = locale_manager.translate
 ngettext = locale_manager.ngettext
 

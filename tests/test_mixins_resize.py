@@ -83,26 +83,31 @@ class TestCreateResize:
         assert attr == expected
         assert other is None
 
-    def test_equal_dimension_warns_and_rejects(self):
+    def test_equal_dimension_warns_and_rejects(self, monkeypatch):
         mixin = _make_mixin()
         logger = Mock()
+        monkeypatch.setattr("pymedia.models.mixins.resize_mixin._", lambda msgid: msgid)
 
         mixin.create_resize(logger=logger, width=1920)
 
         assert mixin.resize_width is None
         logger.warning.assert_called_once_with(
-            key="resize_rejected_equal", dimension="width"
+            "Resize rejected cause %(dimension)s is equal.", dimension="width"
         )
 
-    def test_upscale_rejected_warns_and_rejects(self):
+    def test_upscale_rejected_warns_and_rejects(self, monkeypatch):
         mixin = _make_mixin()
         logger = Mock()
+        monkeypatch.setattr("pymedia.models.mixins.resize_mixin._", lambda msgid: msgid)
 
         mixin.create_resize(logger=logger, width=2560)
 
         assert mixin.resize_width is None
         logger.warning.assert_called_once_with(
-            key="upscale_rejected", target=2560, source=1920
+            "Resize rejected cause no_upscale is True and target %(target)s is"
+            " greater than source %(source)s.",
+            target=2560,
+            source=1920,
         )
 
 

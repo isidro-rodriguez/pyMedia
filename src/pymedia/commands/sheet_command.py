@@ -8,7 +8,7 @@ from pymedia.errors import (
     MissingParameterError,
 )
 from pymedia.ffmpeg.sheet_cmd import sheet_cmd
-from pymedia.locales import _
+from pymedia.locales import _  # noqa
 from pymedia.models.enums import OverwriteMode, PresetsSheetMode
 from pymedia.models.pipeline.sheet_pipeline import SheetArguments, SheetParameters
 from pymedia.typer_options import (
