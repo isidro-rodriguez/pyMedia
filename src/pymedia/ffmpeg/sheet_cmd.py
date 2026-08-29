@@ -12,7 +12,7 @@ from pymedia.locale_manager import locale_manager
 from pymedia.locales import _  # noqa
 from pymedia.models.media import Audio, Subtitle
 from pymedia.models.pipeline.sheet_pipeline import SheetParameters
-from pymedia.utils import parse_quantity, to_ffmpeg_path
+from pymedia.utils import parse_quantity, parse_size, parse_timedelta, to_ffmpeg_path
 
 # =============================================================================
 # Funciones auxiliares
@@ -26,16 +26,6 @@ def _escape_drawtext(text: str) -> str:
     text = text.replace("%", "\\%")
     text = text.replace("'", r"'\''")
     return text
-
-
-def _build_duration_display(time: timedelta) -> str:
-    """Formatea un objeto timedelta a una cadena con formato HH:MM:SS o MM:SS."""
-    total = int(time.total_seconds())
-    hours, remainder = divmod(total, 3600)
-    minutes, secs = divmod(remainder, 60)
-    if hours > 0:
-        return f"{hours}:{minutes:02d}:{secs:02d}"
-    return f"{minutes}:{secs:02d}"
 
 
 # =============================================================================
@@ -121,7 +111,7 @@ def _generate_snapshots(params: SheetParameters, output: Path) -> list[str]:
         seconds = timedelta(
             microseconds=round((Fraction(frame_n) / media.video.fps) * 1_000_000)
         )
-        timestamp_str = _build_duration_display(seconds)
+        timestamp_str = parse_timedelta(seconds)
 
         filter_complex_parts.append(
             f"[s{i}]select='eq(n\\,{frame_n})',"
@@ -176,16 +166,6 @@ def _generate_header(params: SheetParameters, image_input: Path) -> list[str]:
         if not acc:
             return f"{prefix} [...]"
         return f"{prefix} [{', '.join(acc)}, ...]"
-
-    def _build_size_display(size_bytes: int) -> str:
-        """Formatea el texto que muestra el tamaño del vídeo."""
-        lang = locale_manager.detect_language()
-        size_gb = parse_quantity(value=size_bytes / 1024**3, locale=lang)
-        size_mb = parse_quantity(value=size_bytes / 1024**2, locale=lang)
-        size_bt = parse_quantity(value=size_bytes, locale=lang)
-        if size_bytes > 1024**3:
-            return f"{size_gb} GB ({size_bt} bytes)"
-        return f"{size_mb} MB ({size_bt} bytes)"
 
     def _build_audio_line(tracks: list[Audio], max_len: int) -> str | None:
         """Formatea el texto que muestra las pistas de audio del vídeo."""
@@ -275,11 +255,15 @@ def _generate_header(params: SheetParameters, image_input: Path) -> list[str]:
 
     size_dur_parts = []
     if media.size:
-        size_dur_parts.append(f"{_('Size')}: {_build_size_display(media.size)}")
-    if media.duration:
         size_dur_parts.append(
-            f"{_('Duration')}: {_build_duration_display(media.duration)}"
+            f"{_('Size')}: {
+                parse_size(
+                    size_bytes=media.size, locale=locale_manager.detect_language()
+                )
+            }"
         )
+    if media.duration:
+        size_dur_parts.append(f"{_('Duration')}: {parse_timedelta(media.duration)}")
     if size_dur_parts:
         lines.append(" | ".join(size_dur_parts))
 

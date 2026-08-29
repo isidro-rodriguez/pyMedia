@@ -1,4 +1,3 @@
-from datetime import timedelta
 from pathlib import Path
 
 from rich.console import Group
@@ -21,7 +20,7 @@ from pymedia.typer_options import (
     HelpOption,
     InputSingleArgument,
 )
-from pymedia.utils import parse_quantity
+from pymedia.utils import parse_quantity, parse_size, parse_timedelta
 
 
 class InfoCommand(SingleCommand[InfoArguments, InfoParameters]):
@@ -71,19 +70,6 @@ def _build_info_panel(media: Media, single_input: Path, locale: str = "en") -> P
     panel_width = 80
     na = _("-")
 
-    def _format_duration(duration: timedelta) -> str:
-        """Trunca los microsegundos para mostrar solo H:MM:SS."""
-        return str(timedelta(seconds=int(duration.total_seconds())))
-
-    def _format_size(size: int) -> str:
-        """Formatea bytes como GB o MB, con separador de miles según locale."""
-        bt = parse_quantity(value=size, locale=locale)
-        if size >= 1024**3:
-            gb = parse_quantity(value=size / 1024**3, locale=locale)
-            return _("%(value)s GB (%(raw)s bytes)") % {"value": gb, "raw": bt}
-        mb = parse_quantity(value=size / 1024**2, locale=locale)
-        return _("%(value)s MB (%(raw)s bytes)") % {"value": mb, "raw": bt}
-
     def _build_general_table() -> Table:
         table = Table(title=f"📁 {_('General')}", show_header=True, expand=True)
         table.add_column(_("Field"), style="bold", ratio=1)
@@ -92,10 +78,10 @@ def _build_info_panel(media: Media, single_input: Path, locale: str = "en") -> P
         table.add_row(_("Container"), media.format_name or na)
         table.add_row(
             _("Duration"),
-            _format_duration(media.duration) if media.duration else na,
+            parse_timedelta(media.duration) if media.duration else na,
         )
         if media.size is not None:
-            table.add_row(_("Size"), _format_size(media.size))
+            table.add_row(_("Size"), parse_size(size_bytes=media.size, locale=locale))
         return table
 
     def _build_video_table(video: Video) -> Table:
