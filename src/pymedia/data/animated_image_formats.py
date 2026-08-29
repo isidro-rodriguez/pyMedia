@@ -1,4 +1,6 @@
+from collections.abc import Mapping
 from dataclasses import dataclass
+from types import MappingProxyType
 
 
 @dataclass(frozen=True)
@@ -29,26 +31,30 @@ class AnimatedImageFormatData:
     requires_palette: bool
 
 
-ANIMATED_IMAGE_FORMATS = {
-    "gif": AnimatedImageFormatData(
+_ANIMATED_IMAGE_FORMATS: tuple[AnimatedImageFormatData, ...] = (
+    AnimatedImageFormatData(
         name="gif",
         codec="gif",
         extension=".gif",
         supports_transparency=True,
         requires_palette=True,
     ),
-    "webp_anim": AnimatedImageFormatData(
+    AnimatedImageFormatData(
         name="webp_anim",
         codec="libwebp",
         extension=".webp",
         supports_transparency=True,
         requires_palette=False,
     ),
-    "apng": AnimatedImageFormatData(
+    AnimatedImageFormatData(
         name="apng",
         codec="apng",
         extension=".png",
         supports_transparency=True,
         requires_palette=False,
     ),
-}
+)
+
+ANIMATED_IMAGE_FORMATS: Mapping[str, AnimatedImageFormatData] = MappingProxyType(
+    {fmt.name: fmt for fmt in _ANIMATED_IMAGE_FORMATS}
+)

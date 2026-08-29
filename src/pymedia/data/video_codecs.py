@@ -1,4 +1,8 @@
+"""Datos estáticos de códecs de vídeo soportados."""
+
+from collections.abc import Mapping
 from dataclasses import dataclass
+from types import MappingProxyType
 
 
 @dataclass(frozen=True)
@@ -31,8 +35,8 @@ class VideoCodecData:
     profiles: tuple[str, ...] | None = None
 
 
-VIDEO_CODECS = {
-    "av1": VideoCodecData(
+_VIDEO_CODECS: tuple[VideoCodecData, ...] = (
+    VideoCodecData(
         name="av1",
         library="libsvtav1",
         containers=(".mkv", ".mp4", ".ogg", ".ogv", ".ts", ".webm"),
@@ -57,37 +61,37 @@ VIDEO_CODECS = {
         ),
         profiles=("main", "high", "professional"),
     ),
-    "dnxhd": VideoCodecData(
+    VideoCodecData(
         name="dnxhd",
         library="dnxhd",
         containers=(".mkv", ".mov", ".mp4", ".mxf"),
     ),
-    "dvvideo": VideoCodecData(
+    VideoCodecData(
         name="dvvideo",
         library="dvvideo",
         containers=(".mkv", ".mov", ".mxf"),
     ),
-    "ffv1": VideoCodecData(
+    VideoCodecData(
         name="ffv1",
         library="ffv1",
         containers=(".avi", ".mkv", ".mov"),
     ),
-    "flv1": VideoCodecData(
+    VideoCodecData(
         name="flv1",
         library="flv",
         containers=(".f4v", ".flv", ".mkv", ".mov", ".mp4"),
     ),
-    "h261": VideoCodecData(
+    VideoCodecData(
         name="h261",
         library="h261",
         containers=(".mkv", ".mov", ".mp4"),
     ),
-    "h263": VideoCodecData(
+    VideoCodecData(
         name="h263",
         library="h263",
         containers=(".3g2", ".3gp", ".f4v", ".flv", ".mkv", ".mov", ".mp4"),
     ),
-    "h264": VideoCodecData(
+    VideoCodecData(
         name="h264",
         library="libx264",
         containers=(
@@ -119,7 +123,7 @@ VIDEO_CODECS = {
         ),
         profiles=("baseline", "main", "high", "high10"),
     ),
-    "h265": VideoCodecData(
+    VideoCodecData(
         name="h265",
         library="libx265",
         containers=(
@@ -147,27 +151,27 @@ VIDEO_CODECS = {
         ),
         profiles=("main", "main10"),
     ),
-    "huffyuv": VideoCodecData(
+    VideoCodecData(
         name="huffyuv",
         library="huffyuv",
         containers=(".avi", ".mkv", ".mov"),
     ),
-    "jpeg2000": VideoCodecData(
+    VideoCodecData(
         name="jpeg2000",
         library="jpeg2000",
         containers=(".avi", ".mkv", ".mov", ".mp4"),
     ),
-    "mjpeg": VideoCodecData(
+    VideoCodecData(
         name="mjpeg",
         library="mjpeg",
         containers=(".avi", ".mkv", ".mov", ".mp4", ".ts"),
     ),
-    "mpeg1video": VideoCodecData(
+    VideoCodecData(
         name="mpeg1video",
         library="mpeg1video",
         containers=(".mkv", ".mov", ".mp4", ".mpeg", ".mpg", ".ts", ".vob"),
     ),
-    "mpeg2video": VideoCodecData(
+    VideoCodecData(
         name="mpeg2video",
         library="mpeg2video",
         containers=(
@@ -182,7 +186,7 @@ VIDEO_CODECS = {
             ".vob",
         ),
     ),
-    "mpeg4": VideoCodecData(
+    VideoCodecData(
         name="mpeg4",
         library="mpeg4",
         containers=(
@@ -198,79 +202,83 @@ VIDEO_CODECS = {
             ".ts",
         ),
     ),
-    "msmpeg4v3": VideoCodecData(
+    VideoCodecData(
         name="msmpeg4v3",
         library="msmpeg4v3",
         containers=(".avi", ".asf", ".wmv"),
     ),
-    "prores": VideoCodecData(
+    VideoCodecData(
         name="prores",
         library="prores",
         containers=(".mkv", ".mov", ".mp4", ".mxf"),
     ),
-    "rawvideo": VideoCodecData(
+    VideoCodecData(
         name="rawvideo",
         library="rawvideo",
         containers=(".mkv", ".mov", ".mp4"),
     ),
-    "rv40": VideoCodecData(
+    VideoCodecData(
         name="rv40",
         library="rv40",
         containers=(".mkv", ".rm", ".rmvb"),
     ),
-    "snow": VideoCodecData(
+    VideoCodecData(
         name="snow",
         library="snow",
         containers=(".mkv",),
     ),
-    "svq3": VideoCodecData(
+    VideoCodecData(
         name="svq3",
         library="svq3",
         containers=(".mkv", ".mov"),
     ),
-    "theora": VideoCodecData(
+    VideoCodecData(
         name="theora",
         library="libtheora",
         containers=(".mkv", ".ogg", ".ogv"),
     ),
-    "utvideo": VideoCodecData(
+    VideoCodecData(
         name="utvideo",
         library="utvideo",
         containers=(".avi", ".mkv"),
     ),
-    "vc1": VideoCodecData(
+    VideoCodecData(
         name="vc1",
         library="vc1",
         containers=(".asf", ".avi", ".m2ts", ".mkv", ".mov", ".mp4", ".ts", ".wmv"),
     ),
-    "vp6": VideoCodecData(
+    VideoCodecData(
         name="vp6",
         library="vp6",
         containers=(".f4v", ".flv", ".mkv"),
     ),
-    "vp8": VideoCodecData(
+    VideoCodecData(
         name="vp8",
         library="libvpx",
         containers=(".mkv", ".mp4", ".ogg", ".ogv", ".webm"),
     ),
-    "vp9": VideoCodecData(
+    VideoCodecData(
         name="vp9",
         library="libvpx-vp9",
         containers=(".mkv", ".mp4", ".ogg", ".ogv", ".webm"),
     ),
-    "wmv1": VideoCodecData(
+    VideoCodecData(
         name="wmv1",
         library="wmv1",
         containers=(".mkv", ".mov", ".mp4", ".wmv"),
     ),
-    "wmv2": VideoCodecData(
+    VideoCodecData(
         name="wmv2",
         library="wmv2",
         containers=(".mkv", ".mov", ".mp4", ".wmv"),
     ),
-    "wmv3": VideoCodecData(
+    VideoCodecData(
         name="wmv3",
         library="wmv3",
         containers=(".mkv", ".mov", ".mp4", ".wmv"),
     ),
-}
+)
+
+VIDEO_CODECS: Mapping[str, VideoCodecData] = MappingProxyType(
+    {codec.name: codec for codec in _VIDEO_CODECS}
+)

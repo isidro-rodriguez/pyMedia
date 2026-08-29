@@ -1,4 +1,8 @@
+"""Datos estáticos de formatos de imagen estática soportados."""
+
+from collections.abc import Mapping
 from dataclasses import dataclass
+from types import MappingProxyType
 
 
 @dataclass(frozen=True)
@@ -27,26 +31,30 @@ class ImageFormatData:
     default_pix_fmt: str
 
 
-IMAGE_FORMATS = {
-    "jpeg": ImageFormatData(
+_IMAGE_FORMATS: tuple[ImageFormatData, ...] = (
+    ImageFormatData(
         name="jpeg",
         codec="mjpeg",
         extension=".jpg",
         supports_lossless=False,
         default_pix_fmt="yuvj420p",
     ),
-    "png": ImageFormatData(
+    ImageFormatData(
         name="png",
         codec="png",
         extension=".png",
         supports_lossless=True,
         default_pix_fmt="rgb24",
     ),
-    "webp": ImageFormatData(
+    ImageFormatData(
         name="webp",
         codec="libwebp",
         extension=".webp",
         supports_lossless=True,
         default_pix_fmt="yuv420p",
     ),
-}
+)
+
+IMAGE_FORMATS: Mapping[str, ImageFormatData] = MappingProxyType(
+    {fmt.name: fmt for fmt in _IMAGE_FORMATS}
+)

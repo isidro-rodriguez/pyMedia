@@ -1,4 +1,8 @@
+"""Datos estáticos de códecs de audio soportados."""
+
+from collections.abc import Mapping
 from dataclasses import dataclass
+from types import MappingProxyType
 
 
 @dataclass(frozen=True)
@@ -26,26 +30,26 @@ class AudioCodecData:
     bit_rates: tuple[str, ...] | None = None
 
 
-AUDIO_CODECS = {
-    "aac": AudioCodecData(
+_AUDIO_CODECS: tuple[AudioCodecData, ...] = (
+    AudioCodecData(
         name="aac",
         library="aac",
         containers=(".m4a", ".mka", ".mkv", ".mov", ".mp4", ".ts"),
         bit_rates=("96k", "128k", "160k", "192k", "224k", "256k", "320k"),
     ),
-    "ac3": AudioCodecData(
+    AudioCodecData(
         name="ac3",
         library="ac3",
         containers=(".ac3", ".m2ts", ".mka", ".mkv", ".ts"),
         bit_rates=("192k", "224k", "384k", "448k", "640k"),
     ),
     # Lossless: FFmpeg no requiere ni acepta el flag -b:a
-    "alac": AudioCodecData(
+    AudioCodecData(
         name="alac",
         library="alac",
         containers=(".m4a", ".mka", ".mkv", ".mov", ".mp4"),
     ),
-    "amr_nb": AudioCodecData(
+    AudioCodecData(
         name="amr_nb",
         library="libopencore_amrnb",
         containers=(".amr", ".3gp"),
@@ -60,7 +64,7 @@ AUDIO_CODECS = {
             "12.2k",
         ),
     ),
-    "amr_wb": AudioCodecData(
+    AudioCodecData(
         name="amr_wb",
         library="libvo_amrwbenc",
         containers=(".awb", ".3gp"),
@@ -76,25 +80,25 @@ AUDIO_CODECS = {
             "23.85k",
         ),
     ),
-    "eac3": AudioCodecData(
+    AudioCodecData(
         name="eac3",
         library="eac3",
         containers=(".m2ts", ".mka", ".mkv", ".mp4", ".ts"),
         bit_rates=("192k", "224k", "256k", "320k", "384k", "448k", "640k"),
     ),
     # Lossless: FFmpeg no requiere ni acepta el flag -b:a
-    "flac": AudioCodecData(
+    AudioCodecData(
         name="flac",
         library="flac",
         containers=(".flac", ".mka", ".mkv", ".ogg"),
     ),
     # Lossless: FFmpeg no requiere ni acepta el flag -b:a
-    "mlp": AudioCodecData(
+    AudioCodecData(
         name="mlp",
         library="mlp",
         containers=(".mlp", ".mka", ".mkv"),
     ),
-    "mp1": AudioCodecData(
+    AudioCodecData(
         name="mp1",
         library="mp1",
         containers=(".mp1", ".mkv", ".avi", ".mov"),
@@ -110,7 +114,7 @@ AUDIO_CODECS = {
             "448k",
         ),
     ),
-    "mp2": AudioCodecData(
+    AudioCodecData(
         name="mp2",
         library="mp2",
         containers=(".mp2", ".mkv", ".avi", ".mpg", ".mpeg", ".ts", ".vob"),
@@ -126,59 +130,63 @@ AUDIO_CODECS = {
             "384k",
         ),
     ),
-    "mp3": AudioCodecData(
+    AudioCodecData(
         name="mp3",
         library="libmp3lame",
         containers=(".mp3", ".mka", ".mkv"),
         bit_rates=("96k", "128k", "160k", "192k", "224k", "256k", "320k"),
     ),
-    "opus": AudioCodecData(
+    AudioCodecData(
         name="opus",
         library="libopus",
         containers=(".mka", ".mkv", ".mp4", ".ogg", ".opus", ".webm"),
         bit_rates=("64k", "96k", "128k", "160k", "192k", "256k"),
     ),
     # PCM: FFmpeg calcula el bitrate implícitamente según sample rate, bits y canales
-    "pcm_s16le": AudioCodecData(
+    AudioCodecData(
         name="pcm_s16le",
         library="pcm_s16le",
         containers=(".wav", ".avi", ".mkv", ".mov", ".aiff", ".raw"),
     ),
-    "pcm_s24le": AudioCodecData(
+    AudioCodecData(
         name="pcm_s24le",
         library="pcm_s24le",
         containers=(".wav", ".mkv", ".mov", ".aiff", ".raw", ".flac"),
     ),
-    "pcm_s32le": AudioCodecData(
+    AudioCodecData(
         name="pcm_s32le",
         library="pcm_s32le",
         containers=(".wav", ".mkv", ".mov", ".aiff", ".raw"),
     ),
-    "pcm_f32le": AudioCodecData(
+    AudioCodecData(
         name="pcm_f32le",
         library="pcm_f32le",
         containers=(".wav", ".mkv", ".mov", ".aiff", ".raw"),
     ),
-    "pcm_alaw": AudioCodecData(
+    AudioCodecData(
         name="pcm_alaw",
         library="pcm_alaw",
         containers=(".wav", ".au", ".raw", ".mkv", ".mov", ".rtp"),
     ),
-    "pcm_mulaw": AudioCodecData(
+    AudioCodecData(
         name="pcm_mulaw",
         library="pcm_mulaw",
         containers=(".wav", ".au", ".raw", ".mkv", ".mov", ".rtp"),
     ),
     # Lossless: FFmpeg no requiere ni acepta el flag -b:a
-    "truehd": AudioCodecData(
+    AudioCodecData(
         name="truehd",
         library="truehd",
         containers=(".mkv", ".mka", ".thd", ".m2ts"),
     ),
-    "vorbis": AudioCodecData(
+    AudioCodecData(
         name="vorbis",
         library="libvorbis",
         containers=(".mka", ".mkv", ".ogg", ".oga", ".webm"),
         bit_rates=("64k", "96k", "128k", "160k", "192k", "256k"),
     ),
-}
+)
+
+AUDIO_CODECS: Mapping[str, AudioCodecData] = MappingProxyType(
+    {codec.name: codec for codec in _AUDIO_CODECS}
+)

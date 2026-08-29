@@ -143,7 +143,7 @@ VIDEO_CONTAINERS: tuple[str, ...] = (
 """tuple[str, ...]: Extensiones de contenedores para archivos de vídeo."""
 
 # =============================================================================
-#  Extensiones de containers válidos para salidas de ffmpeg
+#  Restricción de containers válidos para salidas de la aplicación.
 # =============================================================================
 
 
