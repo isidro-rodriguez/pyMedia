@@ -2,22 +2,29 @@
 
 Comandos:
     extract             Genera `pymedia.pot` a partir de los msgid de `src/`.
-    seed -l <lang>      Siembra el catálogo `<lang>` desde los antiguos
-                        módulos `en.py`/`<lang>.py` (migración one-shot).
     update -l <lang>    Sincroniza `<lang>.po` con el POT actual.
     compile -l <lang>   Compila `pymedia.po` a `pymedia.mo`.
     check               Valida los catálogos y el POT.
 
-Uso:
+Uso, ejemplo en español:
+    1. Regenera pymedia.pot escaneando `_()` y `ngettext()` de src/
     uv run python scripts/i18n.py extract
-    uv run python scripts/i18n.py seed -l es
+
+    2. Rehace es/LC_MESSAGES/pymedia.po a partir del POT
     uv run python scripts/i18n.py update -l es
+
+    3. Manual: abrir src/pymedia/locales/es/LC_MESSAGES/pymedia.po y
+       rellenar las msgstr vacía
+
+    4. Compila pymedia.po -> pymedia.mo
     uv run python scripts/i18n.py compile -l es
+
+    5. Validación
     uv run python scripts/i18n.py check
+    uv run pytest tests/test_locales.py tests/test_locale_manager.py
 """
 
 import argparse
-import importlib.util
 import io
 import re
 import sys
@@ -33,37 +40,6 @@ SRC_DIR = PROJECT_ROOT / "src"
 LOCALEDIR = SRC_DIR / "pymedia" / "locales"
 DOMAIN = "pymedia"
 LANGUAGES = ["es"]
-
-_CATEGORIES_LEGACY = (
-    "Cli",
-    "ConfigValidation",
-    "Debug",
-    "ExecutionError",
-    "Info",
-    "Metadata",
-    "ParameterError",
-    "Progress",
-    "ValidationError",
-    "Warnings",
-)
-
-_BRACE_PATTERN = re.compile(r"\{(\w+)(?::[^}]*)?\}")
-
-
-def _normalize_legacy(text: str) -> str:
-    """Convierte `{param}` a `%(param)s` y quita los `\n` iniciales."""
-    text = _BRACE_PATTERN.sub(r"%(\1)s", text)
-    return text.lstrip("\n")
-
-
-def _load_legacy_module(path: Path) -> object:
-    """Carga un antiguo módulo `en.py`/`es.py` solo-con-dicts sin efectos."""
-    if not path.exists():
-        return None
-    spec = importlib.util.spec_from_file_location(f"legacy_{path.stem}", path)
-    module = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(module)
-    return module
 
 
 def _po_path(lang: str) -> Path:
@@ -92,42 +68,6 @@ def cmd_extract() -> None:
     with pot.open("wb") as f:
         write_po(f, catalog)
     print(f"POT actualizado: {pot} ({len(catalog)} msgid)")
-
-
-def cmd_seed(lang: str) -> None:
-    """Siembra `<lang>.po` desde los antiguos `en.py`/`<lang>.py`."""
-    legacy_en = _load_legacy_module(LOCALEDIR / "en.py")
-    legacy_lang = _load_legacy_module(LOCALEDIR / f"{lang}.py")
-    if legacy_en is None or legacy_lang is None:
-        missing = LOCALEDIR / "en.py" if legacy_en is None else LOCALEDIR / f"{lang}.py"
-        sys.exit(f"No se encontró {missing} para sembrar")
-
-    translations: dict[str, str] = {}
-    for category in _CATEGORIES_LEGACY:
-        en_cat = getattr(legacy_en, category, None)
-        lang_cat = getattr(legacy_lang, category, None)
-        if en_cat is None or lang_cat is None:
-            continue
-        for key in en_cat:
-            if key not in lang_cat:
-                continue
-            norm_en = _normalize_legacy(en_cat[key])
-            norm_lang = _normalize_legacy(lang_cat[key])
-            translations[norm_en] = norm_lang
-
-    pot_path = LOCALEDIR / f"{DOMAIN}.pot"
-    pot = read_po(pot_path.open("rb"))
-    po_path = _po_path(lang)
-
-    new_catalog = Catalog(domain=DOMAIN)
-    for message in pot:
-        if not message.id:
-            continue
-        msgstr = translations.get(message.id, "")
-        new_catalog.add(message.id, string=msgstr, locations=list(message.locations))
-
-    write_catalog(new_catalog, po_path)
-    print(f"Catálogo sembrado: {po_path} ({len(new_catalog)} entradas)")
 
 
 def cmd_update(lang: str) -> None:
@@ -223,7 +163,7 @@ def main() -> None:
     parser = argparse.ArgumentParser(prog="locale_manager", description=__doc__)
     sub = parser.add_subparsers(dest="command", required=True)
     sub.add_parser("extract", help="Genera pymedia.pot desde src/")
-    for name in ("seed", "update", "compile"):
+    for name in ("update", "compile"):
         p = sub.add_parser(name, help=f"{name.capitalize()} de catálogos")
         p.add_argument("-l", "--lang", default="es")
     sub.add_parser("check", help="Valida los catálogos")
@@ -233,8 +173,6 @@ def main() -> None:
         cmd_extract()
     elif args.command == "check":
         cmd_check()
-    elif args.command == "seed":
-        cmd_seed(args.lang)
     elif args.command == "update":
         cmd_update(args.lang)
     elif args.command == "compile":
