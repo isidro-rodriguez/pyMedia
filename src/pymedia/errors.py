@@ -46,35 +46,28 @@ class CannotCreateDirectoryError(ExecutionError):
 
 
 class CommandExecutionError(ExecutionError):
-    def __init__(self, command_name: str, error: str) -> None:
+    def __init__(self, name: str, error: str) -> None:
         super().__init__(
-            _(
-                "FFmpeg command %(command_name)s failed during execution. Error: "
-                "%(error)s"
-            )
-            % {"command_name": command_name, "error": error}
+            _("FFmpeg command %(name)s failed during execution. Error: %(error)s")
+            % {"name": name, "error": error}
         )
 
 
 class CommandGenerationError(ExecutionError):
-    def __init__(self, command_name: str) -> None:
+    def __init__(self, name: str) -> None:
         super().__init__(
-            _("FFmpeg command %(command_name)s was not generated.")
-            % {"command_name": command_name}
+            _("FFmpeg command %(name)s was not generated.") % {"name": name}
         )
 
 
 class CommandTimeoutError(ExecutionError):
-    def __init__(self, command_name: str) -> None:
-        super().__init__(
-            _("FFmpeg command %(command_name)s timed out.")
-            % {"command_name": command_name}
-        )
+    def __init__(self, name: str) -> None:
+        super().__init__(_("FFmpeg command %(name)s timed out.") % {"name": name})
 
 
 class InvalidConfigError(ExecutionError):
-    def __init__(self, message: str) -> None:
-        super().__init__(_("Invalid configuration: %(message)s") % {"message": message})
+    def __init__(self, msg: str) -> None:
+        super().__init__(_("Invalid configuration: %(msg)s") % {"msg": msg})
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -110,11 +103,6 @@ class ConflictiveResizeDimensionsParametersError(ParameterError):
         super().__init__(_("It is not allowed to specify width and height together."))
 
 
-class MissingArgumentError(ParameterError):
-    def __init__(self, argument: str) -> None:
-        super().__init__(_("Missing argument: %(argument)s") % {"argument": argument})
-
-
 class MissingMediaError(ParameterError):
     def __init__(self, path: str) -> None:
         super().__init__(_("Missing media information: %(path)s") % {"path": path})
@@ -130,16 +118,6 @@ class MissingParameterError(ParameterError):
         super().__init__(_("Missing name: %(name)s") % {"name": name})
 
 
-class OutputParameterError(ParameterError):
-    def __init__(self) -> None:
-        super().__init__(
-            _(
-                "It is not allowed to specify an output if it has been provided "
-                "multiple video inputs."
-            )
-        )
-
-
 # ─────────────────────────────────────────────────────────────────────────────
 #  Errores de validación
 # ─────────────────────────────────────────────────────────────────────────────
@@ -151,33 +129,9 @@ class ValidationError(PyMediaError):
     level = "ERROR"
 
 
-class CropExceedsDimensionsError(ValidationError):
-    def __init__(self, crop_dimensions: str, video_dimensions: str) -> None:
-        super().__init__(
-            _(
-                "Invalid crop dimensions: %(crop_dimensions)s >= original "
-                "%(video_dimensions)s."
-            )
-            % {"crop_dimensions": crop_dimensions, "video_dimensions": video_dimensions}
-        )
-
-
-class InvalidBordersFormatError(ValidationError):
-    def __init__(self) -> None:
-        super().__init__(_("Invalid borders format. Expected: LEFT,RIGHT,TOP,BOTTOM."))
-
-
-class InvalidCropFormatError(ValidationError):
-    def __init__(self) -> None:
-        super().__init__(_("Invalid crop format. Expected: WIDTH,HEIGHT,X,Y."))
-
-
-class InvalidDirectoryError(ValidationError):
-    def __init__(self, directory: str) -> None:
-        super().__init__(
-            _(r'%(directory)s contains invalid characters: < > : " / \ | ? *')
-            % {"directory": directory}
-        )
+class InvalidParameterError(ValidationError):
+    def __init__(self, msg: str) -> None:
+        super().__init__(msg)
 
 
 class InvalidNameError(ValidationError):

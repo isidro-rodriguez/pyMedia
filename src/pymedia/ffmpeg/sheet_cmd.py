@@ -334,11 +334,11 @@ def sheet_cmd(params: SheetParameters, tile_tmp: Path) -> list[list[str]]:
     snapshots_cmd = _generate_snapshots(params=params, output=tile_tmp)
 
     if snapshots_cmd is None:
-        raise CommandGenerationError(command_name="snapshots_cmd")
+        raise CommandGenerationError(name="snapshots_cmd")
 
     header_cmd = _generate_header(params=params, image_input=tile_tmp)
 
     if header_cmd is None:
-        raise CommandGenerationError(command_name="header_cmd")
+        raise CommandGenerationError(name="header_cmd")
 
     return [snapshots_cmd, header_cmd]

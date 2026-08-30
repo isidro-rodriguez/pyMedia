@@ -24,22 +24,22 @@ msgstr ""
 
 #: pymedia/errors.py:52
 #, python-format
-msgid "FFmpeg command %(command_name)s failed during execution. Error: %(error)s"
+msgid "FFmpeg command %(name)s failed during execution. Error: %(error)s"
 msgstr ""
 
 #: pymedia/errors.py:62
 #, python-format
-msgid "FFmpeg command %(command_name)s was not generated."
+msgid "FFmpeg command %(name)s was not generated."
 msgstr ""
 
 #: pymedia/errors.py:70
 #, python-format
-msgid "FFmpeg command %(command_name)s timed out."
+msgid "FFmpeg command %(name)s timed out."
 msgstr ""
 
 #: pymedia/errors.py:77
 #, python-format
-msgid "Invalid configuration: %(message)s"
+msgid "Invalid configuration: %(msg)s"
 msgstr ""
 
 #: pymedia/errors.py:95
@@ -148,7 +148,7 @@ msgid "Log level DEBUG"
 msgstr ""
 
 #: pymedia/typer_options.py:79
-msgid "Show this message and exit."
+msgid "Show this msg and exit."
 msgstr ""
 
 #: pymedia/typer_options.py:96 pymedia/typer_options.py:106
@@ -184,11 +184,11 @@ msgid "Preset sheet style."
 msgstr ""
 
 #: pymedia/typer_options.py:154
-msgid "Target height, in pixels, to resize the video."
+msgid "_Dimensions height, in pixels, to resize the video."
 msgstr ""
 
 #: pymedia/typer_options.py:164
-msgid "Target width, in pixels, to resize the video."
+msgid "_Dimensions width, in pixels, to resize the video."
 msgstr ""
 
 #: pymedia/typer_options.py:174

@@ -20,6 +20,13 @@ class ContainerType(Enum):
     VIDEO = "video"
 
 
+class Dimensions(NamedTuple):
+    """Tipos de dimensiones."""
+
+    width: int
+    height: int
+
+
 class GyrateMode(int, Enum):
     """Ángulos de giro disponibles"""
 
@@ -53,3 +60,11 @@ class PresetsSheetMode(Enum):
     FHD = "fhd"
     HD = "hd"
     WEB = "web"
+
+
+class ScaleMode(Enum):
+    """Modo de redimensionado."""
+
+    STRETCH = "stretch"  # Re-escala a la dimensión objetivo, modifica aspect ratio.
+    FIT = "fit"  # Re-escala hasta encajar en la dimensión objetivo, no modifica AR.
+    COVER = "cover"  # Re-escala hasta cubrir la dimensión objetivo, no modifica AR.

@@ -46,7 +46,7 @@ class Logger:
             rich_tracebacks=True,
             tracebacks_show_locals=debug,
         )
-        console.setFormatter(logging.Formatter("%(message)s"))
+        console.setFormatter(logging.Formatter("%(msg)s"))
         root.addHandler(console)
 
         log_path = (
@@ -60,7 +60,7 @@ class Logger:
         log_path.parent.mkdir(parents=True, exist_ok=True)
         file_handler = logging.FileHandler(filename=log_path, encoding="utf-8")
         file_handler.setFormatter(
-            logging.Formatter("%(asctime)s %(levelname)-8s %(message)s")
+            logging.Formatter("%(asctime)s %(levelname)-8s %(msg)s")
         )
         root.addHandler(file_handler)
 
@@ -83,30 +83,30 @@ class Logger:
             cls.create(debug=debug)
         return cls(logging.getLogger(__name__))
 
-    def critical(self, message: str, exc_info: bool = False) -> None:
+    def critical(self, msg: str, exc_info: bool = False) -> None:
         """Muestra log de nivel crítico."""
-        self._logger.critical(msg=message, exc_info=exc_info)
+        self._logger.critical(msg=msg, exc_info=exc_info)
 
-    def error(self, message: str, exc_info: bool = False) -> None:
+    def error(self, msg: str, exc_info: bool = False) -> None:
         """Muestra log de nivel error."""
-        self._logger.error(msg=message, exc_info=exc_info)
+        self._logger.error(msg=msg, exc_info=exc_info)
 
     @staticmethod
-    def _render(message: str, kwargs: dict) -> str:
-        """Aplica `%(name)s` a `message` si hay valores que sustituir."""
+    def _render(msg: str, kwargs: dict) -> str:
+        """Aplica `%(name)s` a `msg` si hay valores que sustituir."""
         if kwargs:
-            return message % kwargs
-        return message
+            return msg % kwargs
+        return msg
 
-    def warning(self, message: str, **kwargs) -> None:
+    def warning(self, msg: str, **kwargs) -> None:
         """Muestra log de nivel aviso (mensaje ya traducido)."""
-        self._logger.warning(self._render(message, kwargs))
+        self._logger.warning(self._render(msg, kwargs))
 
-    def info(self, message: str, **kwargs) -> None:
+    def info(self, msg: str, **kwargs) -> None:
         """Muestra log de nivel información (mensaje ya traducido)."""
-        self._logger.info(self._render(message, kwargs))
+        self._logger.info(self._render(msg, kwargs))
 
-    def debug(self, message: str, **kwargs) -> None:
+    def debug(self, msg: str, **kwargs) -> None:
         """Muestra log de nivel depuración (mensaje ya traducido)."""
 
         def _prettify(value: object) -> object:
@@ -116,7 +116,7 @@ class Logger:
             return value
 
         kwargs = {name: _prettify(value) for name, value in kwargs.items()}
-        self._logger.debug(self._render(message, kwargs))
+        self._logger.debug(self._render(msg, kwargs))
 
     def print(self, renderable: RenderableType) -> None:
         """Imprime un objeto Rich (Table, Panel, etc.) por consola.

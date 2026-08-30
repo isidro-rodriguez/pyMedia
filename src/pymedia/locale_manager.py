@@ -120,13 +120,13 @@ class _LocaleManager:
         return self._translation
 
     def translate(self, message: str) -> str:
-        """Traduce `message` al idioma activo.
+        """Traduce `msg` al idioma activo.
 
         Args:
             message: msgid en inglés a traducir.
 
         Returns:
-            El mensaje traducido, o `message` sin cambios si no hay
+            El mensaje traducido, o `msg` sin cambios si no hay
             entrada en el catálogo activo.
         """
         return self._translation.gettext(message)

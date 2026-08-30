@@ -7,6 +7,7 @@ from pymedia.locales import _  # noqa
 from pymedia.models.enums import (
     OverwriteMode,
     PresetsSheetMode,
+    ScaleMode,
 )
 
 # =============================================================================
@@ -76,7 +77,7 @@ HelpOption = Annotated[
     bool,
     typer.Option(
         "--help",
-        help=_("Show this message and exit."),
+        help=_("Show this msg and exit."),
         callback=_show_help,
         is_eager=True,
         expose_value=False,
@@ -145,28 +146,28 @@ PresetSheetOption = Annotated[
     ),
 ]
 
-
-ResizeHeightOption = Annotated[
-    int | None,
+ScaleModeOption = Annotated[
+    ScaleMode,
     typer.Option(
-        "--height",
+        "--mode",
         rich_help_panel=_("Command options"),
-        help=_("Target height, in pixels, to resize the video."),
+        help=_("Specify different ways to scale the video."),
     ),
 ]
 
 
-ResizeWidthOption = Annotated[
-    int | None,
+ScaleToOption = Annotated[
+    str | None,
     typer.Option(
-        "--width",
+        "--size",
+        metavar="WIDTHxHEIGHT",
         rich_help_panel=_("Command options"),
-        help=_("Target width, in pixels, to resize the video."),
+        help=_("Target resolution, in pixels, to resize the video."),
     ),
 ]
 
 
-ResizeUpscaleOption = Annotated[
+ScaleUpscaleOption = Annotated[
     bool,
     typer.Option(
         "--upscale",

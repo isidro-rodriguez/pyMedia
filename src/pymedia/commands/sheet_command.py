@@ -61,11 +61,11 @@ class SheetCommand(BatchCommand[SheetArguments, SheetParameters]):
             snapshots_cmd, header_cmd = sheet_cmd(params=params, tile_tmp=tile_tmp)
 
             if snapshots_cmd is None:
-                raise CommandGenerationError(command_name="generate_sheet_cmd")
+                raise CommandGenerationError(name="generate_sheet_cmd")
             self.logger.debug(_("FFmpeg command: %(cmd)s"), cmd=snapshots_cmd)
 
             if header_cmd is None:
-                raise CommandGenerationError(command_name="generate_header_cmd")
+                raise CommandGenerationError(name="generate_header_cmd")
             self.logger.debug(_("FFmpeg command: %(cmd)s"), cmd=header_cmd)
 
             self.run_ffmpeg(

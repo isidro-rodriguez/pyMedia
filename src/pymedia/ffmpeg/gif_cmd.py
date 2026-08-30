@@ -17,10 +17,9 @@ def gif_cmd(params: GifParameters) -> list[str]:
 
     filters: str = ""
 
-    if params.resize_width or params.resize_height:
-        resize_cmd = params.to_resize_cmd()
-        if resize_cmd:
-            filters += f"{resize_cmd},"
+    resize_cmd = params.to_scale_cmd()
+    if resize_cmd:
+        filters += f"{resize_cmd},"
 
     filters += (
         f"{params.to_fps_cmd()},split[a][b];[a]palettegen[p];"

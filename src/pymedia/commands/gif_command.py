@@ -6,7 +6,7 @@ from pymedia.errors import (
 )
 from pymedia.ffmpeg.gif_cmd import gif_cmd
 from pymedia.locales import _  # noqa
-from pymedia.models.enums import OverwriteMode
+from pymedia.models.enums import OverwriteMode, ScaleMode
 from pymedia.models.pipeline.gif_pipeline import GifArguments, GifParameters
 from pymedia.typer_options import (
     DebugOption,
@@ -15,9 +15,9 @@ from pymedia.typer_options import (
     InputSingleArgument,
     OutputOption,
     OverwriteOption,
-    ResizeHeightOption,
-    ResizeUpscaleOption,
-    ResizeWidthOption,
+    ScaleModeOption,
+    ScaleToOption,
+    ScaleUpscaleOption,
     TimestampEndOption,
     TimestampStartOption,
 )
@@ -33,9 +33,9 @@ class GifCommand(SingleCommand[GifArguments, GifParameters]):
         output: OutputOption = None,
         overwrite: OverwriteOption = OverwriteMode.ASK,
         fps: FpsGifOption = 15,
-        resize_width: ResizeWidthOption = None,
-        resize_height: ResizeHeightOption = None,
-        resize_upscale: ResizeUpscaleOption = False,
+        scale_to: ScaleToOption = "640x360",
+        scale_mode: ScaleModeOption = ScaleMode.FIT,
+        scale_upscale: ScaleUpscaleOption = False,
         timestamp_start: TimestampStartOption = None,
         timestamp_end: TimestampEndOption = None,
         debug: DebugOption = False,
@@ -59,7 +59,7 @@ class GifCommand(SingleCommand[GifArguments, GifParameters]):
             raise MissingMediaError(path=str(self.params.input_single))
         cmd = gif_cmd(params=self.params)
         if cmd is None:
-            raise CommandGenerationError(command_name=self.name)
+            raise CommandGenerationError(name=self.name)
         self.cmd = cmd
 
         self.logger.debug(_("FFmpeg command: %(cmd)s"), cmd=self.cmd)

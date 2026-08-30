@@ -337,4 +337,4 @@ class Config:
             )
 
         if errors:
-            raise InvalidConfigError(message="; ".join(errors))
+            raise InvalidConfigError(msg="; ".join(errors))

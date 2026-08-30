@@ -140,7 +140,7 @@ class BaseCommand[ArgsT, ParamsT](ABC):
             proc.wait()
             stderr_thread.join()
             stdout_thread.join()
-            raise CommandTimeoutError(command_name=command_name or description)
+            raise CommandTimeoutError(name=command_name or description)
 
         proc = subprocess.Popen(
             args=cmd,
@@ -195,7 +195,7 @@ class BaseCommand[ArgsT, ParamsT](ABC):
 
         if proc.returncode != 0:
             raise CommandExecutionError(
-                command_name=command_name or description, error="".join(stderr_lines)
+                name=command_name or description, error="".join(stderr_lines)
             )
 
 
