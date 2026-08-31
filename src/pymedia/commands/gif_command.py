@@ -33,7 +33,7 @@ class GifCommand(SingleCommand[GifArguments, GifParameters]):
         input_single: InputSingleArgument,
         output: OutputOption = None,
         overwrite: OverwriteOption = OverwriteMode.ASK,
-        fps: FpsGifOption = 15,
+        fps: FpsGifOption = 12,
         crop: CropOption = None,
         scale_to: ScaleToOption = "640x360",
         scale_mode: ScaleModeOption = ScaleMode.FIT,
