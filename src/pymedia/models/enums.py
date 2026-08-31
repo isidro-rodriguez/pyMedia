@@ -45,6 +45,14 @@ class PresetsSheetMode(Enum):
     WEB = "web"
 
 
+class RotateMode(Enum):
+    """Ángulos de giro disponibles."""
+
+    D90 = 90
+    D180 = 180
+    D270 = 270
+
+
 class ScaleMode(Enum):
     """Modo de redimensionado."""
 

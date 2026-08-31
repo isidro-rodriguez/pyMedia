@@ -2,11 +2,12 @@ from dataclasses import dataclass
 from pathlib import Path
 
 from pymedia.logger import Logger
-from pymedia.models.enums import OutputMediaType, OverwriteMode, ScaleMode
+from pymedia.models.enums import OutputMediaType, OverwriteMode, RotateMode, ScaleMode
 from pymedia.models.mixins.crop_mixin import CropMixin
 from pymedia.models.mixins.fps_mixin import FpsGifMixin
 from pymedia.models.mixins.inputs_mixin import InputSingleMixin
 from pymedia.models.mixins.outputs_mixin import OutputSingleMixin
+from pymedia.models.mixins.rotate_mixin import RotateMixin
 from pymedia.models.mixins.scale_mixin import ScaleMixin
 from pymedia.models.mixins.timestamps_mixin import (
     TimestampEndMixin,
@@ -38,6 +39,7 @@ class GifArguments:
     scale_to: str
     scale_mode: ScaleMode
     scale_upscale: bool = False
+    rotate: RotateMode | None = None
     timestamp_start: str | None
     timestamp_end: str | None
 
@@ -46,9 +48,10 @@ class GifArguments:
 class GifParameters(
     InputSingleMixin,
     OutputSingleMixin,
+    FpsGifMixin,
     CropMixin,
     ScaleMixin,
-    FpsGifMixin,
+    RotateMixin,
     TimestampStartMixin,
     TimestampEndMixin,
 ):
@@ -59,8 +62,9 @@ class GifParameters(
         media: Metadatos del vídeo de entrada ya resuelto y validado.
         output: Ruta absoluta del fichero de salida.
         overwrite: Indica actuación ante fichero de salida ya existente. [defecto: ask]
-        fps: Número de imágenes por segundos [defecto: 15].
-        scale_to: Ancho objetivo para redimensionado.
+        fps: Número de imágenes por segundos [defecto: 12].
+        scale_to: Ancho objetivo para redimensionado. [defecto: 640x360].
+        rotate: Ángulo de giro de la imagen.
         timestamp_start: Marca temporal que indica el punto inicial.
         timestamp_end: Marca temporal que indica el punto final.
     """
@@ -104,11 +108,15 @@ class GifParameters(
                 crop_str=args.crop,
             )
 
-        if args.scale_to is not None:
-            params.create_scale(
-                logger=logger,
-                scale_upscale=args.scale_upscale,
-                scale_to=args.scale_to,
+        params.create_scale(
+            logger=logger,
+            scale_upscale=args.scale_upscale,
+            scale_to=args.scale_to,
+        )
+
+        if args.rotate is not None:
+            params.create_rotate(
+                rotate=args.rotate,
             )
 
         if args.timestamp_start is not None:

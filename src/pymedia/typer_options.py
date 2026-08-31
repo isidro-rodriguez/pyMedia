@@ -7,6 +7,7 @@ from pymedia.locales import _  # noqa
 from pymedia.models.enums import (
     OverwriteMode,
     PresetsSheetMode,
+    RotateMode,
     ScaleMode,
 )
 
@@ -153,6 +154,15 @@ PresetSheetOption = Annotated[
         "--preset",
         rich_help_panel=_("Command options"),
         help=_("Preset sheet style."),
+    ),
+]
+
+RotateOption = Annotated[
+    RotateMode | None,
+    typer.Option(
+        "--rotate",
+        rich_help_panel=_("Command options"),
+        help=_("Specify an ortogonal arc degree to rotate the image."),
     ),
 ]
 
