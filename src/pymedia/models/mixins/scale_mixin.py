@@ -39,7 +39,7 @@ class ScaleMixin(_HasSingleMedia):
         self,
         logger: Logger,
         scale_upscale: bool,
-        scale_to: str | None = None,
+        scale_to: str,
     ) -> None:
         """Establece los parámetros de redimensionado.
 
@@ -57,10 +57,9 @@ class ScaleMixin(_HasSingleMedia):
         """
 
         self.scale_upscale = scale_upscale
-        if scale_to is not None:
-            self.scale_to = self._process_scale(
-                scale_str=scale_to, media=self.media, logger=logger
-            )
+        self.scale_to = self._process_scale(
+            scale_str=scale_to, media=self.media, logger=logger
+        )
 
     def to_scale_cmd(self) -> str | None:
         """Devuelve el valor de escala como filtro listo para el consumo de ffmpeg.

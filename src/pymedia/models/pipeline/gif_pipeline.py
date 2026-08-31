@@ -83,30 +83,45 @@ class GifParameters(
             overwrite=args.overwrite,
             scale_mode=args.scale_mode,
         )
+
         params.create_input_single(
             input_single=args.input_single,
             logger=logger,
         )
+
         params.create_output_single(
             media_type=OutputMediaType.GIF,
             output=args.output,
             extension=".gif",
         )
-        params.create_crop(
-            crop_str=args.crop,
-        )
-        params.create_scale(
-            logger=logger,
-            scale_upscale=args.scale_upscale,
-            scale_to=args.scale_to,
-        )
+
         params.create_fps(
             fps=args.fps,
         )
-        params.create_timestamp_start(
-            start=args.timestamp_start,
-        )
-        params.create_timestamp_end(
-            end=args.timestamp_end,
-        )
+
+        if args.crop is not None:
+            params.create_crop(
+                crop_str=args.crop,
+            )
+
+        if args.scale_to is not None:
+            params.create_scale(
+                logger=logger,
+                scale_upscale=args.scale_upscale,
+                scale_to=args.scale_to,
+            )
+
+        if args.timestamp_start is not None:
+            params.create_timestamp_start(
+                start=args.timestamp_start,
+            )
+
+        if args.timestamp_end is not None:
+            params.create_timestamp_end(
+                end=args.timestamp_end,
+            )
+
+        if params.timestamp_start is not None and params.timestamp_end is not None:
+            params.validate_timestamp_start_order(time=params.timestamp_end)
+
         return params

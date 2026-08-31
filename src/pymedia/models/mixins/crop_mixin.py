@@ -16,12 +16,12 @@ class CropMixin:
     """Mixin para el recorte de imagen.
 
     Attributes:
-        crop: Área y coordenada de la zona a preservar de la imagen.
+        crop_area: Área y coordenada de la zona a preservar de la imagen.
     """
 
     crop_area: CropArea | None = None
 
-    def create_crop(self, crop_str: str | None) -> None:
+    def create_crop(self, crop_str: str) -> None:
         """Crea el atributo crop, parseando y validando la opción del usuario.
 
         Args:
@@ -31,11 +31,7 @@ class CropMixin:
             InvalidParameterError: Si el valor del parametro no es válido.
             MissingMediaPropertyError: Si no se ha obtenido un parámetro importante.
         """
-
-        if crop_str is not None:
-            self.crop_area = self._process_crop_area(
-                crop_str=crop_str, media=self.media
-            )
+        self.crop_area = self._process_crop_area(crop_str=crop_str, media=self.media)
 
     def to_crop_cmd(self) -> str:
         """Devuelve el filtro listo para consumo de ffmpeg.
