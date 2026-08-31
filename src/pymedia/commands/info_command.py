@@ -88,7 +88,12 @@ def _build_info_panel(media: Media, single_input: Path, locale: str = "en") -> P
         table = Table(title=f"🎬 {_('Video')}", show_header=True, expand=True)
         table.add_column(_("Field"), style="bold", ratio=1)
         table.add_column(_("Value"), ratio=3)
-        table.add_row(_("Codec"), video.codec or na)
+        table.add_row(
+            _("Codec"),
+            f"{video.codec} ({video.profile})"
+            if video.codec and video.profile
+            else video.codec or na,
+        )
         if video.width is None or video.height is None:
             raise MissingParameterError(name="video dimension")
         table.add_row(_("Resolution"), f"{video.width}x{video.height}")
