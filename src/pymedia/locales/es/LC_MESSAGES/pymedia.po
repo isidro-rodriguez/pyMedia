@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-08-30 22:18+0100\n"
+"POT-Creation-Date: 2026-08-31 12:26+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -75,12 +75,12 @@ msgstr "Falta la propiedad del vídeo: %(name)s"
 msgid "Missing name: %(name)s"
 msgstr "Falta el parámetro: %(name)s"
 
-#: pymedia/errors.py:140
+#: pymedia/errors.py:145
 #, python-format
 msgid "%(filename)s contains invalid characters: < > : \" / \\ | ? *"
 msgstr "%(filename)s contiene caracteres no válidos: < > : \" / \\ | ? *"
 
-#: pymedia/errors.py:149
+#: pymedia/errors.py:154
 #, python-format
 msgid ""
 "Invalid extension %(extension)s. Codec %(codec)s requires one of: "
@@ -89,7 +89,7 @@ msgstr ""
 "Extensión %(extension)s no válida. El códec %(codec)s requiere una de: "
 "%(supported)s."
 
-#: pymedia/errors.py:160
+#: pymedia/errors.py:165
 #, python-format
 msgid ""
 "Invalid extension %(extension)s. %(media_type)s requires one of: "
@@ -98,85 +98,105 @@ msgstr ""
 "Extensión %(extension)s no válida. %(media_type)s requiere una de: "
 "%(supported)s."
 
-#: pymedia/errors.py:173
+#: pymedia/errors.py:178
 msgid "Invalid timestamp format. Expected: hh:mm:ss."
 msgstr "Formato de marca de tiempo no válido. Esperado: hh:mm:ss."
 
-#: pymedia/errors.py:179
+#: pymedia/errors.py:184
 #, python-format
 msgid "Timestamp %(time)s exceeds video duration %(duration)s."
 msgstr "La marca de tiempo %(time)s supera la duración del vídeo %(duration)s."
 
-#: pymedia/typer_options.py:28 pymedia/typer_options.py:36
+#: pymedia/typer_options.py:29 pymedia/typer_options.py:37
 #, python-format
 msgid "%(path)s is not a file."
 msgstr "%(path)s no es un archivo."
 
-#: pymedia/typer_options.py:48
+#: pymedia/typer_options.py:49
 msgid "Video to process."
 msgstr "Vídeo a procesar."
 
-#: pymedia/typer_options.py:56
+#: pymedia/typer_options.py:57
 msgid "Video list to process."
 msgstr "Lista de vídeos a procesar."
 
-#: pymedia/typer_options.py:71
+#: pymedia/typer_options.py:72
 msgid "Log level DEBUG"
 msgstr "Nivel de log DEBUG"
 
-#: pymedia/typer_options.py:80
+#: pymedia/typer_options.py:81
 msgid "Show this msg and exit."
 msgstr "Muestra este mensaje y sale."
 
-#: pymedia/typer_options.py:97 pymedia/typer_options.py:107
-#: pymedia/typer_options.py:117
+#: pymedia/typer_options.py:98 pymedia/typer_options.py:108
+#: pymedia/typer_options.py:118
 msgid "Output options"
 msgstr "Opciones de salida"
 
-#: pymedia/typer_options.py:98
+#: pymedia/typer_options.py:99
 msgid "Output directory for multiple output files."
 msgstr "Directorio de salida para varios archivos de salida."
 
-#: pymedia/typer_options.py:108
+#: pymedia/typer_options.py:109
 msgid "Output file name."
 msgstr "Nombre del archivo de salida."
 
-#: pymedia/typer_options.py:118
+#: pymedia/typer_options.py:119
 msgid "Action to use if output file already exists."
 msgstr "Acción a usar si el archivo de salida ya existe."
 
-#: pymedia/typer_options.py:134 pymedia/typer_options.py:144
-#: pymedia/typer_options.py:153 pymedia/typer_options.py:164
-#: pymedia/typer_options.py:174 pymedia/typer_options.py:185
-#: pymedia/typer_options.py:196
+#: pymedia/typer_options.py:134 pymedia/typer_options.py:143
+#: pymedia/typer_options.py:152 pymedia/typer_options.py:163
+#: pymedia/typer_options.py:173 pymedia/typer_options.py:182
+#: pymedia/typer_options.py:191 pymedia/typer_options.py:202
+#: pymedia/typer_options.py:212 pymedia/typer_options.py:223
+#: pymedia/typer_options.py:234
 msgid "Command options"
 msgstr "Opciones de comando"
 
 #: pymedia/typer_options.py:135
-msgid "Frames per second of the animated GIF."
-msgstr "Fotogramas por segundo del GIF animado."
+msgid "Crop to WIDTH×HEIGHT at offset X,Y (from top-left)."
+msgstr ""
+"Recorta a ANCHO×ALTO en el desplazamiento X,Y (desde la esquina superior "
+"izquierda)."
 
-#: pymedia/typer_options.py:145
+#: pymedia/typer_options.py:144
+msgid "Flip the image horizontally, swapping left and right."
+msgstr "Invierte la imagen horizontalmente, intercambiando izquierda y derecha."
+
+#: pymedia/typer_options.py:153
+msgid "Flip the image vertically, swapping top and bottom."
+msgstr "Invierte la imagen verticalmente, intercambiando arriba y abajo."
+
+#: pymedia/typer_options.py:164
+msgid "Set the GIF frame rate in frames per second."
+msgstr "Establece la frecuencia de fotogramas del GIF en fotogramas por segundo."
+
+#: pymedia/typer_options.py:174
 msgid "Preset sheet style."
 msgstr "Estilo de hoja preestablecido."
 
-#: pymedia/typer_options.py:154
+#: pymedia/typer_options.py:183
+msgid "Specify an orthogonal arc degree to rotate the image."
+msgstr "Especifica un ángulo de giro ortogonal para rotar la imagen."
+
+#: pymedia/typer_options.py:192
 msgid "Specify different ways to scale the video."
 msgstr "Especifica distintas formas de escalar el vídeo."
 
-#: pymedia/typer_options.py:165
+#: pymedia/typer_options.py:203
 msgid "Target resolution, in pixels, to resize the video."
 msgstr "Resolución objetivo, en píxeles, para redimensionar el vídeo."
 
-#: pymedia/typer_options.py:175
+#: pymedia/typer_options.py:213
 msgid "Allows upscaling beyond the source dimensions."
 msgstr "Permite ampliar más allá de las dimensiones de origen."
 
-#: pymedia/typer_options.py:186
+#: pymedia/typer_options.py:224
 msgid "Time point at which GIF generation ends."
 msgstr "Punto temporal en que termina la generación del GIF."
 
-#: pymedia/typer_options.py:197
+#: pymedia/typer_options.py:235
 msgid "Time point at which GIF generation starts."
 msgstr "Punto temporal en que comienza la generación del GIF."
 
@@ -188,21 +208,21 @@ msgstr "El archivo de salida ya existe. ¿Sobrescribir?"
 msgid "BaseCommand skipped since output file already exists."
 msgstr "Comando omitido porque el archivo de salida ya existe."
 
-#: pymedia/commands/gif_command.py:28
+#: pymedia/commands/gif_command.py:32
 msgid "Generates an animated GIF from the specified video."
 msgstr "Genera un GIF animado a partir del vídeo indicado"
 
-#: pymedia/commands/gif_command.py:65 pymedia/commands/sheet_command.py:65
+#: pymedia/commands/gif_command.py:73 pymedia/commands/sheet_command.py:65
 #: pymedia/commands/sheet_command.py:69
 #, python-format
 msgid "FFmpeg command: %(cmd)s"
 msgstr "Comando FFmpeg: %(cmd)s"
 
-#: pymedia/commands/gif_command.py:70
+#: pymedia/commands/gif_command.py:78
 msgid "Generating GIF"
 msgstr "Generando GIF"
 
-#: pymedia/commands/gif_command.py:76
+#: pymedia/commands/gif_command.py:84
 #, python-format
 msgid "GIF generated successfully: %(output)s"
 msgstr "GIF generado correctamente: %(output)s"
@@ -243,60 +263,60 @@ msgstr "Tamaño"
 msgid "Video"
 msgstr "Vídeo"
 
-#: pymedia/commands/info_command.py:91 pymedia/commands/info_command.py:108
+#: pymedia/commands/info_command.py:92 pymedia/commands/info_command.py:113
 msgid "Codec"
 msgstr "Códec"
 
-#: pymedia/commands/info_command.py:94
+#: pymedia/commands/info_command.py:99
 msgid "Resolution"
 msgstr "Resolución"
 
-#: pymedia/commands/info_command.py:95
+#: pymedia/commands/info_command.py:100
 msgid "FPS"
 msgstr "FPS"
 
-#: pymedia/commands/info_command.py:97
+#: pymedia/commands/info_command.py:102
 msgid "Bitrate"
 msgstr "Bitrate"
 
-#: pymedia/commands/info_command.py:98
+#: pymedia/commands/info_command.py:103
 #, python-format
 msgid "%(bit_rate)s bps"
 msgstr "%(bit_rate)s bps"
 
-#: pymedia/commands/info_command.py:106
+#: pymedia/commands/info_command.py:111
 msgid "Audio"
 msgstr "Audio"
 
-#: pymedia/commands/info_command.py:109
+#: pymedia/commands/info_command.py:114
 msgid "Sample rate"
 msgstr "Sample rate"
 
-#: pymedia/commands/info_command.py:110
+#: pymedia/commands/info_command.py:115
 msgid "Channels"
 msgstr "Canales"
 
-#: pymedia/commands/info_command.py:111 pymedia/commands/info_command.py:126
+#: pymedia/commands/info_command.py:116 pymedia/commands/info_command.py:131
 msgid "Language"
 msgstr "Lenguaje"
 
-#: pymedia/commands/info_command.py:124
+#: pymedia/commands/info_command.py:129
 msgid "Subtitles"
 msgstr "Subtítulos"
 
-#: pymedia/commands/info_command.py:127
+#: pymedia/commands/info_command.py:132
 msgid "Title"
 msgstr "Título"
 
-#: pymedia/commands/info_command.py:128
+#: pymedia/commands/info_command.py:133
 msgid "Forced"
 msgstr "Forzado"
 
-#: pymedia/commands/info_command.py:129
+#: pymedia/commands/info_command.py:134
 msgid "Default"
 msgstr "Defecto"
 
-#: pymedia/commands/info_command.py:152
+#: pymedia/commands/info_command.py:157
 msgid "Metadata"
 msgstr "Metadatos"
 
@@ -422,25 +442,70 @@ msgstr ""
 "Ajuste de configuración no válido: se espera que app.stall_timeout sea un"
 " entero entre 30 y 600."
 
-#: pymedia/models/mixins/scale_mixin.py:93
+#: pymedia/models/mixins/crop_mixin.py:64
+#, python-format
+msgid "Invalid crop %(crop_str)s. Expected: WIDTH,HEIGHT,X,Y"
+msgstr "Crop no válido %(crop_str)s. Se esperaba: WIDTH,HEIGHT,X,Y"
+
+#: pymedia/models/mixins/crop_mixin.py:78
+msgid "Invalid crop dimensions: width and height must be greater than 0."
+msgstr ""
+"Dimensiones de recorte no válidas: la anchura y la altura deben ser "
+"mayores que 0."
+
+#: pymedia/models/mixins/crop_mixin.py:86
+#, python-format
+msgid ""
+"Invalid crop area. Area width (%(area_width)s) and coordinate X "
+"(%(area_x)s) is bigger that video width (%(video_width)s) "
+msgstr ""
+"Área de recorte no válida. La anchura del área (%(area_width)s) y la "
+"coordenada X (%(area_x)s) superan la anchura del vídeo (%(video_width)s)"
+
+#: pymedia/models/mixins/crop_mixin.py:99
+#, python-format
+msgid ""
+"Invalid crop area. Area height (%(area_height)s) and coordinate Y "
+"(%(area_y)s) is bigger that video height (%(video_height)s) "
+msgstr ""
+"Área de recorte no válida. La altura del área (%(area_height)s) y la "
+"coordenada Y (%(area_y)s) superan la altura del vídeo (%(video_height)s)"
+
+#: pymedia/models/mixins/flip_mixin.py:27
+msgid "Invalid flip parameter."
+msgstr "Parámetro de inversión no válido."
+
+#: pymedia/models/mixins/scale_mixin.py:91
 #, python-format
 msgid "Invalid dimensions %(value)s. Expected: WIDTHxHEIGHT"
 msgstr "Dimensiones inválidas %(value)s. Se esperaba: WIDTHxHEIGHT"
 
-#: pymedia/models/mixins/scale_mixin.py:101
-#: pymedia/models/mixins/scale_mixin.py:117
+#: pymedia/models/mixins/scale_mixin.py:99
+#: pymedia/models/mixins/scale_mixin.py:115
 msgid "video dimensions"
 msgstr "dimensiones del vídeo"
 
-#: pymedia/models/mixins/scale_mixin.py:113
+#: pymedia/models/mixins/scale_mixin.py:111
 msgid "Scale mode not supported."
 msgstr "Modo de escala no soportado."
 
-#: pymedia/models/mixins/scale_mixin.py:122
+#: pymedia/models/mixins/scale_mixin.py:120
 msgid "Target dimensions must be even."
 msgstr "Las dimensiones objetivo deben ser pares."
 
-#: pymedia/models/mixins/scale_mixin.py:127
+#: pymedia/models/mixins/scale_mixin.py:125
 msgid "Ignored scale. Target scale > video resolution, it requires upscale."
-msgstr "Escala ignorada. La escala objetivo supera la resolución del vídeo y requiere ampliación."
+msgstr ""
+"Escala ignorada. La escala objetivo supera la resolución del vídeo y "
+"requiere ampliación."
+
+#: pymedia/models/mixins/timestamps_mixin.py:63
+#, python-format
+msgid "Invalid timestamps. Start %(start)s >= %(time)s."
+msgstr "Marcas de tiempo no válidas. Inicio %(start)s >= %(time)s."
+
+#: pymedia/models/mixins/timestamps_mixin.py:110
+#, python-format
+msgid "Invalid timestamps. End %(time)s <= %(end)s."
+msgstr "Marcas de tiempo no válidas. Fin %(time)s <= %(end)s."
 

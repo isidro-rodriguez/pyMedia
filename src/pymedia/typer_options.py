@@ -180,7 +180,7 @@ RotateOption = Annotated[
     typer.Option(
         default="--rotate",
         rich_help_panel=_("Command options"),
-        help=_("Specify an ortogonal arc degree to rotate the image."),
+        help=_("Specify an orthogonal arc degree to rotate the image."),
     ),
 ]
 
