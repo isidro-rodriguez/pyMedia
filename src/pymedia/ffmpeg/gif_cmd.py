@@ -27,6 +27,11 @@ def gif_cmd(params: GifParameters) -> list[str]:
         if scale_filter is not None:
             filters.append(f"{scale_filter}")
 
+    if params.hflip or params.vflip:
+        flip_filter = params.to_flip_cmd()
+        if flip_filter is not None:
+            filters.append(f"{flip_filter}")
+
     if params.rotate is not None:
         rotate_filter = params.to_rotate_cmd()
         if rotate_filter is not None:

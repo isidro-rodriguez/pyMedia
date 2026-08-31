@@ -68,7 +68,7 @@ InputListArgument = Annotated[
 DebugOption = Annotated[
     bool,
     typer.Option(
-        "--debug",
+        default="--debug",
         help=_("Log level DEBUG"),
     ),
 ]
@@ -77,7 +77,7 @@ DebugOption = Annotated[
 HelpOption = Annotated[
     bool,
     typer.Option(
-        "--help",
+        default="--help",
         help=_("Show this msg and exit."),
         callback=_show_help,
         is_eager=True,
@@ -129,17 +129,35 @@ OverwriteOption = Annotated[
 CropOption = Annotated[
     str | None,
     typer.Option(
-        "--crop",
+        default="--crop",
         metavar="WIDTH,HEIGHT,X,Y",
         rich_help_panel=_("Command options"),
         help=_("Crop to WIDTH×HEIGHT at offset X,Y (from top-left)."),
     ),
 ]
 
+FlipHorizontalOption = Annotated[
+    bool,
+    typer.Option(
+        default="--hflip",
+        rich_help_panel=_("Command options"),
+        help=_("Flip the image horizontally, swapping left and right."),
+    ),
+]
+
+FlipVerticalOption = Annotated[
+    bool,
+    typer.Option(
+        default="--vflip",
+        rich_help_panel=_("Command options"),
+        help=_("Flip the image vertically, swapping top and bottom."),
+    ),
+]
+
 FpsGifOption = Annotated[
     int,
     typer.Option(
-        "--fps",
+        default="--fps",
         min=4,
         max=20,
         rich_help_panel=_("Command options"),
@@ -151,7 +169,7 @@ FpsGifOption = Annotated[
 PresetSheetOption = Annotated[
     PresetsSheetMode,
     typer.Option(
-        "--preset",
+        default="--preset",
         rich_help_panel=_("Command options"),
         help=_("Preset sheet style."),
     ),
@@ -160,7 +178,7 @@ PresetSheetOption = Annotated[
 RotateOption = Annotated[
     RotateMode | None,
     typer.Option(
-        "--rotate",
+        default="--rotate",
         rich_help_panel=_("Command options"),
         help=_("Specify an ortogonal arc degree to rotate the image."),
     ),
@@ -169,7 +187,7 @@ RotateOption = Annotated[
 ScaleModeOption = Annotated[
     ScaleMode,
     typer.Option(
-        "--mode",
+        default="--mode",
         rich_help_panel=_("Command options"),
         help=_("Specify different ways to scale the video."),
     ),
@@ -179,7 +197,7 @@ ScaleModeOption = Annotated[
 ScaleToOption = Annotated[
     str | None,
     typer.Option(
-        "--size",
+        default="--size",
         metavar="WIDTHxHEIGHT",
         rich_help_panel=_("Command options"),
         help=_("Target resolution, in pixels, to resize the video."),
@@ -190,7 +208,7 @@ ScaleToOption = Annotated[
 ScaleUpscaleOption = Annotated[
     bool,
     typer.Option(
-        "--upscale",
+        default="--upscale",
         rich_help_panel=_("Command options"),
         help=_("Allows upscaling beyond the source dimensions."),
     ),
@@ -200,7 +218,7 @@ ScaleUpscaleOption = Annotated[
 TimestampEndOption = Annotated[
     str | None,
     typer.Option(
-        "--end",
+        default="--end",
         metavar="hh:mm:ss",
         rich_help_panel=_("Command options"),
         help=_("Time point at which GIF generation ends."),
@@ -211,7 +229,7 @@ TimestampEndOption = Annotated[
 TimestampStartOption = Annotated[
     str | None,
     typer.Option(
-        "--start",
+        default="--start",
         metavar="hh:mm:ss",
         rich_help_panel=_("Command options"),
         help=_("Time point at which GIF generation starts."),

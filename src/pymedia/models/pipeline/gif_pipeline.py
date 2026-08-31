@@ -4,6 +4,7 @@ from pathlib import Path
 from pymedia.logger import Logger
 from pymedia.models.enums import OutputMediaType, OverwriteMode, RotateMode, ScaleMode
 from pymedia.models.mixins.crop_mixin import CropMixin
+from pymedia.models.mixins.flip_mixin import FlipMixin
 from pymedia.models.mixins.fps_mixin import FpsGifMixin
 from pymedia.models.mixins.inputs_mixin import InputSingleMixin
 from pymedia.models.mixins.outputs_mixin import OutputSingleMixin
@@ -39,6 +40,8 @@ class GifArguments:
     scale_to: str
     scale_mode: ScaleMode
     scale_upscale: bool = False
+    hflip: bool = False
+    vflip: bool = False
     rotate: RotateMode | None = None
     timestamp_start: str | None
     timestamp_end: str | None
@@ -51,6 +54,7 @@ class GifParameters(
     FpsGifMixin,
     CropMixin,
     ScaleMixin,
+    FlipMixin,
     RotateMixin,
     TimestampStartMixin,
     TimestampEndMixin,
@@ -64,6 +68,8 @@ class GifParameters(
         overwrite: Indica actuación ante fichero de salida ya existente. [defecto: ask]
         fps: Número de imágenes por segundos [defecto: 12].
         scale_to: Ancho objetivo para redimensionado. [defecto: 640x360].
+        hflip: Invierte la imagen horizontalmente, intercambiando izquierda y derecha.
+        vflip: Invierte la imagen verticalmente, intercambiando arriba y abajo.
         rotate: Ángulo de giro de la imagen.
         timestamp_start: Marca temporal que indica el punto inicial.
         timestamp_end: Marca temporal que indica el punto final.
@@ -86,6 +92,8 @@ class GifParameters(
         params = cls(
             overwrite=args.overwrite,
             scale_mode=args.scale_mode,
+            hflip=args.hflip,
+            vflip=args.vflip,
         )
 
         params.create_input_single(

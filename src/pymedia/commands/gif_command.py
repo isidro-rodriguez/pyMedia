@@ -11,6 +11,8 @@ from pymedia.models.pipeline.gif_pipeline import GifArguments, GifParameters
 from pymedia.typer_options import (
     CropOption,
     DebugOption,
+    FlipHorizontalOption,
+    FlipVerticalOption,
     FpsGifOption,
     HelpOption,
     InputSingleArgument,
@@ -39,6 +41,8 @@ class GifCommand(SingleCommand[GifArguments, GifParameters]):
         scale_to: ScaleToOption = "640x360",
         scale_mode: ScaleModeOption = ScaleMode.FIT,
         scale_upscale: ScaleUpscaleOption = False,
+        hflip: FlipHorizontalOption = False,
+        vflip: FlipVerticalOption = False,
         rotate: RotateOption = None,
         timestamp_start: TimestampStartOption = None,
         timestamp_end: TimestampEndOption = None,
