@@ -129,6 +129,11 @@ class ValidationError(PyMediaError):
     level = "ERROR"
 
 
+class InvalidArgumentError(ValidationError):
+    def __init__(self, msg: str) -> None:
+        super().__init__(msg)
+
+
 class InvalidParameterError(ValidationError):
     def __init__(self, msg: str) -> None:
         super().__init__(msg)

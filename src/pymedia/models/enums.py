@@ -2,7 +2,7 @@ from enum import Enum
 from typing import NamedTuple
 
 
-class CropMargins(NamedTuple):
+class CropArea(NamedTuple):
     """Datos para el corte de imagen mediante crop."""
 
     width: int  # Ancho del vídeo resultante
@@ -11,28 +11,11 @@ class CropMargins(NamedTuple):
     y: int  # Coordenada Y del punto de corte
 
 
-class ContainerType(Enum):
-    """Tipos de container."""
-
-    ANIMATED = "animated"
-    AUDIO = "audio"
-    IMAGE = "image"
-    VIDEO = "video"
-
-
 class Dimensions(NamedTuple):
     """Tipos de dimensiones."""
 
     width: int
     height: int
-
-
-class GyrateMode(int, Enum):
-    """Ángulos de giro disponibles"""
-
-    d90 = 90
-    d180 = 180
-    d270 = 270
 
 
 class OverwriteMode(Enum):

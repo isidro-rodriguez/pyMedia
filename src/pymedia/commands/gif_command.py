@@ -9,6 +9,7 @@ from pymedia.locales import _  # noqa
 from pymedia.models.enums import OverwriteMode, ScaleMode
 from pymedia.models.pipeline.gif_pipeline import GifArguments, GifParameters
 from pymedia.typer_options import (
+    CropOption,
     DebugOption,
     FpsGifOption,
     HelpOption,
@@ -33,6 +34,7 @@ class GifCommand(SingleCommand[GifArguments, GifParameters]):
         output: OutputOption = None,
         overwrite: OverwriteOption = OverwriteMode.ASK,
         fps: FpsGifOption = 15,
+        crop: CropOption = None,
         scale_to: ScaleToOption = "640x360",
         scale_mode: ScaleModeOption = ScaleMode.FIT,
         scale_upscale: ScaleUpscaleOption = False,

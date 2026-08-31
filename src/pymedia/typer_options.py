@@ -125,6 +125,16 @@ OverwriteOption = Annotated[
 # =============================================================================
 
 
+CropOption = Annotated[
+    str | None,
+    typer.Option(
+        "--crop",
+        metavar="WIDTH,HEIGHT,X,Y",
+        rich_help_panel=_("Command options"),
+        help=_("Crop frames to this dimension."),
+    ),
+]
+
 FpsGifOption = Annotated[
     int,
     typer.Option(

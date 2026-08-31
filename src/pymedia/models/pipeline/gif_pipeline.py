@@ -3,6 +3,7 @@ from pathlib import Path
 
 from pymedia.logger import Logger
 from pymedia.models.enums import OutputMediaType, OverwriteMode, ScaleMode
+from pymedia.models.mixins.crop_mixin import CropMixin
 from pymedia.models.mixins.fps_mixin import FpsGifMixin
 from pymedia.models.mixins.inputs_mixin import InputSingleMixin
 from pymedia.models.mixins.outputs_mixin import OutputSingleMixin
@@ -33,6 +34,7 @@ class GifArguments:
     output: Path | None
     overwrite: OverwriteMode
     fps: int
+    crop: str | None
     scale_to: str
     scale_mode: ScaleMode
     scale_upscale: bool = False
@@ -44,8 +46,9 @@ class GifArguments:
 class GifParameters(
     InputSingleMixin,
     OutputSingleMixin,
-    FpsGifMixin,
+    CropMixin,
     ScaleMixin,
+    FpsGifMixin,
     TimestampStartMixin,
     TimestampEndMixin,
 ):
@@ -76,17 +79,34 @@ class GifParameters(
             Instancia de GifParameters completamente inicializada.
         """
 
-        params = cls(overwrite=args.overwrite, scale_mode=args.scale_mode)
-        params.create_input_single(input_single=args.input_single, logger=logger)
-        params.create_output_single(
-            media_type=OutputMediaType.GIF, output=args.output, extension=".gif"
+        params = cls(
+            overwrite=args.overwrite,
+            scale_mode=args.scale_mode,
         )
-        params.create_fps(fps=args.fps)
+        params.create_input_single(
+            input_single=args.input_single,
+            logger=logger,
+        )
+        params.create_output_single(
+            media_type=OutputMediaType.GIF,
+            output=args.output,
+            extension=".gif",
+        )
+        params.create_crop(
+            crop_str=args.crop,
+        )
         params.create_scale(
             logger=logger,
             scale_upscale=args.scale_upscale,
-            scale_to=args.scale_to if args.scale_to else None,
+            scale_to=args.scale_to,
         )
-        params.create_timestamp_start(start=args.timestamp_start)
-        params.create_timestamp_end(end=args.timestamp_end)
+        params.create_fps(
+            fps=args.fps,
+        )
+        params.create_timestamp_start(
+            start=args.timestamp_start,
+        )
+        params.create_timestamp_end(
+            end=args.timestamp_end,
+        )
         return params

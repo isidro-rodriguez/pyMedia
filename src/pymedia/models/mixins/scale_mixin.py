@@ -57,11 +57,10 @@ class ScaleMixin(_HasSingleMedia):
         """
 
         self.scale_upscale = scale_upscale
-        self.scale_to = (
-            self._process_scale(scale_str=scale_to, media=self.media, logger=logger)
-            if scale_to
-            else None
-        )
+        if scale_to is not None:
+            self.scale_to = self._process_scale(
+                scale_str=scale_to, media=self.media, logger=logger
+            )
 
     def to_scale_cmd(self) -> str | None:
         """Devuelve el valor de escala como filtro listo para el consumo de ffmpeg.

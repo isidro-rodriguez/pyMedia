@@ -15,15 +15,22 @@ def gif_cmd(params: GifParameters) -> list[str]:
     if params.output is None:
         raise MissingParameterError(name="output")
 
-    filters: str = ""
+    filters: list[str] = []
 
-    resize_cmd = params.to_scale_cmd()
-    if resize_cmd:
-        filters += f"{resize_cmd},"
+    if params.crop_area is not None:
+        crop_filter = params.to_crop_cmd()
+        if crop_filter is not None:
+            filters.append(f"{crop_filter}")
 
-    filters += (
-        f"{params.to_fps_cmd()},split[a][b];[a]palettegen[p];"
-        f"[b][p]paletteuse=dither=floyd_steinberg"
+    if params.scale_to is not None:
+        scale_filter = params.to_scale_cmd()
+        if scale_filter is not None:
+            filters.append(f"{scale_filter}")
+
+    filters.append(f"{params.to_fps_cmd()}")
+
+    filters.append(
+        "split[a][b];[a]palettegen[p];[b][p]paletteuse=dither=floyd_steinberg"
     )
 
     cmd = ["ffmpeg"]
@@ -41,7 +48,7 @@ def gif_cmd(params: GifParameters) -> list[str]:
         [
             *params.to_input_single_cmd(),
             "-filter_complex",
-            filters,
+            ",".join(filters),
             "-progress",
             "pipe:1",
             "-nostats",

@@ -40,11 +40,8 @@ class TimestampStartMixin(_HasSingleMedia):
             MissingParameterError: Si no se pudo obtener el parámetro.
             TimeExceedsDurationError: Si marca de tiempo superior a la duración.
         """
-        self.timestamp_start = (
-            _process_time(time_str=start, media=self.media)
-            if start is not None
-            else None
-        )
+        if start is not None:
+            self.timestamp_start = _process_time(time_str=start, media=self.media)
 
     def to_timestamp_start_cmd(self) -> list[str]:
         """Devuelve el filtro listo para consumo de ffmpeg.
