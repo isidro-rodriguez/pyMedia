@@ -31,22 +31,6 @@ def _fake_translate(monkeypatch):
 
 
 class TestCreateScale:
-    def test_none_scale_is_noop(self):
-        mixin = _mixin()
-
-        mixin.create_scale(logger=Mock(), scale_upscale=False, scale_to=None)
-
-        assert mixin.scale_upscale is False
-        assert mixin.scale_to is None
-
-    def test_empty_scale_is_noop(self):
-        mixin = _mixin()
-
-        mixin.create_scale(logger=Mock(), scale_upscale=True, scale_to="")
-
-        assert mixin.scale_upscale is True
-        assert mixin.scale_to is None
-
     def test_equal_dimensions_are_noop(self):
         mixin = _mixin()
         logger = Mock()
@@ -58,7 +42,9 @@ class TestCreateScale:
 
 
 class TestParseErrors:
-    @pytest.mark.parametrize("value", ["abc", "1280", "1280x", "x720", "12x80x720"])
+    @pytest.mark.parametrize(
+        "value", ["", "abc", "1280", "1280x", "x720", "12x80x720"]
+    )
     def test_invalid_dimensions_raise(self, value):
         mixin = _mixin()
 

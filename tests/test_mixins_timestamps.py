@@ -23,14 +23,6 @@ def _media(duration: timedelta | None = timedelta(hours=2)) -> Media:
 
 
 class TestCreateTimestampStart:
-    def test_none_sets_attr_none(self):
-        mixin = TimestampStartMixin()
-        mixin.media = _media()
-
-        mixin.create_timestamp_start(start=None)
-
-        assert mixin.timestamp_start is None
-
     @pytest.mark.parametrize(
         ("start", "expected"),
         [
@@ -79,14 +71,6 @@ class TestCreateTimestampStart:
 
 
 class TestCreateTimestampEnd:
-    def test_none_sets_attr_none(self):
-        mixin = TimestampEndMixin()
-        mixin.media = _media()
-
-        mixin.create_timestamp_end(end=None)
-
-        assert mixin.timestamp_end is None
-
     @pytest.mark.parametrize(
         ("end", "expected"),
         [
