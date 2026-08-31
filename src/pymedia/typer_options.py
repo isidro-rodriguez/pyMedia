@@ -132,7 +132,7 @@ CropOption = Annotated[
         "--crop",
         metavar="WIDTH,HEIGHT,X,Y",
         rich_help_panel=_("Command options"),
-        help=_("Crop frames to this dimension."),
+        help=_("Crop to WIDTH×HEIGHT at offset X,Y (from top-left)."),
     ),
 ]
 
@@ -143,7 +143,7 @@ FpsGifOption = Annotated[
         min=4,
         max=20,
         rich_help_panel=_("Command options"),
-        help=_("Frames per second of the animated GIF."),
+        help=_("Set the GIF frame rate in frames per second."),
     ),
 ]
 
