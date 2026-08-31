@@ -6,6 +6,8 @@ Valida la plantilla POT, los catálogos PO y los compilados MO:
 - Paridad de placeholders `%(name)s` entre msgid y msgstr.
 - Compilación en memoria sin error.
 - Todo msgid del POT se usa en `src/`.
+- Los locales disponibles en disco coinciden con los declarados.
+- Todas las entradas del PO están compiladas en el `.mo`.
 """
 
 import io
@@ -15,7 +17,7 @@ from pathlib import Path
 import pytest
 from babel.messages.catalog import Catalog
 from babel.messages.extract import extract_from_dir
-from babel.messages.mofile import write_mo
+from babel.messages.mofile import read_mo, write_mo
 from babel.messages.pofile import read_po
 
 _SRC_DIR = Path(__file__).resolve().parents[1] / "src"
@@ -43,10 +45,33 @@ def _placeholder_params(text: str) -> set[str]:
     return set(re.findall(r"%\(\w+\)s", text))
 
 
+def _mo_path(lang: str) -> Path:
+    return _po_path(lang).with_suffix(".mo")
+
+
+def _read_mo(path: Path) -> Catalog:
+    """Lee un archivo MO y devuelve el catálogo."""
+    with path.open("rb") as f:
+        return read_mo(f)
+
+
+def _entries(catalog: Catalog) -> dict[str, str]:
+    """Devuelve {msgid: msgstr}, descartando el header del catálogo."""
+    return {message.id: message.string for message in catalog if message.id}
+
+
+def _available_languages() -> set[str]:
+    """Devuelve los códigos de idioma con catálogo PO presente en disco."""
+    return {
+        path.parents[1].name
+        for path in _LOCALEDIR.glob(f"*/LC_MESSAGES/{_DOMAIN}.po")
+    }
+
+
 # ─── 1) POT existe y es válido ────────────────────────────────────────────
 
 
-def test_pot_existe() -> None:
+def test_pot_exists() -> None:
     """La plantilla POT existe y contiene al menos un msgid."""
     pot = _pot_path()
     assert pot.exists(), f"Falta la plantilla: {pot}"
@@ -58,17 +83,38 @@ def test_pot_existe() -> None:
 
 
 @pytest.mark.parametrize("lang", _LANGUAGES)
-def test_po_existe(lang: str) -> None:
+def test_po_exists(lang: str) -> None:
     """Existe un catálogo PO para cada idioma soportado."""
     po = _po_path(lang)
     assert po.exists(), f"Falta el catálogo: {po}"
+
+
+# ─── 2b) Locales disponibles actualizados ─────────────────────────────────
+
+
+def test_available_locales_updated() -> None:
+    """Los catálogos en disco coinciden con los idiomas declarados."""
+    disponibles = _available_languages()
+    declarados = set(_LANGUAGES)
+
+    assert disponibles == declarados, (
+        f"Locales en disco ({sorted(disponibles)}) no coinciden con los "
+        f"declarados ({sorted(declarados)}). Añade el catálogo o actualiza "
+        "`_LANGUAGES`."
+    )
+
+    for lang in declarados:
+        mo = _mo_path(lang)
+        assert mo.exists(), (
+            f"Falta el compilado para `{lang}`: {mo} (ejecuta `compile -l {lang}`)"
+        )
 
 
 # ─── 3) Unicidad y msgstr no vacío ───────────────────────────────────────
 
 
 @pytest.mark.parametrize("lang", _LANGUAGES)
-def test_msgid_unicos_y_msgstr_no_vacio(lang: str) -> None:
+def test_msgids_unique_and_translated(lang: str) -> None:
     """Los msgid son únicos y todo msgstr no vacío (salvo el header)."""
     catalog = _read_po(_po_path(lang))
     seen: set[str] = set()
@@ -91,7 +137,7 @@ def test_msgid_unicos_y_msgstr_no_vacio(lang: str) -> None:
 
 
 @pytest.mark.parametrize("lang", _LANGUAGES)
-def test_paridad_placeholders(lang: str) -> None:
+def test_placeholder_parity(lang: str) -> None:
     """msgid y msgstr tienen los mismos placeholders `%(name)s`."""
     catalog = _read_po(_po_path(lang))
     errores: list[str] = []
@@ -111,7 +157,7 @@ def test_paridad_placeholders(lang: str) -> None:
 
 
 @pytest.mark.parametrize("lang", _LANGUAGES)
-def test_compila_en_memoria(lang: str) -> None:
+def test_catalog_compiles_in_memory(lang: str) -> None:
     """El catálogo PO compila a MO sin errores."""
     catalog = _read_po(_po_path(lang))
     stream = io.BytesIO()
@@ -119,10 +165,38 @@ def test_compila_en_memoria(lang: str) -> None:
     assert stream.tell() > 0, "El MO generado está vacío"
 
 
-# ─── 6) Todo msgid del POT se usa en src/ ────────────────────────────────
+# ─── 6) PO totalmente compilado ──────────────────────────────────────────
 
 
-def test_todo_msgid_se_usa_en_src() -> None:
+@pytest.mark.parametrize("lang", _LANGUAGES)
+def test_po_fully_compiled(lang: str) -> None:
+    """Todas las entradas del PO están compiladas y al día en el MO."""
+    mo = _mo_path(lang)
+    assert mo.exists(), f"Falta el compilado: {mo} (ejecuta `compile -l {lang}`)"
+
+    po_entries = _entries(_read_po(_po_path(lang)))
+    mo_entries = _entries(_read_mo(mo))
+
+    sin_compilar = sorted(set(po_entries) - set(mo_entries))
+    desactualizadas = sorted(
+        msgid
+        for msgid, msgstr in po_entries.items()
+        if msgid in mo_entries and mo_entries[msgid] != msgstr
+    )
+
+    assert not sin_compilar, (
+        "Entradas del PO sin compilar en el MO:\n" + "\n".join(sin_compilar)
+    )
+    assert not desactualizadas, (
+        "Entradas del PO con msgstr distinta al MO (recompila):\n"
+        + "\n".join(desactualizadas)
+    )
+
+
+# ─── 7) Todo msgid del POT se usa en src/ ────────────────────────────────
+
+
+def test_all_pot_msgids_used_in_src() -> None:
     """Cada msgid del POT aparece en el código fuente de `src/`."""
     pot = _read_po(_pot_path())
     extraido = Catalog(domain=_DOMAIN)
@@ -136,4 +210,4 @@ def test_todo_msgid_se_usa_en_src() -> None:
         extraido.add(message, locations=[(filename, lineno)])
 
     faltan = [m.id for m in pot if m.id and m.id not in extraido]
-    assert not faltan, f"msgids en POT no usados en src/:\n" + "\n".join(faltan)
+    assert not faltan, "msgids en POT no usados en src/:\n" + "\n".join(faltan)

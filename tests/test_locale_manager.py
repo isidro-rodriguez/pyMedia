@@ -3,12 +3,9 @@
 Valora detección de idioma, carga de catálogos, traducción y plurales.
 """
 
-import locale
 import os
 from pathlib import Path
 from unittest.mock import patch
-
-import pytest
 
 from pymedia.locale_manager import _LocaleManager, locale_manager
 
