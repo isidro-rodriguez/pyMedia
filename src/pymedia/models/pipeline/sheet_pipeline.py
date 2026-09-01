@@ -4,6 +4,7 @@ from pathlib import Path
 from pymedia.errors import MissingParameterError
 from pymedia.logger import Logger
 from pymedia.models.enums import OutputMediaType, OverwriteMode, PresetsSheetMode
+from pymedia.models.mixins.image_mixin import ImageQualityMixin
 from pymedia.models.mixins.inputs_mixin import InputSingleMixin
 from pymedia.models.mixins.outputs_mixin import OutputBatchMixin
 from pymedia.models.mixins.sheet_presets_mixin import SheetPresetsMixin
@@ -29,7 +30,9 @@ class SheetArguments:
 
 
 @dataclass(kw_only=True)
-class SheetParameters(InputSingleMixin, OutputBatchMixin, SheetPresetsMixin):
+class SheetParameters(
+    InputSingleMixin, OutputBatchMixin, ImageQualityMixin, SheetPresetsMixin
+):
     """Parámetros utilizados por el comando Sheet.
 
     Attributes:

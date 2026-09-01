@@ -120,11 +120,11 @@ def _generate_snapshots(params: SheetParameters, output: Path) -> list[str]:
             f"{_build_thumb_pad()}[t{r}{c}]"
         )
 
-    filter_complex_parts.append(_build_stack_filter())
-
     m = preset.margin
     filter_complex_parts.append(
-        f"[grid]pad=iw+{m * 2}:ih+{m * 2}:{m}:{m}:color={preset.background}[out]"
+        f"{_build_stack_filter()},"
+        f"[grid]pad=iw+{m * 2}:ih+{m * 2}:{m}:{m}:color={preset.background}, "
+        f"{params.to_image_quality_cmd().format}[out]"
     )
 
     return [
@@ -138,6 +138,7 @@ def _generate_snapshots(params: SheetParameters, output: Path) -> list[str]:
         "[out]",
         "-frames:v",
         "1",
+        *params.to_image_quality_cmd().compression,
         str(output),
     ]
 
@@ -295,6 +296,7 @@ def _generate_header(params: SheetParameters, image_input: Path) -> list[str]:
             f"fontsize={preset.fontsize}:fontcolor={preset.text_color}:"
             f"x={preset.header_margin_left}:y={y}"
         )
+    filters.append(params.to_image_quality_cmd().format)
 
     return [
         "ffmpeg",
@@ -303,6 +305,7 @@ def _generate_header(params: SheetParameters, image_input: Path) -> list[str]:
         str(image_input),
         "-vf",
         ",".join(filters),
+        *params.to_image_quality_cmd().compression,
         str(params.output),
     ]
 
