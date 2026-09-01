@@ -29,7 +29,9 @@ class ScaleMixin(_HasSingleMedia):
     """Mixin para los valores de redimensionado.
 
     Attributes:
-        scale_to: Valor del ancho a redimensionar.
+        scale_mode: Política de escalado del vídeo o imagen.
+        scale_upscale: Permite el incremento de dimensiones.
+        scale_to: Dimensión objetivo, en píxeles, o `None` si no se cambia.
     """
 
     scale_mode: ScaleMode

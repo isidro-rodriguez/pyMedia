@@ -24,6 +24,29 @@ from pymedia.models.mixins.timestamps_mixin import (
 
 @dataclass(frozen=True, slots=True, kw_only=True)
 class ThumbnailArguments:
+    """Argumentos crudos del subcomando thumbnail, tal como llegan de la CLI.
+
+    Attributes:
+        input_single: Ruta del vídeo de entrada.
+        output: Ruta de salida deseada, o None para usar la derivada de
+            input_single.
+        overwrite: Política de sobrescritura de archivos existentes.
+        every: Intervalo en segundos entre thumbnails (modo intervalo).
+        scene: Umbral de sensibilidad para detección de cambio de escena
+            (modo escena).
+        timestamp_at: Marca o marcas de tiempo, sin parsear, para capturar
+            thumbnails puntuales (modo timestamp).
+        timestamp_start: Inicio del rango temporal a procesar, sin parsear.
+        timestamp_end: Fin del rango temporal a procesar, sin parsear.
+        crop: Especificación de corte, sin parsear.
+        scale_to: Dimensiones de escalado destino, sin parsear.
+        scale_mode: Modo de escalado a aplicar (STRETCH, FIT, COVER).
+        scale_upscale: Si se permite escalar por encima del tamaño original.
+        hflip: Si se aplica volteo horizontal.
+        vflip: Si se aplica volteo vertical.
+        rotate: Modo de rotación a aplicar, o None si no se rota.
+    """
+
     input_single: Path
     output: Path | None = None
     overwrite: OverwriteMode
@@ -56,10 +79,51 @@ class ThumbnailParameters(
     FlipMixin,
     RotateMixin,
 ):
+    """Parámetros validados y parseados para generar thumbnails.
+
+    Se construye exclusivamente a través de create(), que valida y parsea
+    los ThumbnailArguments crudos de la CLI en los tipos que consumen
+    thumbnail_cmd.
+
+    Attributes:
+        input_single: Ruta del fichero de vídeo a procesar.
+        media: Metadatos del vídeo.
+        output: Ruta del fichero de salida procesada
+        overwrite: Política de sobrescritura de archivos existentes.
+        timestamp_at: Lista de marcas de tiempo indicando las capturas de thumbnails.
+        timestamp_start: Marca de tiempo que indica el punto inicial.
+        timestamp_end: Marca de tiempo que indica el punto final.
+        scene: Índice de sensibilidad de cambio de fotograma para obtener imagen.
+        fps: Frecuencia de extracción en segundos por imagen.
+        crop_area: Área y coordenada de la zona a preservar de la imagen.
+        scale_mode: Política de escalado del vídeo o imagen.
+        scale_upscale: Permite el incremento de dimensiones.
+        scale_to: Dimensiones objetivo a las que se va a escalar el vídeo o imagen.
+        hflip: Invierte la imagen horizontalmente, intercambiando izquierda y derecha.
+        vflip: Invierte la imagen verticalmente, intercambiando arriba y abajo.
+        rotate: Ángulo de rotación que se va a someter el vídeo.
+    """
+
     overwrite: OverwriteMode
 
     @classmethod
     def create(cls, args: ThumbnailArguments, logger: Logger) -> "ThumbnailParameters":
+        """Valida y parsea los argumentos crudos de la CLI a ThumbnailParameters.
+
+        Args:
+            args: Argumentos sin procesar recibidos del subcomando thumbnail.
+            logger: Logger compartido para reportar avisos durante el parseo.
+
+        Returns:
+            Instancia de ThumbnailParameters lista para thumbnail_cmd.
+
+        Raises:
+            MissingRequiredOptionError: Si no se aporta ninguna de --at,
+                --scene o --every.
+            ExclusiveOptionsError: Si se combinan opciones incompatibles
+                entre sí (--at/--scene/--every, o --at con --start/--end).
+        """
+
         params = cls(
             overwrite=args.overwrite,
             scale_mode=args.scale_mode,

@@ -117,9 +117,24 @@ class TimestampEndMixin(_HasSingleMedia):
 
 @dataclass(kw_only=True)
 class TimestampAtMixin(_HasSingleMedia):
+    """Mixin para listas de marcas de tiempo.
+
+    Attributes:
+        timestamp_at: Lista de marcas de tiempo.
+    """
+
     timestamp_at: list[timedelta] | None = None
 
     def create_timestamp_at(self, times_str: str) -> None:
+        """Parsea y valida un str de timestamp de marca de tiempo.
+
+        Args:
+            times_str: String de lista de marcas de tiempo.
+
+        Raises:
+            InvalidArgumentError: Si el str no tiene un formato válido.
+        """
+
         times: list[timedelta] = []
         try:
             times_array = times_str.split(",")
