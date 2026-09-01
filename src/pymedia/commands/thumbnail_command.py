@@ -93,11 +93,12 @@ class ThumbnailCommand(SingleCommand[ThumbnailArguments, ThumbnailParameters]):
         self.run_ffmpeg(
             cmd=cmd,
             media=self.params.media,
-            description=_("Generating GIF"),
+            description=_("Generating thumbnail"),
             stall_timeout=self.config.app.stall_timeout,
             command_name=self.name,
         )
 
         self.logger.info(
-            _("GIF generated successfully: %(output)s"), output=self.params.output
+            _("Thumbnail(s) generated successfully: %(output)s"),
+            output=self.params.output,
         )

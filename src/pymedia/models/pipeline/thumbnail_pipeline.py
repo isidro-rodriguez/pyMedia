@@ -28,8 +28,8 @@ class ThumbnailArguments:
     output: Path | None = None
     overwrite: OverwriteMode
     every: int | None = None
-    scene: float | None = None  # En Typer, limitar a rango (0.1, 0.9)
-    timestamps_at: str | None = None
+    scene: float | None = None
+    timestamp_at: str | None = None
     timestamp_start: str | None
     timestamp_end: str | None
     crop: str | None = None
@@ -60,7 +60,6 @@ class ThumbnailParameters(
 
     @classmethod
     def create(cls, args: ThumbnailArguments, logger: Logger) -> "ThumbnailParameters":
-
         params = cls(
             overwrite=args.overwrite,
             scale_mode=args.scale_mode,
@@ -80,9 +79,9 @@ class ThumbnailParameters(
             extension=".jpg",
         )
 
-        if args.timestamps_at is not None:
+        if args.timestamp_at is not None:
             params.create_timestamp_at(
-                times_str=args.timestamps_at,
+                times_str=args.timestamp_at,
             )
 
         if args.timestamp_start is not None:
@@ -135,11 +134,11 @@ def _validate_options(params: ThumbnailParameters) -> None:
 
     # 1. Al menos uno debe existir (evaluando presencia explícita)
     if not any(x is not None for x in (at, scene, fps)):
-        raise MissingRequiredOptionError(options=["--at", "--scene", "--fps"])
+        raise MissingRequiredOptionError(options=["--at", "--scene", "--every"])
 
     # 2. Exclusividad mutua (máximo 1 de las opciones principales)
     if sum(x is not None for x in (at, scene, fps)) > 1:
-        raise ConflictiveOptionsError(options=["--at", "--scale", "--every"])
+        raise ConflictiveOptionsError(options=["--at", "--scene", "--every"])
 
     # 3. Conflicto entre --at y rango (--start / --end)
     if at is not None and any(x is not None for x in (start, end)):

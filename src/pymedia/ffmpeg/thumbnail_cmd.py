@@ -42,7 +42,7 @@ class ThumbnailCmd:
             if timestamp is None:
                 raise MissingParameterError(name="timestamp_at")
             output = self._params.output.with_stem(
-                f"{self._params.output.stem}_{str(timestamp)}"
+                f"{self._params.output.stem}_{str(timestamp).replace(':', '-')}"
             )
             return self._build_cmd(output=output, timestamp=timestamp)
         output = self._params.output.with_stem(f"{self._params.output.stem}_%03d")

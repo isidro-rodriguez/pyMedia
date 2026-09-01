@@ -120,8 +120,6 @@ class TimestampAtMixin(_HasSingleMedia):
     timestamp_at: list[timedelta] | None = None
 
     def create_timestamp_at(self, times_str: str) -> None:
-        if self.timestamp_at is None:
-            raise MissingParameterError(name="timestamp_at")
         times: list[timedelta] = []
         try:
             times_array = times_str.split(",")
