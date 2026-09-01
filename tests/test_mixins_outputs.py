@@ -7,8 +7,8 @@ import pytest
 from pymedia.errors import (
     ConflictiveOutputAmmountParameterError,
     ConflictiveOutputParametersError,
+    InvalidContainerError,
     InvalidContainerTypeError,
-    InvalidFileExtensionError,
     InvalidNameError,
     MissingMediaPropertyError,
 )
@@ -182,7 +182,7 @@ class TestValidateOutput:
     def test_audio_extension_not_supported_by_codec(self, tmp_path):
         mixin = _single_mixin(media=_media(audio=_audio("aac")))
 
-        with pytest.raises(InvalidFileExtensionError):
+        with pytest.raises(InvalidContainerError):
             mixin.create_output_single(
                 OutputMediaType.AUDIO, output=tmp_path / "out.flac"
             )
@@ -240,7 +240,7 @@ class TestValidateOutput:
     def test_video_extension_not_supported_by_codec(self, tmp_path):
         mixin = _single_mixin(media=_media(video=_video("h264")))
 
-        with pytest.raises(InvalidFileExtensionError) as exc_info:
+        with pytest.raises(InvalidContainerError) as exc_info:
             mixin.create_output_single(
                 OutputMediaType.VIDEO, output=tmp_path / "out.avi"
             )
@@ -259,7 +259,7 @@ class TestValidateOutput:
         mixin = _single_mixin(media=_media(video=_video("h264"), audio=_audio("aac")))
 
         # .m2ts es válido para h264 pero no para aac
-        with pytest.raises(InvalidFileExtensionError):
+        with pytest.raises(InvalidContainerError):
             mixin.create_output_single(
                 OutputMediaType.VIDEO, output=tmp_path / "out.m2ts"
             )

@@ -8,7 +8,7 @@ import platformdirs
 
 from pymedia.data.audio_codecs import AUDIO_CODECS
 from pymedia.data.video_codecs import VIDEO_CODECS
-from pymedia.errors import InvalidConfigError
+from pymedia.errors import ConfigError
 from pymedia.locales import _  # noqa
 
 
@@ -143,7 +143,7 @@ class Config:
             Configuración validada y cargada lista para consumo de la pyMedia.
 
         Raises:
-            InvalidConfigError: Si `config.toml` presenta parámetros no válidos.
+            ConfigError: Si `config.toml` presenta parámetros no válidos.
         """
         path = (
             Path(
@@ -337,4 +337,6 @@ class Config:
             )
 
         if errors:
-            raise InvalidConfigError(msg="; ".join(errors))
+            raise ConfigError(
+                msg=_("Invalid configuration: %(msg)s") % {"msg": "; ".join(errors)}
+            )

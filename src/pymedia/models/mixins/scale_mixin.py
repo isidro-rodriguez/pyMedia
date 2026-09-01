@@ -4,6 +4,7 @@ from pathlib import Path
 from typing import Protocol
 
 from pymedia.errors import (
+    InvalidArgumentError,
     InvalidParameterError,
     MissingMediaPropertyError,
 )
@@ -87,7 +88,7 @@ class ScaleMixin(_HasSingleMedia):
                 width_str, height_str = value.split("x")
                 width_int, height_int = int(width_str), int(height_str)
             except (ValueError, TypeError) as err:
-                raise InvalidParameterError(
+                raise InvalidArgumentError(
                     msg=_("Invalid dimensions %(value)s. Expected: WIDTHxHEIGHT")
                     % {"value": value}
                 ) from err

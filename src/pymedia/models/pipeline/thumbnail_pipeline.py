@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from pathlib import Path
 
 from pymedia.errors import (
-    ConflictiveOptionsError,
+    ExclusiveOptionsError,
     MissingRequiredOptionError,
 )
 from pymedia.logger import Logger
@@ -138,11 +138,11 @@ def _validate_options(params: ThumbnailParameters) -> None:
 
     # 2. Exclusividad mutua (máximo 1 de las opciones principales)
     if sum(x is not None for x in (at, scene, fps)) > 1:
-        raise ConflictiveOptionsError(options=["--at", "--scene", "--every"])
+        raise ExclusiveOptionsError(options=["--at", "--scene", "--every"])
 
     # 3. Conflicto entre --at y rango (--start / --end)
     if at is not None and any(x is not None for x in (start, end)):
-        raise ConflictiveOptionsError(
+        raise ExclusiveOptionsError(
             option="--at", incompatible_with=["--start", "--end"]
         )
 

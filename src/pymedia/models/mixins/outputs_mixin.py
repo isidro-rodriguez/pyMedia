@@ -15,14 +15,15 @@ from pymedia.data.containers import (
 )
 from pymedia.data.video_codecs import VIDEO_CODECS
 from pymedia.errors import (
-    CannotCreateDirectoryError,
-    ConflictiveOutputAmmountParameterError,
-    ConflictiveOutputParametersError,
+    ExclusiveOptionsError,
+    InvalidArgumentError,
+    InvalidContainerError,
     InvalidContainerTypeError,
-    InvalidFileExtensionError,
-    InvalidNameError,
     MissingMediaPropertyError,
+    OptionError,
+    PermissionDeniedError,
 )
+from pymedia.locales import _  # noqa
 from pymedia.models.enums import OutputMediaType
 from pymedia.models.media import Media
 
@@ -68,10 +69,10 @@ class OutputSingleMixin(_HasSingleMedia):
         Raises:
             MissingMediaError: Si se indica output sin proporcionar media.
             MissingMediaPropertyError: Si no se pudo obtener un name relevante.
-            CannotCreateDirectoryError: Si el usuario no tiene permisos para crear el
+            PermissionDeniedError: Si el usuario no tiene permisos para crear el
                 directorio destino.
             InvalidNameError: Si el nombre tiene caracteres inválidos para Windows.
-            InvalidFileExtensionError: Si el container no corresponde al códec usado.
+            InvalidContainerError: Si el container no corresponde al códec usado.
             InvalidContainerTypeError: Si el container no corresponde al tipo de medio.
         """
         self.output = _process_output(
@@ -133,16 +134,21 @@ class OutputBatchMixin(_HasBatchMedia):
                 fichero de entrada.
             MissingMediaError: Si se indica output sin proporcionar media.
             MissingMediaPropertyError: Si no se pudo obtener un name relevante.
-            CannotCreateDirectoryError: Si el usuario no tiene permisos para crear el
+            PermissionDeniedError: Si el usuario no tiene permisos para crear el
                 directorio destino.
             InvalidNameError: Si el nombre tiene caracteres inválidos para Windows.
-            InvalidFileExtensionError: Si el container no corresponde al códec usado.
+            InvalidContainerError: Si el container no corresponde al códec usado.
             InvalidContainerTypeError: Si el container no corresponde al tipo de medio.
         """
         if output is not None and output_directory is not None:
-            raise ConflictiveOutputParametersError()
+            raise ExclusiveOptionsError(options=["output", "output_directory"])
         if output is not None and input_counter > 1:
-            raise ConflictiveOutputAmmountParameterError()
+            raise OptionError(
+                msg=_(
+                    "It is not allowed to specify an output with multiple inputs, "
+                    "use output directory instead."
+                )
+            )
         if output_directory is not None:
             self.output_directory = _process_output_directory(output_directory)
         self.output = _process_output(
@@ -168,7 +174,10 @@ def _validate_name(name: str) -> None:
         and not name.endswith((" ", "."))
         and name.upper().split(".")[0] not in reserved_names
     ):
-        raise InvalidNameError(filename=name)
+        raise InvalidArgumentError(
+            _(r'%(name)s contains invalid characters: < > : " / \ | ? *')
+            % {"name": name}
+        )
 
 
 def _process_output_directory(directory: Path) -> Path:
@@ -177,7 +186,9 @@ def _process_output_directory(directory: Path) -> Path:
     try:
         directory.mkdir(parents=True, exist_ok=True)
     except OSError as e:
-        raise CannotCreateDirectoryError(path=str(directory)) from e
+        raise PermissionDeniedError(
+            msg=_("Could not create directory: %(path)s") % {"path": directory}
+        ) from e
     return directory
 
 
@@ -209,7 +220,7 @@ def _validate_output(output: Path, media: Media, media_type: OutputMediaType) ->
                 )
             for audio_track in media.audio:
                 if output.suffix not in AUDIO_CODECS[audio_track.codec].containers:
-                    raise InvalidFileExtensionError(
+                    raise InvalidContainerError(
                         extension=output.suffix,
                         codec=AUDIO_CODECS[audio_track.codec].name,
                         supported=",".join(AUDIO_CODECS[audio_track.codec].containers),
@@ -240,7 +251,7 @@ def _validate_output(output: Path, media: Media, media_type: OutputMediaType) ->
                     supported=",".join(VIDEO_CONTAINERS),
                 )
             if output.suffix not in VIDEO_CODECS[media.video.codec].containers:
-                raise InvalidFileExtensionError(
+                raise InvalidContainerError(
                     extension=output.suffix,
                     codec=VIDEO_CODECS[media.video.codec].name,
                     supported=",".join(VIDEO_CODECS[media.video.codec].containers),
@@ -251,7 +262,7 @@ def _validate_output(output: Path, media: Media, media_type: OutputMediaType) ->
                 if audio_track.codec is None:
                     raise MissingMediaPropertyError(name="audio codec")
                 if output.suffix not in AUDIO_CODECS[audio_track.codec].containers:
-                    raise InvalidFileExtensionError(
+                    raise InvalidContainerError(
                         extension=output.suffix,
                         codec=AUDIO_CODECS[audio_track.codec].name,
                         supported=",".join(AUDIO_CODECS[audio_track.codec].containers),

@@ -5,11 +5,11 @@ from pathlib import Path
 from typing import Protocol
 
 from pymedia.errors import (
+    InvalidArgumentError,
     InvalidParameterError,
     InvalidTimeFormatError,
     MissingMediaPropertyError,
     MissingParameterError,
-    TimeExceedsDurationError,
 )
 from pymedia.locales import _  # noqa
 from pymedia.models.media import Media
@@ -124,7 +124,7 @@ class TimestampAtMixin(_HasSingleMedia):
         try:
             times_array = times_str.split(",")
         except ValueError as e:
-            raise InvalidParameterError(
+            raise InvalidArgumentError(
                 msg=_("Invalidad timestamp list format. Expected hh:mm:ss,hh:mm:ss,...")
             ) from e
         for time_str in times_array:
@@ -162,8 +162,9 @@ def _process_time(time_str: str, media: Media) -> timedelta:
         if media.duration is None:
             raise MissingMediaPropertyError(name="video.duration")
         if time_delta > media.duration:
-            raise TimeExceedsDurationError(
-                time=str(time_delta), duration=str(media.duration)
+            raise InvalidParameterError(
+                _("Timestamp %(time)s exceeds video duration %(duration)s.")
+                % {"time": str(time_delta), "duration": str(media.duration)}
             )
 
     time_delta = _parse_to_timedelta()

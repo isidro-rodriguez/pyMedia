@@ -22,66 +22,27 @@ class PyMediaError(Exception):
     def __init__(self, message: str) -> None:
         self.message = message
         super().__init__(self.message)
-
-        if self.level == "CRITICAL":
-            logger.critical(self.message)
-        else:
-            logger.error(self.message)
+        logger.error(self.message)
 
 
-# ─────────────────────────────────────────────────────────────────────────────
-#  Errores de ejecución (Errores críticos)
-# ─────────────────────────────────────────────────────────────────────────────
-
-
-class ExecutionError(PyMediaError):
-    """Errores de ejecución. Implican salida de la aplicación."""
-
-    level = "CRITICAL"
-
-
-class CannotCreateDirectoryError(ExecutionError):
-    def __init__(self, path: str) -> None:
-        super().__init__(_("Could not create directory: %(path)s") % {"path": path})
-
-
-class CommandExecutionError(ExecutionError):
-    def __init__(self, name: str, error: str) -> None:
-        super().__init__(
-            _("FFmpeg command %(name)s failed during execution. Error: %(error)s")
-            % {"name": name, "error": error}
-        )
-
-
-class CommandGenerationError(ExecutionError):
-    def __init__(self, name: str) -> None:
-        super().__init__(
-            _("FFmpeg command %(name)s was not generated.") % {"name": name}
-        )
-
-
-class CommandTimeoutError(ExecutionError):
-    def __init__(self, name: str) -> None:
-        super().__init__(_("FFmpeg command %(name)s timed out.") % {"name": name})
-
-
-class InvalidConfigError(ExecutionError):
+class CommandError(PyMediaError):
     def __init__(self, msg: str) -> None:
-        super().__init__(_("Invalid configuration: %(msg)s") % {"msg": msg})
+        super().__init__(msg)
 
 
-# ─────────────────────────────────────────────────────────────────────────────
-#  Errores en el proceso de parámetros
-# ─────────────────────────────────────────────────────────────────────────────
+class CommandGenerationError(PyMediaError):
+    def __init__(self, name: str) -> None:
+        super().__init__(
+            _("FFmpeg command was not generated: %(name)s ") % {"name": name}
+        )
 
 
-class ParameterError(PyMediaError):
-    """Errores del pipeline de procesamiento de vídeo."""
+class ConfigError(PyMediaError):
+    def __init__(self, msg: str) -> None:
+        super().__init__(msg)
 
-    level = "ERROR"
 
-
-class ConflictiveOptionsError(Exception):
+class ExclusiveOptionsError(PyMediaError):
     """Excepción para opciones de CLI incompatibles entre sí."""
 
     def __init__(
@@ -102,95 +63,12 @@ class ConflictiveOptionsError(Exception):
         super().__init__(message)
 
 
-class ConflictiveOutputAmmountParameterError(ParameterError):
-    def __init__(self) -> None:
-        super().__init__(
-            _(
-                "It is not allowed to specify an output with multiple inputs, "
-                "use output directory instead."
-            )
-        )
-
-
-class ConflictiveOutputParametersError(ParameterError):
-    def __init__(self) -> None:
-        super().__init__(
-            _("It is not allowed to specify an output path and an output directory.")
-        )
-
-
-class ConflictiveResizeDimensionsParametersError(ParameterError):
-    def __init__(self) -> None:
-        super().__init__(_("It is not allowed to specify width and height together."))
-
-
-class MissingMediaError(ParameterError):
-    def __init__(self, path: str) -> None:
-        super().__init__(_("Missing media information: %(path)s") % {"path": path})
-
-
-class MissingRequiredOptionError(ParameterError):
-    def __init__(self, options: list[str]) -> None:
-        super().__init__(
-            _("One of the following options is required: %(options)s")
-            % {"options": ", ".join(options)}
-        )
-
-
-class MissingMediaPropertyError(ParameterError):
-    def __init__(self, name: str) -> None:
-        super().__init__(_("Missing media property: %(name)s") % {"name": name})
-
-
-class MissingMediaPropertiesError(ParameterError):
-    def __init__(self, names: list[str]) -> None:
-        super().__init__(
-            _("Missing media properties: %(name)s") % {"names": ", ".join(names)}
-        )
-
-
-class MissingParameterError(ParameterError):
-    def __init__(self, name: str) -> None:
-        super().__init__(_("Missing parameter: %(name)s") % {"name": name})
-
-
-class MissingParametersError(ParameterError):
-    def __init__(self, names: list[str]) -> None:
-        super().__init__(
-            _("Missing parameters: %(names)s") % {"names": ", ".join(names)}
-        )
-
-
-# ─────────────────────────────────────────────────────────────────────────────
-#  Errores de validación
-# ─────────────────────────────────────────────────────────────────────────────
-
-
-class ValidationError(PyMediaError):
-    """Errores de validación de la entrada del usuario."""
-
-    level = "ERROR"
-
-
-class InvalidArgumentError(ValidationError):
+class InvalidArgumentError(PyMediaError):
     def __init__(self, msg: str) -> None:
         super().__init__(msg)
 
 
-class InvalidParameterError(ValidationError):
-    def __init__(self, msg: str) -> None:
-        super().__init__(msg)
-
-
-class InvalidNameError(ValidationError):
-    def __init__(self, filename: str) -> None:
-        super().__init__(
-            _(r'%(filename)s contains invalid characters: < > : " / \ | ? *')
-            % {"filename": filename}
-        )
-
-
-class InvalidFileExtensionError(ValidationError):
+class InvalidContainerError(PyMediaError):
     def __init__(self, extension: str, codec: str, supported: str) -> None:
         super().__init__(
             _(
@@ -201,7 +79,7 @@ class InvalidFileExtensionError(ValidationError):
         )
 
 
-class InvalidContainerTypeError(ValidationError):
+class InvalidContainerTypeError(PyMediaError):
     def __init__(self, extension: str, media_type: str, supported: str) -> None:
         super().__init__(
             _(
@@ -216,14 +94,44 @@ class InvalidContainerTypeError(ValidationError):
         )
 
 
-class InvalidTimeFormatError(ValidationError):
+class InvalidParameterError(PyMediaError):
+    def __init__(self, msg: str) -> None:
+        super().__init__(msg)
+
+
+class InvalidTimeFormatError(PyMediaError):
     def __init__(self) -> None:
         super().__init__(_("Invalid timestamp format. Expected: hh:mm:ss."))
 
 
-class TimeExceedsDurationError(ValidationError):
-    def __init__(self, time: str, duration: str) -> None:
+class MissingMediaError(PyMediaError):
+    def __init__(self, path: str) -> None:
+        super().__init__(_("Missing media information: %(path)s") % {"path": path})
+
+
+class MissingMediaPropertyError(PyMediaError):
+    def __init__(self, name: str) -> None:
+        super().__init__(_("Missing media property: %(name)s") % {"name": name})
+
+
+class MissingParameterError(PyMediaError):
+    def __init__(self, name: str) -> None:
+        super().__init__(_("Missing parameter: %(name)s") % {"name": name})
+
+
+class MissingRequiredOptionError(PyMediaError):
+    def __init__(self, options: list[str]) -> None:
         super().__init__(
-            _("Timestamp %(time)s exceeds video duration %(duration)s.")
-            % {"time": time, "duration": duration}
+            _("One of the following options is required: %(options)s")
+            % {"options": ", ".join(options)}
         )
+
+
+class OptionError(PyMediaError):
+    def __init__(self, msg: str) -> None:
+        super().__init__(msg)
+
+
+class PermissionDeniedError(PyMediaError):
+    def __init__(self, msg: str) -> None:
+        super().__init__(msg)

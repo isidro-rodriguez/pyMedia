@@ -9,7 +9,7 @@ from typing import TypeVar
 import typer
 from rich.progress import Progress
 
-from pymedia.errors import CommandExecutionError, CommandTimeoutError
+from pymedia.errors import CommandError
 from pymedia.locales import _  # noqa
 from pymedia.logger import Logger
 from pymedia.models.config import Config
@@ -125,7 +125,7 @@ class BaseCommand[ArgsT, ParamsT](ABC):
             command_name: Nombre interno del comando para los mensajes de error.
 
         Raises:
-            CommandExecutionError: Si falla el cmd o se bloquea.
+            CommandError: Si falla el cmd o se bloquea.
         """
 
         def _read_stdout() -> None:
@@ -140,7 +140,9 @@ class BaseCommand[ArgsT, ParamsT](ABC):
             proc.wait()
             stderr_thread.join()
             stdout_thread.join()
-            raise CommandTimeoutError(name=command_name or description)
+            raise CommandError(
+                msg=_("FFmpeg command timed out: %(name)s ") % {"name": command_name}
+            )
 
         proc = subprocess.Popen(
             args=cmd,
@@ -194,9 +196,7 @@ class BaseCommand[ArgsT, ParamsT](ABC):
         stderr_thread.join()
 
         if proc.returncode != 0:
-            raise CommandExecutionError(
-                name=command_name or description, error="".join(stderr_lines)
-            )
+            raise CommandError(msg=_("FFmpeg command failed during execution."))
 
 
 class SingleCommand(BaseCommand[ArgsT, ParamsT], ABC):
