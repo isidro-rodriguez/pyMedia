@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 
+from pymedia.data.types import RotateMode
 from pymedia.errors import MissingParameterError
-from pymedia.models.enums import RotateMode
 
 
 @dataclass(kw_only=True)

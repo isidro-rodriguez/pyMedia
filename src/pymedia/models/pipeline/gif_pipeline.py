@@ -1,8 +1,8 @@
 from dataclasses import dataclass
 from pathlib import Path
 
+from pymedia.data.types import OutputMediaType, OverwriteMode, RotateMode, ScaleMode
 from pymedia.logger import Logger
-from pymedia.models.enums import OutputMediaType, OverwriteMode, RotateMode, ScaleMode
 from pymedia.models.mixins.crop_mixin import CropMixin
 from pymedia.models.mixins.flip_mixin import FlipMixin
 from pymedia.models.mixins.fps_mixin import FpsGifMixin

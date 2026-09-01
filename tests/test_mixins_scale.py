@@ -4,8 +4,8 @@ from unittest.mock import Mock
 
 import pytest
 
+from pymedia.data.types import Dimensions, ScaleMode
 from pymedia.errors import InvalidParameterError, MissingMediaPropertyError
-from pymedia.models.enums import Dimensions, ScaleMode
 from pymedia.models.media import Media, Video
 from pymedia.models.mixins.scale_mixin import ScaleMixin
 
@@ -42,9 +42,7 @@ class TestCreateScale:
 
 
 class TestParseErrors:
-    @pytest.mark.parametrize(
-        "value", ["", "abc", "1280", "1280x", "x720", "12x80x720"]
-    )
+    @pytest.mark.parametrize("value", ["", "abc", "1280", "1280x", "x720", "12x80x720"])
     def test_invalid_dimensions_raise(self, value):
         mixin = _mixin()
 

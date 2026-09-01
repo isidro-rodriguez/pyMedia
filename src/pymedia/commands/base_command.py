@@ -9,11 +9,11 @@ from typing import TypeVar
 import typer
 from rich.progress import Progress
 
+from pymedia.data.types import OverwriteMode
 from pymedia.errors import CommandError
 from pymedia.locales import _  # noqa
 from pymedia.logger import Logger
 from pymedia.models.config import Config
-from pymedia.models.enums import OverwriteMode
 from pymedia.models.media import Media
 
 ArgsT = TypeVar("ArgsT")

@@ -2,9 +2,9 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Protocol
 
+from pymedia.data.types import ImageQuality
 from pymedia.errors import InvalidParameterError, MissingParameterError
 from pymedia.locales import _  # noqa
-from pymedia.models.enums import ImageQuality
 
 
 class _HasOutput(Protocol):

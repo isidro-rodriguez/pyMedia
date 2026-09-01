@@ -1,4 +1,5 @@
 from pymedia.commands.base_command import BaseCommand, SingleCommand
+from pymedia.data.types import OverwriteMode, ScaleMode
 from pymedia.errors import (
     CommandGenerationError,
     MissingMediaError,
@@ -6,7 +7,6 @@ from pymedia.errors import (
 )
 from pymedia.ffmpeg.thumbnail_cmd import ThumbnailCmd
 from pymedia.locales import _  # noqa
-from pymedia.models.enums import OverwriteMode, ScaleMode
 from pymedia.models.pipeline.thumbnail_pipeline import (
     ThumbnailArguments,
     ThumbnailParameters,

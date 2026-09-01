@@ -1,4 +1,5 @@
 from pymedia.commands.base_command import BaseCommand, SingleCommand
+from pymedia.data.types import OverwriteMode, ScaleMode
 from pymedia.errors import (
     CommandGenerationError,
     MissingMediaError,
@@ -6,7 +7,6 @@ from pymedia.errors import (
 )
 from pymedia.ffmpeg.gif_cmd import gif_cmd
 from pymedia.locales import _  # noqa
-from pymedia.models.enums import OverwriteMode, ScaleMode
 from pymedia.models.pipeline.gif_pipeline import GifArguments, GifParameters
 from pymedia.typer_options import (
     CropOption,

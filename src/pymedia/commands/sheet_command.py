@@ -2,6 +2,7 @@ import tempfile
 from pathlib import Path
 
 from pymedia.commands.base_command import BaseCommand, BatchCommand
+from pymedia.data.types import OverwriteMode, PresetsSheetMode
 from pymedia.errors import (
     CommandGenerationError,
     MissingMediaError,
@@ -9,7 +10,6 @@ from pymedia.errors import (
 )
 from pymedia.ffmpeg.sheet_cmd import sheet_cmd
 from pymedia.locales import _  # noqa
-from pymedia.models.enums import OverwriteMode, PresetsSheetMode
 from pymedia.models.pipeline.sheet_pipeline import SheetArguments, SheetParameters
 from pymedia.typer_options import (
     DebugOption,

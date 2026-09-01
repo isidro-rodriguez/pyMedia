@@ -3,13 +3,13 @@ from typing import Annotated
 
 import typer
 
-from pymedia.locales import _  # noqa
-from pymedia.models.enums import (
+from pymedia.data.types import (
     OverwriteMode,
     PresetsSheetMode,
     RotateMode,
     ScaleMode,
 )
+from pymedia.locales import _  # noqa
 
 # =============================================================================
 #  Callbacks

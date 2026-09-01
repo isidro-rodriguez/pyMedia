@@ -3,6 +3,7 @@ from enum import Enum
 from pathlib import Path
 from typing import Protocol
 
+from pymedia.data.types import Dimensions, ScaleMode
 from pymedia.errors import (
     InvalidArgumentError,
     InvalidParameterError,
@@ -10,7 +11,6 @@ from pymedia.errors import (
 )
 from pymedia.locales import _  # noqa
 from pymedia.logger import Logger
-from pymedia.models.enums import Dimensions, ScaleMode
 from pymedia.models.media import Media
 
 

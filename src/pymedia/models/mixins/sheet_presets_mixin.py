@@ -5,8 +5,8 @@ from pathlib import Path
 
 import platformdirs
 
+from pymedia.data.types import PresetsSheetMode
 from pymedia.errors import MissingParameterError
-from pymedia.models.enums import PresetsSheetMode
 from pymedia.models.sheet_preset import PresetSheet
 
 _FONT_FILENAME = "SourceCodePro-Bold.ttf"

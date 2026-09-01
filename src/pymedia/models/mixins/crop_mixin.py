@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 
+from pymedia.data.types import CropArea
 from pymedia.errors import (
     InvalidArgumentError,
     InvalidParameterError,
@@ -7,7 +8,6 @@ from pymedia.errors import (
     MissingParameterError,
 )
 from pymedia.locales import _  # noqa
-from pymedia.models.enums import CropArea
 from pymedia.models.media import Media
 
 

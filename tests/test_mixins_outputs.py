@@ -4,6 +4,7 @@ from pathlib import Path
 
 import pytest
 
+from pymedia.data.types import OutputMediaType
 from pymedia.errors import (
     ConflictiveOutputAmmountParameterError,
     ConflictiveOutputParametersError,
@@ -12,7 +13,6 @@ from pymedia.errors import (
     InvalidNameError,
     MissingMediaPropertyError,
 )
-from pymedia.models.enums import OutputMediaType
 from pymedia.models.media import Audio, Media, Video
 from pymedia.models.mixins.outputs_mixin import (
     OutputBatchMixin,
