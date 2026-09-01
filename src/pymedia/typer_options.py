@@ -126,52 +126,12 @@ OverwriteOption = Annotated[
 # =============================================================================
 
 
-CropOption = Annotated[
-    str | None,
-    typer.Option(
-        default="--crop",
-        metavar="WIDTH,HEIGHT,X,Y",
-        rich_help_panel=_("Command options"),
-        help=_("Crop to WIDTH×HEIGHT at offset X,Y (from top-left)."),
-    ),
-]
-
 EveryOption = Annotated[
     int | None,
     typer.Option(
         default="--every",
         rich_help_panel=_("Command options"),
         help=_("Interval between thumbnails, in seconds."),
-    ),
-]
-
-FlipHorizontalOption = Annotated[
-    bool,
-    typer.Option(
-        default="--hflip",
-        rich_help_panel=_("Command options"),
-        help=_("Flip the image horizontally, swapping left and right."),
-    ),
-]
-
-FlipVerticalOption = Annotated[
-    bool,
-    typer.Option(
-        default="--vflip",
-        rich_help_panel=_("Command options"),
-        help=_("Flip the image vertically, swapping top and bottom."),
-    ),
-]
-
-
-FpsGifOption = Annotated[
-    int,
-    typer.Option(
-        default="--fps",
-        min=4,
-        max=20,
-        rich_help_panel=_("Command options"),
-        help=_("Set the GIF frame rate in frames per second."),
     ),
 ]
 
@@ -182,45 +142,6 @@ PresetSheetOption = Annotated[
         default="--preset",
         rich_help_panel=_("Command options"),
         help=_("Preset sheet style."),
-    ),
-]
-
-RotateOption = Annotated[
-    RotateMode | None,
-    typer.Option(
-        default="--rotate",
-        rich_help_panel=_("Command options"),
-        help=_("Specify an orthogonal arc degree to rotate the image."),
-    ),
-]
-
-ScaleModeOption = Annotated[
-    ScaleMode,
-    typer.Option(
-        default="--mode",
-        rich_help_panel=_("Command options"),
-        help=_("Specify different ways to scale the video."),
-    ),
-]
-
-
-ScaleToOption = Annotated[
-    str | None,
-    typer.Option(
-        default="--size",
-        metavar="WIDTHxHEIGHT",
-        rich_help_panel=_("Command options"),
-        help=_("Target resolution, in pixels, to resize the video."),
-    ),
-]
-
-
-ScaleUpscaleOption = Annotated[
-    bool,
-    typer.Option(
-        default="--upscale",
-        rich_help_panel=_("Command options"),
-        help=_("Allows upscaling beyond the source dimensions."),
     ),
 ]
 
@@ -287,5 +208,95 @@ TimestampStartThumbnailOption = Annotated[
         metavar="hh:mm:ss",
         rich_help_panel=_("Command options"),
         help=_("Time point at which thumbnails generation starts."),
+    ),
+]
+
+# =============================================================================
+#  Opciones de filtros
+# =============================================================================
+
+CropOption = Annotated[
+    str | None,
+    typer.Option(
+        default="--crop",
+        metavar="WIDTH,HEIGHT,X,Y",
+        rich_help_panel=_("Filter options"),
+        help=_("Crop to WIDTH×HEIGHT at offset X,Y (from top-left)."),
+    ),
+]
+
+
+FlipHorizontalOption = Annotated[
+    bool,
+    typer.Option(
+        default="--hflip",
+        rich_help_panel=_("Filter options"),
+        help=_("Flip the image horizontally, swapping left and right."),
+    ),
+]
+
+FlipVerticalOption = Annotated[
+    bool,
+    typer.Option(
+        default="--vflip",
+        rich_help_panel=_("Filter options"),
+        help=_("Flip the image vertically, swapping top and bottom."),
+    ),
+]
+
+
+FpsGifOption = Annotated[
+    int,
+    typer.Option(
+        default="--fps",
+        min=4,
+        max=20,
+        rich_help_panel=_("Filter options"),
+        help=_("Set the GIF frame rate in frames per second."),
+    ),
+]
+
+
+RotateOption = Annotated[
+    RotateMode | None,
+    typer.Option(
+        default="--rotate",
+        rich_help_panel=_("Filter options"),
+        help=_("Specify an orthogonal arc degree to rotate the image."),
+    ),
+]
+
+
+# =============================================================================
+#  Opciones de filtros de escalado
+# =============================================================================
+
+ScaleModeOption = Annotated[
+    ScaleMode,
+    typer.Option(
+        default="--mode",
+        rich_help_panel=_("Scale filter options"),
+        help=_("Specify different ways to scale the video."),
+    ),
+]
+
+
+ScaleToOption = Annotated[
+    str | None,
+    typer.Option(
+        default="--size",
+        metavar="WIDTHxHEIGHT",
+        rich_help_panel=_("Scale filter options"),
+        help=_("Target resolution, in pixels, to resize the video."),
+    ),
+]
+
+
+ScaleUpscaleOption = Annotated[
+    bool,
+    typer.Option(
+        default="--upscale",
+        rich_help_panel=_("Scale filter options"),
+        help=_("Allows upscaling beyond the source dimensions."),
     ),
 ]

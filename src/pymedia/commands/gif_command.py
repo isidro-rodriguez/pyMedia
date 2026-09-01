@@ -36,6 +36,8 @@ class GifCommand(SingleCommand[GifArguments, GifParameters]):
         input_single: InputSingleArgument,
         output: OutputOption = None,
         overwrite: OverwriteOption = OverwriteMode.ASK,
+        timestamp_start: TimestampStartGifOption = None,
+        timestamp_end: TimestampEndGifOption = None,
         fps: FpsGifOption = 12,
         crop: CropOption = None,
         scale_to: ScaleToOption = "640x360",
@@ -44,8 +46,6 @@ class GifCommand(SingleCommand[GifArguments, GifParameters]):
         hflip: FlipHorizontalOption = False,
         vflip: FlipVerticalOption = False,
         rotate: RotateOption = None,
-        timestamp_start: TimestampStartGifOption = None,
-        timestamp_end: TimestampEndGifOption = None,
         debug: DebugOption = False,
         help_: HelpOption = False,
     ) -> None:
