@@ -26,12 +26,12 @@ class ImageQualityMixin(_HasOutput):
             case ".png":
                 return ImageQuality(
                     format="format=rgb24",
-                    compression=["--compression_level", "6"],
+                    compression=["-compression_level", "6"],
                 )
             case ".webp":
                 return ImageQuality(
                     format="format=rgb24",
-                    compression=["--lossless", "1"],
+                    compression=["-lossless", "1"],
                 )
             case _:
                 raise InvalidParameterError(msg=_("Image container not supported."))

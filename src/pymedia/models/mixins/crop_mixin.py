@@ -93,7 +93,7 @@ class CropMixin:
                     }
                 )
 
-            if crop_area.height + crop_area.y >= video.height:
+            if crop_area.height + crop_area.y > video.height:
                 raise InvalidParameterError(
                     msg=_(
                         "Invalid crop area. Area height (%(area_height)s) and "

@@ -230,7 +230,7 @@ SceneOption = Annotated[
     typer.Option(
         default="--scene",
         min=0.1,
-        max=0.9,
+        max=0.5,
         rich_help_panel=_("Command options"),
         help=_("Scene-change sensitivity for thumbnail detection."),
     ),

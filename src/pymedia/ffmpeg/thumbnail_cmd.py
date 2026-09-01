@@ -63,13 +63,18 @@ class ThumbnailCmd:
         params = self._params
         filters: list[str] = []
 
+        if (
+            self._mode is _ThumbnailMode.INTERVAL
+            or self._mode is _ThumbnailMode.TIMESTAMP
+        ):
+            filters.append("thumbnail=30")
+
         if self._mode is _ThumbnailMode.INTERVAL:
             filters.append(params.to_fps_cmd())
 
         if self._mode is _ThumbnailMode.SCENE:
             filters.append(params.to_scene_cmd())
 
-        filters.append("thumbnail=30")
         filters.append(params.to_image_quality_cmd().format)
 
         if params.crop_area is not None:
