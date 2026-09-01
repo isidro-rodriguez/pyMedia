@@ -67,7 +67,7 @@ msgstr "Falta información de vídeo: %(path)s"
 
 #: pymedia/errors.py:113
 #, python-format
-msgid "Missing media property: %(name)s"
+msgid "Missing media name: %(name)s"
 msgstr "Falta la propiedad del vídeo: %(name)s"
 
 #: pymedia/errors.py:118
@@ -472,7 +472,7 @@ msgstr ""
 "coordenada Y (%(area_y)s) superan la altura del vídeo (%(video_height)s)"
 
 #: pymedia/models/mixins/flip_mixin.py:27
-msgid "Invalid flip parameter."
+msgid "Invalid flip name."
 msgstr "Parámetro de inversión no válido."
 
 #: pymedia/models/mixins/scale_mixin.py:91

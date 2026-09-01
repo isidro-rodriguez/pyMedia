@@ -1,21 +1,9 @@
 from enum import Enum
 from typing import NamedTuple
 
-
-class CropArea(NamedTuple):
-    """Datos para el corte de imagen mediante crop."""
-
-    width: int  # Ancho del vídeo resultante
-    height: int  # Altura del vídeo resultante
-    x: int  # Coordenada X del punto de corte
-    y: int  # Coordenada Y del punto de corte
-
-
-class Dimensions(NamedTuple):
-    """Tipos de dimensiones."""
-
-    width: int
-    height: int
+# =============================================================================
+#  Enums
+# =============================================================================
 
 
 class OverwriteMode(Enum):
@@ -59,3 +47,31 @@ class ScaleMode(Enum):
     STRETCH = "stretch"  # Re-escala a la dimensión objetivo, modifica aspect ratio.
     FIT = "fit"  # Re-escala hasta encajar en la dimensión objetivo, no modifica AR.
     COVER = "cover"  # Re-escala hasta cubrir la dimensión objetivo, no modifica AR.
+
+
+# =============================================================================
+#  Tuples
+# =============================================================================
+
+
+class CropArea(NamedTuple):
+    """Datos para el corte de imagen mediante crop."""
+
+    width: int  # Ancho del vídeo resultante
+    height: int  # Altura del vídeo resultante
+    x: int  # Coordenada X del punto de corte
+    y: int  # Coordenada Y del punto de corte
+
+
+class Dimensions(NamedTuple):
+    """Tipos de dimensiones."""
+
+    width: int
+    height: int
+
+
+class ImageQuality(NamedTuple):
+    """Parámetros para optimizar la calidad de la imagen de salida."""
+
+    format: str
+    compression: list[str]

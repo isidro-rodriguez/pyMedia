@@ -63,9 +63,7 @@ def test_detect_language_usa_config_toml(tmp_path: Path) -> None:
 def test_detect_language_fallback_en() -> None:
     """Sin configuración ni variables de entorno, el resultado es válido."""
     mgr = _LocaleManager()
-    env_limpio = {
-        k: v for k, v in os.environ.items() if k not in ("LANG", "LC_ALL")
-    }
+    env_limpio = {k: v for k, v in os.environ.items() if k not in ("LANG", "LC_ALL")}
     with patch.dict(os.environ, env_limpio, clear=True):
         resultado = mgr.detect_language()
         assert resultado in mgr.SUPPORTED_LANGUAGES

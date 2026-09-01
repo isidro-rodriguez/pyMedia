@@ -24,4 +24,4 @@ class FlipMixin:
             return "hflip"
         if self.vflip:
             return "vflip"
-        raise InvalidParameterError(msg=_("Invalid flip parameter."))
+        raise InvalidParameterError(msg=_("Invalid flip name."))

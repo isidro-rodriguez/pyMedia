@@ -115,6 +115,27 @@ class TimestampEndMixin(_HasSingleMedia):
             )
 
 
+@dataclass(kw_only=True)
+class TimestampAtMixin(_HasSingleMedia):
+    timestamp_at: list[timedelta] | None = None
+
+    def create_timestamp_at(self, times_str: str) -> None:
+        if self.timestamp_at is None:
+            raise MissingParameterError(name="timestamp_at")
+        times: list[timedelta] = []
+        try:
+            times_array = times_str.split(",")
+        except ValueError as e:
+            raise InvalidParameterError(
+                msg=_("Invalidad timestamp list format. Expected hh:mm:ss,hh:mm:ss,...")
+            ) from e
+        for time_str in times_array:
+            time = _process_time(time_str=time_str, media=self.media)
+            times.append(time)
+        times.sort()
+        self.timestamp_at = times
+
+
 def _process_time(time_str: str, media: Media) -> timedelta:
     """Valida y procesa la marca de tiempo."""
 

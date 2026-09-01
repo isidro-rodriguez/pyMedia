@@ -63,8 +63,7 @@ def _entries(catalog: Catalog) -> dict[str, str]:
 def _available_languages() -> set[str]:
     """Devuelve los códigos de idioma con catálogo PO presente en disco."""
     return {
-        path.parents[1].name
-        for path in _LOCALEDIR.glob(f"*/LC_MESSAGES/{_DOMAIN}.po")
+        path.parents[1].name for path in _LOCALEDIR.glob(f"*/LC_MESSAGES/{_DOMAIN}.po")
     }
 
 
@@ -184,8 +183,8 @@ def test_po_fully_compiled(lang: str) -> None:
         if msgid in mo_entries and mo_entries[msgid] != msgstr
     )
 
-    assert not sin_compilar, (
-        "Entradas del PO sin compilar en el MO:\n" + "\n".join(sin_compilar)
+    assert not sin_compilar, "Entradas del PO sin compilar en el MO:\n" + "\n".join(
+        sin_compilar
     )
     assert not desactualizadas, (
         "Entradas del PO con msgstr distinta al MO (recompila):\n"

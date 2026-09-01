@@ -63,7 +63,7 @@ msgstr ""
 
 #: pymedia/errors.py:113
 #, python-format
-msgid "Missing media property: %(name)s"
+msgid "Missing media name: %(name)s"
 msgstr ""
 
 #: pymedia/errors.py:118
@@ -432,7 +432,7 @@ msgid ""
 msgstr ""
 
 #: pymedia/models/mixins/flip_mixin.py:27
-msgid "Invalid flip parameter."
+msgid "Invalid flip name."
 msgstr ""
 
 #: pymedia/models/mixins/scale_mixin.py:91

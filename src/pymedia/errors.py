@@ -81,6 +81,27 @@ class ParameterError(PyMediaError):
     level = "ERROR"
 
 
+class ConflictiveOptionsError(Exception):
+    """Excepción para opciones de CLI incompatibles entre sí."""
+
+    def __init__(
+        self,
+        options: list[str] | None = None,
+        option: str | None = None,
+        incompatible_with: list[str] | None = None,
+    ):
+        if options is not None:
+            opts_str = ", ".join(f"'{opt}'" for opt in options)
+            message = f"The following options are mutually exclusive: {opts_str}."
+        elif option is not None and incompatible_with is not None:
+            opts_str = ", ".join(f"'{opt}'" for opt in incompatible_with)
+            message = f"Option '{option}' cannot be used with: {opts_str}."
+        else:
+            message = "Incompatible command line options specified."
+
+        super().__init__(message)
+
+
 class ConflictiveOutputAmmountParameterError(ParameterError):
     def __init__(self) -> None:
         super().__init__(
@@ -108,14 +129,36 @@ class MissingMediaError(ParameterError):
         super().__init__(_("Missing media information: %(path)s") % {"path": path})
 
 
+class MissingRequiredOptionError(ParameterError):
+    def __init__(self, options: list[str]) -> None:
+        super().__init__(
+            _("One of the following options is required: %(options)s")
+            % {"options": ", ".join(options)}
+        )
+
+
 class MissingMediaPropertyError(ParameterError):
     def __init__(self, name: str) -> None:
         super().__init__(_("Missing media property: %(name)s") % {"name": name})
 
 
+class MissingMediaPropertiesError(ParameterError):
+    def __init__(self, names: list[str]) -> None:
+        super().__init__(
+            _("Missing media properties: %(name)s") % {"names": ", ".join(names)}
+        )
+
+
 class MissingParameterError(ParameterError):
     def __init__(self, name: str) -> None:
-        super().__init__(_("Missing name: %(name)s") % {"name": name})
+        super().__init__(_("Missing parameter: %(name)s") % {"name": name})
+
+
+class MissingParametersError(ParameterError):
+    def __init__(self, names: list[str]) -> None:
+        super().__init__(
+            _("Missing parameters: %(names)s") % {"names": ", ".join(names)}
+        )
 
 
 # ─────────────────────────────────────────────────────────────────────────────

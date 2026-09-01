@@ -136,6 +136,15 @@ CropOption = Annotated[
     ),
 ]
 
+EveryOption = Annotated[
+    int | None,
+    typer.Option(
+        default="--every",
+        rich_help_panel=_("Command options"),
+        help=_("Interval between thumbnails, in seconds."),
+    ),
+]
+
 FlipHorizontalOption = Annotated[
     bool,
     typer.Option(
@@ -153,6 +162,7 @@ FlipVerticalOption = Annotated[
         help=_("Flip the image vertically, swapping top and bottom."),
     ),
 ]
+
 
 FpsGifOption = Annotated[
     int,
@@ -215,7 +225,29 @@ ScaleUpscaleOption = Annotated[
 ]
 
 
-TimestampEndOption = Annotated[
+SceneOption = Annotated[
+    float | None,
+    typer.Option(
+        default="--scene",
+        min=0.1,
+        max=0.9,
+        rich_help_panel=_("Command options"),
+        help=_("Scene-change sensitivity for thumbnail detection."),
+    ),
+]
+
+
+TimestampAtThumbnailOption = Annotated[
+    str | None,
+    typer.Option(
+        default="--at",
+        metavar="hh:mm:ss,hh:mm:ss,...",
+        rich_help_panel=_("Command options"),
+        help=_("Take a thumbnail at specific TIMESTAMP(s)."),
+    ),
+]
+
+TimestampEndGifOption = Annotated[
     str | None,
     typer.Option(
         default="--end",
@@ -226,12 +258,34 @@ TimestampEndOption = Annotated[
 ]
 
 
-TimestampStartOption = Annotated[
+TimestampEndThumbnailOption = Annotated[
+    str | None,
+    typer.Option(
+        default="--end",
+        metavar="hh:mm:ss",
+        rich_help_panel=_("Command options"),
+        help=_("Time point at which thumbnails generation ends."),
+    ),
+]
+
+
+TimestampStartGifOption = Annotated[
     str | None,
     typer.Option(
         default="--start",
         metavar="hh:mm:ss",
         rich_help_panel=_("Command options"),
         help=_("Time point at which GIF generation starts."),
+    ),
+]
+
+
+TimestampStartThumbnailOption = Annotated[
+    str | None,
+    typer.Option(
+        default="--start",
+        metavar="hh:mm:ss",
+        rich_help_panel=_("Command options"),
+        help=_("Time point at which thumbnails generation starts."),
     ),
 ]

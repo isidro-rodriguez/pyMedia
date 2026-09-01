@@ -67,7 +67,7 @@ class OutputSingleMixin(_HasSingleMedia):
 
         Raises:
             MissingMediaError: Si se indica output sin proporcionar media.
-            MissingMediaPropertyError: Si no se pudo obtener un property relevante.
+            MissingMediaPropertyError: Si no se pudo obtener un name relevante.
             CannotCreateDirectoryError: Si el usuario no tiene permisos para crear el
                 directorio destino.
             InvalidNameError: Si el nombre tiene caracteres inválidos para Windows.
@@ -132,7 +132,7 @@ class OutputBatchMixin(_HasBatchMedia):
             ConflictiveOutputAmmountParameterError: Si se indica output con más de un
                 fichero de entrada.
             MissingMediaError: Si se indica output sin proporcionar media.
-            MissingMediaPropertyError: Si no se pudo obtener un property relevante.
+            MissingMediaPropertyError: Si no se pudo obtener un name relevante.
             CannotCreateDirectoryError: Si el usuario no tiene permisos para crear el
                 directorio destino.
             InvalidNameError: Si el nombre tiene caracteres inválidos para Windows.

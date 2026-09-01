@@ -4,16 +4,19 @@ from pymedia.errors import (
     MissingMediaError,
     MissingParameterError,
 )
-from pymedia.ffmpeg.gif_cmd import gif_cmd
+from pymedia.ffmpeg.thumbnail_cmd import ThumbnailCmd
 from pymedia.locales import _  # noqa
 from pymedia.models.enums import OverwriteMode, ScaleMode
-from pymedia.models.pipeline.gif_pipeline import GifArguments, GifParameters
+from pymedia.models.pipeline.thumbnail_pipeline import (
+    ThumbnailArguments,
+    ThumbnailParameters,
+)
 from pymedia.typer_options import (
     CropOption,
     DebugOption,
+    EveryOption,
     FlipHorizontalOption,
     FlipVerticalOption,
-    FpsGifOption,
     HelpOption,
     InputSingleArgument,
     OutputOption,
@@ -22,13 +25,15 @@ from pymedia.typer_options import (
     ScaleModeOption,
     ScaleToOption,
     ScaleUpscaleOption,
+    SceneOption,
+    TimestampAtThumbnailOption,
     TimestampEndGifOption,
     TimestampStartGifOption,
 )
 
 
-class GifCommand(SingleCommand[GifArguments, GifParameters]):
-    name = "gif"
+class ThumbnailCommand(SingleCommand[ThumbnailArguments, ThumbnailParameters]):
+    name = "thumbnail"
     help = _("Generates an animated GIF from the specified video.")
 
     @staticmethod
@@ -36,44 +41,57 @@ class GifCommand(SingleCommand[GifArguments, GifParameters]):
         input_single: InputSingleArgument,
         output: OutputOption = None,
         overwrite: OverwriteOption = OverwriteMode.ASK,
-        fps: FpsGifOption = 12,
+        every: EveryOption = None,
+        scene: SceneOption = None,
+        timestamp_at: TimestampAtThumbnailOption = None,
+        timestamp_start: TimestampStartGifOption = None,
+        timestamp_end: TimestampEndGifOption = None,
         crop: CropOption = None,
-        scale_to: ScaleToOption = "640x360",
+        scale_to: ScaleToOption = None,
         scale_mode: ScaleModeOption = ScaleMode.FIT,
         scale_upscale: ScaleUpscaleOption = False,
         hflip: FlipHorizontalOption = False,
         vflip: FlipVerticalOption = False,
         rotate: RotateOption = None,
-        timestamp_start: TimestampStartGifOption = None,
-        timestamp_end: TimestampEndGifOption = None,
         debug: DebugOption = False,
         help_: HelpOption = False,
     ) -> None:
-        GifCommand.run(
+        ThumbnailCommand.run(
             args=BaseCommand.build_args(
-                args_cls=GifArguments,
+                args_cls=ThumbnailArguments,
                 local_vars=locals(),
             ),
             debug=debug,
         )
 
     def process_parameters(self) -> None:
-        self.params = GifParameters.create(args=self.args, logger=self.logger)
+        self.params = ThumbnailParameters.create(args=self.args, logger=self.logger)
 
     def process_cmd(self) -> None:
         if self.params.input_single is None:
             raise MissingParameterError(name="input_single")
         if self.params.media is None:
             raise MissingMediaError(path=str(self.params.input_single))
-        cmd = gif_cmd(params=self.params)
+
+        if self.params.timestamp_at is not None:
+            for timestamp in self.params.timestamp_at:
+                cmd = ThumbnailCmd(params=self.params).create(timestamp=timestamp)
+                self._run_cmd(cmd=cmd)
+        else:
+            cmd = ThumbnailCmd(params=self.params).create()
+            self._run_cmd(cmd=cmd)
+
+    def _run_cmd(self, cmd: list[str]):
         if cmd is None:
             raise CommandGenerationError(name=self.name)
-        self.cmd = cmd
 
-        self.logger.debug(_("FFmpeg command: %(cmd)s"), cmd=self.cmd)
+        if self.params.media is None:
+            raise MissingParameterError(name="media")
+
+        self.logger.debug(_("FFmpeg command: %(cmd)s"), cmd=cmd)
 
         self.run_ffmpeg(
-            cmd=self.cmd,
+            cmd=cmd,
             media=self.params.media,
             description=_("Generating GIF"),
             stall_timeout=self.config.app.stall_timeout,
