@@ -9,10 +9,10 @@ import subprocess
 import sys
 from pathlib import Path
 
-OUTPUT_DIR = Path("build")
-ENTRY = "src/pymedia/main.py"
+OUTPUT_DIR = Path("../build")
+ENTRY = "../src/pymedia/main.py"
 FINAL_NAME = "pymedia.exe"
-RESOURCES = Path("src/pymedia/resources")
+RESOURCES = Path("../src/pymedia/resources")
 ICON = RESOURCES / "icon.ico"
 
 
