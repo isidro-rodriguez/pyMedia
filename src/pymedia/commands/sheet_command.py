@@ -8,7 +8,7 @@ from pymedia.errors import (
     MissingMediaError,
     MissingParameterError,
 )
-from pymedia.ffmpeg.sheet_cmd import sheet_cmd
+from pymedia.ffmpeg.sheet_cmd import SheetCmd
 from pymedia.locales import _  # noqa
 from pymedia.models.pipeline.sheet_pipeline import SheetArguments, SheetParameters
 from pymedia.typer_options import (
@@ -58,7 +58,9 @@ class SheetCommand(BatchCommand[SheetArguments, SheetParameters]):
         with tempfile.TemporaryDirectory() as tmp_dir:
             tile_tmp = Path(tmp_dir) / "tile_tmp.jpg"
 
-            snapshots_cmd, header_cmd = sheet_cmd(params=params, tile_tmp=tile_tmp)
+            sheet_instance = SheetCmd(params=params, tile_tmp=tile_tmp)
+            snapshots_cmd = sheet_instance.create_snapshots()
+            header_cmd = sheet_instance.create_header()
 
             if snapshots_cmd is None:
                 raise CommandGenerationError(name="generate_sheet_cmd")
