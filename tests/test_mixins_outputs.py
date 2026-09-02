@@ -6,12 +6,12 @@ import pytest
 
 from pymedia.data.types import OutputMediaType
 from pymedia.errors import (
-    ConflictiveOutputAmmountParameterError,
-    ConflictiveOutputParametersError,
+    ExclusiveOptionsError,
+    InvalidArgumentError,
     InvalidContainerError,
     InvalidContainerTypeError,
-    InvalidNameError,
     MissingMediaPropertyError,
+    OptionError,
 )
 from pymedia.models.media import Audio, Media, Video
 from pymedia.models.mixins.outputs_mixin import (
@@ -70,23 +70,23 @@ class TestValidateName:
         ["a<b", "a>b", "a:b", 'a"b', "a/b", "a\\b", "a|b", "a?b", "a*b", "a\x00b"],
     )
     def test_invalid_characters(self, name):
-        with pytest.raises(InvalidNameError):
+        with pytest.raises(InvalidArgumentError):
             _validate_name(name)
 
     @pytest.mark.parametrize(
         "name", ["CON", "con", "PRN", "AUX", "NUL", "LPT1", "COM9"]
     )
     def test_reserved_names(self, name):
-        with pytest.raises(InvalidNameError):
+        with pytest.raises(InvalidArgumentError):
             _validate_name(name)
 
     @pytest.mark.parametrize("name", ["clip ", "clip."])
     def test_trailing_space_or_dot(self, name):
-        with pytest.raises(InvalidNameError):
+        with pytest.raises(InvalidArgumentError):
             _validate_name(name)
 
     def test_empty_name(self):
-        with pytest.raises(InvalidNameError):
+        with pytest.raises(InvalidArgumentError):
             _validate_name("")
 
 
@@ -287,7 +287,7 @@ class TestOutputBatch:
     def test_conflictive_output_and_directory(self, tmp_path):
         mixin = _batch_mixin([Path("a.mp4")])
 
-        with pytest.raises(ConflictiveOutputParametersError):
+        with pytest.raises(ExclusiveOptionsError):
             mixin.create_output_batch(
                 input_single=Path("a.mp4"),
                 input_counter=1,
@@ -300,7 +300,7 @@ class TestOutputBatch:
     def test_output_rejected_with_multiple_inputs(self, tmp_path):
         mixin = _batch_mixin([Path("a.mp4"), Path("b.mp4")])
 
-        with pytest.raises(ConflictiveOutputAmmountParameterError):
+        with pytest.raises(OptionError):
             mixin.create_output_batch(
                 input_single=Path("a.mp4"),
                 input_counter=2,
@@ -341,7 +341,7 @@ class TestOutputBatch:
     def test_output_directory_invalid_name(self, tmp_path):
         mixin = _batch_mixin([Path("a.gif"), Path("b.gif")])
 
-        with pytest.raises(InvalidNameError):
+        with pytest.raises(InvalidArgumentError):
             mixin.create_output_batch(
                 input_single=Path("a.gif"),
                 input_counter=2,

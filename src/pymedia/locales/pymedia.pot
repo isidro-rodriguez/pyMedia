@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-08-31 12:25+0100\n"
+"POT-Creation-Date: 2026-09-02 07:25+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,86 +17,47 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.18.0\n"
 
-#: pymedia/errors.py:45
+#: pymedia/errors.py:36
 #, python-format
-msgid "Could not create directory: %(path)s"
+msgid "FFmpeg command was not generated: %(name)s"
 msgstr ""
 
-#: pymedia/errors.py:51
-#, python-format
-msgid "FFmpeg command %(name)s failed during execution. Error: %(error)s"
-msgstr ""
-
-#: pymedia/errors.py:59
-#, python-format
-msgid "FFmpeg command %(name)s was not generated."
-msgstr ""
-
-#: pymedia/errors.py:65
-#, python-format
-msgid "FFmpeg command %(name)s timed out."
-msgstr ""
-
-#: pymedia/errors.py:70
-#, python-format
-msgid "Invalid configuration: %(msg)s"
-msgstr ""
-
-#: pymedia/errors.py:88
-msgid ""
-"It is not allowed to specify an output with multiple inputs, use output "
-"directory instead."
-msgstr ""
-
-#: pymedia/errors.py:97
-msgid "It is not allowed to specify an output path and an output directory."
-msgstr ""
-
-#: pymedia/errors.py:103
-msgid "It is not allowed to specify width and height together."
-msgstr ""
-
-#: pymedia/errors.py:108
-#, python-format
-msgid "Missing media information: %(path)s"
-msgstr ""
-
-#: pymedia/errors.py:113
-#, python-format
-msgid "Missing media name: %(name)s"
-msgstr ""
-
-#: pymedia/errors.py:118
-#, python-format
-msgid "Missing name: %(name)s"
-msgstr ""
-
-#: pymedia/errors.py:145
-#, python-format
-msgid "%(filename)s contains invalid characters: < > : \" / \\ | ? *"
-msgstr ""
-
-#: pymedia/errors.py:154
+#: pymedia/errors.py:75
 #, python-format
 msgid ""
 "Invalid extension %(extension)s. Codec %(codec)s requires one of: "
 "%(supported)s."
 msgstr ""
 
-#: pymedia/errors.py:165
+#: pymedia/errors.py:86
 #, python-format
 msgid ""
 "Invalid extension %(extension)s. %(media_type)s requires one of: "
 "%(supported)s."
 msgstr ""
 
-#: pymedia/errors.py:178
+#: pymedia/errors.py:104
 msgid "Invalid timestamp format. Expected: hh:mm:ss."
 msgstr ""
 
-#: pymedia/errors.py:184
+#: pymedia/errors.py:109
 #, python-format
-msgid "Timestamp %(time)s exceeds video duration %(duration)s."
+msgid "Missing media information: %(path)s"
+msgstr ""
+
+#: pymedia/errors.py:114
+#, python-format
+msgid "Missing media property: %(name)s"
+msgstr ""
+
+#: pymedia/errors.py:119
+#, python-format
+msgid "Missing parameter: %(name)s"
+msgstr ""
+
+#: pymedia/errors.py:125
+#, python-format
+msgid "One of the following options is required: %(options)s"
 msgstr ""
 
 #: pymedia/typer_options.py:29 pymedia/typer_options.py:37
@@ -137,73 +98,112 @@ msgstr ""
 msgid "Action to use if output file already exists."
 msgstr ""
 
-#: pymedia/typer_options.py:134 pymedia/typer_options.py:143
-#: pymedia/typer_options.py:152 pymedia/typer_options.py:163
-#: pymedia/typer_options.py:173 pymedia/typer_options.py:182
-#: pymedia/typer_options.py:191 pymedia/typer_options.py:202
-#: pymedia/typer_options.py:212 pymedia/typer_options.py:223
-#: pymedia/typer_options.py:234
+#: pymedia/typer_options.py:133 pymedia/typer_options.py:143
+#: pymedia/typer_options.py:155 pymedia/typer_options.py:166
+#: pymedia/typer_options.py:176 pymedia/typer_options.py:187
+#: pymedia/typer_options.py:198 pymedia/typer_options.py:209
 msgid "Command options"
 msgstr ""
 
-#: pymedia/typer_options.py:135
-msgid "Crop to WIDTH×HEIGHT at offset X,Y (from top-left)."
+#: pymedia/typer_options.py:134
+msgid "Interval between thumbnails, in seconds."
 msgstr ""
 
 #: pymedia/typer_options.py:144
-msgid "Flip the image horizontally, swapping left and right."
-msgstr ""
-
-#: pymedia/typer_options.py:153
-msgid "Flip the image vertically, swapping top and bottom."
-msgstr ""
-
-#: pymedia/typer_options.py:164
-msgid "Set the GIF frame rate in frames per second."
-msgstr ""
-
-#: pymedia/typer_options.py:174
 msgid "Preset sheet style."
 msgstr ""
 
-#: pymedia/typer_options.py:183
-msgid "Specify an orthogonal arc degree to rotate the image."
+#: pymedia/typer_options.py:156
+msgid "Scene-change sensitivity for thumbnail detection."
 msgstr ""
 
-#: pymedia/typer_options.py:192
-msgid "Specify different ways to scale the video."
+#: pymedia/typer_options.py:167
+msgid "Take a thumbnail at specific TIMESTAMP(s)."
 msgstr ""
 
-#: pymedia/typer_options.py:203
-msgid "Target resolution, in pixels, to resize the video."
-msgstr ""
-
-#: pymedia/typer_options.py:213
-msgid "Allows upscaling beyond the source dimensions."
-msgstr ""
-
-#: pymedia/typer_options.py:224
+#: pymedia/typer_options.py:177
 msgid "Time point at which GIF generation ends."
 msgstr ""
 
-#: pymedia/typer_options.py:235
+#: pymedia/typer_options.py:188
+msgid "Time point at which thumbnails generation ends."
+msgstr ""
+
+#: pymedia/typer_options.py:199
 msgid "Time point at which GIF generation starts."
+msgstr ""
+
+#: pymedia/typer_options.py:210
+msgid "Time point at which thumbnails generation starts."
+msgstr ""
+
+#: pymedia/typer_options.py:223 pymedia/typer_options.py:233
+#: pymedia/typer_options.py:242 pymedia/typer_options.py:254
+#: pymedia/typer_options.py:264
+msgid "Filter options"
+msgstr ""
+
+#: pymedia/typer_options.py:224
+msgid "Crop to WIDTH×HEIGHT at offset X,Y (from top-left)."
+msgstr ""
+
+#: pymedia/typer_options.py:234
+msgid "Flip the image horizontally, swapping left and right."
+msgstr ""
+
+#: pymedia/typer_options.py:243
+msgid "Flip the image vertically, swapping top and bottom."
+msgstr ""
+
+#: pymedia/typer_options.py:255
+msgid "Set the GIF frame rate in frames per second."
+msgstr ""
+
+#: pymedia/typer_options.py:265
+msgid "Specify an orthogonal arc degree to rotate the image."
+msgstr ""
+
+#: pymedia/typer_options.py:278 pymedia/typer_options.py:289
+#: pymedia/typer_options.py:299
+msgid "Scale filter options"
+msgstr ""
+
+#: pymedia/typer_options.py:279
+msgid "Specify different ways to scale the video."
+msgstr ""
+
+#: pymedia/typer_options.py:290
+msgid "Target resolution, in pixels, to resize the video."
+msgstr ""
+
+#: pymedia/typer_options.py:300
+msgid "Allows upscaling beyond the source dimensions."
 msgstr ""
 
 #: pymedia/commands/base_command.py:102
 msgid "Output file already exists. Overwrite?"
 msgstr ""
 
+#: pymedia/commands/base_command.py:144
+#, python-format
+msgid "FFmpeg command timed out: %(name)s"
+msgstr ""
+
+#: pymedia/commands/base_command.py:199
+msgid "FFmpeg command failed during execution."
+msgstr ""
+
 #: pymedia/commands/base_command.py:238 pymedia/commands/base_command.py:285
 msgid "BaseCommand skipped since output file already exists."
 msgstr ""
 
-#: pymedia/commands/gif_command.py:32
+#: pymedia/commands/gif_command.py:32 pymedia/commands/thumbnail_command.py:37
 msgid "Generates an animated GIF from the specified video."
 msgstr ""
 
-#: pymedia/commands/gif_command.py:73 pymedia/commands/sheet_command.py:65
-#: pymedia/commands/sheet_command.py:69
+#: pymedia/commands/gif_command.py:73 pymedia/commands/sheet_command.py:67
+#: pymedia/commands/sheet_command.py:71
+#: pymedia/commands/thumbnail_command.py:91
 #, python-format
 msgid "FFmpeg command: %(cmd)s"
 msgstr ""
@@ -233,7 +233,7 @@ msgstr ""
 msgid "Value"
 msgstr ""
 
-#: pymedia/commands/info_command.py:77 pymedia/ffmpeg/sheet_cmd.py:254
+#: pymedia/commands/info_command.py:77 pymedia/ffmpeg/sheet_cmd.py:292
 msgid "File"
 msgstr ""
 
@@ -241,15 +241,15 @@ msgstr ""
 msgid "Container"
 msgstr ""
 
-#: pymedia/commands/info_command.py:80 pymedia/ffmpeg/sheet_cmd.py:266
+#: pymedia/commands/info_command.py:80 pymedia/ffmpeg/sheet_cmd.py:304
 msgid "Duration"
 msgstr ""
 
-#: pymedia/commands/info_command.py:84 pymedia/ffmpeg/sheet_cmd.py:259
+#: pymedia/commands/info_command.py:84 pymedia/ffmpeg/sheet_cmd.py:297
 msgid "Size"
 msgstr ""
 
-#: pymedia/commands/info_command.py:88 pymedia/ffmpeg/sheet_cmd.py:270
+#: pymedia/commands/info_command.py:88 pymedia/ffmpeg/sheet_cmd.py:308
 msgid "Video"
 msgstr ""
 
@@ -314,17 +314,26 @@ msgstr ""
 msgid "Generates a thumbnail grid sheet with media info header."
 msgstr ""
 
-#: pymedia/commands/sheet_command.py:74
+#: pymedia/commands/sheet_command.py:76
 msgid "Generating sheet snapshots"
 msgstr ""
 
-#: pymedia/commands/sheet_command.py:82
+#: pymedia/commands/sheet_command.py:84
 msgid "Generating sheet header"
 msgstr ""
 
-#: pymedia/commands/sheet_command.py:88
+#: pymedia/commands/sheet_command.py:90
 #, python-format
 msgid "Metadata generated successfully: %(output)s"
+msgstr ""
+
+#: pymedia/commands/thumbnail_command.py:96
+msgid "Generating thumbnail"
+msgstr ""
+
+#: pymedia/commands/thumbnail_command.py:102
+#, python-format
+msgid "Thumbnail(s) generated successfully: %(output)s"
 msgstr ""
 
 #: pymedia/ffmpeg/probe.py:41
@@ -408,6 +417,11 @@ msgid ""
 "integer between 30 to 600."
 msgstr ""
 
+#: pymedia/models/config.py:341
+#, python-format
+msgid "Invalid configuration: %(msg)s"
+msgstr ""
+
 #: pymedia/models/mixins/crop_mixin.py:64
 #, python-format
 msgid "Invalid crop %(crop_str)s. Expected: WIDTH,HEIGHT,X,Y"
@@ -435,25 +449,45 @@ msgstr ""
 msgid "Invalid flip name."
 msgstr ""
 
-#: pymedia/models/mixins/scale_mixin.py:91
+#: pymedia/models/mixins/image_mixin.py:37
+msgid "Image container not supported."
+msgstr ""
+
+#: pymedia/models/mixins/outputs_mixin.py:148
+msgid ""
+"It is not allowed to specify an output with multiple inputs, use output "
+"directory instead."
+msgstr ""
+
+#: pymedia/models/mixins/outputs_mixin.py:178
+#, python-format
+msgid "%(name)s contains invalid characters: < > : \" / \\ | ? *"
+msgstr ""
+
+#: pymedia/models/mixins/outputs_mixin.py:190
+#, python-format
+msgid "Could not create directory: %(path)s"
+msgstr ""
+
+#: pymedia/models/mixins/scale_mixin.py:94
 #, python-format
 msgid "Invalid dimensions %(value)s. Expected: WIDTHxHEIGHT"
 msgstr ""
 
-#: pymedia/models/mixins/scale_mixin.py:99
-#: pymedia/models/mixins/scale_mixin.py:115
+#: pymedia/models/mixins/scale_mixin.py:102
+#: pymedia/models/mixins/scale_mixin.py:118
 msgid "video dimensions"
 msgstr ""
 
-#: pymedia/models/mixins/scale_mixin.py:111
+#: pymedia/models/mixins/scale_mixin.py:114
 msgid "Scale mode not supported."
 msgstr ""
 
-#: pymedia/models/mixins/scale_mixin.py:120
+#: pymedia/models/mixins/scale_mixin.py:123
 msgid "Target dimensions must be even."
 msgstr ""
 
-#: pymedia/models/mixins/scale_mixin.py:125
+#: pymedia/models/mixins/scale_mixin.py:128
 msgid "Ignored scale. Target scale > video resolution, it requires upscale."
 msgstr ""
 
@@ -465,5 +499,14 @@ msgstr ""
 #: pymedia/models/mixins/timestamps_mixin.py:110
 #, python-format
 msgid "Invalid timestamps. End %(time)s <= %(end)s."
+msgstr ""
+
+#: pymedia/models/mixins/timestamps_mixin.py:143
+msgid "Invalidad timestamp list format. Expected hh:mm:ss,hh:mm:ss,..."
+msgstr ""
+
+#: pymedia/models/mixins/timestamps_mixin.py:181
+#, python-format
+msgid "Timestamp %(time)s exceeds video duration %(duration)s."
 msgstr ""
 

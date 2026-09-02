@@ -5,10 +5,10 @@ from datetime import timedelta
 import pytest
 
 from pymedia.errors import (
+    InvalidParameterError,
     InvalidTimeFormatError,
     MissingMediaPropertyError,
     MissingParameterError,
-    TimeExceedsDurationError,
 )
 from pymedia.models.media import Media
 from pymedia.models.mixins.timestamps_mixin import (
@@ -58,7 +58,7 @@ class TestCreateTimestampStart:
         mixin = TimestampStartMixin()
         mixin.media = _media(duration=timedelta(seconds=30))
 
-        with pytest.raises(TimeExceedsDurationError):
+        with pytest.raises(InvalidParameterError):
             mixin.create_timestamp_start(start="00:00:31")
 
     def test_equal_to_duration_is_allowed(self):
@@ -106,7 +106,7 @@ class TestCreateTimestampEnd:
         mixin = TimestampEndMixin()
         mixin.media = _media(duration=timedelta(minutes=5))
 
-        with pytest.raises(TimeExceedsDurationError):
+        with pytest.raises(InvalidParameterError):
             mixin.create_timestamp_end(end="00:06:00")
 
 
