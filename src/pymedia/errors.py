@@ -33,7 +33,7 @@ class CommandError(PyMediaError):
 class CommandGenerationError(PyMediaError):
     def __init__(self, name: str) -> None:
         super().__init__(
-            _("FFmpeg command was not generated: %(name)s ") % {"name": name}
+            _("FFmpeg command was not generated: %(name)s") % {"name": name}
         )
 
 

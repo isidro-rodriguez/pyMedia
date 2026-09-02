@@ -141,7 +141,7 @@ class BaseCommand[ArgsT, ParamsT](ABC):
             stderr_thread.join()
             stdout_thread.join()
             raise CommandError(
-                msg=_("FFmpeg command timed out: %(name)s ") % {"name": command_name}
+                msg=_("FFmpeg command timed out: %(name)s") % {"name": command_name}
             )
 
         proc = subprocess.Popen(
