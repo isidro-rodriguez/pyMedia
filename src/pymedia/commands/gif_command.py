@@ -5,7 +5,7 @@ from pymedia.errors import (
     MissingMediaError,
     MissingParameterError,
 )
-from pymedia.ffmpeg.gif_cmd import gif_cmd
+from pymedia.ffmpeg.gif_cmd import GifCmd
 from pymedia.locales import _  # noqa
 from pymedia.models.pipeline.gif_pipeline import GifArguments, GifParameters
 from pymedia.typer_options import (
@@ -65,7 +65,7 @@ class GifCommand(SingleCommand[GifArguments, GifParameters]):
             raise MissingParameterError(name="input_single")
         if self.params.media is None:
             raise MissingMediaError(path=str(self.params.input_single))
-        cmd = gif_cmd(params=self.params)
+        cmd = GifCmd(params=self.params).create()
         if cmd is None:
             raise CommandGenerationError(name=self.name)
         self.cmd = cmd
