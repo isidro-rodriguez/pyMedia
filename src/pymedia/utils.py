@@ -1,4 +1,4 @@
-"""Utilidades de parseo y formateo compartidas por los modelos de pyMedia."""
+"""Utilidades compartidas por los modelos de pyMedia."""
 
 from datetime import timedelta
 from fractions import Fraction
@@ -91,7 +91,7 @@ def to_ffmpeg_path(path: Path) -> str:
     """Convierte una ruta a formato seguro para filtros ffmpeg (drawtext, etc.).
 
     Args:
-        path: Ruta a convertir.
+        path: Ruta del fichero de vídeo a procesar.
 
     Returns:
         Ruta posix con `:` escapado para su uso en filtros.

@@ -11,7 +11,7 @@ class FlipMixin:
     """Mixin para invertir la imagen de un vídeo o captura.
 
     Attributes:
-        hflip: Invierte la imagen horizontalmente, intercambiando izquierda y derecha.
+        hflip: Invierte la imagen horizontalmente, intercambia izquierda y derecha.
         vflip: Invierte la imagen verticalmente, intercambiando arriba y abajo.
     """
 

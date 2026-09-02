@@ -57,12 +57,21 @@ class ScaleMode(Enum):
 
 
 class CropArea(NamedTuple):
-    """Datos para el corte de imagen mediante crop."""
+    """Datos para el corte de imagen mediante área."""
 
     width: int  # Ancho del vídeo resultante
     height: int  # Altura del vídeo resultante
     x: int  # Coordenada X del punto de corte
     y: int  # Coordenada Y del punto de corte
+
+
+class CropBorders(NamedTuple):
+    """Datos para el corte de imagen mediante bordes."""
+
+    left: int
+    right: int
+    top: int
+    bottom: int
 
 
 class Dimensions(NamedTuple):

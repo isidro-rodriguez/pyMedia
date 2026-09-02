@@ -3,7 +3,6 @@
 import tempfile
 from pathlib import Path
 
-from pymedia.commands.base_command import BaseCommand, BatchCommand
 from pymedia.data.types import OverwriteMode, PresetsSheetMode
 from pymedia.errors import (
     CommandGenerationError,
@@ -14,7 +13,8 @@ from pymedia.errors import (
 from pymedia.ffmpeg.sheet_cmd import SheetCmd
 from pymedia.locales import _  # noqa
 from pymedia.models.pipeline.sheet_pipeline import SheetArguments, SheetParameters
-from pymedia.typer_options import (
+from pymedia.pipeline.base_pipeline import BasePipeline, BatchPipeline
+from pymedia.typer.options import (
     DebugOption,
     HelpOption,
     InputListArgument,
@@ -25,10 +25,10 @@ from pymedia.typer_options import (
 )
 
 
-class SheetCommand(BatchCommand[SheetArguments, SheetParameters]):
+class SheetCommand(BatchPipeline[SheetArguments, SheetParameters]):
     """Comando de CLI que genera una hoja de capturas con cabecera de metadatos."""
 
-    name = "sheet"
+    command_name = "sheet"
     help = _("Generates a thumbnail grid sheet with media info header.")
 
     @staticmethod
@@ -53,7 +53,7 @@ class SheetCommand(BatchCommand[SheetArguments, SheetParameters]):
             help_: Muestra la ayuda del comando.
         """
         SheetCommand.run(
-            args=BaseCommand.build_args(
+            args=BasePipeline.build_args(
                 args_cls=SheetArguments,
                 local_vars=locals(),
             ),
@@ -105,7 +105,7 @@ class SheetCommand(BatchCommand[SheetArguments, SheetParameters]):
                 cmd=snapshots_cmd,
                 description=_("Generating sheet snapshots"),
                 stall_timeout=self.config.app.stall_timeout,
-                command_name=self.name,
+                command_name=self.command_name,
                 total_steps=sheet_instance.capture_count,
             )
 
@@ -113,7 +113,7 @@ class SheetCommand(BatchCommand[SheetArguments, SheetParameters]):
                 cmd=header_cmd,
                 description=_("Generating sheet header"),
                 stall_timeout=self.config.app.stall_timeout,
-                command_name=self.name,
+                command_name=self.command_name,
             )
 
         self.logger.info(

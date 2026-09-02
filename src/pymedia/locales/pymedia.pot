@@ -19,7 +19,7 @@ msgstr ""
 
 #: pymedia/errors.py:36
 #, python-format
-msgid "FFmpeg command was not generated: %(name)s"
+msgid "FFmpeg command was not generated: %(command_name)s"
 msgstr ""
 
 #: pymedia/errors.py:75
@@ -186,7 +186,7 @@ msgstr ""
 
 #: pymedia/commands/base_command.py:144
 #, python-format
-msgid "FFmpeg command timed out: %(name)s"
+msgid "FFmpeg command timed out: %(command_name)s"
 msgstr ""
 
 #: pymedia/commands/base_command.py:199
@@ -194,7 +194,7 @@ msgid "FFmpeg command failed during execution."
 msgstr ""
 
 #: pymedia/commands/base_command.py:238 pymedia/commands/base_command.py:285
-msgid "BaseCommand skipped since output file already exists."
+msgid "BasePipeline skipped since output file already exists."
 msgstr ""
 
 #: pymedia/commands/gif_command.py:32 pymedia/commands/thumbnail_command.py:37
@@ -493,12 +493,12 @@ msgstr ""
 
 #: pymedia/models/mixins/timestamps_mixin.py:63
 #, python-format
-msgid "Invalid timestamps. Start %(start)s >= %(time)s."
+msgid "Invalid timestamps. Start %(timestamp_start)s >= %(time)s."
 msgstr ""
 
 #: pymedia/models/mixins/timestamps_mixin.py:110
 #, python-format
-msgid "Invalid timestamps. End %(time)s <= %(end)s."
+msgid "Invalid timestamps. End %(time)s <= %(timestamp_end)s."
 msgstr ""
 
 #: pymedia/models/mixins/timestamps_mixin.py:143

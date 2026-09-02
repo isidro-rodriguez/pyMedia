@@ -28,7 +28,7 @@ class Logger:
         """Inicializa el wrapper sobre un logger estándar.
 
         Args:
-            logger: Logger de `logging` al que delegar los mensajes.
+            logger: Interfaz principal de la aplicación para generar mensajes.
         """
         self._logger = logger
 

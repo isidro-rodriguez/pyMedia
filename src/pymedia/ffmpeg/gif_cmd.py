@@ -2,7 +2,7 @@
 
 from pymedia.data.types import OverwriteMode
 from pymedia.errors import MissingParameterError
-from pymedia.models.pipeline.gif_pipeline import GifParameters
+from pymedia.models.parameters import GifParameters
 
 
 class GifCmd:

@@ -19,8 +19,7 @@ from pymedia.models.mixins.rotate_mixin import RotateMixin
 from pymedia.models.mixins.scale_mixin import ScaleMixin
 from pymedia.models.mixins.timestamps_mixin import (
     TimestampAtMixin,
-    TimestampEndMixin,
-    TimestampStartMixin,
+    TimestampStartEndMixin,
 )
 from pymedia.models.pipeline.base_pipeline import BaseArguments, BaseParameters
 
@@ -30,7 +29,7 @@ class ThumbnailArguments(BaseArguments):
     """Argumentos crudos del subcomando thumbnail, tal como llegan de la CLI.
 
     Attributes:
-        input_single: Ruta del fichero a procesar.
+        input_single: Ruta del fichero de vídeo a procesar.
         output: Ruta del fichero de salida deseada, o None para usar la
             derivada de la entrada.
         overwrite: Política ante conflicto de salida ya existente. [defecto: ask]
@@ -44,7 +43,7 @@ class ThumbnailArguments(BaseArguments):
         scale_to: Dimensión objetivo, en píxeles, sin parsear.
         scale_mode: Política de escalado del vídeo o imagen. [defecto: fit]
         scale_upscale: Permite el incremento de dimensiones.
-        hflip: Invierte la imagen horizontalmente, intercambiando izquierda y derecha.
+        hflip: Invierte la imagen horizontalmente, intercambia izquierda y derecha.
         vflip: Invierte la imagen verticalmente, intercambiando arriba y abajo.
         rotate: Ángulo ortogonal con el que se va a rotar la imagen.
     """
@@ -71,8 +70,8 @@ class ThumbnailParameters(
     OutputSingleMixin,
     ImageQualityMixin,
     TimestampAtMixin,
-    TimestampStartMixin,
-    TimestampEndMixin,
+    TimestampStartEndMixin,
+    TimestampStartEndMixin,
     SceneMixin,
     FpsImageMixin,
     CropMixin,
@@ -96,11 +95,11 @@ class ThumbnailParameters(
         timestamp_end: Marca de tiempo que indica el punto final.
         scene: Índice de sensibilidad de cambio de fotograma para obtener imagen.
         fps: Frecuencia de imágenes por segundo a extraer.
-        crop_area: Área y coordenada de la zona a preservar de la imagen.
+        crop_area: Área y coordenada, en px, de la zona a preservar de la imagen.
         scale_mode: Política de escalado del vídeo o imagen.
         scale_upscale: Permite el incremento de dimensiones.
         scale_to: Dimensión objetivo, en píxeles, o None si no se cambia.
-        hflip: Invierte la imagen horizontalmente, intercambiando izquierda y derecha.
+        hflip: Invierte la imagen horizontalmente, intercambia izquierda y derecha.
         vflip: Invierte la imagen verticalmente, intercambiando arriba y abajo.
         rotate: Ángulo ortogonal con el que se va a rotar la imagen.
     """
@@ -110,17 +109,18 @@ class ThumbnailParameters(
         """Valida y parsea los argumentos crudos de la CLI a ThumbnailParameters.
 
         Args:
-            args: Argumentos crudos recibidos desde la CLI.
-            logger: Sistema de registro de mensajes.
+            args: Argumentos tipados específicos del comando.
+            logger: Interfaz principal de la aplicación para generar mensajes.
 
         Returns:
             Instancia de ThumbnailParameters completamente inicializada.
 
         Raises:
-            MissingRequiredOptionError: Si no se aporta ninguna de --at,
-                --scene o --every.
+            MissingRequiredOptionError: Si no se aporta ninguna opción:
+                --at, --scene o --every.
             ExclusiveOptionsError: Si se combinan opciones incompatibles
-                entre sí (--at/--scene/--every, o --at con --start/--end).
+                entre (--at/--scene/--every)
+                o (--at con --timestamp_start/--timestamp_end).
         """
         params = cls(
             overwrite=args.overwrite,
@@ -134,7 +134,7 @@ class ThumbnailParameters(
             logger=logger,
         )
 
-        params.create_output_single(
+        params.get_output(
             media_type=OutputMediaType.IMAGE,
             output=args.output,
             affix="_thumbnail",
@@ -162,7 +162,7 @@ class ThumbnailParameters(
             )
 
         if args.every is not None:
-            params.create_fps(
+            params.get_fps(
                 every=args.every,
             )
 
@@ -172,7 +172,7 @@ class ThumbnailParameters(
             )
 
         if args.scale_to is not None:
-            params.create_scale(
+            params.get_scale_to(
                 logger=logger,
                 scale_upscale=args.scale_upscale,
                 scale_to=args.scale_to,
@@ -201,10 +201,10 @@ def _validate_options(params: ThumbnailParameters) -> None:
     if sum(x is not None for x in (at, scene, fps)) > 1:
         raise ExclusiveOptionsError(options=["--at", "--scene", "--every"])
 
-    # 3. Conflicto entre --at y rango (--start / --end)
+    # 3. Conflicto entre --at y rango (--timestamp_start / --timestamp_end)
     if at is not None and any(x is not None for x in (start, end)):
         raise ExclusiveOptionsError(
-            option="--at", incompatible_with=["--start", "--end"]
+            option="--at", incompatible_with=["--timestamp_start", "--timestamp_end"]
         )
 
     # 4. Validación de orden si existe el rango completo

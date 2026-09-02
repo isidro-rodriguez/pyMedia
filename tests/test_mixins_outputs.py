@@ -150,7 +150,7 @@ class TestValidateOutput:
         """Comprueba que una extensión GIF válida se acepta."""
         mixin = _single_mixin(media=_media())
 
-        mixin.create_output_single(OutputMediaType.GIF, output=tmp_path / "out.gif")
+        mixin.create_output(OutputMediaType.GIF, output=tmp_path / "out.gif")
 
         assert mixin.output == (tmp_path / "out.gif").absolute()
 
@@ -159,7 +159,7 @@ class TestValidateOutput:
         mixin = _single_mixin(media=_media())
 
         with pytest.raises(InvalidContainerTypeError) as exc_info:
-            mixin.create_output_single(OutputMediaType.GIF, output=tmp_path / "out.png")
+            mixin.create_output(OutputMediaType.GIF, output=tmp_path / "out.png")
 
         assert "gif" in exc_info.value.message
 
@@ -167,7 +167,7 @@ class TestValidateOutput:
         """Comprueba que una extensión de imagen válida se acepta."""
         mixin = _single_mixin()
 
-        mixin.create_output_single(OutputMediaType.IMAGE, output=tmp_path / "out.png")
+        mixin.create_output(OutputMediaType.IMAGE, output=tmp_path / "out.png")
 
         assert mixin.output == (tmp_path / "out.png").absolute()
 
@@ -176,9 +176,7 @@ class TestValidateOutput:
         mixin = _single_mixin()
 
         with pytest.raises(InvalidContainerTypeError) as exc_info:
-            mixin.create_output_single(
-                OutputMediaType.IMAGE, output=tmp_path / "out.xyz"
-            )
+            mixin.create_output(OutputMediaType.IMAGE, output=tmp_path / "out.xyz")
 
         assert "Image" in exc_info.value.message
 
@@ -187,15 +185,13 @@ class TestValidateOutput:
         mixin = _single_mixin(media=_media(audio=None))
 
         with pytest.raises(MissingMediaPropertyError, match="audio track"):
-            mixin.create_output_single(
-                OutputMediaType.AUDIO, output=tmp_path / "out.m4a"
-            )
+            mixin.create_output(OutputMediaType.AUDIO, output=tmp_path / "out.m4a")
 
     def test_audio_valid_extension(self, tmp_path):
         """Comprueba que una extensión de audio válida se acepta."""
         mixin = _single_mixin(media=_media(audio=_audio("aac")))
 
-        mixin.create_output_single(OutputMediaType.AUDIO, output=tmp_path / "out.m4a")
+        mixin.create_output(OutputMediaType.AUDIO, output=tmp_path / "out.m4a")
 
         assert mixin.output == (tmp_path / "out.m4a").absolute()
 
@@ -204,26 +200,20 @@ class TestValidateOutput:
         mixin = _single_mixin(media=_media(audio=_audio("aac")))
 
         with pytest.raises(InvalidContainerError):
-            mixin.create_output_single(
-                OutputMediaType.AUDIO, output=tmp_path / "out.flac"
-            )
+            mixin.create_output(OutputMediaType.AUDIO, output=tmp_path / "out.flac")
 
     def test_audio_not_container_extension(self, tmp_path):
         """Comprueba que una extensión no de audio lanza un error."""
         mixin = _single_mixin(media=_media(audio=_audio("aac")))
 
         with pytest.raises(InvalidContainerTypeError):
-            mixin.create_output_single(
-                OutputMediaType.AUDIO, output=tmp_path / "out.txt"
-            )
+            mixin.create_output(OutputMediaType.AUDIO, output=tmp_path / "out.txt")
 
     def test_subtitle_valid_extension(self, tmp_path):
         """Comprueba que una extensión de subtítulo válida se acepta."""
         mixin = _single_mixin()
 
-        mixin.create_output_single(
-            OutputMediaType.SUBTITLE, output=tmp_path / "out.srt"
-        )
+        mixin.create_output(OutputMediaType.SUBTITLE, output=tmp_path / "out.srt")
 
         assert mixin.output == (tmp_path / "out.srt").absolute()
 
@@ -232,9 +222,7 @@ class TestValidateOutput:
         mixin = _single_mixin()
 
         with pytest.raises(InvalidContainerTypeError) as exc_info:
-            mixin.create_output_single(
-                OutputMediaType.SUBTITLE, output=tmp_path / "out.xyz"
-            )
+            mixin.create_output(OutputMediaType.SUBTITLE, output=tmp_path / "out.xyz")
 
         assert "Subtitle" in exc_info.value.message
 
@@ -243,24 +231,20 @@ class TestValidateOutput:
         mixin = _single_mixin(media=_media(video=None))
 
         with pytest.raises(MissingMediaPropertyError, match="video"):
-            mixin.create_output_single(
-                OutputMediaType.VIDEO, output=tmp_path / "out.mp4"
-            )
+            mixin.create_output(OutputMediaType.VIDEO, output=tmp_path / "out.mp4")
 
     def test_video_requires_codec(self, tmp_path):
         """Comprueba que la salida de vídeo exige un códec en la pista."""
         mixin = _single_mixin(media=_media(video=_video(None)))
 
         with pytest.raises(MissingMediaPropertyError, match="video codec"):
-            mixin.create_output_single(
-                OutputMediaType.VIDEO, output=tmp_path / "out.mp4"
-            )
+            mixin.create_output(OutputMediaType.VIDEO, output=tmp_path / "out.mp4")
 
     def test_video_valid_extension(self, tmp_path):
         """Comprueba que una extensión de vídeo válida se acepta."""
         mixin = _single_mixin(media=_media(video=_video("h264")))
 
-        mixin.create_output_single(OutputMediaType.VIDEO, output=tmp_path / "out.mp4")
+        mixin.create_output(OutputMediaType.VIDEO, output=tmp_path / "out.mp4")
 
         assert mixin.output == (tmp_path / "out.mp4").absolute()
 
@@ -269,9 +253,7 @@ class TestValidateOutput:
         mixin = _single_mixin(media=_media(video=_video("h264")))
 
         with pytest.raises(InvalidContainerError) as exc_info:
-            mixin.create_output_single(
-                OutputMediaType.VIDEO, output=tmp_path / "out.avi"
-            )
+            mixin.create_output(OutputMediaType.VIDEO, output=tmp_path / "out.avi")
 
         assert "h264" in exc_info.value.message
 
@@ -280,9 +262,7 @@ class TestValidateOutput:
         mixin = _single_mixin(media=_media(video=_video("h264")))
 
         with pytest.raises(InvalidContainerTypeError):
-            mixin.create_output_single(
-                OutputMediaType.VIDEO, output=tmp_path / "out.txt"
-            )
+            mixin.create_output(OutputMediaType.VIDEO, output=tmp_path / "out.txt")
 
     def test_video_audio_codec_checked(self, tmp_path):
         """Comprueba que el contenedor de vídeo también soporta los códecs de audio."""
@@ -290,9 +270,7 @@ class TestValidateOutput:
 
         # .m2ts es válido para h264 pero no para aac
         with pytest.raises(InvalidContainerError):
-            mixin.create_output_single(
-                OutputMediaType.VIDEO, output=tmp_path / "out.m2ts"
-            )
+            mixin.create_output(OutputMediaType.VIDEO, output=tmp_path / "out.m2ts")
 
 
 class TestOutputSingleDefault:
@@ -303,7 +281,7 @@ class TestOutputSingleDefault:
         monkeypatch.chdir(tmp_path)
 
         mixin = _single_mixin(input_single=Path("clip.mp4"))
-        mixin.create_output_single(OutputMediaType.GIF, extension=".gif")
+        mixin.create_output(OutputMediaType.GIF, extension=".gif")
 
         assert mixin.output == (tmp_path / "clip.gif").absolute()
 
@@ -312,7 +290,7 @@ class TestOutputSingleDefault:
         monkeypatch.chdir(tmp_path)
 
         mixin = _single_mixin(input_single=Path("clip.mp4"))
-        mixin.create_output_single(OutputMediaType.GIF, affix="_edit", extension=".gif")
+        mixin.create_output(OutputMediaType.GIF, affix="_edit", extension=".gif")
 
         assert mixin.output == (tmp_path / "clip_edit.gif").absolute()
 
@@ -325,7 +303,7 @@ class TestOutputBatch:
         mixin = _batch_mixin([Path("a.mp4")])
 
         with pytest.raises(ExclusiveOptionsError):
-            mixin.create_output_batch(
+            mixin.create_output(
                 input_single=Path("a.mp4"),
                 input_counter=1,
                 media=_media(),
@@ -339,7 +317,7 @@ class TestOutputBatch:
         mixin = _batch_mixin([Path("a.mp4"), Path("b.mp4")])
 
         with pytest.raises(OptionError):
-            mixin.create_output_batch(
+            mixin.create_output(
                 input_single=Path("a.mp4"),
                 input_counter=2,
                 media=_media(),
@@ -351,7 +329,7 @@ class TestOutputBatch:
         """Comprueba que con una sola entrada la salida explícita es válida."""
         mixin = _batch_mixin([Path("a.mp4")])
 
-        mixin.create_output_batch(
+        mixin.create_output(
             input_single=Path("a.mp4"),
             input_counter=1,
             media=_media(),
@@ -367,7 +345,7 @@ class TestOutputBatch:
         mixin = _batch_mixin([Path("a.gif"), Path("b.gif")])
         target = tmp_path / "out"
 
-        mixin.create_output_batch(
+        mixin.create_output(
             input_single=Path("a.gif"),
             input_counter=2,
             media=_media(),
@@ -383,7 +361,7 @@ class TestOutputBatch:
         mixin = _batch_mixin([Path("a.gif"), Path("b.gif")])
 
         with pytest.raises(InvalidArgumentError):
-            mixin.create_output_batch(
+            mixin.create_output(
                 input_single=Path("a.gif"),
                 input_counter=2,
                 media=_media(),

@@ -44,8 +44,7 @@ class SheetParameters(
     Attributes:
         input_single: Ruta del fichero de vídeo a procesar.
         media: Metadatos del vídeo de entrada ya resuelto y validado.
-        output: Ruta del fichero de salida procesada, válida solo cuando
-            el lote contiene un único fichero.
+        output: Ruta absoluta del fichero de salida procesado.
         output_directory: Directorio de salida para lotes de varios ficheros.
         overwrite: Política ante conflicto de salida ya existente.
         preset_sheet: Estilo de hoja preajustado.
@@ -58,9 +57,9 @@ class SheetParameters(
         """Crea y valida los parámetros del comando Sheet desde argumentos brutos.
 
         Args:
-            args: Argumentos crudos recibidos desde la CLI.
+            args: Argumentos tipados específicos del comando.
             input_single: Ruta del fichero de vídeo a procesar.
-            logger: Sistema de registro de mensajes.
+            logger: Interfaz principal de la aplicación para generar mensajes.
 
         Returns:
             Instancia de SheetParameters completamente inicializada.
@@ -71,7 +70,7 @@ class SheetParameters(
             raise MissingParameterError(name="input_single")
         if params.media is None:
             raise MissingParameterError(name="media")
-        params.create_output_batch(
+        params.create_output(
             input_single=params.input_single,
             input_counter=len(args.input_list),
             media=params.media,

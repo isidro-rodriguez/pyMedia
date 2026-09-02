@@ -69,6 +69,10 @@ select = ["E", "F", "I", "UP", "B", "D"]
 [tool.ruff.lint.pydocstyle]
 convention = "google"
 
+# .local: documento interno de copy/paste (glosario), sin reglas de estilo
+[tool.ruff.lint.per-file-ignores]
+".local/**" = ["D", "E501"]
+
 # Configuración de Pytest
 [tool.pytest.ini_options]
 testpaths = ["tests"]

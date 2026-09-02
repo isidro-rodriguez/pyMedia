@@ -16,12 +16,14 @@ class RotateMixin:
 
     rotate: RotateMode | None = None
 
-    def create_rotate(self, rotate: RotateMode) -> None:
+    def create_rotate(self, rotate: RotateMode | None) -> None:
         """Crea el atributo rotate.
 
         Args:
             rotate: Ángulo ortogonal con el que se va a rotar la imagen.
         """
+        if rotate is None:
+            return
         self.rotate = rotate
 
     def to_rotate_cmd(self) -> str:

@@ -43,8 +43,8 @@ class ScaleMixin(_HasSingleMedia):
     def create_scale(
         self,
         logger: Logger,
-        scale_upscale: bool,
-        scale_to: str,
+        scale_upscale: bool = False,
+        scale_to: str | None = None,
     ) -> None:
         """Establece los parámetros de redimensionado.
 
@@ -61,6 +61,8 @@ class ScaleMixin(_HasSingleMedia):
             MissingMediaPropertyError: Si las dimensiones del vídeo no se
                 pueden obtener.
         """
+        if scale_to is None:
+            return
         self.scale_upscale = scale_upscale
         self.scale_to = self._process_scale(
             scale_str=scale_to, media=self.media, logger=logger

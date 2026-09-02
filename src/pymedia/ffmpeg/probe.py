@@ -12,7 +12,7 @@ def probe(path: Path, logger: Logger) -> dict:
     """Obtiene metadatos del vídeo a procesar.
 
     Args:
-        path: Ruta del fichero del que se va a sacar metadatos.
+        path: Ruta del fichero de vídeo a procesar.
         logger: Servicio de registro de mensajes.
 
     Returns:

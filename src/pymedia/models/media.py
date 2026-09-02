@@ -102,7 +102,7 @@ class Media:
         """Mapea el JSON de ffprobe a MediaInput.
 
         Args:
-            path: Ruta del fichero multimedia a analizar.
+            path: Ruta del fichero de vídeo a procesar.
             logger: Logger para los mensajes del proceso ffprobe.
 
         Returns:

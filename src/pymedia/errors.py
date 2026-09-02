@@ -54,7 +54,8 @@ class CommandGenerationError(PyMediaError):
             name: Nombre interno del comando o filtro fallido.
         """
         super().__init__(
-            _("FFmpeg command was not generated: %(name)s") % {"name": name}
+            _("FFmpeg command was not generated: %(command_name)s")
+            % {"command_name": name}
         )
 
 
@@ -139,7 +140,7 @@ class InvalidContainerTypeError(PyMediaError):
 
         Args:
             extension: Extensión del fichero de salida.
-            media_type: Tipo de medio esperado (p. ej. "video").
+            media_type: Tipo de medio de salida esperado.
             supported: Extensiones de contenedor soportadas para ese tipo.
         """
         super().__init__(
@@ -196,7 +197,9 @@ class MissingMediaPropertyError(PyMediaError):
         Args:
             name: Nombre de la propiedad del medio que falta.
         """
-        super().__init__(_("Missing media property: %(name)s") % {"name": name})
+        super().__init__(
+            _("Missing media property: %(command_name)s") % {"command_name": name}
+        )
 
 
 class MissingParameterError(PyMediaError):
@@ -208,7 +211,9 @@ class MissingParameterError(PyMediaError):
         Args:
             name: Nombre del parámetro que falta.
         """
-        super().__init__(_("Missing parameter: %(name)s") % {"name": name})
+        super().__init__(
+            _("Missing parameter: %(command_name)s") % {"command_name": name}
+        )
 
 
 class MissingRequiredOptionError(PyMediaError):

@@ -6,7 +6,6 @@ from rich.console import Group
 from rich.panel import Panel
 from rich.table import Table
 
-from pymedia.commands.base_command import SingleCommand
 from pymedia.errors import (
     MissingMediaError,
     MissingParameterError,
@@ -17,7 +16,8 @@ from pymedia.logger import Logger
 from pymedia.models.config import Config
 from pymedia.models.media import Audio, Media, Subtitle, Video
 from pymedia.models.pipeline.info_pipeline import InfoArguments, InfoParameters
-from pymedia.typer_options import (
+from pymedia.pipeline.base_pipeline import SinglePipeline
+from pymedia.typer.options import (
     DebugOption,
     HelpOption,
     InputSingleArgument,
@@ -25,10 +25,10 @@ from pymedia.typer_options import (
 from pymedia.utils import parse_quantity, parse_size, parse_timedelta
 
 
-class InfoCommand(SingleCommand[InfoArguments, InfoParameters]):
+class InfoCommand(SinglePipeline[InfoArguments, InfoParameters]):
     """Comando de CLI que imprime los metadatos de un vídeo de entrada."""
 
-    name = "info"
+    command_name = "info"
 
     @staticmethod
     def cli(

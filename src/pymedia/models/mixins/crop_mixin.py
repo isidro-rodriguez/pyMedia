@@ -23,7 +23,7 @@ class CropMixin:
 
     crop_area: CropArea | None = None
 
-    def create_crop(self, crop_str: str) -> None:
+    def create_crop(self, crop_str: str | None) -> None:
         """Crea el atributo crop, parseando y validando la opción del usuario.
 
         Args:
@@ -33,6 +33,8 @@ class CropMixin:
             InvalidParameterError: Si el valor del parametro no es válido.
             MissingMediaPropertyError: Si no se ha obtenido un parámetro importante.
         """
+        if crop_str is None:
+            return
         self.crop_area = self._process_crop_area(crop_str=crop_str, media=self.media)
 
     def to_crop_cmd(self) -> str:

@@ -15,7 +15,6 @@ from pymedia.errors import (
 )
 from pymedia.locales import _  # noqa
 from pymedia.models.media import Media
-from pymedia.utils import parse_timedelta
 
 
 class _HasSingleMedia(Protocol):
@@ -24,7 +23,7 @@ class _HasSingleMedia(Protocol):
 
 
 @dataclass(kw_only=True)
-class TimestampStartMixin(_HasSingleMedia):
+class TimestampStartEndMixin(_HasSingleMedia):
     """Mixin para las marcas de tiempo que indican el punto inicial a procesar.
 
     Attributes:
@@ -32,12 +31,16 @@ class TimestampStartMixin(_HasSingleMedia):
     """
 
     timestamp_start: timedelta | None = None
+    timestamp_end: timedelta | None = None
 
-    def create_timestamp_start(self, start: str) -> None:
+    def create_timestamp_start_end(
+        self, timestamp_start: str | None, timestamp_end: str | None
+    ) -> None:
         """Crea el atributo de marca de tiempo indicando el punto inicial.
 
         Args:
-            start: String indicando punto inicial.
+            timestamp_start: Marca de tiempo que indica el punto inicial.
+            timestamp_end: Marca de tiempo que indica el punto final.
 
         Raises:
             InvalidTimeFormatError: Si el formato de la marca no es válido.
@@ -45,7 +48,24 @@ class TimestampStartMixin(_HasSingleMedia):
             MissingParameterError: Si no se pudo obtener el parámetro.
             TimeExceedsDurationError: Si marca de tiempo superior a la duración.
         """
-        self.timestamp_start = _process_time(time_str=start, media=self.media)
+        if timestamp_start is not None:
+            self.timestamp_start = _process_time(
+                time_str=timestamp_start,
+                media=self.media,
+            )
+
+        if timestamp_end is not None:
+            self.timestamp_end = _process_time(
+                time_str=timestamp_end,
+                media=self.media,
+            )
+
+        if self.timestamp_start is not None and self.timestamp_end is not None:
+            if self.timestamp_start > self.timestamp_end:
+                raise InvalidParameterError(
+                    msg=_("Invalid timestamps. Start (%(start)s) => End (%(end)s.)")
+                    % {"start": timestamp_start, "end": timestamp_end}
+                )
 
     def to_timestamp_start_cmd(self) -> list[str]:
         """Devuelve el filtro listo para consumo de ffmpeg.
@@ -57,52 +77,6 @@ class TimestampStartMixin(_HasSingleMedia):
             raise MissingParameterError(name="timestamp_start")
         return ["-ss", str(self.timestamp_start)]
 
-    def validate_timestamp_start_order(self, time: timedelta) -> None:
-        """Comprueba que la marca de inicio sea anterior a la marca indicada.
-
-        Args:
-            time: Marca de tiempo (normalmente el final) con la que comparar.
-
-        Raises:
-            MissingParameterError: Si la marca de inicio no está definida.
-            InvalidParameterError: Si la marca de inicio es posterior o igual.
-        """
-        if self.timestamp_start is None:
-            raise MissingParameterError(name="timestamp_end")
-        if self.timestamp_start >= time:
-            raise InvalidParameterError(
-                msg=_("Invalid timestamps. Start %(start)s >= %(time)s.")
-                % {
-                    "start": parse_timedelta(self.timestamp_start),
-                    "time": parse_timedelta(time),
-                }
-            )
-
-
-@dataclass(kw_only=True)
-class TimestampEndMixin(_HasSingleMedia):
-    """Mixin para las marcas de tiempo que indican el punto final a procesar.
-
-    Attributes:
-        timestamp_end: Marca de tiempo que indica el punto final.
-    """
-
-    timestamp_end: timedelta | None = None
-
-    def create_timestamp_end(self, end: str) -> None:
-        """Crea el atributo de marca de tiempo indicando el punto final.
-
-        Args:
-            end: String indicando punto final.
-
-        Raises:
-            InvalidTimeFormatError: Si el formato de la marca no es válido.
-            MissingMediaPropertyError: Si no se pudo obtener la duración del vídeo.
-            MissingParameterError: Si no se pudo obtener el parámetro.
-            TimeExceedsDurationError: Si marca de tiempo superior a la duración.
-        """
-        self.timestamp_end = _process_time(time_str=end, media=self.media)
-
     def to_timestamp_end_cmd(self) -> list[str]:
         """Devuelve el filtro listo para consumo de ffmpeg.
 
@@ -112,27 +86,6 @@ class TimestampEndMixin(_HasSingleMedia):
         if self.timestamp_end is None:
             raise MissingParameterError(name="timestamp_end")
         return ["-to", str(self.timestamp_end)]
-
-    def validate_timestamp_end_order(self, time: timedelta) -> None:
-        """Comprueba que la marca indicada sea anterior a la marca de fin.
-
-        Args:
-            time: Marca de tiempo (normalmente el inicio) con la que comparar.
-
-        Raises:
-            MissingParameterError: Si la marca de fin no está definida.
-            InvalidParameterError: Si la marca de fin es anterior o igual.
-        """
-        if self.timestamp_end is None:
-            raise MissingParameterError(name="timestamp_end")
-        if time >= self.timestamp_end:
-            raise InvalidParameterError(
-                msg=_("Invalid timestamps. End %(time)s <= %(end)s.")
-                % {
-                    "time": parse_timedelta(time),
-                    "end": parse_timedelta(self.timestamp_end),
-                }
-            )
 
 
 @dataclass(kw_only=True)

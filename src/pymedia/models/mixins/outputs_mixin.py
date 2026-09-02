@@ -49,7 +49,7 @@ class OutputSingleMixin(_HasSingleMedia):
 
     output: Path | None = None
 
-    def create_output_single(
+    def create_output(
         self,
         media_type: OutputMediaType,
         affix: str | None = None,
@@ -62,7 +62,7 @@ class OutputSingleMixin(_HasSingleMedia):
             media_type: Tipo de medio de salida esperado.
             affix: Sufijo a añadir al nombre del fichero de salida.
             extension: Extensión a forzar en el fichero de salida.
-            output: Ruta de salida explícita, si se ha indicado.
+            output: Ruta absoluta del fichero de salida procesado.
 
         Raises:
             MissingMediaError: Si no se pudieron obtener los metadatos del fichero.
@@ -98,7 +98,7 @@ class OutputBatchMixin(_HasBatchMedia):
     output: Path | None = None
     output_directory: Path | None = None
 
-    def create_output_batch(
+    def create_output(
         self,
         input_single: Path,
         input_counter: int,
