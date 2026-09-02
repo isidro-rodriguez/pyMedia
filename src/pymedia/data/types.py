@@ -1,3 +1,5 @@
+"""Tipos y datos auxiliares compartidos por los modelos de pyMedia."""
+
 from enum import Enum
 from typing import NamedTuple
 
@@ -7,7 +9,7 @@ from typing import NamedTuple
 
 
 class OverwriteMode(Enum):
-    """Resolución de conflicto si ya existe un fichero con el mismo nombre"""
+    """Resolución de conflicto si ya existe un fichero con el mismo nombre."""
 
     YES = "yes"
     NO = "no"

@@ -190,3 +190,4 @@ _AUDIO_CODECS: tuple[AudioCodecData, ...] = (
 AUDIO_CODECS: Mapping[str, AudioCodecData] = MappingProxyType(
     {codec.name: codec for codec in _AUDIO_CODECS}
 )
+"""dict[str, AudioCodecData]: Códecs de audio soportados indexados por nombre."""

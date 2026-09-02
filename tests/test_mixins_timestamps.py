@@ -23,6 +23,8 @@ def _media(duration: timedelta | None = timedelta(hours=2)) -> Media:
 
 
 class TestCreateTimestampStart:
+    """Pruebas de creación de la marca de inicio."""
+
     @pytest.mark.parametrize(
         ("start", "expected"),
         [
@@ -32,6 +34,7 @@ class TestCreateTimestampStart:
         ],
     )
     def test_supported_formats(self, start, expected):
+        """Comprueba que los formatos soportados se parsean correctamente."""
         mixin = TimestampStartMixin()
         mixin.media = _media()
 
@@ -41,6 +44,7 @@ class TestCreateTimestampStart:
 
     @pytest.mark.parametrize("start", ["abc", "", "1:2:3:4", "1.5:3", "3,5"])
     def test_invalid_format_raises(self, start):
+        """Comprueba que los formatos inválidos lanzan un error."""
         mixin = TimestampStartMixin()
         mixin.media = _media()
 
@@ -48,6 +52,7 @@ class TestCreateTimestampStart:
             mixin.create_timestamp_start(start=start)
 
     def test_missing_duration_raises(self):
+        """Comprueba que la ausencia de duración lanza un error."""
         mixin = TimestampStartMixin()
         mixin.media = _media(duration=None)
 
@@ -55,6 +60,7 @@ class TestCreateTimestampStart:
             mixin.create_timestamp_start(start="00:00:05")
 
     def test_exceeds_duration_raises(self):
+        """Comprueba que una marca posterior a la duración lanza un error."""
         mixin = TimestampStartMixin()
         mixin.media = _media(duration=timedelta(seconds=30))
 
@@ -62,6 +68,7 @@ class TestCreateTimestampStart:
             mixin.create_timestamp_start(start="00:00:31")
 
     def test_equal_to_duration_is_allowed(self):
+        """Comprueba que una marca igual a la duración es válida."""
         mixin = TimestampStartMixin()
         mixin.media = _media(duration=timedelta(minutes=1))
 
@@ -71,6 +78,8 @@ class TestCreateTimestampStart:
 
 
 class TestCreateTimestampEnd:
+    """Pruebas de creación de la marca de fin."""
+
     @pytest.mark.parametrize(
         ("end", "expected"),
         [
@@ -80,6 +89,7 @@ class TestCreateTimestampEnd:
         ],
     )
     def test_supported_formats(self, end, expected):
+        """Comprueba que los formatos soportados se parsean correctamente."""
         mixin = TimestampEndMixin()
         mixin.media = _media()
 
@@ -89,6 +99,7 @@ class TestCreateTimestampEnd:
 
     @pytest.mark.parametrize("end", ["", "-10", "1:2:3:4", "a:00"])
     def test_invalid_format_raises(self, end):
+        """Comprueba que los formatos inválidos lanzan un error."""
         mixin = TimestampEndMixin()
         mixin.media = _media()
 
@@ -96,6 +107,7 @@ class TestCreateTimestampEnd:
             mixin.create_timestamp_end(end=end)
 
     def test_missing_duration_raises(self):
+        """Comprueba que la ausencia de duración lanza un error."""
         mixin = TimestampEndMixin()
         mixin.media = _media(duration=None)
 
@@ -103,6 +115,7 @@ class TestCreateTimestampEnd:
             mixin.create_timestamp_end(end="00:00:05")
 
     def test_exceeds_duration_raises(self):
+        """Comprueba que un fin posterior a la duración lanza un error."""
         mixin = TimestampEndMixin()
         mixin.media = _media(duration=timedelta(minutes=5))
 
@@ -111,7 +124,10 @@ class TestCreateTimestampEnd:
 
 
 class TestToTimestampStartCmd:
+    """Pruebas de generación del flag `-ss`."""
+
     def test_returns_ss_flag(self):
+        """Comprueba que se genera el flag `-ss` con la marca formateada."""
         mixin = TimestampStartMixin()
         mixin.media = _media()
         mixin.timestamp_start = timedelta(minutes=1, seconds=30)
@@ -119,6 +135,7 @@ class TestToTimestampStartCmd:
         assert mixin.to_timestamp_start_cmd() == ["-ss", "0:01:30"]
 
     def test_missing_parameter_raises(self):
+        """Comprueba que la ausencia de marca lanza un error."""
         mixin = TimestampStartMixin()
         mixin.media = _media()
         mixin.timestamp_start = None
@@ -128,7 +145,10 @@ class TestToTimestampStartCmd:
 
 
 class TestToTimestampEndCmd:
+    """Pruebas de generación del flag `-to`."""
+
     def test_returns_to_flag(self):
+        """Comprueba que se genera el flag `-to` con la marca formateada."""
         mixin = TimestampEndMixin()
         mixin.media = _media()
         mixin.timestamp_end = timedelta(seconds=90)
@@ -136,6 +156,7 @@ class TestToTimestampEndCmd:
         assert mixin.to_timestamp_end_cmd() == ["-to", "0:01:30"]
 
     def test_missing_parameter_raises(self):
+        """Comprueba que la ausencia de marca lanza un error."""
         mixin = TimestampEndMixin()
         mixin.media = _media()
         mixin.timestamp_end = None

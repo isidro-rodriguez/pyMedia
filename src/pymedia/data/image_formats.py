@@ -58,3 +58,4 @@ _IMAGE_FORMATS: tuple[ImageFormatData, ...] = (
 IMAGE_FORMATS: Mapping[str, ImageFormatData] = MappingProxyType(
     {fmt.name: fmt for fmt in _IMAGE_FORMATS}
 )
+"""dict[str, ImageFormatData]: Formatos de imagen estática indexados por nombre."""

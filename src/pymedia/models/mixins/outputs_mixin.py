@@ -40,8 +40,7 @@ class _HasBatchMedia(Protocol):
 
 @dataclass(kw_only=True)
 class OutputSingleMixin(_HasSingleMedia):
-    """
-    Mixin que gestiona la ruta de salida para comandos de fichero único.
+    """Mixin que gestiona la ruta de salida para comandos de fichero único.
 
     Attributes:
         output: Ruta del fichero de salida procesada, o None si aún no
@@ -57,8 +56,7 @@ class OutputSingleMixin(_HasSingleMedia):
         extension: str | None = None,
         output: Path | None = None,
     ) -> None:
-        """
-        Procesa y asigna la ruta de salida a partir de los parámetros de entrada.
+        """Procesa y asigna la ruta de salida a partir de los parámetros de entrada.
 
         Args:
             media_type: Tipo de medio de salida esperado.
@@ -87,8 +85,7 @@ class OutputSingleMixin(_HasSingleMedia):
 
 @dataclass(kw_only=True)
 class OutputBatchMixin(_HasBatchMedia):
-    """
-    Mixin que gestiona la ruta o directorio de salida para comandos por lotes.
+    """Mixin que gestiona la ruta o directorio de salida para comandos por lotes.
 
     Attributes:
         output: Ruta del fichero de salida procesada, válida solo cuando
@@ -111,8 +108,7 @@ class OutputBatchMixin(_HasBatchMedia):
         affix: str | None = None,
         extension: str | None = None,
     ) -> None:
-        """
-        Procesa y asigna la ruta o directorio de salida para un lote de entradas.
+        """Procesa y asigna la ruta o directorio de salida para un lote de entradas.
 
         Args:
             input_single: Ruta al fichero a procesar.
@@ -163,7 +159,7 @@ class OutputBatchMixin(_HasBatchMedia):
 
 
 def _validate_name(name: str) -> None:
-    """Valida si el archivo o directorio no contiene caracteres no permitidos"""
+    """Valida que el nombre no contenga caracteres no permitidos."""
     invalid_chars = re.compile(r'[<>:"/\\|?*\x00-\x1F]')
     reserved_names = {"CON", "PRN", "AUX", "NUL"} | {
         f"{p}{n}" for p in ("COM", "LPT") for n in range(1, 10)
@@ -193,8 +189,7 @@ def _process_output_directory(directory: Path) -> Path:
 
 
 def _validate_output(output: Path, media: Media, media_type: OutputMediaType) -> None:
-    """Comprueba el fichero de salida tenga una extensión de animación válida."""
-
+    """Comprueba que la salida tenga una extensión válida para el tipo de medio."""
     _process_output_directory(output.parent)
     _validate_name(output.stem)
 
@@ -286,7 +281,6 @@ def _process_output(
     output_directory: Path | None = None,
 ) -> Path:
     """Procesa la ruta del fichero de salida."""
-
     if output is not None:
         output = output.absolute()
     else:

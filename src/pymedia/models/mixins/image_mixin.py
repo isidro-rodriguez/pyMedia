@@ -1,3 +1,5 @@
+"""Mixins de calidad de imagen de salida y detección de cambios de escena."""
+
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Protocol
@@ -37,6 +39,7 @@ class ImageQualityMixin(_HasOutput):
                 raise InvalidParameterError(msg=_("Image container not supported."))
 
 
+@dataclass(kw_only=True)
 class SceneMixin:
     """Mixin indicar la obtención de imágenes por cambios de cámara en escena.
 
@@ -47,7 +50,11 @@ class SceneMixin:
     scene: float | None = None
 
     def create_scene(self, scene: float) -> None:
-        """Crea el parámetro scene."""
+        """Crea el parámetro scene.
+
+        Args:
+            scene: Índice de sensibilidad de cambio de escena.
+        """
         self.scene = scene
 
     def to_scene_cmd(self) -> str:

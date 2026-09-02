@@ -1,3 +1,5 @@
+"""Pipeline de argumentos y parámetros del subcomando sheet."""
+
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -61,7 +63,6 @@ class SheetParameters(
         Returns:
             Instancia de SheetParameters completamente inicializada.
         """
-
         params = cls(overwrite=args.overwrite)
         params.create_input_single(input_single=input_single, logger=logger)
         if params.input_single is None:

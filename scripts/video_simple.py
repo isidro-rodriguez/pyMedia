@@ -1,3 +1,5 @@
+"""Genera un vídeo de prueba con un fractal de Mandelbrot animado y audio tonal."""
+
 #!/usr/bin/env python3
 
 import subprocess
@@ -31,6 +33,14 @@ CONFIG = {
 
 
 def build_ffmpeg_command(config):
+    """Construye el comando ffmpeg a partir de la configuración indicada.
+
+    Args:
+        config: Diccionario con los parámetros de generación del vídeo.
+
+    Returns:
+        Lista con el comando ffmpeg listo para ejecutar.
+    """
     width = config["width"]
     height = config["height"]
     fps = config["fps"]
@@ -136,6 +146,7 @@ def build_ffmpeg_command(config):
 
 
 def main():
+    """Genera el vídeo de prueba ejecutando ffmpeg."""
     command = build_ffmpeg_command(CONFIG)
 
     print("Ejecutando FFmpeg:\n")

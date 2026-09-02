@@ -282,3 +282,4 @@ _VIDEO_CODECS: tuple[VideoCodecData, ...] = (
 VIDEO_CODECS: Mapping[str, VideoCodecData] = MappingProxyType(
     {codec.name: codec for codec in _VIDEO_CODECS}
 )
+"""dict[str, VideoCodecData]: Códecs de vídeo soportados indexados por nombre."""

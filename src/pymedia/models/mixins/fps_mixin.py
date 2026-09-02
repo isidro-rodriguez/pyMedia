@@ -1,3 +1,5 @@
+"""Mixins de imágenes por segundo (GIF y extracción de capturas)."""
+
 from dataclasses import dataclass
 from fractions import Fraction
 
@@ -20,7 +22,6 @@ class FpsGifMixin:
         Args:
             fps: Imágenes por segundo del Gif.
         """
-
         self.fps = fps
 
     def to_fps_cmd(self) -> str:
@@ -32,7 +33,6 @@ class FpsGifMixin:
         Raises:
             MissingParameterError: Si no se pudo obtener el parametro fps.
         """
-
         if self.fps is None:
             raise MissingParameterError(name="fps")
         return f"fps={self.fps}"
@@ -54,7 +54,6 @@ class FpsImageMixin:
         Args:
             every: Cada cuantos segundos se extrae una imagen.
         """
-
         self.fps = Fraction(1, every)
 
     def to_fps_cmd(self) -> str:
@@ -66,7 +65,6 @@ class FpsImageMixin:
         Raises:
             MissingParameterError: Si no se pudo obtener el parametro fps.
         """
-
         if self.fps is None:
             raise MissingParameterError(name="fps")
         return f"fps={self.fps}"

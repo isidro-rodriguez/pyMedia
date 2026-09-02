@@ -1,3 +1,5 @@
+"""Composición de comandos ffmpeg para el subcomando gif."""
+
 from pymedia.data.types import OverwriteMode
 from pymedia.errors import MissingParameterError
 from pymedia.models.pipeline.gif_pipeline import GifParameters
@@ -7,10 +9,15 @@ class GifCmd:
     """Compone el comando de ffmpeg para generar animaciones en Gifs."""
 
     def __init__(self, params: GifParameters) -> None:
+        """Inicializa el generador con los parámetros validados del GIF.
+
+        Args:
+            params: Parámetros procesados del subcomando gif.
+        """
         self.params = params
 
     def create(self) -> list[str]:
-        """Compone el comando de ffmpeg para generar animaciones en Gifs
+        """Compone el comando de ffmpeg para generar animaciones en Gifs.
 
         Returns:
             Lista de str con el comando de ffmpeg.

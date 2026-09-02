@@ -1,3 +1,9 @@
+"""Servicio de registro de mensajes de pyMedia.
+
+Envuelve el módulo estándar `logging` y lo configura con un handler de consola
+Rich y un handler de fichero en el directorio de configuración del usuario.
+"""
+
 import logging
 from pathlib import Path
 from typing import Self
@@ -19,6 +25,11 @@ class Logger:
     _console = Console()
 
     def __init__(self, logger: logging.Logger) -> None:
+        """Inicializa el wrapper sobre un logger estándar.
+
+        Args:
+            logger: Logger de `logging` al que delegar los mensajes.
+        """
         self._logger = logger
 
     @classmethod
@@ -78,17 +89,26 @@ class Logger:
         Returns:
             Logger con prefijo 'pymedia.*'.
         """
-
         if not cls._configured:
             cls.create(debug=debug)
         return cls(logging.getLogger(__name__))
 
     def critical(self, msg: str, exc_info: bool = False) -> None:
-        """Muestra log de nivel crítico."""
+        """Muestra log de nivel crítico.
+
+        Args:
+            msg: Mensaje ya traducido a mostrar.
+            exc_info: Si `True`, añade la traza de la excepción activa.
+        """
         self._logger.critical(msg=msg, exc_info=exc_info)
 
     def error(self, msg: str, exc_info: bool = False) -> None:
-        """Muestra log de nivel error."""
+        """Muestra log de nivel error.
+
+        Args:
+            msg: Mensaje ya traducido a mostrar.
+            exc_info: Si `True`, añade la traza de la excepción activa.
+        """
         self._logger.error(msg=msg, exc_info=exc_info)
 
     @staticmethod
@@ -99,15 +119,30 @@ class Logger:
         return msg
 
     def warning(self, msg: str, **kwargs) -> None:
-        """Muestra log de nivel aviso (mensaje ya traducido)."""
+        """Muestra log de nivel aviso (mensaje ya traducido).
+
+        Args:
+            msg: Mensaje ya traducido a mostrar.
+            **kwargs: Valores para interpolar en `msg` vía `%`.
+        """
         self._logger.warning(self._render(msg, kwargs))
 
     def info(self, msg: str, **kwargs) -> None:
-        """Muestra log de nivel información (mensaje ya traducido)."""
+        """Muestra log de nivel información (mensaje ya traducido).
+
+        Args:
+            msg: Mensaje ya traducido a mostrar.
+            **kwargs: Valores para interpolar en `msg` vía `%`.
+        """
         self._logger.info(self._render(msg, kwargs))
 
     def debug(self, msg: str, **kwargs) -> None:
-        """Muestra log de nivel depuración (mensaje ya traducido)."""
+        """Muestra log de nivel depuración (mensaje ya traducido).
+
+        Args:
+            msg: Mensaje ya traducido a mostrar.
+            **kwargs: Valores para interpolar en `msg` vía `%`.
+        """
 
         def _prettify(value: object) -> object:
             """Convierte dicts/lists/tuples/sets en texto multilínea legible."""

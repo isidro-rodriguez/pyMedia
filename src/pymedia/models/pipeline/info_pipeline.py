@@ -1,3 +1,5 @@
+"""Pipeline de argumentos y parámetros del subcomando info."""
+
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -20,7 +22,7 @@ class InfoArguments:
 class InfoParameters(
     InputSingleMixin,
 ):
-    """Parámetros utilizados por el comando GIF.
+    """Parámetros utilizados por el comando Info.
 
     Attributes:
         input_single: Ruta del vídeo a procesar.
@@ -29,7 +31,7 @@ class InfoParameters(
 
     @classmethod
     def create(cls, args: InfoArguments, logger: Logger) -> "InfoParameters":
-        """Crea y valida los parámetros del comando GIF desde de los argumentos brutos.
+        """Crea y valida los parámetros del comando Info desde los argumentos brutos.
 
         Args:
             args: Argumentos crudos recibidos desde la CLI.
@@ -38,7 +40,6 @@ class InfoParameters(
         Returns:
             Instancia de InfoParameters completamente inicializada.
         """
-
         params: InfoParameters = InfoParameters()
         params.create_input_single(input_single=args.input_single, logger=logger)
         return params

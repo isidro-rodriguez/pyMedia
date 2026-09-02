@@ -43,6 +43,7 @@ LANGUAGES = ["es"]
 
 
 def _po_path(lang: str) -> Path:
+    """Devuelve la ruta al archivo `.po` del idioma indicado."""
     return LOCALEDIR / lang / "LC_MESSAGES" / f"{DOMAIN}.po"
 
 
@@ -71,7 +72,11 @@ def cmd_extract() -> None:
 
 
 def cmd_update(lang: str) -> None:
-    """Sincroniza `<lang>.po` con el POT."""
+    """Sincroniza `<lang>.po` con el POT.
+
+    Args:
+        lang: Código de idioma del catálogo (`es`, `en`...).
+    """
     pot_path = LOCALEDIR / f"{DOMAIN}.pot"
     pot = read_po(pot_path.open("rb"))
     po_path = _po_path(lang)
@@ -94,7 +99,11 @@ def cmd_update(lang: str) -> None:
 
 
 def cmd_compile(lang: str) -> None:
-    """Compila `<lang>.po` a `<lang>.mo`."""
+    """Compila `<lang>.po` a `<lang>.mo`.
+
+    Args:
+        lang: Código de idioma del catálogo (`es`, `en`...).
+    """
     po_path = _po_path(lang)
     if not po_path.exists():
         sys.exit(f"No existe {po_path}")
@@ -106,7 +115,12 @@ def cmd_compile(lang: str) -> None:
 
 
 def write_catalog(catalog: Catalog, po_path: Path) -> None:
-    """Escribe un catálogo en `po_path` creando el directorio padre."""
+    """Escribe un catálogo en `po_path` creando el directorio padre.
+
+    Args:
+        catalog: Catálogo de mensajes a escribir.
+        po_path: Ruta del fichero `.po` destino.
+    """
     po_path.parent.mkdir(parents=True, exist_ok=True)
     with po_path.open("wb") as f:
         write_po(f, catalog)
@@ -160,6 +174,7 @@ def _same_placeholders(msgid: str, msgstr: str) -> bool:
 
 
 def main() -> None:
+    """Parsea los argumentos y ejecuta el subcomando i18n indicado."""
     parser = argparse.ArgumentParser(prog="locale_manager", description=__doc__)
     sub = parser.add_subparsers(dest="command", required=True)
     sub.add_parser("extract", help="Genera pymedia.pot desde src/")

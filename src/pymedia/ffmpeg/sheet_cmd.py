@@ -68,7 +68,6 @@ class SheetCmd:
             MissingMediaPropertyError: Si falta alguna propiedad técnica requerida
                 en el objeto media (duration, fps, size, video, codec, etc.).
         """
-
         header_cmd = self._generate_header()
         if header_cmd is None:
             raise CommandGenerationError(name="header_cmd")
@@ -110,9 +109,7 @@ class SheetCmd:
             return f"{border},{gap}"
 
         def _build_timestamp_drawtext() -> str:
-            """Construye el filtro drawtext para superponer la marca de tiempo en la
-            miniatura.
-            """
+            """Construye el filtro drawtext con la marca de tiempo de la miniatura."""
             if preset is None:
                 raise MissingParameterError(name="preset")
             ts_margin = 4
@@ -198,13 +195,13 @@ class SheetCmd:
         ]
 
     def _generate_header(self) -> list[str]:
-        """Genera el comando FFmpeg para superponer la cabecera con metadatos sobre la
-        cuadrícula de forma resiliente a propiedades ausentes.
+        """Genera el comando FFmpeg que superpone la cabecera con metadatos.
+
+        Construye la cabecera de forma resiliente a propiedades ausentes del medio.
         """
 
         def _truncate_list_display(prefix: str, items: list[str], max_len: int) -> str:
-            """Recorta la cadena de texto en cabecera si excede cierta longitud según el
-            preset utilizado por el usuario."""
+            """Recorta la cabecera con elipsis si excede la longitud del preset."""
             base_template = f"{prefix} [{', '.join(items)}]"
             if len(base_template) <= max_len:
                 return base_template

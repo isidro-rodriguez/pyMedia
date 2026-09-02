@@ -1,3 +1,5 @@
+"""Mixin de estilos preajustados para las hojas de capturas."""
+
 import dataclasses
 from dataclasses import dataclass
 from importlib.resources import files
@@ -116,9 +118,7 @@ class SheetPresetsMixin:
 
     @staticmethod
     def _resolve_font_asset() -> Path:
-        """Devuelve la ruta de la fuente en el directorio de la app, instalándola si
-        falta.
-        """
+        """Devuelve la ruta de la fuente, instalándola en la app si falta."""
         assets_dir = (
             Path(
                 platformdirs.user_config_dir(

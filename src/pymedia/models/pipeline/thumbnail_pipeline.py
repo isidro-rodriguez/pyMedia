@@ -1,3 +1,5 @@
+"""Pipeline de argumentos y parámetros del subcomando thumbnail."""
+
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -30,7 +32,7 @@ class ThumbnailArguments:
         input_single: Ruta del vídeo de entrada.
         output: Ruta de salida deseada, o None para usar la derivada de
             input_single.
-        overwrite: Política de sobrescritura de archivos existentes.
+        overwrite: Política de sobrescritura de archivos existentes. [defecto: ask]
         every: Intervalo en segundos entre thumbnails (modo intervalo).
         scene: Umbral de sensibilidad para detección de cambio de escena
             (modo escena).
@@ -40,7 +42,7 @@ class ThumbnailArguments:
         timestamp_end: Fin del rango temporal a procesar, sin parsear.
         crop: Especificación de corte, sin parsear.
         scale_to: Dimensiones de escalado destino, sin parsear.
-        scale_mode: Modo de escalado a aplicar (STRETCH, FIT, COVER).
+        scale_mode: Modo de escalado a aplicar (STRETCH, FIT, COVER). [defecto: fit]
         scale_upscale: Si se permite escalar por encima del tamaño original.
         hflip: Si se aplica volteo horizontal.
         vflip: Si se aplica volteo vertical.
@@ -123,7 +125,6 @@ class ThumbnailParameters(
             ExclusiveOptionsError: Si se combinan opciones incompatibles
                 entre sí (--at/--scene/--every, o --at con --start/--end).
         """
-
         params = cls(
             overwrite=args.overwrite,
             scale_mode=args.scale_mode,
@@ -191,8 +192,7 @@ class ThumbnailParameters(
 
 
 def _validate_options(params: ThumbnailParameters) -> None:
-    """Verifica que se han aportado opciones requeridas y que no se han introducido
-    combinaciones ambiguas."""
+    """Verifica las opciones requeridas y descarta combinaciones ambiguas."""
     at, scene, fps = params.timestamp_at, params.scene, params.fps
     start, end = params.timestamp_start, params.timestamp_end
 

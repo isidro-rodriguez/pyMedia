@@ -34,7 +34,7 @@ def _limpiar_pycache() -> int:
 
 
 def _crear_zip() -> None:
-    """Crea el zip con directorios y ficheros de raíz. Devuelve (dirs, ficheros)."""
+    """Crea el zip con los directorios y los ficheros de raíz seleccionados."""
     with zipfile.ZipFile(BACKUP_PATH, "w", zipfile.ZIP_DEFLATED) as zf:
         for nombre_dir in DIRS:
             dir_path = ROOT / nombre_dir
@@ -51,6 +51,7 @@ def _crear_zip() -> None:
 
 
 def main() -> None:
+    """Limpia las cachés, crea la copia de seguridad e informa del resultado."""
     print("Limpiando cachés __pycache__...")
     n_cache = _limpiar_pycache()
     print(f"  {n_cache} directorios __pycache__ eliminados")

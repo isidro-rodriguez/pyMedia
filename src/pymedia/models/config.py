@@ -1,3 +1,5 @@
+"""Modelo de configuración de la aplicación y su validación."""
+
 import tomllib
 from dataclasses import dataclass
 from enum import Enum
@@ -65,8 +67,7 @@ class VideoCodec(Enum):
 
 @dataclass(frozen=True, kw_only=True, slots=True)
 class Encode:
-    """
-    Parámetros de transcodificación que se usarán en ffmpeg.
+    """Parámetros de transcodificación que se usarán en ffmpeg.
 
     Attributes:
         video_codec: Códec de vídeo a utilizar en transcodificación.
@@ -86,8 +87,7 @@ class Encode:
 
 @dataclass(frozen=True, kw_only=True, slots=True)
 class ConflictiveConcat:
-    """
-    Actuaciones ante valores conflictivos en CONCAT filter.
+    """Actuaciones ante valores conflictivos en CONCAT filter.
 
     Attributes:
         fps: Si transcodifica los vídeos al de menor FPS o el mayor.
@@ -102,8 +102,7 @@ class ConflictiveConcat:
 
 @dataclass(frozen=True, kw_only=True, slots=True)
 class App:
-    """
-    Opciones de configuración de la aplicación.
+    """Opciones de configuración de la aplicación.
 
     Attributes:
         language: Lenguaje de la aplicación.
@@ -118,8 +117,7 @@ class App:
 
 @dataclass(frozen=True, kw_only=True, slots=True)
 class Config:
-    """
-    Actuaciones ante valores conflictivos en CONCAT filter.
+    """Actuaciones ante valores conflictivos en CONCAT filter.
 
     Attributes:
         encode: Parámetros de transcodificación que se usarán en ffmpeg.

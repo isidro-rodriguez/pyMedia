@@ -1,4 +1,5 @@
-# src/pymedia/models/media.py
+"""Modelos de metadatos de medios obtenidos mediante ffprobe."""
+
 from dataclasses import dataclass
 from datetime import timedelta
 from fractions import Fraction
@@ -11,6 +12,19 @@ from pymedia.utils import parse_fraction, to_float, to_int
 
 @dataclass(frozen=True, kw_only=True, slots=True)
 class Video:
+    """Metadatos de la pista de vídeo de un medio.
+
+    Attributes:
+        codec: Nombre del códec de vídeo.
+        width: Ancho en píxeles.
+        height: Alto en píxeles.
+        fps: Frecuencia de imágenes por segundo.
+        bit_rate: Tasa de bits en bps.
+        pix_fmt: Formato de píxeles.
+        aspect_ratio: Relación de aspecto mostrada.
+        profile: Perfil del códec.
+    """
+
     codec: str | None = None
     width: int | None = None
     height: int | None = None
@@ -23,6 +37,17 @@ class Video:
 
 @dataclass(frozen=True, kw_only=True, slots=True)
 class Audio:
+    """Metadatos de una pista de audio de un medio.
+
+    Attributes:
+        codec: Nombre del códec de audio.
+        sample_rate: Frecuencia de muestreo en Hz.
+        channels: Número de canales.
+        channel_layout: Distribución de canales (p. ej. "stereo").
+        bit_rate: Tasa de bits en bps.
+        language: Código de idioma de la pista.
+    """
+
     codec: str | None = None
     sample_rate: int | None = None
     channels: int | None = None
@@ -33,6 +58,17 @@ class Audio:
 
 @dataclass(frozen=True, kw_only=True, slots=True)
 class Subtitle:
+    """Metadatos de una pista de subtítulos de un medio.
+
+    Attributes:
+        index: Índice de la pista dentro del contenedor.
+        codec: Nombre del códec de subtítulos.
+        language: Código de idioma de la pista.
+        title: Título descriptivo de la pista.
+        forced: Si la pista está marcada como forzada.
+        default: Si la pista está marcada como predeterminada.
+    """
+
     index: int | None = None
     codec: str | None = None
     language: str | None = None
@@ -43,6 +79,17 @@ class Subtitle:
 
 @dataclass(frozen=True, kw_only=True, slots=True)
 class Media:
+    """Metadatos agregados de un medio obtenidos de ffprobe.
+
+    Attributes:
+        duration: Duración total del medio.
+        size: Tamaño del fichero en bytes.
+        format_name: Nombre del formato contenedor.
+        video: Metadatos de la pista de vídeo, o None si no existe.
+        audio: Lista de pistas de audio, o None si no hay.
+        subtitles: Lista de pistas de subtítulos, o None si no hay.
+    """
+
     duration: timedelta | None = None
     size: int | None = None
     format_name: str | None = None
@@ -52,7 +99,15 @@ class Media:
 
     @classmethod
     def load(cls, path: Path, logger: Logger) -> "Media":
-        """Mapea el JSON de ffprobe a MediaInput."""
+        """Mapea el JSON de ffprobe a MediaInput.
+
+        Args:
+            path: Ruta del fichero multimedia a analizar.
+            logger: Logger para los mensajes del proceso ffprobe.
+
+        Returns:
+            El medio construido a partir de la salida de ffprobe.
+        """
         data = probe(path=path, logger=logger)
 
         video = None

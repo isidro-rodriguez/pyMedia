@@ -1,3 +1,5 @@
+"""Mixin de recorte de imagen (filtro crop de ffmpeg)."""
+
 from dataclasses import dataclass
 
 from pymedia.data.types import CropArea
@@ -49,8 +51,7 @@ class CropMixin:
         """Procesa el string del argumento crop del usuario."""
 
         def _parse_crop_area() -> CropArea:
-            """Parsea el valor de crop del usuario y lo convierte en tuple de
-            enteros."""
+            """Parsea el valor de crop del usuario y lo convierte en enteros."""
             try:
                 width_str, height_str, x_str, y_str = crop_str.split(",")
                 width, height, x, y = (

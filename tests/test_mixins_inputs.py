@@ -32,7 +32,10 @@ def _fake_probe(monkeypatch):
 
 
 class TestInputSingleCreate:
+    """Pruebas de creación de la entrada individual."""
+
     def test_sets_absolute_path_and_media(self, tmp_path, monkeypatch):
+        """Comprueba que se guardan la ruta absoluta y los metadatos."""
         monkeypatch.chdir(tmp_path)
         mixin = InputSingleMixin()
         source = tmp_path / "clip.mp4"
@@ -43,6 +46,7 @@ class TestInputSingleCreate:
         assert mixin.media == Media()
 
     def test_invalid_extension_raises(self, tmp_path):
+        """Comprueba que una extensión no de vídeo lanza un error."""
         mixin = InputSingleMixin()
 
         with pytest.raises(InvalidContainerTypeError) as exc_info:
@@ -51,6 +55,7 @@ class TestInputSingleCreate:
         assert "Video" in exc_info.value.message
 
     def test_converts_to_absolute_path(self, tmp_path, monkeypatch):
+        """Comprueba que una ruta relativa se convierte en absoluta."""
         monkeypatch.chdir(tmp_path)
         mixin = InputSingleMixin()
         relative = Path("clip.mp4")
@@ -61,13 +66,17 @@ class TestInputSingleCreate:
 
 
 class TestInputSingleCmd:
+    """Pruebas de generación del comando de entrada individual."""
+
     def test_to_input_single_cmd(self):
+        """Comprueba que se genera el argumento `-i` correctamente."""
         source = Path("clip.mp4")
         mixin = InputSingleMixin(input_single=source)
 
         assert mixin.to_input_single_cmd() == ["-i", str(source)]
 
     def test_to_input_single_cmd_missing_parameter(self):
+        """Comprueba que falta lanzar un error si no hay ruta."""
         mixin = InputSingleMixin()
 
         with pytest.raises(MissingParameterError, match="input_single"):
@@ -75,7 +84,10 @@ class TestInputSingleCmd:
 
 
 class TestInputListCreate:
+    """Pruebas de creación de la lista de entradas."""
+
     def test_creates_absolute_paths_and_media(self, tmp_path, monkeypatch):
+        """Comprueba que se guardan rutas absolutas y sus metadatos."""
         monkeypatch.chdir(tmp_path)
         mixin = InputListMixin()
         source_a = Path("a.mp4")
@@ -87,6 +99,7 @@ class TestInputListCreate:
         assert mixin.media_list == [Media(), Media()]
 
     def test_replaces_existing_entries(self, tmp_path, monkeypatch):
+        """Comprueba que una nueva lista reemplaza los valores previos."""
         monkeypatch.chdir(tmp_path)
         previous = Path("prev.mp4").absolute()
         mixin = InputListMixin(input_list=[previous], media_list=[Media()])
@@ -97,6 +110,7 @@ class TestInputListCreate:
         assert mixin.media_list == [Media()]
 
     def test_transactional_on_load_failure(self, monkeypatch):
+        """Comprueba que un fallo de carga no deja estado a medio llenar."""
         calls = 0
 
         def _flaky_load(path, logger):
@@ -122,12 +136,16 @@ class TestInputListCreate:
 
 
 class TestInputListCmd:
+    """Pruebas de generación del comando de lista de entradas."""
+
     def test_to_input_list_cmd(self):
+        """Comprueba que se genera un `-i` por cada entrada."""
         mixin = InputListMixin(input_list=[Path("a.mp4"), Path("b.mp4")])
 
         assert mixin.to_input_list_cmd() == ["-i", "a.mp4", "-i", "b.mp4"]
 
     def test_to_input_list_cmd_missing_parameter(self):
+        """Comprueba que falta lanzar un error si no hay lista."""
         mixin = InputListMixin()
 
         with pytest.raises(MissingParameterError, match="input_list"):
@@ -135,13 +153,17 @@ class TestInputListCmd:
 
 
 class TestLoadMedia:
+    """Pruebas de la carga de metadatos de un medio."""
+
     def test_invalid_extension_raises(self):
+        """Comprueba que una extensión no válida lanza un error."""
         with pytest.raises(InvalidContainerTypeError):
             InputListMixin(input_list=[], media_list=[]).create_input_list(
                 input_list=[Path("x.txt")], logger=None
             )
 
     def test_load_error_raises_missing_media(self, monkeypatch):
+        """Comprueba que un fallo de ffprobe lanza MissingMediaError."""
         monkeypatch.setattr(
             "pymedia.models.mixins.inputs_mixin.Media.load", _fake_load_raises
         )

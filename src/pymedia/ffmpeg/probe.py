@@ -1,3 +1,5 @@
+"""Ejecución de ffprobe para obtener los metadatos de un medio."""
+
 import json
 import subprocess
 from pathlib import Path
@@ -7,8 +9,7 @@ from pymedia.logger import Logger
 
 
 def probe(path: Path, logger: Logger) -> dict:
-    """
-    Obtiene metadatos del vídeo a procesar.
+    """Obtiene metadatos del vídeo a procesar.
 
     Args:
         path: Ruta del fichero del que se va a sacar metadatos.
@@ -17,7 +18,6 @@ def probe(path: Path, logger: Logger) -> dict:
     Returns:
         Metadatos del vídeo a procesar o errores si no es un vídeo válido.
     """
-
     cmd = [
         "ffprobe",
         "-v",

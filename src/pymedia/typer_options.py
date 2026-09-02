@@ -1,3 +1,9 @@
+"""Tipos `Annotated` reutilizables para las opciones y argumentos de Typer.
+
+Agrupa los callbacks de validación y las definiciones de argumentos/opciones
+compartidas por los subcomandos, con textos de ayuda localizados.
+"""
+
 from pathlib import Path
 from typing import Annotated
 
@@ -17,7 +23,7 @@ from pymedia.locales import _  # noqa
 
 
 def _show_help(ctx: typer.Context, value: bool) -> None:
-    """Callback para mostar el texto de ayuda en múltiples idiomas."""
+    """Muestra el texto de ayuda del comando en el idioma activo."""
     if value:
         typer.echo(ctx.get_help())
         raise typer.Exit()

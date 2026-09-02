@@ -1,3 +1,5 @@
+"""Subcomando `sheet`: genera hojas de contactos con capturas de varios vídeos."""
+
 import tempfile
 from pathlib import Path
 
@@ -23,6 +25,8 @@ from pymedia.typer_options import (
 
 
 class SheetCommand(BatchCommand[SheetArguments, SheetParameters]):
+    """Comando de CLI que genera una hoja de capturas con cabecera de metadatos."""
+
     name = "sheet"
     help = _("Generates a thumbnail grid sheet with media info header.")
 
@@ -36,6 +40,17 @@ class SheetCommand(BatchCommand[SheetArguments, SheetParameters]):
         debug: DebugOption = False,
         help_: HelpOption = False,
     ) -> None:
+        """Punto de entrada de Typer: construye los argumentos y ejecuta el comando.
+
+        Args:
+            input_list: Lista de vídeos a procesar.
+            output: Ruta de salida para un único vídeo de entrada.
+            output_directory: Directorio de salida para lotes de varios vídeos.
+            overwrite: Política ante un fichero de salida existente.
+            preset_sheet: Estilo de hoja preajustado (FHD, HD o WEB).
+            debug: Habilita el nivel de log DEBUG.
+            help_: Muestra la ayuda del comando.
+        """
         SheetCommand.run(
             args=BaseCommand.build_args(
                 args_cls=SheetArguments,
@@ -45,11 +60,24 @@ class SheetCommand(BatchCommand[SheetArguments, SheetParameters]):
         )
 
     def process_parameters(self, input_single: Path) -> SheetParameters:
+        """Valida y parsea los argumentos en parámetros procesados para un vídeo.
+
+        Args:
+            input_single: Ruta del vídeo a procesar.
+
+        Returns:
+            Parámetros procesados para ese vídeo.
+        """
         return SheetParameters.create(
             args=self.args, logger=self.logger, input_single=input_single
         )
 
     def process_cmd(self, params: SheetParameters) -> None:
+        """Construye y ejecuta los comandos ffmpeg de capturas y cabecera.
+
+        Args:
+            params: Parámetros parseados y validados con el tipo específico del comando.
+        """
         if params.input_single is None:
             raise MissingParameterError(name="input_single")
         if params.media is None:

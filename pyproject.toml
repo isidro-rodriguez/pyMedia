@@ -62,9 +62,12 @@ quote-style = "double"
 indent-style = "space"
 line-ending = "auto"
 
-# Errores básicos, Pyflakes, imports ordenados, pyupgrade y bugbear
+# Errores básicos, Pyflakes, imports ordenados, pyupgrade, bugbear y docstrings
 [tool.ruff.lint]
-select = ["E", "F", "I", "UP", "B"]
+select = ["E", "F", "I", "UP", "B", "D"]
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
 
 # Configuración de Pytest
 [tool.pytest.ini_options]

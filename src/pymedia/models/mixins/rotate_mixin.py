@@ -1,3 +1,5 @@
+"""Mixin de rotación de la imagen (filtro transpose de ffmpeg)."""
+
 from dataclasses import dataclass
 
 from pymedia.data.types import RotateMode
@@ -15,7 +17,11 @@ class RotateMixin:
     rotate: RotateMode | None = None
 
     def create_rotate(self, rotate: RotateMode) -> None:
-        """Crea el atributo rotate."""
+        """Crea el atributo rotate.
+
+        Args:
+            rotate: Ángulo de rotación a aplicar.
+        """
         self.rotate = rotate
 
     def to_rotate_cmd(self) -> str:

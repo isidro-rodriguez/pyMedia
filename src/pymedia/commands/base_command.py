@@ -1,3 +1,10 @@
+"""Clases base de los subcomandos de la CLI de pyMedia.
+
+Define el ciclo de vida común (carga de configuración, parseo de parámetros,
+resolución de sobrescritura, construcción y ejecución de ffmpeg) para comandos
+de fichero único y de procesamiento por lotes.
+"""
+
 import inspect
 import queue
 import subprocess
@@ -90,6 +97,9 @@ class BaseCommand[ArgsT, ParamsT](ABC):
     def resolve_overwrite(params: ParamsT) -> bool:
         """Comprueba si el fichero de salida existe y resuelve la sobrescritura.
 
+        Args:
+            params: Parámetros del comando con el modo de sobrescritura.
+
         Returns:
             `True`: El proceso continuar con normalidad.
             `False`: El proceso termina.
@@ -114,8 +124,7 @@ class BaseCommand[ArgsT, ParamsT](ABC):
         stall_timeout: int,
         command_name: str | None = None,
     ) -> None:
-        """Ejecuta el cmd ffmpeg generado mientras registra la salida para
-        mostrar una barra de progreso.
+        """Ejecuta el cmd ffmpeg generado mientras muestra una barra de progreso.
 
         Args:
             cmd: Comando ffmpeg ya construido, listo para ejecutar.
@@ -228,7 +237,6 @@ class SingleCommand(BaseCommand[ArgsT, ParamsT], ABC):
             args: Argumentos ya tipados específicos del comando.
             debug: Si `True`, habilita el nivel de log de depuración.
         """
-
         config = Config.load()
         cls.logger = Logger.load(debug=debug)
         instance = cls(args, config)
@@ -252,12 +260,20 @@ class BatchCommand(BaseCommand[ArgsT, list[ParamsT]], ABC):
 
     @abstractmethod
     def process_parameters(self, input_single: Path) -> ParamsT:
-        """Validación y parseo de argumentos (input_single) a atributos de comando."""
+        """Validación y parseo de argumentos (input_single) a atributos de comando.
+
+        Args:
+            input_single: Ruta del fichero a procesar.
+        """
         pass
 
     @abstractmethod
     def process_cmd(self, params: ParamsT) -> None:
-        """Preparación y obtención del cmd de ffmpeg."""
+        """Preparación y obtención del cmd de ffmpeg.
+
+        Args:
+            params: Parámetros parseados y validados con el tipo específico del comando.
+        """
         pass
 
     @classmethod

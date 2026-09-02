@@ -1,3 +1,5 @@
+"""Modelo de configuración gráfica de las hojas de capturas (sheet)."""
+
 from dataclasses import dataclass
 from pathlib import Path
 

@@ -1,3 +1,5 @@
+"""Pipeline de argumentos y parámetros del subcomando gif."""
+
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -24,10 +26,14 @@ class GifArguments:
         input_single: Ruta al fichero a procesar.
         output: Ruta del fichero de salida. [defecto: INPUT_SINGLE.gif]
         overwrite: Indica actuación ante fichero de salida ya existente. [defecto: ask]
-        fps: Número de imágenes por segundos. [defecto: 15]
+        fps: Número de imágenes por segundos. [defecto: 12]
+        crop: Especificación de corte, sin parsear.
         scale_to: Dimensión objetivo a re-escalar.
         scale_mode: Modo de re-escalado.
         scale_upscale: Permite el incremento de resolución.
+        hflip: Invierte la imagen horizontalmente.
+        vflip: Invierte la imagen verticalmente.
+        rotate: Ángulo de giro de la imagen.
         timestamp_start: Marca temporal que indica el punto inicial.
         timestamp_end: Marca temporal que indica el punto final.
     """
@@ -67,7 +73,10 @@ class GifParameters(
         output: Ruta absoluta del fichero de salida.
         overwrite: Indica actuación ante fichero de salida ya existente. [defecto: ask]
         fps: Número de imágenes por segundos [defecto: 12].
+        crop_area: Área y coordenada de la zona a preservar de la imagen.
         scale_to: Ancho objetivo para redimensionado. [defecto: 640x360].
+        scale_mode: Modo de escalado (STRETCH, FIT o COVER). [defecto: fit]
+        scale_upscale: Permite escalar por encima del tamaño original.
         hflip: Invierte la imagen horizontalmente, intercambiando izquierda y derecha.
         vflip: Invierte la imagen verticalmente, intercambiando arriba y abajo.
         rotate: Ángulo de giro de la imagen.
@@ -88,7 +97,6 @@ class GifParameters(
         Returns:
             Instancia de GifParameters completamente inicializada.
         """
-
         params = cls(
             overwrite=args.overwrite,
             scale_mode=args.scale_mode,

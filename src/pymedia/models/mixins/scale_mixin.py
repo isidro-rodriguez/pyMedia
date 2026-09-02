@@ -1,3 +1,5 @@
+"""Mixin de redimensionado (filtro scale de ffmpeg)."""
+
 from dataclasses import dataclass
 from enum import Enum
 from pathlib import Path
@@ -58,7 +60,6 @@ class ScaleMixin(_HasSingleMedia):
             MissingMediaPropertyError: Si los metadatos requeridos del vídeo no se
                 pueden obtener.
         """
-
         self.scale_upscale = scale_upscale
         self.scale_to = self._process_scale(
             scale_str=scale_to, media=self.media, logger=logger
@@ -81,8 +82,7 @@ class ScaleMixin(_HasSingleMedia):
     def _process_scale(
         self, scale_str: str, media: Media, logger: Logger
     ) -> Dimensions | None:
-        """Procesa el valor de escala validando el argumento y modificándolo según las
-        opciones elegidas por el usuario."""
+        """Procesa el valor de escala validándolo según las opciones del usuario."""
 
         def _parse_dimensions(value: str) -> Dimensions:
             """Valida la entrada y la devuelve como un objeto de dimensiones."""

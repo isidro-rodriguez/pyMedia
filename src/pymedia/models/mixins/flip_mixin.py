@@ -1,3 +1,5 @@
+"""Mixin de volteo horizontal y vertical de la imagen."""
+
 from dataclasses import dataclass
 
 from pymedia.errors import InvalidParameterError

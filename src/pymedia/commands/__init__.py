@@ -10,7 +10,11 @@ from pymedia.commands.base_command import BaseCommand
 
 
 def register_all(app: typer.Typer) -> None:
-    """Descubre todas las subclases de BaseCommand y las registra en la app."""
+    """Descubre todas las subclases de BaseCommand y las registra en la app.
+
+    Args:
+        app: Instancia de la aplicación Typer donde se registran los comandos.
+    """
     for _, module_name, _ in pkgutil.iter_modules(__path__):
         importlib.import_module(f"{__name__}.{module_name}")
     pending: list[type[BaseCommand]] = list(BaseCommand.__subclasses__())

@@ -137,7 +137,7 @@ def test_msgids_unique_and_translated(lang: str) -> None:
 
 @pytest.mark.parametrize("lang", _LANGUAGES)
 def test_placeholder_parity(lang: str) -> None:
-    """msgid y msgstr tienen los mismos placeholders `%(name)s`."""
+    """Msgid y msgstr tienen los mismos placeholders `%(name)s`."""
     catalog = _read_po(_po_path(lang))
     errores: list[str] = []
 

@@ -17,6 +17,7 @@ ICON = RESOURCES / "icon.ico"
 
 
 def main() -> None:
+    """Compila pyMedia con Nuitka en un único ejecutable `.exe`."""
     cmd = [
         sys.executable,
         "-m",

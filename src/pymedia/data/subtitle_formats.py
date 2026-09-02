@@ -90,3 +90,4 @@ _SUBTITLE_FORMATS: tuple[SubtitleFormatData, ...] = (
 SUBTITLE_FORMATS: Mapping[str, SubtitleFormatData] = MappingProxyType(
     {fmt.codec_name: fmt for fmt in _SUBTITLE_FORMATS}
 )
+"""dict[str, SubtitleFormatData]: Subtítulos indexados por nombre de códec."""

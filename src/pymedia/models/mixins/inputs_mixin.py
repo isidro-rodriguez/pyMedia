@@ -1,3 +1,5 @@
+"""Mixins de entrada de vídeo (individual y por lotes)."""
+
 import subprocess
 from dataclasses import dataclass
 from json import JSONDecodeError
@@ -31,7 +33,7 @@ class InputSingleMixin:
     def create_input_single(self, input_single: Path, logger: Logger) -> None:
         """Crea los atributos input_single y media.
 
-        Attributes
+        Args:
             input_single: Ruta del vídeo a procesar.
             logger: Sistema de registro de mensajes.
 
@@ -76,8 +78,8 @@ class InputListMixin:
     def create_input_list(self, input_list: list[Path], logger: Logger) -> None:
         """Crea los atributos input_list y media_list.
 
-        Attributes
-            input_single: Ruta del vídeo a procesar.
+        Args:
+            input_list: Lista de rutas de los vídeos a procesar.
             logger: Sistema de registro de mensajes.
 
         Raises:
@@ -117,7 +119,7 @@ class InputListMixin:
 
 
 def _load_media(path: Path, logger: Logger) -> Media:
-    """Carga la lista de metadatos de los vídeos a procesar"""
+    """Carga los metadatos de un vídeo validando su extensión."""
 
     def _validate_video_extension() -> None:
         """Valida que la lista de ficheros tengan extensiones de vídeos."""

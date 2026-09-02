@@ -42,11 +42,15 @@ Style: Default,Arial,36,&H00FFFFFF,&H000000FF,&H00000000,&H00000000,0,0,0,0,100,
 [Events]
 Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
 Dialogue: 0,0:00:00.00,0:00:30.00,Default,,0,0,0,,Subtitulo: {text}
-"""
+"""  # noqa: E501
 
 
 def build_subtitle_files(output_dir: Path) -> list[Path]:
-    """Crea los .ass temporales y devuelve sus rutas en orden."""
+    """Crea los .ass temporales y devuelve sus rutas en orden.
+
+    Args:
+        output_dir: Directorio donde crear los ficheros de subtítulos.
+    """
     paths = []
     for filename, text in SUBTITLES.items():
         path = output_dir / filename
@@ -56,7 +60,12 @@ def build_subtitle_files(output_dir: Path) -> list[Path]:
 
 
 def build_ffmpeg_command(sub_paths: list[Path], output: Path) -> list[str]:
-    """Ensambla el comando ffmpeg completo."""
+    """Ensambla el comando ffmpeg completo.
+
+    Args:
+        sub_paths: Rutas de los ficheros `.ass` a incrustar.
+        output: Ruta del fichero de salida.
+    """
     cmd = [
         "ffmpeg",
         "-y",

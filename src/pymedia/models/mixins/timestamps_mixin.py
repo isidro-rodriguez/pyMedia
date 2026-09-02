@@ -1,3 +1,5 @@
+"""Mixins de marcas de tiempo de inicio, fin y listas de marcas."""
+
 import re
 from dataclasses import dataclass
 from datetime import timedelta
@@ -56,6 +58,15 @@ class TimestampStartMixin(_HasSingleMedia):
         return ["-ss", str(self.timestamp_start)]
 
     def validate_timestamp_start_order(self, time: timedelta) -> None:
+        """Comprueba que la marca de inicio sea anterior a la marca indicada.
+
+        Args:
+            time: Marca de tiempo (normalmente el final) con la que comparar.
+
+        Raises:
+            MissingParameterError: Si la marca de inicio no está definida.
+            InvalidParameterError: Si la marca de inicio es posterior o igual.
+        """
         if self.timestamp_start is None:
             raise MissingParameterError(name="timestamp_end")
         if self.timestamp_start >= time:
@@ -103,6 +114,15 @@ class TimestampEndMixin(_HasSingleMedia):
         return ["-to", str(self.timestamp_end)]
 
     def validate_timestamp_end_order(self, time: timedelta) -> None:
+        """Comprueba que la marca indicada sea anterior a la marca de fin.
+
+        Args:
+            time: Marca de tiempo (normalmente el inicio) con la que comparar.
+
+        Raises:
+            MissingParameterError: Si la marca de fin no está definida.
+            InvalidParameterError: Si la marca de fin es anterior o igual.
+        """
         if self.timestamp_end is None:
             raise MissingParameterError(name="timestamp_end")
         if time >= self.timestamp_end:
@@ -134,7 +154,6 @@ class TimestampAtMixin(_HasSingleMedia):
         Raises:
             InvalidArgumentError: Si el str no tiene un formato válido.
         """
-
         times: list[timedelta] = []
         try:
             times_array = times_str.split(",")

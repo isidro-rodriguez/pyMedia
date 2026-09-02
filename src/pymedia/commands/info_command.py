@@ -1,3 +1,5 @@
+"""Subcomando `info`: muestra los metadatos de un vídeo en una tabla Rich."""
+
 from pathlib import Path
 
 from rich.console import Group
@@ -24,6 +26,8 @@ from pymedia.utils import parse_quantity, parse_size, parse_timedelta
 
 
 class InfoCommand(SingleCommand[InfoArguments, InfoParameters]):
+    """Comando de CLI que imprime los metadatos de un vídeo de entrada."""
+
     name = "info"
 
     @staticmethod
@@ -32,6 +36,13 @@ class InfoCommand(SingleCommand[InfoArguments, InfoParameters]):
         debug: DebugOption = False,
         help_: HelpOption = False,
     ) -> None:
+        """Punto de entrada de Typer: construye los argumentos y ejecuta el comando.
+
+        Args:
+            input_single: Vídeo del que se muestran los metadatos.
+            debug: Habilita el nivel de log DEBUG.
+            help_: Muestra la ayuda del comando.
+        """
         InfoCommand.run(
             args=InfoCommand.build_args(
                 args_cls=InfoArguments,
@@ -41,9 +52,11 @@ class InfoCommand(SingleCommand[InfoArguments, InfoParameters]):
         )
 
     def process_parameters(self) -> None:
+        """Valida y parsea los argumentos en parámetros procesados."""
         self.params = InfoParameters.create(args=self.args, logger=self.logger)
 
     def process_cmd(self) -> None:
+        """Construye y muestra el panel Rich con los metadatos del vídeo."""
         if self.params.input_single is None:
             raise MissingParameterError(name="input_single")
         if self.params.media is None:
@@ -58,6 +71,12 @@ class InfoCommand(SingleCommand[InfoArguments, InfoParameters]):
 
     @classmethod
     def run(cls, args: InfoArguments, debug: bool) -> None:
+        """Ejecuta el flujo del comando Info sin generar comandos ffmpeg.
+
+        Args:
+            args: Argumentos tipados del comando Info.
+            debug: Habilita el nivel de log DEBUG.
+        """
         config = Config.load()
         cls.logger = Logger.load(debug=debug)
         instance = cls(args, config)
@@ -71,6 +90,7 @@ def _build_info_panel(media: Media, single_input: Path, locale: str = "en") -> P
     na = _("-")
 
     def _build_general_table() -> Table:
+        """Construye la tabla de datos generales del vídeo."""
         table = Table(title=f"📁 {_('General')}", show_header=True, expand=True)
         table.add_column(_("Field"), style="bold", ratio=1)
         table.add_column(_("Value"), ratio=3)
@@ -85,6 +105,7 @@ def _build_info_panel(media: Media, single_input: Path, locale: str = "en") -> P
         return table
 
     def _build_video_table(video: Video) -> Table:
+        """Construye la tabla de metadatos de la pista de vídeo."""
         table = Table(title=f"🎬 {_('Video')}", show_header=True, expand=True)
         table.add_column(_("Field"), style="bold", ratio=1)
         table.add_column(_("Value"), ratio=3)
@@ -108,6 +129,7 @@ def _build_info_panel(media: Media, single_input: Path, locale: str = "en") -> P
         return table
 
     def _build_audio_table(audio: list[Audio]) -> Table:
+        """Construye la tabla de metadatos de las pistas de audio."""
         table = Table(title=f"🎵 {_('Audio')}", expand=True)
         for column in (
             _("Codec"),
@@ -126,6 +148,7 @@ def _build_info_panel(media: Media, single_input: Path, locale: str = "en") -> P
         return table
 
     def _build_subtitles_table(subtitles: list[Subtitle]) -> Table:
+        """Construye la tabla de metadatos de las pistas de subtítulos."""
         table = Table(title=f"💬 {_('Subtitles')}", expand=True)
         for column in (
             _("Language"),

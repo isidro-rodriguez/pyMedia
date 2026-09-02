@@ -1,3 +1,9 @@
+"""Punto de entrada de la CLI de pyMedia.
+
+Construye la aplicación Typer, registra los subcomandos y configura la codificación
+de la salida estándar en Windows.
+"""
+
 import io
 import sys
 
@@ -25,6 +31,7 @@ app = typer.Typer(
 def main(
     help_: HelpOption = False,  # noqa
 ) -> None:
+    """Muestra la ayuda global de la aplicación cuando se invoca con `--help`."""
     pass
 
 

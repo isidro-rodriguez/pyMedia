@@ -20,11 +20,19 @@ class ThumbnailCmd:
     """Compone los comandos ffmpeg para generar thumbnails."""
 
     def __init__(self, params: ThumbnailParameters) -> None:
+        """Inicializa el generador y resuelve el modo de thumbnail.
+
+        Args:
+            params: Parámetros procesados del subcomando thumbnail.
+        """
         self._params = params
         self._mode = self._resolve_mode()
 
     def create(self, timestamp: timedelta | None = None) -> list[str]:
         """Compone los comandos ffmpeg según el modo de thumbnail solicitado.
+
+        Args:
+            timestamp: Marca de tiempo del fotograma a capturar (modo TIMESTAMP).
 
         Returns:
             Lista de comandos ffmpeg listos para consumo: uno por cada
@@ -49,6 +57,7 @@ class ThumbnailCmd:
         return self._build_cmd(output=output)
 
     def _resolve_mode(self) -> _ThumbnailMode:
+        """Establece el modo de obtención de imágenes para mayor claridad de módulo."""
         params = self._params
         if params.timestamp_at is not None:
             return _ThumbnailMode.TIMESTAMP
@@ -95,7 +104,7 @@ class ThumbnailCmd:
         output: Path,
         timestamp: timedelta | None = None,
     ) -> list[str]:
-        # Ensambla un único comando ffmpeg para el modo indicado
+        """Ensambla un único comando ffmpeg para el modo indicado."""
         params = self._params
         cmd: list[str] = ["ffmpeg", "-y"]
 

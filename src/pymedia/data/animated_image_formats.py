@@ -1,3 +1,5 @@
+"""Datos estáticos de formatos de imagen animada soportados."""
+
 from collections.abc import Mapping
 from dataclasses import dataclass
 from types import MappingProxyType
@@ -58,3 +60,4 @@ _ANIMATED_IMAGE_FORMATS: tuple[AnimatedImageFormatData, ...] = (
 ANIMATED_IMAGE_FORMATS: Mapping[str, AnimatedImageFormatData] = MappingProxyType(
     {fmt.name: fmt for fmt in _ANIMATED_IMAGE_FORMATS}
 )
+"""dict[str, AnimatedImageFormatData]: Imágenes animadas indexadas por nombre."""
