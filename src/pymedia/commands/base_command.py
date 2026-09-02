@@ -119,29 +119,44 @@ class BaseCommand[ArgsT, ParamsT](ABC):
     @staticmethod
     def run_ffmpeg(
         cmd: list[str],
-        progress_time: timedelta,
         description: str,
         stall_timeout: int,
         command_name: str,
+        progress_time: timedelta | None = None,
+        total_steps: int | None = None,
     ) -> None:
         """Ejecuta el cmd ffmpeg generado mientras muestra una barra de progreso.
 
+        El progreso se reporta de tres formas posibles, según los parámetros
+        recibidos: por tiempo (`progress_time`, vía `out_time_ms` en stdout),
+        por pasos (`total_steps`, contando eventos `showinfo` en stderr) o de
+        forma indeterminada (barra pulsante) si no se aporta ninguno.
+
         Args:
             cmd: Comando ffmpeg ya construido, listo para ejecutar.
-            progress_time: Duración del tramo de vídeo a procesar.
             description: Mensaje ya traducido a mostrar junto a la barra.
             stall_timeout: Tiempo de espera en caso de comando ffmpeg bloqueado.
             command_name: Nombre interno del comando para los mensajes de error.
+            progress_time: Duración del tramo de vídeo a procesar.
+            total_steps: Número de pasos esperados de `showinfo` por stderr.
 
         Raises:
             CommandError: Si falla el cmd o se bloquea.
         """
 
         def _read_stdout() -> None:
-            """Recepción de la evolución del comando ffmpeg."""
+            """Recepción de la evolución del comando ffmpeg vía -progress."""
             for line_ in proc.stdout:  # type: ignore[union-attr]
-                lines.put(line_)
-            lines.put(None)  # sentinel: fin de stream
+                events.put(("stdout", line_))
+            events.put(("stdout", None))  # sentinel: fin de stream
+
+        def _read_stderr() -> None:
+            """Almacena stderr y emite eventos showinfo para el progreso por pasos."""
+            for line_ in proc.stderr:  # type: ignore[union-attr]
+                stderr_lines.append(line_)
+                if total_steps is not None and "pts_time:" in line_:
+                    events.put(("stderr", line_))
+            events.put(("stderr", None))  # sentinel: fin de stream
 
         def _abort() -> None:
             """Mata el proceso si no se ha recibido avance en el tiempo establecido."""
@@ -163,41 +178,45 @@ class BaseCommand[ArgsT, ParamsT](ABC):
 
         assert proc.stdout is not None
         assert proc.stderr is not None
-        stderr = proc.stderr
-
-        # Drenar stderr en un hilo aparte: si nadie lo lee, su buffer se
-        # llena y ffmpeg se bloquea -> deadlock con el bucle de stdout.
         stderr_lines: list[str] = []
-        stderr_thread = threading.Thread(
-            target=lambda: stderr_lines.extend(stderr), daemon=True
-        )
-        stderr_thread.start()
-
-        # Cola + hilo lector: permite aplicar timeout de "sin progreso"
-        # sin bloquear indefinidamente en el for de stdout.
-        lines: queue.Queue[str | None] = queue.Queue()
+        events: queue.Queue[tuple[str, str | None]] = queue.Queue()
 
         stdout_thread = threading.Thread(target=_read_stdout, daemon=True)
+        stderr_thread = threading.Thread(target=_read_stderr, daemon=True)
         stdout_thread.start()
+        stderr_thread.start()
 
         with Progress() as progress:
-            progress_seconds = progress_time.total_seconds()
-            task = progress.add_task(description=description, total=progress_seconds)
+            if progress_time is not None:
+                total: float | None = progress_time.total_seconds()
+            elif total_steps is not None:
+                total = float(total_steps)
+            else:
+                total = None
+            task = progress.add_task(description=description, total=total)
 
-            while True:
+            pending_streams = {"stdout", "stderr"}
+            completed_steps = 0
+            while pending_streams:
                 try:
-                    line = lines.get(timeout=stall_timeout)
+                    source, line = events.get(timeout=stall_timeout)
                 except queue.Empty:
                     _abort()
+
                 if line is None:
-                    break
-                if line.startswith("out_time_ms="):
+                    pending_streams.discard(source)
+                    continue
+
+                if progress_time is not None and line.startswith("out_time_ms="):
                     value = line.partition("=")[2].strip()
                     if value.isdigit():
                         progress.update(task_id=task, completed=int(value) / 1_000_000)
+                elif total_steps is not None and source == "stderr":
+                    completed_steps += 1
+                    progress.update(task_id=task, completed=completed_steps)
 
-            if progress_seconds is not None:
-                progress.update(task_id=task, completed=progress_seconds)
+            if total is not None:
+                progress.update(task_id=task, completed=total)
 
         proc.wait()
         stderr_thread.join()

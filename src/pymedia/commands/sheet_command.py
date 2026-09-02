@@ -103,15 +103,14 @@ class SheetCommand(BatchCommand[SheetArguments, SheetParameters]):
 
             self.run_ffmpeg(
                 cmd=snapshots_cmd,
-                progress_time=params.media.duration,
                 description=_("Generating sheet snapshots"),
                 stall_timeout=self.config.app.stall_timeout,
                 command_name=self.name,
+                total_steps=sheet_instance.capture_count,
             )
 
             self.run_ffmpeg(
                 cmd=header_cmd,
-                progress_time=params.media.duration,
                 description=_("Generating sheet header"),
                 stall_timeout=self.config.app.stall_timeout,
                 command_name=self.name,

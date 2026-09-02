@@ -74,6 +74,14 @@ class SheetCmd:
 
         return header_cmd
 
+    @property
+    def capture_count(self) -> int:
+        """Número total de miniaturas (capturas) que compondrán la cuadrícula."""
+        preset = self.params.preset_sheet
+        if preset is None:
+            raise MissingParameterError(name="preset")
+        return preset.columns * preset.rows
+
     @staticmethod
     def _escape_drawtext(text: str) -> str:
         """Escapa caracteres especiales para el filtro drawtext de FFmpeg."""
@@ -166,7 +174,7 @@ class SheetCmd:
             timestamp_str = parse_timedelta(seconds)
 
             filter_complex_parts.append(
-                f"[s{i}]select='eq(n\\,{frame_n})',"
+                f"[s{i}]select='eq(n\\,{frame_n})',showinfo,"
                 f"scale={params.thumb_width}:-1,"
                 f"{_build_timestamp_drawtext()},"
                 f"{_build_thumb_pad()}[t{r}{c}]"
