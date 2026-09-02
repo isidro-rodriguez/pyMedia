@@ -10,6 +10,7 @@ import queue
 import subprocess
 import threading
 from abc import ABC, abstractmethod
+from datetime import timedelta
 from pathlib import Path
 from typing import TypeVar
 
@@ -17,11 +18,10 @@ import typer
 from rich.progress import Progress
 
 from pymedia.data.types import OverwriteMode
-from pymedia.errors import CommandError
+from pymedia.errors import CommandError, MissingMediaPropertyError
 from pymedia.locales import _  # noqa
 from pymedia.logger import Logger
 from pymedia.models.config import Config
-from pymedia.models.media import Media
 
 ArgsT = TypeVar("ArgsT")
 ParamsT = TypeVar("ParamsT")
@@ -119,16 +119,16 @@ class BaseCommand[ArgsT, ParamsT](ABC):
     @staticmethod
     def run_ffmpeg(
         cmd: list[str],
-        media: Media,
+        progress_time: timedelta,
         description: str,
         stall_timeout: int,
-        command_name: str | None = None,
+        command_name: str,
     ) -> None:
         """Ejecuta el cmd ffmpeg generado mientras muestra una barra de progreso.
 
         Args:
             cmd: Comando ffmpeg ya construido, listo para ejecutar.
-            media: Datos del vídeo, usados para conocer la duración total.
+            progress_time: Duración del tramo de vídeo a procesar.
             description: Mensaje ya traducido a mostrar junto a la barra.
             stall_timeout: Tiempo de espera en caso de comando ffmpeg bloqueado.
             command_name: Nombre interno del comando para los mensajes de error.
@@ -181,10 +181,8 @@ class BaseCommand[ArgsT, ParamsT](ABC):
         stdout_thread.start()
 
         with Progress() as progress:
-            total_seconds = (
-                media.duration.total_seconds() if media.duration is not None else None
-            )
-            task = progress.add_task(description=description, total=total_seconds)
+            progress_seconds = progress_time.total_seconds()
+            task = progress.add_task(description=description, total=progress_seconds)
 
             while True:
                 try:
@@ -198,14 +196,42 @@ class BaseCommand[ArgsT, ParamsT](ABC):
                     if value.isdigit():
                         progress.update(task_id=task, completed=int(value) / 1_000_000)
 
-            if total_seconds is not None:
-                progress.update(task_id=task, completed=total_seconds)
+            if progress_seconds is not None:
+                progress.update(task_id=task, completed=progress_seconds)
 
         proc.wait()
         stderr_thread.join()
 
         if proc.returncode != 0:
             raise CommandError(msg=_("FFmpeg command failed during execution."))
+
+    @staticmethod
+    def resolve_progress_time(
+        video_duration: timedelta, start: timedelta | None, end: timedelta | None
+    ) -> timedelta:
+        """Resuelve la duración del tramo de vídeo a procesar.
+
+        Calcula la duración del tramo de vídeo a procesar definido por los flags
+        `--start`, `--end` y `media.duration` para que muestre correctamente el avance
+        la barra de progreso de Rich.
+
+        Args:
+            video_duration: Duración del vídeo a procesar.
+            start: String indicando punto inicial.
+            end: String indicando punto final.
+
+        Returns:
+            Duración del tramo de vídeo a procesar.
+        """
+        if video_duration is None:
+            raise MissingMediaPropertyError(name="duration")
+        if start is not None and end is not None:
+            return end - start
+        if start is not None:
+            return video_duration - start
+        if end is not None:
+            return video_duration - end
+        return video_duration
 
 
 class SingleCommand(BaseCommand[ArgsT, ParamsT], ABC):

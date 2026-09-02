@@ -49,15 +49,16 @@ class ScaleMixin(_HasSingleMedia):
         """Establece los parámetros de redimensionado.
 
         Args:
-            logger: Servicio de logueo.
+            logger: Sistema de registro de mensajes.
             scale_upscale: Permite el incremento de dimensiones.
             scale_to: Dimensión objetivo, en píxeles, o `None` si no se cambia.
 
         Raises:
-            InvalidResizeParametersError: Si se especifican tanto la altura como el
-                ancho, pero sin permitir incremento de resolución o cambio de
-                proporciones.
-            MissingMediaPropertyError: Si los metadatos requeridos del vídeo no se
+            InvalidArgumentError: Si la dimensión objetivo no tiene un formato
+                válido (se esperaba WIDTHxHEIGHT).
+            InvalidParameterError: Si la dimensión objetivo no es par o el modo
+                de escalado no tiene un valor válido.
+            MissingMediaPropertyError: Si las dimensiones del vídeo no se
                 pueden obtener.
         """
         self.scale_upscale = scale_upscale

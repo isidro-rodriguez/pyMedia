@@ -12,7 +12,7 @@ class InfoArguments:
     """Argumentos cargados por Typer para el comando Info.
 
     Attributes:
-        input_single: Ruta al fichero a procesar.
+        input_single: Ruta del fichero a procesar.
     """
 
     input_single: Path
@@ -25,7 +25,7 @@ class InfoParameters(
     """Parámetros utilizados por el comando Info.
 
     Attributes:
-        input_single: Ruta del vídeo a procesar.
+        input_single: Ruta del fichero de vídeo a procesar.
         media: Metadatos del vídeo de entrada ya resuelto y validado.
     """
 
@@ -35,7 +35,7 @@ class InfoParameters(
 
         Args:
             args: Argumentos crudos recibidos desde la CLI.
-            logger: Logger para trazas de progreso.
+            logger: Sistema de registro de mensajes.
 
         Returns:
             Instancia de InfoParameters completamente inicializada.

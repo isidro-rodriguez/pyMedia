@@ -131,5 +131,13 @@ class ThumbnailCmd:
         else:
             cmd.extend(["-fps_mode", "vfr"])
 
-        cmd.extend([*params.to_image_quality_cmd().compression, str(output)])
+        cmd.extend(
+            [
+                *params.to_image_quality_cmd().compression,
+                "-progress",
+                "pipe:1",
+                "-nostats",
+                str(output),
+            ]
+        )
         return cmd

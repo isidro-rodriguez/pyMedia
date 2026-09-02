@@ -8,6 +8,7 @@ from pymedia.data.types import OverwriteMode, PresetsSheetMode
 from pymedia.errors import (
     CommandGenerationError,
     MissingMediaError,
+    MissingMediaPropertyError,
     MissingParameterError,
 )
 from pymedia.ffmpeg.sheet_cmd import SheetCmd
@@ -63,10 +64,10 @@ class SheetCommand(BatchCommand[SheetArguments, SheetParameters]):
         """Valida y parsea los argumentos en parámetros procesados para un vídeo.
 
         Args:
-            input_single: Ruta del vídeo a procesar.
+            input_single: Ruta del fichero de vídeo a procesar.
 
         Returns:
-            Parámetros procesados para ese vídeo.
+            Parámetros procesados y validados para el comando.
         """
         return SheetParameters.create(
             args=self.args, logger=self.logger, input_single=input_single
@@ -76,12 +77,14 @@ class SheetCommand(BatchCommand[SheetArguments, SheetParameters]):
         """Construye y ejecuta los comandos ffmpeg de capturas y cabecera.
 
         Args:
-            params: Parámetros parseados y validados con el tipo específico del comando.
+            params: Parámetros procesados y validados para el comando.
         """
         if params.input_single is None:
             raise MissingParameterError(name="input_single")
         if params.media is None:
             raise MissingMediaError(path=str(params.input_single))
+        if params.media.duration is None:
+            raise MissingMediaPropertyError(name="media.duration")
 
         with tempfile.TemporaryDirectory() as tmp_dir:
             tile_tmp = Path(tmp_dir) / "tile_tmp.jpg"
@@ -92,15 +95,15 @@ class SheetCommand(BatchCommand[SheetArguments, SheetParameters]):
 
             if snapshots_cmd is None:
                 raise CommandGenerationError(name="generate_sheet_cmd")
-            self.logger.debug(_("FFmpeg command: %(cmd)s"), cmd=snapshots_cmd)
+            self.logger.debug(msg=_("FFmpeg command: %(cmd)s"), cmd=snapshots_cmd)
 
             if header_cmd is None:
                 raise CommandGenerationError(name="generate_header_cmd")
-            self.logger.debug(_("FFmpeg command: %(cmd)s"), cmd=header_cmd)
+            self.logger.debug(msg=_("FFmpeg command: %(cmd)s"), cmd=header_cmd)
 
             self.run_ffmpeg(
                 cmd=snapshots_cmd,
-                media=params.media,
+                progress_time=params.media.duration,
                 description=_("Generating sheet snapshots"),
                 stall_timeout=self.config.app.stall_timeout,
                 command_name=self.name,
@@ -108,12 +111,12 @@ class SheetCommand(BatchCommand[SheetArguments, SheetParameters]):
 
             self.run_ffmpeg(
                 cmd=header_cmd,
-                media=params.media,
+                progress_time=params.media.duration,
                 description=_("Generating sheet header"),
                 stall_timeout=self.config.app.stall_timeout,
                 command_name=self.name,
             )
 
         self.logger.info(
-            _("Metadata generated successfully: %(output)s"), output=params.output
+            msg=_("Metadata generated successfully: %(output)s"), output=params.output
         )

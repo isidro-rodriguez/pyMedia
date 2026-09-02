@@ -176,7 +176,7 @@ def _build_info_panel(media: Media, single_input: Path, locale: str = "en") -> P
         sections.append(_build_subtitles_table(media.subtitles))
 
     return Panel(
-        Group(*sections),
+        renderable=Group(*sections),
         title=_("Metadata"),
         border_style="cyan",
         width=panel_width,

@@ -3,7 +3,7 @@
 ## Core Principles
 
 - Readable, straightforward code.
-- Reuse well-known standard-library or lightweight third-party tools.
+- Reuse well-known standard-library.
 - Avoid unnecessary complexity.
 
 ## Code Style

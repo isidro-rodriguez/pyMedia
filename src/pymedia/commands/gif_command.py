@@ -5,6 +5,7 @@ from pymedia.data.types import OverwriteMode, ScaleMode
 from pymedia.errors import (
     CommandGenerationError,
     MissingMediaError,
+    MissingMediaPropertyError,
     MissingParameterError,
 )
 from pymedia.ffmpeg.gif_cmd import GifCmd
@@ -63,7 +64,7 @@ class GifCommand(SingleCommand[GifArguments, GifParameters]):
             timestamp_end: Marca temporal del punto final.
             fps: Imágenes por segundo del GIF.
             crop: Área a recortar (WIDTH,HEIGHT,X,Y).
-            rotate: Ángulo de rotación (90, 180 o 270).
+            rotate: Ángulo ortogonal con el que se va a rotar la imagen (90, 180 o 270).
             scale_to: Dimensión objetivo (WIDTHxHEIGHT).
             scale_mode: Modo de escalado (STRETCH, FIT o COVER).
             scale_upscale: Permite escalar por encima del tamaño original.
@@ -90,6 +91,9 @@ class GifCommand(SingleCommand[GifArguments, GifParameters]):
             raise MissingParameterError(name="input_single")
         if self.params.media is None:
             raise MissingMediaError(path=str(self.params.input_single))
+        if self.params.media.duration is None:
+            raise MissingMediaPropertyError(name="media.duration")
+
         cmd = GifCmd(params=self.params).create()
         if cmd is None:
             raise CommandGenerationError(name=self.name)
@@ -97,9 +101,15 @@ class GifCommand(SingleCommand[GifArguments, GifParameters]):
 
         self.logger.debug(_("FFmpeg command: %(cmd)s"), cmd=self.cmd)
 
+        progress_time = self.resolve_progress_time(
+            video_duration=self.params.media.duration,
+            start=self.params.timestamp_start,
+            end=self.params.timestamp_end,
+        )
+
         self.run_ffmpeg(
             cmd=self.cmd,
-            media=self.params.media,
+            progress_time=progress_time,
             description=_("Generating GIF"),
             stall_timeout=self.config.app.stall_timeout,
             command_name=self.name,

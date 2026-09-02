@@ -65,13 +65,14 @@ class OutputSingleMixin(_HasSingleMedia):
             output: Ruta de salida explícita, si se ha indicado.
 
         Raises:
-            MissingMediaError: Si se indica output sin proporcionar media.
-            MissingMediaPropertyError: Si no se pudo obtener un name relevante.
+            MissingMediaError: Si no se pudieron obtener los metadatos del fichero.
+            MissingMediaPropertyError: Si no se pudo obtener la propiedad
+                `height` del vídeo.
             PermissionDeniedError: Si el usuario no tiene permisos para crear el
                 directorio destino.
-            InvalidNameError: Si el nombre tiene caracteres inválidos para Windows.
-            InvalidContainerError: Si el container no corresponde al códec usado.
-            InvalidContainerTypeError: Si el container no corresponde al tipo de medio.
+            InvalidArgumentError: Si el nombre tiene caracteres inválidos para Windows.
+            InvalidContainerError: Si el contenedor no corresponde al códec usado.
+            InvalidContainerTypeError: Si el contenedor no corresponde al tipo de medio.
         """
         self.output = _process_output(
             input_single=self.input_single,
@@ -111,10 +112,10 @@ class OutputBatchMixin(_HasBatchMedia):
         """Procesa y asigna la ruta o directorio de salida para un lote de entradas.
 
         Args:
-            input_single: Ruta al fichero a procesar.
+            input_single: Ruta del fichero de vídeo a procesar.
             input_counter: Número de ficheros a procesar para validar si se puede
                 indicar parámetro output.
-            media: Metadatos del fichero a procesar.
+            media: Metadatos del vídeo a procesar.
             media_type: Tipo de medio de salida esperado.
             output: Ruta de salida explícita, válida solo para lotes de un
                 único fichero.
@@ -124,17 +125,17 @@ class OutputBatchMixin(_HasBatchMedia):
             extension: Extensión a forzar en el fichero de salida.
 
         Raises:
-            ConflictiveOutputParametersError: Si se indican output y
+            ExclusiveOptionsError: Si se indican output y
                 output_directory a la vez.
-            ConflictiveOutputAmmountParameterError: Si se indica output con más de un
+            OptionError: Si se indica output con más de un
                 fichero de entrada.
-            MissingMediaError: Si se indica output sin proporcionar media.
+            MissingMediaError: Si no se pudieron obtener los metadatos del fichero.
             MissingMediaPropertyError: Si no se pudo obtener un name relevante.
             PermissionDeniedError: Si el usuario no tiene permisos para crear el
                 directorio destino.
-            InvalidNameError: Si el nombre tiene caracteres inválidos para Windows.
-            InvalidContainerError: Si el container no corresponde al códec usado.
-            InvalidContainerTypeError: Si el container no corresponde al tipo de medio.
+            InvalidArgumentError: Si el nombre tiene caracteres inválidos para Windows.
+            InvalidContainerError: Si el contenedor no corresponde al códec usado.
+            InvalidContainerTypeError: Si el contenedor no corresponde al tipo de medio.
         """
         if output is not None and output_directory is not None:
             raise ExclusiveOptionsError(options=["output", "output_directory"])

@@ -21,10 +21,10 @@ class InputSingleMixin:
 
     Attributes:
         input_single: Ruta del fichero de vídeo a procesar.
-        media: Metadatos del vídeo.
+        media: Metadatos del vídeo de entrada ya resuelto y validado.
 
     Raises:
-        MissingMediaError: Si metadatos no obtenidos.
+        MissingMediaError: Si no se pudieron obtener los metadatos del fichero.
     """
 
     input_single: Path | None = None
@@ -34,26 +34,26 @@ class InputSingleMixin:
         """Crea los atributos input_single y media.
 
         Args:
-            input_single: Ruta del vídeo a procesar.
+            input_single: Ruta del fichero de vídeo a procesar.
             logger: Sistema de registro de mensajes.
 
         Raises:
-            MissingMediaError: Si metadatos no obtenidos.
-            MissingParameterError: Si ruta del fichero no obtenido.
-            InvalidContainerTypeError: Si container no válido.
+            MissingMediaError: Si no se pudieron obtener los metadatos del fichero.
+            MissingParameterError: Si no se pudo obtener el parámetro `input_single`.
+            InvalidContainerTypeError: Si el contenedor no corresponde al tipo de medio.
         """
         input_single = input_single.absolute()
         self.input_single = input_single
         self.media = _load_media(path=input_single, logger=logger)
 
     def to_input_single_cmd(self) -> list[str]:
-        """Devuelve lista de str lista para consumo ffmpeg.
+        """Devuelve la lista de parámetros lista para el consumo de ffmpeg.
 
         Returns:
-            Lista de str lista para consumo ffmpeg.
+            Lista de parámetros lista para el consumo de ffmpeg.
 
         Raises:
-            MissingParameterError: Si parámetro "input_single" no obtenido.
+            MissingParameterError: Si no se pudo obtener el parámetro `input_single`.
         """
         if self.input_single is None:
             raise MissingParameterError(name="input_single")
@@ -66,10 +66,10 @@ class InputListMixin:
 
     Attributes:
         input_list: Lista de rutas de los ficheros de vídeo a procesar.
-        media_list: Lista de metadatos de los vídeos.
+        media_list: Lista de metadatos de los vídeos a procesar.
 
     Raises:
-        MissingMediaError: Si metadatos no obtenidos.
+        MissingMediaError: Si no se pudieron obtener los metadatos del fichero.
     """
 
     input_list: list[Path] | None = None
@@ -79,13 +79,13 @@ class InputListMixin:
         """Crea los atributos input_list y media_list.
 
         Args:
-            input_list: Lista de rutas de los vídeos a procesar.
+            input_list: Lista de rutas de los ficheros de vídeo a procesar.
             logger: Sistema de registro de mensajes.
 
         Raises:
-            MissingMediaError: Si metadatos no obtenidos.
-            MissingParameterError: Si ruta del fichero no obtenido.
-            InvalidContainerTypeError: Si container no válido.
+            MissingMediaError: Si no se pudieron obtener los metadatos del fichero.
+            MissingParameterError: Si no se pudo obtener el parámetro `input_list`.
+            InvalidContainerTypeError: Si el contenedor no corresponde al tipo de medio.
         """
         inputs: list[Path] = []
         medias: list[Media] = []
@@ -99,13 +99,13 @@ class InputListMixin:
         self.media_list = medias
 
     def to_input_list_cmd(self) -> list[str]:
-        """Devuelve lista de str lista para consumo ffmpeg.
+        """Devuelve la lista de parámetros lista para el consumo de ffmpeg.
 
         Returns:
-            Lista de inputs lista para consumo ffmpeg.
+            Lista de parámetros lista para el consumo de ffmpeg.
 
         Raises:
-            MissingParameterError: Si parámetro "input_list" no obtenido.
+            MissingParameterError: Si no se pudo obtener el parámetro `input_list`.
         """
         if self.input_list is None:
             raise MissingParameterError(name="input_list")

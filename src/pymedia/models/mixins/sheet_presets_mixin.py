@@ -84,7 +84,7 @@ _PRESETS: dict[str, PresetSheet] = {
 class SheetPresetsMixin:
     """Establece el estilo preajustado indicado por el usuario.
 
-    Parameters:
+    Attributes:
         preset_sheet: Estilo de hoja preajustado.
     """
 

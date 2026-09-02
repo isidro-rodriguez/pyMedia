@@ -191,6 +191,9 @@ class SheetCmd:
             "-frames:v",
             "1",
             *params.to_image_quality_cmd().compression,
+            "-progress",
+            "pipe:1",
+            "-nostats",
             str(output),
         ]
 

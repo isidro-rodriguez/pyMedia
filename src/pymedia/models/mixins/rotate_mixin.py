@@ -8,10 +8,10 @@ from pymedia.errors import MissingParameterError
 
 @dataclass(kw_only=True)
 class RotateMixin:
-    """Mixin para las rotar la imagen de un vídeo o captura.
+    """Mixin para la rotación de la imagen de un vídeo o captura.
 
     Attributes:
-        rotate: Ángulo de rotación que se va a someter el vídeo.
+        rotate: Ángulo ortogonal con el que se va a rotar la imagen.
     """
 
     rotate: RotateMode | None = None
@@ -20,7 +20,7 @@ class RotateMixin:
         """Crea el atributo rotate.
 
         Args:
-            rotate: Ángulo de rotación a aplicar.
+            rotate: Ángulo ortogonal con el que se va a rotar la imagen.
         """
         self.rotate = rotate
 

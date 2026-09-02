@@ -3,7 +3,7 @@
 from dataclasses import dataclass
 from pathlib import Path
 
-from pymedia.data.types import OutputMediaType, OverwriteMode, RotateMode, ScaleMode
+from pymedia.data.types import OutputMediaType, RotateMode, ScaleMode
 from pymedia.logger import Logger
 from pymedia.models.mixins.crop_mixin import CropMixin
 from pymedia.models.mixins.flip_mixin import FlipMixin
@@ -16,31 +16,31 @@ from pymedia.models.mixins.timestamps_mixin import (
     TimestampEndMixin,
     TimestampStartMixin,
 )
+from pymedia.models.pipeline.base_pipeline import BaseArguments, BaseParameters
 
 
 @dataclass(frozen=True, kw_only=True, slots=True)
-class GifArguments:
+class GifArguments(BaseArguments):
     """Argumentos cargados por Typer para el comando GIF.
 
     Attributes:
-        input_single: Ruta al fichero a procesar.
-        output: Ruta del fichero de salida. [defecto: INPUT_SINGLE.gif]
-        overwrite: Indica actuación ante fichero de salida ya existente. [defecto: ask]
-        fps: Número de imágenes por segundos. [defecto: 12]
+        input_single: Ruta del fichero a procesar.
+        output: Ruta del fichero de salida deseada, o None para usar la
+            derivada de la entrada.
+        overwrite: Política ante conflicto de salida ya existente. [defecto: ask]
+        fps: Imágenes por segundo del GIF. [defecto: 12]
         crop: Especificación de corte, sin parsear.
-        scale_to: Dimensión objetivo a re-escalar.
-        scale_mode: Modo de re-escalado.
-        scale_upscale: Permite el incremento de resolución.
-        hflip: Invierte la imagen horizontalmente.
-        vflip: Invierte la imagen verticalmente.
-        rotate: Ángulo de giro de la imagen.
-        timestamp_start: Marca temporal que indica el punto inicial.
-        timestamp_end: Marca temporal que indica el punto final.
+        scale_to: Dimensión objetivo, en píxeles, sin parsear.
+        scale_mode: Política de escalado del vídeo o imagen. [defecto: fit]
+        scale_upscale: Permite el incremento de dimensiones.
+        hflip: Invierte la imagen horizontalmente, intercambiando izquierda y derecha.
+        vflip: Invierte la imagen verticalmente, intercambiando arriba y abajo.
+        rotate: Ángulo ortogonal con el que se va a rotar la imagen.
+        timestamp_start: Marca de tiempo que indica el punto inicial, sin parsear.
+        timestamp_end: Marca de tiempo que indica el punto final, sin parsear.
     """
 
     input_single: Path
-    output: Path | None
-    overwrite: OverwriteMode
     fps: int
     crop: str | None
     scale_to: str
@@ -55,6 +55,7 @@ class GifArguments:
 
 @dataclass(kw_only=True)
 class GifParameters(
+    BaseParameters,
     InputSingleMixin,
     OutputSingleMixin,
     FpsGifMixin,
@@ -68,23 +69,21 @@ class GifParameters(
     """Parámetros utilizados por el comando GIF.
 
     Attributes:
-        input_single: Ruta del vídeo a procesar.
+        input_single: Ruta del fichero de vídeo a procesar.
         media: Metadatos del vídeo de entrada ya resuelto y validado.
-        output: Ruta absoluta del fichero de salida.
-        overwrite: Indica actuación ante fichero de salida ya existente. [defecto: ask]
-        fps: Número de imágenes por segundos [defecto: 12].
+        output: Ruta del fichero de salida procesada, o None si aún no se ha creado.
+        overwrite: Política ante conflicto de salida ya existente.
+        fps: Imágenes por segundo del GIF.
         crop_area: Área y coordenada de la zona a preservar de la imagen.
-        scale_to: Ancho objetivo para redimensionado. [defecto: 640x360].
-        scale_mode: Modo de escalado (STRETCH, FIT o COVER). [defecto: fit]
-        scale_upscale: Permite escalar por encima del tamaño original.
+        scale_to: Dimensión objetivo, en píxeles, o None si no se cambia.
+        scale_mode: Política de escalado del vídeo o imagen.
+        scale_upscale: Permite el incremento de dimensiones.
         hflip: Invierte la imagen horizontalmente, intercambiando izquierda y derecha.
         vflip: Invierte la imagen verticalmente, intercambiando arriba y abajo.
-        rotate: Ángulo de giro de la imagen.
-        timestamp_start: Marca temporal que indica el punto inicial.
-        timestamp_end: Marca temporal que indica el punto final.
+        rotate: Ángulo ortogonal con el que se va a rotar la imagen.
+        timestamp_start: Marca de tiempo que indica el punto inicial.
+        timestamp_end: Marca de tiempo que indica el punto final.
     """
-
-    overwrite: OverwriteMode
 
     @classmethod
     def create(cls, args: GifArguments, logger: Logger) -> "GifParameters":
@@ -92,7 +91,7 @@ class GifParameters(
 
         Args:
             args: Argumentos crudos recibidos desde la CLI.
-            logger: Logger para trazas de progreso.
+            logger: Sistema de registro de mensajes.
 
         Returns:
             Instancia de GifParameters completamente inicializada.

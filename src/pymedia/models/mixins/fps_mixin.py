@@ -11,7 +11,7 @@ class FpsGifMixin:
     """Mixin para las imágenes por segundo de un Gif.
 
     Attributes:
-        fps: Imágenes por segundo del Gif.
+        fps: Imágenes por segundo del GIF.
     """
 
     fps: int | None = None
@@ -20,7 +20,7 @@ class FpsGifMixin:
         """Crea el atributo fps.
 
         Args:
-            fps: Imágenes por segundo del Gif.
+            fps: Imágenes por segundo del GIF.
         """
         self.fps = fps
 
@@ -43,7 +43,7 @@ class FpsImageMixin:
     """Mixin para indicar las imágenes por segundo a extraer de un vídeo.
 
     Attributes:
-        fps: Frecuencia de imágenes por segundo a extraer
+        fps: Frecuencia de imágenes por segundo a extraer.
     """
 
     fps: Fraction | None = None

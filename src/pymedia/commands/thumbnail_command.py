@@ -66,13 +66,14 @@ class ThumbnailCommand(SingleCommand[ThumbnailArguments, ThumbnailParameters]):
             input_single: Vídeo de entrada.
             output: Ruta de salida (por defecto, se deriva de la entrada).
             overwrite: Política ante un fichero de salida existente.
-            every: Intervalo en segundos entre miniaturas (modo intervalo).
-            scene: Umbral de cambio de escena (modo escena).
-            timestamp_at: Lista de marcas temporales (modo timestamp).
-            timestamp_start: Marca temporal del punto inicial del rango.
-            timestamp_end: Marca temporal del punto final del rango.
+            every: Intervalo en segundos entre imágenes (modo intervalo).
+            scene: Umbral de sensibilidad para detección de cambio de escena
+                (modo escena).
+            timestamp_at: Lista de marcas de tiempo (modo timestamp).
+            timestamp_start: Marca temporal del punto inicial.
+            timestamp_end: Marca temporal del punto final.
             crop: Área a recortar (WIDTH,HEIGHT,X,Y).
-            rotate: Ángulo de rotación (90, 180 o 270).
+            rotate: Ángulo ortogonal con el que se va a rotar la imagen (90, 180 o 270).
             scale_to: Dimensión objetivo (WIDTHxHEIGHT).
             scale_mode: Modo de escalado (STRETCH, FIT o COVER).
             scale_upscale: Permite escalar por encima del tamaño original.
@@ -108,7 +109,7 @@ class ThumbnailCommand(SingleCommand[ThumbnailArguments, ThumbnailParameters]):
             cmd = ThumbnailCmd(params=self.params).create()
             self._run_cmd(cmd=cmd)
 
-    def _run_cmd(self, cmd: list[str]):
+    def _run_cmd(self, cmd: list[str]) -> None:
         """Ejecuta un comando ffmpeg de miniaturas y registra el resultado."""
         if cmd is None:
             raise CommandGenerationError(name=self.name)
@@ -118,15 +119,21 @@ class ThumbnailCommand(SingleCommand[ThumbnailArguments, ThumbnailParameters]):
 
         self.logger.debug(_("FFmpeg command: %(cmd)s"), cmd=cmd)
 
+        progress_time = self.resolve_progress_time(
+            video_duration=self.media.duration,
+            start=self.params.timestamp_start,
+            end=self.params.timestamp_end,
+        )
+
         self.run_ffmpeg(
             cmd=cmd,
-            media=self.params.media,
+            progress_time=progress_time,
             description=_("Generating thumbnail"),
             stall_timeout=self.config.app.stall_timeout,
             command_name=self.name,
         )
 
         self.logger.info(
-            _("Thumbnail(s) generated successfully: %(output)s"),
+            msg=_("Thumbnail(s) generated successfully: %(output)s"),
             output=self.params.output,
         )
