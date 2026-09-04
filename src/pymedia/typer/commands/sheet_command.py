@@ -1,10 +1,9 @@
 """Comando Typer para mostrar la información de metadatos de un vídeo."""
 
+import typer
+
 from pymedia.locales import _  # noqa
 from pymedia.pipeline.sheet_pipeline import SheetPipeline
-from pymedia.typer.instance import (
-    typer_instance,
-)
 from pymedia.typer.options import (
     DebugOption,
     HelpOption,
@@ -22,19 +21,21 @@ _HELP = _(
 Generates a thumbnail grid sheet with media info header.
 
 [bold]Examples[/bold]:
-  Generate a vcs with default HD preset:   
+  Generate a vcs with default HD preset:
     > pymedia sheet input.mp4
   Generates a vcs with different preset and specified output:
     > pymedia sheet input.mp4 --preset fhd -o vcs.webp
 """
 )
 
-
-@typer_instance.command(
+sheet = typer.Typer(
     help=_HELP,
     no_args_is_help=True,
 )
-def sheet(
+
+
+@sheet.callback(invoke_without_command=True)
+def sheet_run(
     input_list: InputListArgument,
     output: OutputOption = None,
     output_directory: OutputDirectoryOption = None,
@@ -69,3 +70,7 @@ def sheet(
         if not pipeline.resolve_overwrite():
             continue
         pipeline.process_cmd()
+
+
+if __name__ == "__main__":
+    sheet()

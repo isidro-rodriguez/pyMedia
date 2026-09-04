@@ -12,8 +12,20 @@ typer_instance = typer.Typer(
     add_completion=False,
 )
 
+_HELP = _(
+    """\
+Easy CLI for ffmpeg.
 
-@typer_instance.callback()
+[bold]Examples[/bold]:
+  Generate an animated GIF from a video:   
+    > pymedia gif input.mp4
+  Print GIF's help:     
+    > pymedia gif --help
+"""
+)
+
+
+@typer_instance.callback(help=_HELP)
 def main(
     help_: HelpOption = False,  # noqa
 ) -> None:

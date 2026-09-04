@@ -61,7 +61,7 @@ class _LocaleManager:
         """
 
         def _read_config_language() -> str:
-            # Lee [typer_instance].language del config.toml sin validar.
+            # Lee [app].language del config.toml sin validar.
             path = (
                 Path(
                     platformdirs.user_config_dir(
@@ -74,7 +74,7 @@ class _LocaleManager:
                 return "system"
             with path.open("rb") as f:
                 data = tomllib.load(f)
-            return data.get("typer_instance", {}).get("language", "system")
+            return data.get("app", {}).get("language", "system")
 
         def _detect_system_language() -> str:
             # Detecta el idioma del sistema (env vars POSIX, locale, fallback 'en').

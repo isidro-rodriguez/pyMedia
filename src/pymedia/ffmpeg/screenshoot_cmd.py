@@ -11,8 +11,8 @@ from pymedia.models.parameters import ScreenshootParameters
 class _ScreenshootMode(Enum):
     """Subtipos de thumbnails que soporta el generador."""
 
-    TIMESTAMP = "timestamp"
     INTERVAL = "interval"
+    FRAMES = "frames"
     SCENE = "scene"
 
 
@@ -46,7 +46,7 @@ class ScreenshootCmd:
         if self._params.output is None:
             raise MissingParameterError(name="output")
 
-        if self._mode is _ScreenshootMode.TIMESTAMP:
+        if self._mode is _ScreenshootMode.FRAMES:
             if timestamp is None:
                 raise MissingParameterError(name="timestamp_at")
             output = self._params.output.with_stem(
@@ -60,7 +60,7 @@ class ScreenshootCmd:
         """Establece el modo de obtención de imágenes para mayor claridad de módulo."""
         params = self._params
         if params.timestamp_at is not None:
-            return _ScreenshootMode.TIMESTAMP
+            return _ScreenshootMode.FRAMES
         if params.scene is not None:
             return _ScreenshootMode.SCENE
         if params.fps is not None:
@@ -73,7 +73,7 @@ class ScreenshootCmd:
         filters: list[str] = []
 
         match self._mode:
-            case _ScreenshootMode.TIMESTAMP:
+            case _ScreenshootMode.FRAMES:
                 filters.append("thumbnail=30")
             case _ScreenshootMode.INTERVAL:
                 filters.append("thumbnail=30")
@@ -108,7 +108,7 @@ class ScreenshootCmd:
         params = self._params
         cmd: list[str] = ["ffmpeg", "-y"]
 
-        if self._mode is _ScreenshootMode.TIMESTAMP:
+        if self._mode is _ScreenshootMode.FRAMES:
             if timestamp is None:
                 raise MissingParameterError(name="timestamp")
             cmd.extend(["-ss", str(timestamp)])
@@ -126,7 +126,7 @@ class ScreenshootCmd:
             ]
         )
 
-        if self._mode is _ScreenshootMode.TIMESTAMP:
+        if self._mode is _ScreenshootMode.FRAMES:
             cmd.extend(["-frames:v", "1"])
         else:
             cmd.extend(["-fps_mode", "vfr"])

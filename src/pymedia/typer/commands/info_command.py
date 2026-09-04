@@ -1,8 +1,9 @@
 """Comando Typer para mostrar la información de metadatos de un vídeo."""
 
+import typer
+
 from pymedia.locales import _  # noqa
 from pymedia.pipeline.info_pipeline import InfoPipeline
-from pymedia.typer.instance import typer_instance
 from pymedia.typer.options import DebugOption, HelpOption, InputSingleArgument
 
 _HELP = _(
@@ -10,17 +11,19 @@ _HELP = _(
 Shows information about a video.
 
 [bold]Example[/bold]:
-  Shows video's metadata:   
+  Shows video's metadata:
     > pymedia info input.mp4
 """
 )
 
-
-@typer_instance.command(
+info = typer.Typer(
     help=_HELP,
     no_args_is_help=True,
 )
-def info(
+
+
+@info.callback(invoke_without_command=True)
+def info_run(
     input_single: InputSingleArgument,
     debug: DebugOption = False,
     help_: HelpOption = False,  # noqa
@@ -35,3 +38,7 @@ def info(
     pipeline = InfoPipeline(debug=debug)
     pipeline.process_parameters(input_single=input_single)
     pipeline.process_cmd()
+
+
+if __name__ == "__main__":
+    info()

@@ -1,8 +1,9 @@
 """Comando Typer para iniciar la generación de GIF."""
 
+import typer
+
 from pymedia.locales import _  # noqa
 from pymedia.pipeline.gif_pipeline import GifPipeline
-from pymedia.typer.instance import typer_instance
 from pymedia.typer.options import (
     CropOption,
     DebugOption,
@@ -27,23 +28,25 @@ _HELP = _(
 Generates an animated GIF from the specified video.
 
 [bold]Examples[/bold]:
-  Convert a video to GIF:   
+  Convert a video to GIF:
     > pymedia gif input.mp4
-  Convert a time range:     
+  Convert a time range:
     > pymedia gif input.mp4 --start 00:00:05 --end 00:00:12
-  Set size and frame rate:  
+  Set size and frame rate:
     > pymedia gif input.mp4 --size 480x270 --fps 15
-  Save to a specific file:  
+  Save to a specific file:
     > pymedia gif input.mp4 --output output.gif
 """
 )
 
-
-@typer_instance.command(
+gif = typer.Typer(
     help=_HELP,
     no_args_is_help=True,
 )
-def gif(
+
+
+@gif.callback(invoke_without_command=True)
+def gif_run(
     input_single: InputSingleArgument,
     output: OutputOption = None,
     overwrite: OverwriteOption = OverwriteMode.ASK,
@@ -98,3 +101,7 @@ def gif(
     if not pipeline.resolve_overwrite():
         return
     pipeline.process_cmd()
+
+
+if __name__ == "__main__":
+    gif()
