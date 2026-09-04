@@ -5,12 +5,10 @@ from pathlib import Path
 import pytest
 
 from pymedia.errors import (
-    ExclusiveOptionsError,
     InvalidArgumentError,
     InvalidContainerError,
     InvalidContainerTypeError,
     MissingMediaPropertyError,
-    OptionError,
 )
 from pymedia.models.media import Audio, Media, Video
 from pymedia.models.mixins.outputs_mixin import (
@@ -298,32 +296,21 @@ class TestOutputSingleDefault:
 class TestOutputBatch:
     """Pruebas del procesamiento de salida para lotes de ficheros."""
 
-    def test_conflictive_output_and_directory(self, tmp_path):
-        """Comprueba que combinar salida y directorio lanza un error."""
+    def test_output_takes_precedence_over_directory(self, tmp_path):
+        """Comprueba que una salida explícita prevalece sobre el directorio."""
         mixin = _batch_mixin([Path("a.mp4")])
 
-        with pytest.raises(ExclusiveOptionsError):
-            mixin.create_output(
-                input_single=Path("a.mp4"),
-                input_counter=1,
-                media=_media(),
-                media_type=OutputMediaType.GIF,
-                output=tmp_path / "o.gif",
-                output_directory=tmp_path / "dir",
-            )
+        mixin.create_output(
+            input_single=Path("a.mp4"),
+            media=_media(),
+            media_type=OutputMediaType.GIF,
+            output=tmp_path / "o.gif",
+            output_directory=tmp_path / "dir",
+        )
 
-    def test_output_rejected_with_multiple_inputs(self, tmp_path):
-        """Comprueba que una salida explícita con varias entradas lanza un error."""
-        mixin = _batch_mixin([Path("a.mp4"), Path("b.mp4")])
-
-        with pytest.raises(OptionError):
-            mixin.create_output(
-                input_single=Path("a.mp4"),
-                input_counter=2,
-                media=_media(),
-                media_type=OutputMediaType.GIF,
-                output=tmp_path / "o.gif",
-            )
+        assert mixin.output == (tmp_path / "o.gif").absolute()
+        assert mixin.output_directory == (tmp_path / "dir").absolute()
+        assert (tmp_path / "dir").is_dir()
 
     def test_output_with_single_input(self, tmp_path):
         """Comprueba que con una sola entrada la salida explícita es válida."""
@@ -331,7 +318,6 @@ class TestOutputBatch:
 
         mixin.create_output(
             input_single=Path("a.mp4"),
-            input_counter=1,
             media=_media(),
             media_type=OutputMediaType.GIF,
             output=tmp_path / "o.gif",
@@ -347,7 +333,6 @@ class TestOutputBatch:
 
         mixin.create_output(
             input_single=Path("a.gif"),
-            input_counter=2,
             media=_media(),
             media_type=OutputMediaType.GIF,
             output_directory=target,
@@ -363,7 +348,6 @@ class TestOutputBatch:
         with pytest.raises(InvalidArgumentError):
             mixin.create_output(
                 input_single=Path("a.gif"),
-                input_counter=2,
                 media=_media(),
                 media_type=OutputMediaType.GIF,
                 output_directory=tmp_path / "out<bad>",

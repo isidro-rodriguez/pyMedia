@@ -56,7 +56,7 @@ frames_command = typer.Typer(
 def _frames_run(
     input_single: InputSingleArgument,
     output: OutputOption = None,
-    overwrite: OverwriteOption = OverwriteMode.ASK,
+    overwrite: OverwriteOption = OverwriteMode.YES,
     timestamp_at: TimestampAtThumbnailOption = None,
     crop: CropOption = None,
     rotate: RotateOption = None,
@@ -132,7 +132,7 @@ interval_command = typer.Typer(
 def _interval_run(
     input_single: InputSingleArgument,
     output: OutputOption = None,
-    overwrite: OverwriteOption = OverwriteMode.ASK,
+    overwrite: OverwriteOption = OverwriteMode.YES,
     every: EveryOption = None,
     timestamp_start: TimestampStartGifOption = None,
     timestamp_end: TimestampEndGifOption = None,
@@ -219,7 +219,7 @@ scene_command = typer.Typer(
 def _scene_run(
     input_single: InputSingleArgument,
     output: OutputOption = None,
-    overwrite: OverwriteOption = OverwriteMode.ASK,
+    overwrite: OverwriteOption = OverwriteMode.YES,
     scene: SceneOption = None,
     timestamp_start: TimestampStartGifOption = None,
     timestamp_end: TimestampEndGifOption = None,

@@ -6,6 +6,7 @@ from pathlib import Path
 
 from pymedia.errors import MissingParameterError
 from pymedia.models.parameters import ThumbParameters
+from pymedia.types import OverwriteMode
 
 
 class _ScreenshootMode(Enum):
@@ -25,7 +26,7 @@ class ThumbCmd:
         Args:
             params: Parámetros procesados del subcomando thumbnail.
         """
-        self._params = params
+        self.params = params
         self._mode = self._resolve_mode()
 
     def create(self, timestamp: timedelta | None = None) -> list[str]:
@@ -43,22 +44,22 @@ class ThumbCmd:
             MissingParameterError: Si falta `output` o ningún parámetro
                 de modo (`timestamp_at`, `scene`, `fps`) está presente.
         """
-        if self._params.output is None:
+        if self.params.output is None:
             raise MissingParameterError(name="output")
 
         if self._mode is _ScreenshootMode.FRAMES:
             if timestamp is None:
                 raise MissingParameterError(name="timestamp_at")
-            output = self._params.output.with_stem(
-                f"{self._params.output.stem}_{str(timestamp).replace(':', '-')}"
+            output = self.params.output.with_stem(
+                f"{self.params.output.stem}_{str(timestamp).replace(':', '-')}"
             )
             return self._build_cmd(output=output, timestamp=timestamp)
-        output = self._params.output.with_stem(f"{self._params.output.stem}_%03d")
+        output = self.params.output.with_stem(f"{self.params.output.stem}_%03d")
         return self._build_cmd(output=output)
 
     def _resolve_mode(self) -> _ScreenshootMode:
         """Establece el modo de obtención de imágenes para mayor claridad de módulo."""
-        params = self._params
+        params = self.params
         if params.timestamp_at is not None:
             return _ScreenshootMode.FRAMES
         if params.scene is not None:
@@ -69,7 +70,7 @@ class ThumbCmd:
 
     def _build_filters(self) -> str:
         """Construye los filtros de ffmpeg para generar thumbnails."""
-        params = self._params
+        params = self.params
         filters: list[str] = []
 
         match self._mode:
@@ -105,8 +106,13 @@ class ThumbCmd:
         timestamp: timedelta | None = None,
     ) -> list[str]:
         """Ensambla un único comando ffmpeg para el modo indicado."""
-        params = self._params
-        cmd: list[str] = ["ffmpeg", "-y"]
+        params = self.params
+        cmd: list[str] = ["ffmpeg"]
+
+        if self.params.overwrite is OverwriteMode.YES:
+            cmd.append("-y")
+        else:
+            cmd.append("-n")
 
         if self._mode is _ScreenshootMode.FRAMES:
             if timestamp is None:

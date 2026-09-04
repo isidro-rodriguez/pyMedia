@@ -25,7 +25,7 @@ class TestCreateTimestampStart:
     """Pruebas de creación de la marca de inicio."""
 
     @pytest.mark.parametrize(
-        ("timestamp_start", "expected"),
+        ("start", "expected"),
         [
             ("5", timedelta(seconds=5)),
             ("01:30", timedelta(minutes=1, seconds=30)),
@@ -37,18 +37,18 @@ class TestCreateTimestampStart:
         mixin = TimestampStartEndMixin()
         mixin.media = _media()
 
-        mixin.create_timestamp_start(start=start)
+        mixin.create_timestamp_start_end(timestamp_start=start, timestamp_end=None)
 
         assert mixin.timestamp_start == expected
 
-    @pytest.mark.parametrize("timestamp_start", ["abc", "", "1:2:3:4", "1.5:3", "3,5"])
+    @pytest.mark.parametrize("start", ["abc", "", "1:2:3:4", "1.5:3", "3,5"])
     def test_invalid_format_raises(self, start):
         """Comprueba que los formatos inválidos lanzan un error."""
         mixin = TimestampStartEndMixin()
         mixin.media = _media()
 
         with pytest.raises(InvalidTimeFormatError):
-            mixin.create_timestamp_start(start=start)
+            mixin.create_timestamp_start_end(timestamp_start=start, timestamp_end=None)
 
     def test_missing_duration_raises(self):
         """Comprueba que la ausencia de duración lanza un error."""
@@ -56,7 +56,9 @@ class TestCreateTimestampStart:
         mixin.media = _media(duration=None)
 
         with pytest.raises(MissingMediaPropertyError, match="duration"):
-            mixin.create_timestamp_start(start="00:00:05")
+            mixin.create_timestamp_start_end(
+                timestamp_start="00:00:05", timestamp_end=None
+            )
 
     def test_exceeds_duration_raises(self):
         """Comprueba que una marca posterior a la duración lanza un error."""
@@ -64,14 +66,16 @@ class TestCreateTimestampStart:
         mixin.media = _media(duration=timedelta(seconds=30))
 
         with pytest.raises(InvalidParameterError):
-            mixin.create_timestamp_start(start="00:00:31")
+            mixin.create_timestamp_start_end(
+                timestamp_start="00:00:31", timestamp_end=None
+            )
 
     def test_equal_to_duration_is_allowed(self):
         """Comprueba que una marca igual a la duración es válida."""
         mixin = TimestampStartEndMixin()
         mixin.media = _media(duration=timedelta(minutes=1))
 
-        mixin.create_timestamp_start(start="00:01:00")
+        mixin.create_timestamp_start_end(timestamp_start="00:01:00", timestamp_end=None)
 
         assert mixin.timestamp_start == timedelta(minutes=1)
 
@@ -80,7 +84,7 @@ class TestCreateTimestampEnd:
     """Pruebas de creación de la marca de fin."""
 
     @pytest.mark.parametrize(
-        ("timestamp_end", "expected"),
+        ("end", "expected"),
         [
             ("5", timedelta(seconds=5)),
             ("02:10", timedelta(minutes=2, seconds=10)),
@@ -92,18 +96,18 @@ class TestCreateTimestampEnd:
         mixin = TimestampStartEndMixin()
         mixin.media = _media()
 
-        mixin.create_timestamp_end(end=end)
+        mixin.create_timestamp_start_end(timestamp_start=None, timestamp_end=end)
 
         assert mixin.timestamp_end == expected
 
-    @pytest.mark.parametrize("timestamp_end", ["", "-10", "1:2:3:4", "a:00"])
+    @pytest.mark.parametrize("end", ["", "-10", "1:2:3:4", "a:00"])
     def test_invalid_format_raises(self, end):
         """Comprueba que los formatos inválidos lanzan un error."""
         mixin = TimestampStartEndMixin()
         mixin.media = _media()
 
         with pytest.raises(InvalidTimeFormatError):
-            mixin.create_timestamp_end(end=end)
+            mixin.create_timestamp_start_end(timestamp_start=None, timestamp_end=end)
 
     def test_missing_duration_raises(self):
         """Comprueba que la ausencia de duración lanza un error."""
@@ -111,7 +115,9 @@ class TestCreateTimestampEnd:
         mixin.media = _media(duration=None)
 
         with pytest.raises(MissingMediaPropertyError, match="duration"):
-            mixin.create_timestamp_end(end="00:00:05")
+            mixin.create_timestamp_start_end(
+                timestamp_start=None, timestamp_end="00:00:05"
+            )
 
     def test_exceeds_duration_raises(self):
         """Comprueba que un fin posterior a la duración lanza un error."""
@@ -119,7 +125,9 @@ class TestCreateTimestampEnd:
         mixin.media = _media(duration=timedelta(minutes=5))
 
         with pytest.raises(InvalidParameterError):
-            mixin.create_timestamp_end(end="00:06:00")
+            mixin.create_timestamp_start_end(
+                timestamp_start=None, timestamp_end="00:06:00"
+            )
 
 
 class TestToTimestampStartCmd:
@@ -165,7 +173,7 @@ class TestToTimestampEndCmd:
 
 
 @pytest.mark.parametrize(
-    ("timestamp_start", "expected"),
+    ("start", "expected"),
     [
         ("5.5", timedelta(seconds=5.5)),
         ("01:30.5", timedelta(minutes=1, seconds=30.5)),
@@ -176,6 +184,6 @@ def test_fractional_seconds_should_be_allowed(start, expected):
     mixin = TimestampStartEndMixin()
     mixin.media = _media(duration=timedelta(minutes=10))
 
-    mixin.create_timestamp_start(start=start)
+    mixin.create_timestamp_start_end(timestamp_start=start, timestamp_end=None)
 
     assert mixin.timestamp_start == expected
