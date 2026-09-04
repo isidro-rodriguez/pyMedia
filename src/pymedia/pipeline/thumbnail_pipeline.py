@@ -63,24 +63,24 @@ class ThumbnailCommand(SinglePipeline[ThumbnailArguments, ThumbnailParameters]):
         """Punto de entrada de Typer: construye los argumentos y ejecuta el comando.
 
         Args:
-            input_single: Vídeo de entrada.
-            output: Ruta de salida (por defecto, se deriva de la entrada).
-            overwrite: Política ante un fichero de salida existente.
+            input_single: Ruta del fichero de vídeo a procesar.
+            output: Ruta absoluta del fichero de salida procesado.
+            overwrite: Política ante conflicto de salida ya existente.
             every: Intervalo en segundos entre imágenes (modo intervalo).
             scene: Umbral de sensibilidad para detección de cambio de escena
                 (modo escena).
             timestamp_at: Lista de marcas de tiempo (modo timestamp).
-            timestamp_start: Marca temporal del punto inicial.
-            timestamp_end: Marca temporal del punto final.
-            crop: Área a recortar (WIDTH,HEIGHT,X,Y).
-            rotate: Ángulo ortogonal con el que se va a rotar la imagen (90, 180 o 270).
-            scale_to: Dimensión objetivo (WIDTHxHEIGHT).
-            scale_mode: Modo de escalado (STRETCH, FIT o COVER).
-            scale_upscale: Permite escalar por encima del tamaño original.
-            hflip: Voltea horizontalmente.
-            vflip: Voltea verticalmente.
+            timestamp_start: Marca de tiempo que indica el punto inicial.
+            timestamp_end: Marca de tiempo que indica el punto final.
+            crop: Área y coordenada de la zona a preservar de la imagen.
+            rotate: Ángulo ortogonal con el que se va a rotar la imagen.
+            scale_to: Dimensión objetivo en píxeles.
+            scale_mode: Política de escalado del vídeo o imagen.
+            scale_upscale: Permite el incremento de dimensiones.
+            hflip: Invierte la imagen horizontalmente, intercambia izquierda y derecha.
+            vflip: Invierte la imagen verticalmente, intercambiando arriba y abajo.
             debug: Habilita el nivel de log DEBUG.
-            help_: Muestra la ayuda del comando.
+            help_: Helper para mostrar esta línea en distintos idiomas.
         """
         ThumbnailCommand.run(
             args=BasePipeline.build_args(

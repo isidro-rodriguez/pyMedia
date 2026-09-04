@@ -47,10 +47,10 @@ class SheetCommand(BatchPipeline[SheetArguments, SheetParameters]):
             input_list: Lista de vídeos a procesar.
             output: Ruta de salida para un único vídeo de entrada.
             output_directory: Directorio de salida para lotes de varios vídeos.
-            overwrite: Política ante un fichero de salida existente.
+            overwrite: Política ante conflicto de salida ya existente.
             preset_sheet: Estilo de hoja preajustado (FHD, HD o WEB).
             debug: Habilita el nivel de log DEBUG.
-            help_: Muestra la ayuda del comando.
+            help_: Helper para mostrar esta línea en distintos idiomas.
         """
         SheetCommand.run(
             args=BasePipeline.build_args(

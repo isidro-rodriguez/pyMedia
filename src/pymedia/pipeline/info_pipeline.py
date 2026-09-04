@@ -12,48 +12,20 @@ from pymedia.errors import (
 )
 from pymedia.locale_manager import locale_manager
 from pymedia.locales import _  # noqa
-from pymedia.logger import Logger
-from pymedia.models.config import Config
 from pymedia.models.media import Audio, Media, Subtitle, Video
-from pymedia.models.pipeline.info_pipeline import InfoArguments, InfoParameters
-from pymedia.pipeline.base_pipeline import SinglePipeline
-from pymedia.typer.options import (
-    DebugOption,
-    HelpOption,
-    InputSingleArgument,
-)
+from pymedia.models.parameters import InfoParameters
+from pymedia.pipeline import BasePipeline
 from pymedia.utils import parse_quantity, parse_size, parse_timedelta
 
 
-class InfoCommand(SinglePipeline[InfoArguments, InfoParameters]):
+class InfoPipeline(BasePipeline[InfoParameters]):
     """Comando de CLI que imprime los metadatos de un vídeo de entrada."""
 
-    command_name = "info"
-
-    @staticmethod
-    def cli(
-        input_single: InputSingleArgument,
-        debug: DebugOption = False,
-        help_: HelpOption = False,
-    ) -> None:
-        """Punto de entrada de Typer: construye los argumentos y ejecuta el comando.
-
-        Args:
-            input_single: Vídeo del que se muestran los metadatos.
-            debug: Habilita el nivel de log DEBUG.
-            help_: Muestra la ayuda del comando.
-        """
-        InfoCommand.run(
-            args=InfoCommand.build_args(
-                args_cls=InfoArguments,
-                local_vars=locals(),
-            ),
-            debug=debug,
-        )
-
-    def process_parameters(self) -> None:
+    def process_parameters(self, input_single: Path) -> None:
         """Valida y parsea los argumentos en parámetros procesados."""
-        self.params = InfoParameters.create(args=self.args, logger=self.logger)
+        params: InfoParameters = InfoParameters()
+        params.create_input_single(input_single=input_single, logger=self.logger)
+        self.params = params
 
     def process_cmd(self) -> None:
         """Construye y muestra el panel Rich con los metadatos del vídeo."""
@@ -69,20 +41,6 @@ class InfoCommand(SinglePipeline[InfoArguments, InfoParameters]):
         )
         self.logger.print(panel)
 
-    @classmethod
-    def run(cls, args: InfoArguments, debug: bool) -> None:
-        """Ejecuta el flujo del comando Info sin generar comandos ffmpeg.
-
-        Args:
-            args: Argumentos tipados del comando Info.
-            debug: Habilita el nivel de log DEBUG.
-        """
-        config = Config.load()
-        cls.logger = Logger.load(debug=debug)
-        instance = cls(args, config)
-        instance.process_parameters()
-        instance.process_cmd()
-
 
 def _build_info_panel(media: Media, single_input: Path, locale: str = "en") -> Panel:
     """Construye el panel Rich con los metadatos del vídeo."""
@@ -92,8 +50,8 @@ def _build_info_panel(media: Media, single_input: Path, locale: str = "en") -> P
     def _build_general_table() -> Table:
         """Construye la tabla de datos generales del vídeo."""
         table = Table(title=f"📁 {_('General')}", show_header=True, expand=True)
-        table.add_column(_("Field"), style="bold", ratio=1)
-        table.add_column(_("Value"), ratio=3)
+        table.add_column(header=_("Field"), style="bold", ratio=1)
+        table.add_column(header=_("Value"), ratio=3)
         table.add_row(_("File"), single_input.name)
         table.add_row(_("Container"), media.format_name or na)
         table.add_row(
@@ -107,8 +65,8 @@ def _build_info_panel(media: Media, single_input: Path, locale: str = "en") -> P
     def _build_video_table(video: Video) -> Table:
         """Construye la tabla de metadatos de la pista de vídeo."""
         table = Table(title=f"🎬 {_('Video')}", show_header=True, expand=True)
-        table.add_column(_("Field"), style="bold", ratio=1)
-        table.add_column(_("Value"), ratio=3)
+        table.add_column(header=_("Field"), style="bold", ratio=1)
+        table.add_column(header=_("Value"), ratio=3)
         table.add_row(
             _("Codec"),
             f"{video.codec} ({video.profile})"

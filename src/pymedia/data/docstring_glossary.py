@@ -72,7 +72,7 @@ timestamp_end: Marca de tiempo que indica el punto final.
 extension: Extensión del fichero de salida.
 fps: Frecuencia de imágenes por segundo.                                    # MEDIA
 fps: Si transcodifica los vídeos al de menor FPS o el mayor.                # CONFIG
-help_: Muestra la ayuda del comando.
+help_: Helper para mostrar esta línea en distintos idiomas.
 local_vars: Variables locales de la función.
 logger: Interfaz principal de la aplicación para generar mensajes.
 media_type: Tipo de medio de salida esperado.

@@ -59,21 +59,21 @@ def gif(
     """Punto de entrada y desarrollo del pipeline.
 
     Args:
-        input_single: Vídeo de entrada.
-        output: Ruta de salida (por defecto, se deriva de la entrada).
-        overwrite: Política ante un fichero de salida existente.
-        timestamp_start: Marca temporal del punto inicial.
-        timestamp_end: Marca temporal del punto final.
+        input_single: Ruta del fichero de vídeo a procesar.
+        output: Ruta absoluta del fichero de salida procesado.
+        overwrite: Política ante conflicto de salida ya existente.
+        timestamp_start: Marca de tiempo que indica el punto inicial.
+        timestamp_end: Marca de tiempo que indica el punto final.
         fps: Imágenes por segundo del GIF.
-        crop: Área a recortar (WIDTH,HEIGHT,X,Y).
-        rotate: Ángulo ortogonal con el que se va a rotar la imagen (90, 180 o 270).
-        scale_to: Dimensión objetivo (WIDTHxHEIGHT).
-        scale_mode: Modo de escalado (STRETCH, FIT o COVER).
-        scale_upscale: Permite escalar por encima del tamaño original.
-        hflip: Voltea horizontalmente.
-        vflip: Voltea verticalmente.
+        crop: Área y coordenada de la zona a preservar de la imagen.
+        rotate: Ángulo ortogonal con el que se va a rotar la imagen.
+        scale_to: Dimensión objetivo en píxeles.
+        scale_mode: Política de escalado del vídeo o imagen.
+        scale_upscale: Permite el incremento de dimensiones.
+        hflip: Invierte la imagen horizontalmente, intercambia izquierda y derecha.
+        vflip: Invierte la imagen verticalmente, intercambiando arriba y abajo.
         debug: Habilita el nivel de log DEBUG.
-        help_: Muestra la ayuda del comando.
+        help_: Helper para mostrar esta línea en distintos idiomas.
     """
     pipeline = GifPipeline(debug=debug)
     pipeline.process_parameters(
