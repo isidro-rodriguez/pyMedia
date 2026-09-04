@@ -28,14 +28,15 @@ Generates a thumbnail grid sheet with media info header.
 """
 )
 
-sheet = typer.Typer(
+sheet_command = typer.Typer(
+    name="sheet",
     help=_HELP,
     no_args_is_help=True,
 )
 
 
-@sheet.callback(invoke_without_command=True)
-def sheet_run(
+@sheet_command.callback(invoke_without_command=True)
+def _sheet_run(
     input_list: InputListArgument,
     output: OutputOption = None,
     output_directory: OutputDirectoryOption = None,
@@ -73,4 +74,4 @@ def sheet_run(
 
 
 if __name__ == "__main__":
-    sheet()
+    sheet_command()

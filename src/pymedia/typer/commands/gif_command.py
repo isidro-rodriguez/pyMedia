@@ -39,14 +39,15 @@ Generates an animated GIF from the specified video.
 """
 )
 
-gif = typer.Typer(
+gif_command = typer.Typer(
+    name="gif",
     help=_HELP,
     no_args_is_help=True,
 )
 
 
-@gif.callback(invoke_without_command=True)
-def gif_run(
+@gif_command.callback(invoke_without_command=True)
+def _gif_run(
     input_single: InputSingleArgument,
     output: OutputOption = None,
     overwrite: OverwriteOption = OverwriteMode.ASK,
@@ -104,4 +105,4 @@ def gif_run(
 
 
 if __name__ == "__main__":
-    gif()
+    gif_command()

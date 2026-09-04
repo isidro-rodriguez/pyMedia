@@ -9,14 +9,14 @@ from pymedia.errors import (
     MissingParameterError,
     MissingRequiredOptionError,
 )
-from pymedia.ffmpeg.screenshoot_cmd import ScreenshootCmd
+from pymedia.ffmpeg.thumb_cmd import ThumbCmd
 from pymedia.locales import _  # noqa
-from pymedia.models.parameters import ScreenshootParameters
+from pymedia.models.parameters import ThumbParameters
 from pymedia.pipeline import BasePipeline
 from pymedia.types import OutputMediaType, OverwriteMode, RotateMode, ScaleMode
 
 
-class ScreenshootPipeline(BasePipeline[ScreenshootParameters]):
+class ThumbPipeline(BasePipeline[ThumbParameters]):
     """Comando de CLI que genera miniaturas en modos timestamp, intervalo o escena."""
 
     def process_parameters(
@@ -56,7 +56,7 @@ class ScreenshootPipeline(BasePipeline[ScreenshootParameters]):
             hflip: Invierte la imagen horizontalmente, intercambia izquierda y derecha.
             vflip: Invierte la imagen verticalmente, intercambiando arriba y abajo.
         """
-        params = ScreenshootParameters(
+        params = ThumbParameters(
             overwrite=overwrite,
             scale_mode=scale_mode,
             hflip=hflip,
@@ -117,10 +117,10 @@ class ScreenshootPipeline(BasePipeline[ScreenshootParameters]):
 
         if self.params.timestamp_at is not None:
             for timestamp in self.params.timestamp_at:
-                cmd = ScreenshootCmd(params=self.params).create(timestamp=timestamp)
+                cmd = ThumbCmd(params=self.params).create(timestamp=timestamp)
                 self._run_cmd(cmd=cmd)
         else:
-            cmd = ScreenshootCmd(params=self.params).create()
+            cmd = ThumbCmd(params=self.params).create()
             self._run_cmd(cmd=cmd)
 
     def _run_cmd(self, cmd: list[str]) -> None:

@@ -5,7 +5,7 @@ from enum import Enum
 from pathlib import Path
 
 from pymedia.errors import MissingParameterError
-from pymedia.models.parameters import ScreenshootParameters
+from pymedia.models.parameters import ThumbParameters
 
 
 class _ScreenshootMode(Enum):
@@ -16,10 +16,10 @@ class _ScreenshootMode(Enum):
     SCENE = "scene"
 
 
-class ScreenshootCmd:
+class ThumbCmd:
     """Compone los comandos ffmpeg para generar thumbnails."""
 
-    def __init__(self, params: ScreenshootParameters) -> None:
+    def __init__(self, params: ThumbParameters) -> None:
         """Inicializa el generador y resuelve el modo de thumbnail.
 
         Args:

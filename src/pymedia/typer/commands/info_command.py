@@ -16,14 +16,15 @@ Shows information about a video.
 """
 )
 
-info = typer.Typer(
+info_command = typer.Typer(
+    name="info",
     help=_HELP,
     no_args_is_help=True,
 )
 
 
-@info.callback(invoke_without_command=True)
-def info_run(
+@info_command.callback(invoke_without_command=True)
+def _info_run(
     input_single: InputSingleArgument,
     debug: DebugOption = False,
     help_: HelpOption = False,  # noqa
@@ -41,4 +42,4 @@ def info_run(
 
 
 if __name__ == "__main__":
-    info()
+    info_command()

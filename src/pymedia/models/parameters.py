@@ -64,7 +64,7 @@ class SheetParameters(
 
 
 @dataclass(kw_only=True)
-class ScreenshootParameters(
+class ThumbParameters(
     BaseParameters,
     InputSingleMixin,
     OutputSingleMixin,
