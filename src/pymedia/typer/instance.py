@@ -2,11 +2,10 @@
 
 import typer
 
-from pymedia.typer.options import (
-    HelpOption,
-)
+from pymedia.locales import _  # noqa
+from pymedia.typer.options import HelpOption
 
-app = typer.Typer(
+typer_instance = typer.Typer(
     name="pyMedia",
     rich_markup_mode="rich",
     no_args_is_help=True,
@@ -14,7 +13,7 @@ app = typer.Typer(
 )
 
 
-@app.callback()
+@typer_instance.callback()
 def main(
     help_: HelpOption = False,  # noqa
 ) -> None:

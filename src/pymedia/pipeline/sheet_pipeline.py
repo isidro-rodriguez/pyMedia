@@ -3,7 +3,7 @@
 import tempfile
 from pathlib import Path
 
-from pymedia.data.types import OverwriteMode, PresetsSheetMode
+from pymedia.data.types import OutputMediaType, OverwriteMode, PresetsSheetMode
 from pymedia.errors import (
     CommandGenerationError,
     MissingMediaError,
@@ -12,84 +12,61 @@ from pymedia.errors import (
 )
 from pymedia.ffmpeg.sheet_cmd import SheetCmd
 from pymedia.locales import _  # noqa
-from pymedia.models.pipeline.sheet_pipeline import SheetArguments, SheetParameters
-from pymedia.pipeline.base_pipeline import BasePipeline, BatchPipeline
-from pymedia.typer.options import (
-    DebugOption,
-    HelpOption,
-    InputListArgument,
-    OutputDirectoryOption,
-    OutputOption,
-    OverwriteOption,
-    PresetSheetOption,
-)
+from pymedia.models.parameters import SheetParameters
+from pymedia.pipeline import BasePipeline
 
 
-class SheetCommand(BatchPipeline[SheetArguments, SheetParameters]):
+class SheetPipeline(BasePipeline[SheetParameters]):
     """Comando de CLI que genera una hoja de capturas con cabecera de metadatos."""
 
-    command_name = "sheet"
-    help = _("Generates a thumbnail grid sheet with media info header.")
-
-    @staticmethod
-    def cli(
-        input_list: InputListArgument,
-        output: OutputOption = None,
-        output_directory: OutputDirectoryOption = None,
-        overwrite: OverwriteOption = OverwriteMode.ASK,
-        preset_sheet: PresetSheetOption = PresetsSheetMode.HD,
-        debug: DebugOption = False,
-        help_: HelpOption = False,
+    def process_parameters(
+        self,
+        input_single: Path,
+        overwrite: OverwriteMode,
+        preset_sheet: PresetsSheetMode,
+        output: Path | None = None,
+        output_directory: Path | None = None,
     ) -> None:
-        """Punto de entrada de Typer: construye los argumentos y ejecuta el comando.
-
-        Args:
-            input_list: Lista de vídeos a procesar.
-            output: Ruta de salida para un único vídeo de entrada.
-            output_directory: Directorio de salida para lotes de varios vídeos.
-            overwrite: Política ante conflicto de salida ya existente.
-            preset_sheet: Estilo de hoja preajustado (FHD, HD o WEB).
-            debug: Habilita el nivel de log DEBUG.
-            help_: Helper para mostrar esta línea en distintos idiomas.
-        """
-        SheetCommand.run(
-            args=BasePipeline.build_args(
-                args_cls=SheetArguments,
-                local_vars=locals(),
-            ),
-            debug=debug,
-        )
-
-    def process_parameters(self, input_single: Path) -> SheetParameters:
         """Valida y parsea los argumentos en parámetros procesados para un vídeo.
 
         Args:
             input_single: Ruta del fichero de vídeo a procesar.
-
-        Returns:
-            Parámetros procesados y validados para el comando.
+            overwrite: Política ante conflicto de salida ya existente.
+            preset_sheet: Estilo de hoja preajustado.
+            output: Ruta absoluta del fichero de salida procesado.
+            output_directory: Directorio de salida para lotes de ficheros.
         """
-        return SheetParameters.create(
-            args=self.args, logger=self.logger, input_single=input_single
-        )
-
-    def process_cmd(self, params: SheetParameters) -> None:
-        """Construye y ejecuta los comandos ffmpeg de capturas y cabecera.
-
-        Args:
-            params: Parámetros procesados y validados para el comando.
-        """
+        params = SheetParameters(overwrite=overwrite)
+        params.create_input_single(input_single=input_single, logger=self.logger)
         if params.input_single is None:
             raise MissingParameterError(name="input_single")
         if params.media is None:
-            raise MissingMediaError(path=str(params.input_single))
-        if params.media.duration is None:
+            raise MissingParameterError(name="media")
+        params.create_output(
+            input_single=params.input_single,
+            media=params.media,
+            output_directory=output_directory,
+            media_type=OutputMediaType.IMAGE,
+            output=output,
+            affix="_sheet",
+            extension=".jpg",
+        )
+        params.create_preset_sheet(preset=preset_sheet)
+        self.params = params
+
+    def process_cmd(self) -> None:
+        """Construye y ejecuta los comandos ffmpeg de capturas y cabecera."""
+        if self.params.input_single is None:
+            raise MissingParameterError(name="input_single")
+        if self.params.media is None:
+            raise MissingMediaError(path=str(self.params.input_single))
+        if self.params.media.duration is None:
             raise MissingMediaPropertyError(name="media.duration")
 
         with tempfile.TemporaryDirectory() as tmp_dir:
             tile_tmp = Path(tmp_dir) / "tile_tmp.jpg"
 
-            sheet_instance = SheetCmd(params=params, tile_tmp=tile_tmp)
+            sheet_instance = SheetCmd(params=self.params, tile_tmp=tile_tmp)
             snapshots_cmd = sheet_instance.create_snapshots()
             header_cmd = sheet_instance.create_header()
 
@@ -104,18 +81,15 @@ class SheetCommand(BatchPipeline[SheetArguments, SheetParameters]):
             self.run_ffmpeg(
                 cmd=snapshots_cmd,
                 description=_("Generating sheet snapshots"),
-                stall_timeout=self.config.app.stall_timeout,
-                command_name=self.command_name,
                 total_steps=sheet_instance.capture_count,
             )
 
             self.run_ffmpeg(
                 cmd=header_cmd,
                 description=_("Generating sheet header"),
-                stall_timeout=self.config.app.stall_timeout,
-                command_name=self.command_name,
             )
 
         self.logger.info(
-            msg=_("Metadata generated successfully: %(output)s"), output=params.output
+            msg=_("Metadata generated successfully: %(output)s"),
+            output=self.params.output,
         )

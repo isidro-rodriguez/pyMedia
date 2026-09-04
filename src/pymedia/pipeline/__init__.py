@@ -10,7 +10,7 @@ from pymedia.pipeline.base_pipeline import BasePipeline
 
 
 def register_all(app: typer.Typer) -> None:
-    """Descubre todas las subclases de BasePipeline y las registra en la app.
+    """Descubre todas las subclases de BasePipeline y las registra en la typer_instance.
 
     Args:
         app: Instancia de la aplicación Typer donde se registran los comandos.

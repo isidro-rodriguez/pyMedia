@@ -2,7 +2,7 @@
 
 from pymedia.locales import _  # noqa
 from pymedia.pipeline.info_pipeline import InfoPipeline
-from pymedia.typer.app import app
+from pymedia.typer.instance import typer_instance
 from pymedia.typer.options import DebugOption, HelpOption, InputSingleArgument
 
 _HELP = _(
@@ -10,12 +10,13 @@ _HELP = _(
 Shows information about a video.
 
 [bold]Example[/bold]:
-  Shows video's metadata:   > pymedia info input.mp4
+  Shows video's metadata:   
+    > pymedia info input.mp4
 """
 )
 
 
-@app.command(
+@typer_instance.command(
     help=_HELP,
     no_args_is_help=True,
 )

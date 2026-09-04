@@ -16,12 +16,10 @@ from pymedia.data.containers import (
 from pymedia.data.types import OutputMediaType
 from pymedia.data.video_codecs import VIDEO_CODECS
 from pymedia.errors import (
-    ExclusiveOptionsError,
     InvalidArgumentError,
     InvalidContainerError,
     InvalidContainerTypeError,
     MissingMediaPropertyError,
-    OptionError,
     PermissionDeniedError,
 )
 from pymedia.locales import _  # noqa
@@ -101,7 +99,6 @@ class OutputBatchMixin(_HasBatchMedia):
     def create_output(
         self,
         input_single: Path,
-        input_counter: int,
         media: Media,
         media_type: OutputMediaType,
         output: Path | None = None,
@@ -113,8 +110,6 @@ class OutputBatchMixin(_HasBatchMedia):
 
         Args:
             input_single: Ruta del fichero de vídeo a procesar.
-            input_counter: Número de ficheros a procesar para validar si se puede
-                indicar parámetro output.
             media: Metadatos del vídeo a procesar.
             media_type: Tipo de medio de salida esperado.
             output: Ruta de salida explícita, válida solo para lotes de un
@@ -125,10 +120,6 @@ class OutputBatchMixin(_HasBatchMedia):
             extension: Extensión a forzar en el fichero de salida.
 
         Raises:
-            ExclusiveOptionsError: Si se indican output y
-                output_directory a la vez.
-            OptionError: Si se indica output con más de un
-                fichero de entrada.
             MissingMediaError: Si no se pudieron obtener los metadatos del fichero.
             MissingMediaPropertyError: Si no se pudo obtener un name relevante.
             PermissionDeniedError: Si el usuario no tiene permisos para crear el
@@ -137,15 +128,6 @@ class OutputBatchMixin(_HasBatchMedia):
             InvalidContainerError: Si el contenedor no corresponde al códec usado.
             InvalidContainerTypeError: Si el contenedor no corresponde al tipo de medio.
         """
-        if output is not None and output_directory is not None:
-            raise ExclusiveOptionsError(options=["output", "output_directory"])
-        if output is not None and input_counter > 1:
-            raise OptionError(
-                msg=_(
-                    "It is not allowed to specify an output with multiple inputs, "
-                    "use output directory instead."
-                )
-            )
         if output_directory is not None:
             self.output_directory = _process_output_directory(output_directory)
         self.output = _process_output(
@@ -205,9 +187,6 @@ def _validate_output(output: Path, media: Media, media_type: OutputMediaType) ->
         case OutputMediaType.AUDIO:
             if media.audio is None:
                 raise MissingMediaPropertyError(name="audio track")
-            for audio_track in media.audio:
-                if audio_track.codec is None:
-                    raise MissingMediaPropertyError(name="audio codec")
             if output.suffix not in AUDIO_CONTAINERS:
                 raise InvalidContainerTypeError(
                     extension=output.suffix,
@@ -215,6 +194,8 @@ def _validate_output(output: Path, media: Media, media_type: OutputMediaType) ->
                     supported=",".join(AUDIO_CONTAINERS),
                 )
             for audio_track in media.audio:
+                if audio_track.codec is None:
+                    raise MissingMediaPropertyError(name="audio codec")
                 if output.suffix not in AUDIO_CODECS[audio_track.codec].containers:
                     raise InvalidContainerError(
                         extension=output.suffix,
@@ -238,7 +219,7 @@ def _validate_output(output: Path, media: Media, media_type: OutputMediaType) ->
         case OutputMediaType.VIDEO:
             if media.video is None:
                 raise MissingMediaPropertyError(name="video")
-            if media.video is not None and media.video.codec is None:
+            if media.video.codec is None:
                 raise MissingMediaPropertyError(name="video codec")
             if output.suffix not in VIDEO_CONTAINERS:
                 raise InvalidContainerTypeError(

@@ -400,7 +400,7 @@ msgstr ""
 #: pymedia/models/config.py:303
 #, python-format
 msgid ""
-"Invalid configuration setting: app.language is expected one of: "
+"Invalid configuration setting: typer_instance.language is expected one of: "
 "%(expected)s."
 msgstr ""
 
@@ -413,7 +413,7 @@ msgstr ""
 
 #: pymedia/models/config.py:334
 msgid ""
-"Invalid configuration setting: app.stall_timeout is expected to an "
+"Invalid configuration setting: typer_instance.stall_timeout is expected to an "
 "integer between 30 to 600."
 msgstr ""
 

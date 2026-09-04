@@ -3,7 +3,7 @@
 from pymedia.data.types import OverwriteMode, ScaleMode
 from pymedia.locales import _  # noqa
 from pymedia.pipeline.gif_pipeline import GifPipeline
-from pymedia.typer.app import app
+from pymedia.typer.instance import typer_instance
 from pymedia.typer.options import (
     CropOption,
     DebugOption,
@@ -27,15 +27,19 @@ _HELP = _(
 Generates an animated GIF from the specified video.
 
 [bold]Examples[/bold]:
-  Convert a video to GIF:   > pymedia gif input.mp4
-  Convert a time range:     > pymedia gif input.mp4 --start 00:00:05 --end 00:00:12
-  Set size and frame rate:  > pymedia gif input.mp4 --size 480x270 --fps 15
-  Save to a specific file:  > pymedia gif input.mp4 --output output.gif
+  Convert a video to GIF:   
+    > pymedia gif input.mp4
+  Convert a time range:     
+    > pymedia gif input.mp4 --start 00:00:05 --end 00:00:12
+  Set size and frame rate:  
+    > pymedia gif input.mp4 --size 480x270 --fps 15
+  Save to a specific file:  
+    > pymedia gif input.mp4 --output output.gif
 """
 )
 
 
-@app.command(
+@typer_instance.command(
     help=_HELP,
     no_args_is_help=True,
 )

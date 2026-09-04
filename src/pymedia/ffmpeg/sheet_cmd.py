@@ -13,7 +13,7 @@ from pymedia.errors import (
 from pymedia.locale_manager import locale_manager
 from pymedia.locales import _  # noqa
 from pymedia.models.media import Audio, Subtitle
-from pymedia.models.pipeline.sheet_pipeline import SheetParameters
+from pymedia.models.parameters import SheetParameters
 from pymedia.utils import parse_quantity, parse_size, parse_timedelta, to_ffmpeg_path
 
 

@@ -16,33 +16,7 @@ from pymedia.data.types import (
     ScaleMode,
 )
 from pymedia.locales import _  # noqa
-
-# =============================================================================
-#  Callbacks
-# =============================================================================
-
-
-def _show_help(ctx: typer.Context, value: bool) -> None:
-    """Muestra el texto de ayuda del comando en el idioma activo."""
-    if value:
-        typer.echo(ctx.get_help())
-        raise typer.Exit()
-
-
-def _validate_path(path: Path) -> Path:
-    """Valida la ruta indicada."""
-    if not path.is_file():
-        raise typer.BadParameter(_("%(path)s is not a file.") % {"path": path})
-    return path
-
-
-def _validate_path_list(paths: list[Path]) -> list[Path]:
-    """Valida la ruta indicada."""
-    for p in paths:
-        if not p.is_file():
-            raise typer.BadParameter(_("%(path)s is not a file.") % {"path": p})
-    return paths
-
+from pymedia.typer.service import show_help, validate_path, validate_path_list
 
 # =============================================================================
 #  Argumentos
@@ -53,7 +27,7 @@ InputSingleArgument = Annotated[
     Path,
     typer.Argument(
         help=_("Video to process."),
-        callback=_validate_path,
+        callback=validate_path,
     ),
 ]
 
@@ -61,7 +35,7 @@ InputListArgument = Annotated[
     list[Path],
     typer.Argument(
         help=_("Video list to process."),
-        callback=_validate_path_list,
+        callback=validate_path_list,
     ),
 ]
 
@@ -85,7 +59,7 @@ HelpOption = Annotated[
     typer.Option(
         default="--help",
         help=_("Show this message and exit."),
-        callback=_show_help,
+        callback=show_help,
         is_eager=True,
         expose_value=False,
     ),
