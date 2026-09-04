@@ -8,7 +8,12 @@ import io
 import sys
 
 from pymedia.locale_manager import locale_manager
-from pymedia.typer.commands import gif_command, info_command, sheet_command
+from pymedia.typer.commands import (
+    gif_command,
+    info_command,
+    screenshoot_command,
+    sheet_command,
+)
 
 # Cargar el idioma ANTES de importar typer_options (que usa locales en los help=)
 locale_manager.set_language(locale_manager.detect_language())
@@ -21,6 +26,7 @@ if sys.platform == "win32" and isinstance(sys.stdout, io.TextIOWrapper):
 app = typer_instance()
 app.add_typer(typer_instance=gif_command)
 app.add_typer(typer_instance=info_command)
+app.add_typer(typer_instance=screenshoot_command)
 app.add_typer(typer_instance=sheet_command)
 
 

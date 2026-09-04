@@ -64,7 +64,7 @@ class SheetParameters(
 
 
 @dataclass(kw_only=True)
-class ThumbnailParameters(
+class ScreenshootParameters(
     BaseParameters,
     InputSingleMixin,
     OutputSingleMixin,
@@ -78,4 +78,4 @@ class ThumbnailParameters(
     FlipMixin,
     RotateMixin,
 ):
-    """Parámetros validados y parseados para generar thumbnails."""
+    """Parámetros validados y parseados para generar capturas de vídeo."""

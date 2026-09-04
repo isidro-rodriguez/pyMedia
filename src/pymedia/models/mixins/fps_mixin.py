@@ -48,12 +48,14 @@ class FpsImageMixin:
 
     fps: Fraction | None = None
 
-    def create_fps(self, every: int) -> None:
+    def create_fps(self, every: int | None) -> None:
         """Crea el atributo fps, respecto a cada cuantos segundos se toma una imagen.
 
         Args:
             every: Cada cuantos segundos se extrae una imagen.
         """
+        if every is None:
+            return
         self.fps = Fraction(1, every)
 
     def to_fps_cmd(self) -> str:

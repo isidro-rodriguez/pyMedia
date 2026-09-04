@@ -5,10 +5,10 @@ from enum import Enum
 from pathlib import Path
 
 from pymedia.errors import MissingParameterError
-from pymedia.models.pipeline.thumbnail_pipeline import ThumbnailParameters
+from pymedia.models.parameters import ScreenshootParameters
 
 
-class _ThumbnailMode(Enum):
+class _ScreenshootMode(Enum):
     """Subtipos de thumbnails que soporta el generador."""
 
     TIMESTAMP = "timestamp"
@@ -16,10 +16,10 @@ class _ThumbnailMode(Enum):
     SCENE = "scene"
 
 
-class ThumbnailCmd:
+class ScreenshootCmd:
     """Compone los comandos ffmpeg para generar thumbnails."""
 
-    def __init__(self, params: ThumbnailParameters) -> None:
+    def __init__(self, params: ScreenshootParameters) -> None:
         """Inicializa el generador y resuelve el modo de thumbnail.
 
         Args:
@@ -46,7 +46,7 @@ class ThumbnailCmd:
         if self._params.output is None:
             raise MissingParameterError(name="output")
 
-        if self._mode is _ThumbnailMode.TIMESTAMP:
+        if self._mode is _ScreenshootMode.TIMESTAMP:
             if timestamp is None:
                 raise MissingParameterError(name="timestamp_at")
             output = self._params.output.with_stem(
@@ -56,15 +56,15 @@ class ThumbnailCmd:
         output = self._params.output.with_stem(f"{self._params.output.stem}_%03d")
         return self._build_cmd(output=output)
 
-    def _resolve_mode(self) -> _ThumbnailMode:
+    def _resolve_mode(self) -> _ScreenshootMode:
         """Establece el modo de obtención de imágenes para mayor claridad de módulo."""
         params = self._params
         if params.timestamp_at is not None:
-            return _ThumbnailMode.TIMESTAMP
+            return _ScreenshootMode.TIMESTAMP
         if params.scene is not None:
-            return _ThumbnailMode.SCENE
+            return _ScreenshootMode.SCENE
         if params.fps is not None:
-            return _ThumbnailMode.INTERVAL
+            return _ScreenshootMode.INTERVAL
         raise MissingParameterError(name="timestamp_at, scene o fps")
 
     def _build_filters(self) -> str:
@@ -73,12 +73,12 @@ class ThumbnailCmd:
         filters: list[str] = []
 
         match self._mode:
-            case _ThumbnailMode.TIMESTAMP:
+            case _ScreenshootMode.TIMESTAMP:
                 filters.append("thumbnail=30")
-            case _ThumbnailMode.INTERVAL:
+            case _ScreenshootMode.INTERVAL:
                 filters.append("thumbnail=30")
                 filters.append(params.to_fps_cmd())
-            case _ThumbnailMode.SCENE:
+            case _ScreenshootMode.SCENE:
                 filters.append(params.to_scene_cmd())
 
         filters.append(params.to_image_quality_cmd().format)
@@ -108,7 +108,7 @@ class ThumbnailCmd:
         params = self._params
         cmd: list[str] = ["ffmpeg", "-y"]
 
-        if self._mode is _ThumbnailMode.TIMESTAMP:
+        if self._mode is _ScreenshootMode.TIMESTAMP:
             if timestamp is None:
                 raise MissingParameterError(name="timestamp")
             cmd.extend(["-ss", str(timestamp)])
@@ -126,7 +126,7 @@ class ThumbnailCmd:
             ]
         )
 
-        if self._mode is _ThumbnailMode.TIMESTAMP:
+        if self._mode is _ScreenshootMode.TIMESTAMP:
             cmd.extend(["-frames:v", "1"])
         else:
             cmd.extend(["-fps_mode", "vfr"])

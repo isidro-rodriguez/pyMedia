@@ -98,7 +98,7 @@ class TimestampAtMixin(_HasSingleMedia):
 
     timestamp_at: list[timedelta] | None = None
 
-    def create_timestamp_at(self, times_str: str) -> None:
+    def create_timestamp_at(self, times_str: str | None) -> None:
         """Parsea y valida un str de timestamp de marca de tiempo.
 
         Args:
@@ -107,17 +107,23 @@ class TimestampAtMixin(_HasSingleMedia):
         Raises:
             InvalidArgumentError: Si el str no tiene un formato válido.
         """
+        if times_str is None:
+            return
+
         times: list[timedelta] = []
+
         try:
             times_array = times_str.split(",")
         except ValueError as e:
             raise InvalidArgumentError(
                 msg=_("Invalidad timestamp list format. Expected hh:mm:ss,hh:mm:ss,...")
             ) from e
+
         for time_str in times_array:
             time = _process_time(time_str=time_str, media=self.media)
             times.append(time)
         times.sort()
+        
         self.timestamp_at = times
 
 

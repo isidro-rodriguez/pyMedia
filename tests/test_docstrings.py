@@ -10,13 +10,13 @@ import dataclasses
 import re
 
 import pytest
-
 from pymedia.models.pipeline.gif_pipeline import GifArguments, GifParameters
 from pymedia.models.pipeline.info_pipeline import InfoArguments, InfoParameters
 from pymedia.models.pipeline.sheet_pipeline import SheetArguments, SheetParameters
-from pymedia.models.pipeline.thumbnail_pipeline import (
+
+from pymedia.typer.commands.thumbnail_pipeline import (
+    ScreenshootParameters,
     ThumbnailArguments,
-    ThumbnailParameters,
 )
 
 SECTION_HEADER = re.compile(r"^\s*(Args|Returns|Raises|Examples?|Notes?|Warns)\s*:\s*$")
@@ -30,7 +30,7 @@ PIPELINE_DATACLASSES = [
     SheetArguments,
     SheetParameters,
     ThumbnailArguments,
-    ThumbnailParameters,
+    ScreenshootParameters,
 ]
 
 

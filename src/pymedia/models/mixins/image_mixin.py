@@ -49,12 +49,14 @@ class SceneMixin:
 
     scene: float | None = None
 
-    def create_scene(self, scene: float) -> None:
+    def create_scene(self, scene: float | int | None) -> None:
         """Crea el parámetro scene.
 
         Args:
             scene: Índice de sensibilidad de cambio de escena.
         """
+        if scene is None:
+            return
         self.scene = scene
 
     def to_scene_cmd(self) -> str:
