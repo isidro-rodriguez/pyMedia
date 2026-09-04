@@ -1,6 +1,5 @@
 """Comando Typer para iniciar la generación de GIF."""
 
-from pymedia.data.types import OverwriteMode, ScaleMode
 from pymedia.locales import _  # noqa
 from pymedia.pipeline.gif_pipeline import GifPipeline
 from pymedia.typer.instance import typer_instance
@@ -21,6 +20,7 @@ from pymedia.typer.options import (
     TimestampEndGifOption,
     TimestampStartGifOption,
 )
+from pymedia.types import OverwriteMode, ScaleMode
 
 _HELP = _(
     """\

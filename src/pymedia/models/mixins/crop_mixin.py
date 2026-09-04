@@ -2,7 +2,6 @@
 
 from dataclasses import dataclass
 
-from pymedia.data.types import CropArea
 from pymedia.errors import (
     InvalidArgumentError,
     InvalidParameterError,
@@ -11,6 +10,7 @@ from pymedia.errors import (
 )
 from pymedia.locales import _  # noqa
 from pymedia.models.media import Media
+from pymedia.types import CropArea
 
 
 @dataclass(kw_only=True)

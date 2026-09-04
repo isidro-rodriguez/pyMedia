@@ -3,7 +3,6 @@
 from abc import ABC
 from dataclasses import dataclass
 
-from pymedia.data.types import OverwriteMode
 from pymedia.models.mixins.crop_mixin import CropMixin
 from pymedia.models.mixins.flip_mixin import FlipMixin
 from pymedia.models.mixins.fps_mixin import FpsGifMixin, FpsImageMixin
@@ -17,6 +16,7 @@ from pymedia.models.mixins.timestamps_mixin import (
     TimestampAtMixin,
     TimestampStartEndMixin,
 )
+from pymedia.types import OverwriteMode
 
 
 @dataclass(kw_only=True)

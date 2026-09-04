@@ -2,7 +2,6 @@
 
 from pathlib import Path
 
-from pymedia.data.types import OutputMediaType, OverwriteMode, RotateMode, ScaleMode
 from pymedia.errors import (
     MissingMediaError,
     MissingParameterError,
@@ -11,6 +10,7 @@ from pymedia.ffmpeg.gif_cmd import GifCmd
 from pymedia.locales import _  # noqa
 from pymedia.models.parameters import GifParameters
 from pymedia.pipeline import BasePipeline
+from pymedia.types import OutputMediaType, OverwriteMode, RotateMode, ScaleMode
 
 
 class GifPipeline(BasePipeline[GifParameters]):

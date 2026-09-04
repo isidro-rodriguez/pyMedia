@@ -3,7 +3,6 @@
 import tempfile
 from pathlib import Path
 
-from pymedia.data.types import OutputMediaType, OverwriteMode, PresetsSheetMode
 from pymedia.errors import (
     CommandGenerationError,
     MissingMediaError,
@@ -14,6 +13,7 @@ from pymedia.ffmpeg.sheet_cmd import SheetCmd
 from pymedia.locales import _  # noqa
 from pymedia.models.parameters import SheetParameters
 from pymedia.pipeline import BasePipeline
+from pymedia.types import OutputMediaType, OverwriteMode, PresetsSheetMode
 
 
 class SheetPipeline(BasePipeline[SheetParameters]):

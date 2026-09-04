@@ -1,8 +1,8 @@
 """Composición de comandos ffmpeg para el subcomando gif."""
 
-from pymedia.data.types import OverwriteMode
 from pymedia.errors import MissingParameterError
 from pymedia.models.parameters import GifParameters
+from pymedia.types import OverwriteMode
 
 
 class GifCmd:

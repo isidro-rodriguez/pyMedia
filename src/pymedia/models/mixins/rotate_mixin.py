@@ -2,8 +2,8 @@
 
 from dataclasses import dataclass
 
-from pymedia.data.types import RotateMode
 from pymedia.errors import MissingParameterError
+from pymedia.types import RotateMode
 
 
 @dataclass(kw_only=True)

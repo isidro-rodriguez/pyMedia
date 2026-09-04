@@ -9,14 +9,14 @@ from typing import Annotated
 
 import typer
 
-from pymedia.data.types import (
+from pymedia.locales import _  # noqa
+from pymedia.typer.service import show_help, validate_path, validate_path_list
+from pymedia.types import (
     OverwriteMode,
     PresetsSheetMode,
     RotateMode,
     ScaleMode,
 )
-from pymedia.locales import _  # noqa
-from pymedia.typer.service import show_help, validate_path, validate_path_list
 
 # =============================================================================
 #  Argumentos

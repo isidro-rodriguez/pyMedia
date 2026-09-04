@@ -1,6 +1,5 @@
 """Comando Typer para mostrar la información de metadatos de un vídeo."""
 
-from pymedia.data.types import OverwriteMode, PresetsSheetMode
 from pymedia.locales import _  # noqa
 from pymedia.pipeline.sheet_pipeline import SheetPipeline
 from pymedia.typer.instance import (
@@ -16,6 +15,7 @@ from pymedia.typer.options import (
     PresetSheetOption,
 )
 from pymedia.typer.service import validate_conflict_output_options
+from pymedia.types import OverwriteMode, PresetsSheetMode
 
 _HELP = _(
     """\

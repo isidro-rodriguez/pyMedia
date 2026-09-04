@@ -1,6 +1,5 @@
 """Subcomando `thumbnail`: genera una o varias miniaturas desde un vídeo."""
 
-from pymedia.data.types import OverwriteMode, ScaleMode
 from pymedia.errors import (
     CommandGenerationError,
     MissingMediaError,
@@ -32,6 +31,7 @@ from pymedia.typer.options import (
     TimestampEndGifOption,
     TimestampStartGifOption,
 )
+from pymedia.types import OverwriteMode, ScaleMode
 
 
 class ThumbnailCommand(SinglePipeline[ThumbnailArguments, ThumbnailParameters]):

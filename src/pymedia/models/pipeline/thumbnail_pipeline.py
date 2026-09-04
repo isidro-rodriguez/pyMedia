@@ -3,7 +3,8 @@
 from dataclasses import dataclass
 from pathlib import Path
 
-from pymedia.data.types import OutputMediaType, RotateMode, ScaleMode
+from pymedia.models.pipeline.base_pipeline import BaseArguments, BaseParameters
+
 from pymedia.errors import (
     ExclusiveOptionsError,
     MissingRequiredOptionError,
@@ -21,7 +22,7 @@ from pymedia.models.mixins.timestamps_mixin import (
     TimestampAtMixin,
     TimestampStartEndMixin,
 )
-from pymedia.models.pipeline.base_pipeline import BaseArguments, BaseParameters
+from pymedia.types import OutputMediaType, RotateMode, ScaleMode
 
 
 @dataclass(frozen=True, slots=True, kw_only=True)

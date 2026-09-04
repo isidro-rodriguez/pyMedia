@@ -15,7 +15,6 @@ from typing import TypeVar
 import typer
 from rich.progress import Progress
 
-from pymedia.data.types import OverwriteMode
 from pymedia.errors import (
     CommandError,
     InvalidParameterError,
@@ -24,6 +23,7 @@ from pymedia.errors import (
 from pymedia.locales import _  # noqa
 from pymedia.logger import Logger
 from pymedia.models.config import Config
+from pymedia.types import OverwriteMode
 
 ParamsT = TypeVar("ParamsT")
 

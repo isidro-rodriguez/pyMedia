@@ -4,7 +4,6 @@ from unittest.mock import Mock
 
 import pytest
 
-from pymedia.data.types import Dimensions, ScaleMode
 from pymedia.errors import (
     InvalidArgumentError,
     InvalidParameterError,
@@ -12,6 +11,7 @@ from pymedia.errors import (
 )
 from pymedia.models.media import Media, Video
 from pymedia.models.mixins.scale_mixin import ScaleMixin
+from pymedia.types import Dimensions, ScaleMode
 
 _IGNORED_MSG = "Ignored scale. Target scale > video resolution, it requires upscale."
 

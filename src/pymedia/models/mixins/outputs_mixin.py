@@ -13,7 +13,6 @@ from pymedia.data.containers import (
     SUBTITLE_CONTAINERS,
     VIDEO_CONTAINERS,
 )
-from pymedia.data.types import OutputMediaType
 from pymedia.data.video_codecs import VIDEO_CODECS
 from pymedia.errors import (
     InvalidArgumentError,
@@ -24,6 +23,7 @@ from pymedia.errors import (
 )
 from pymedia.locales import _  # noqa
 from pymedia.models.media import Media
+from pymedia.types import OutputMediaType
 
 
 class _HasSingleMedia(Protocol):

@@ -4,7 +4,6 @@ from pathlib import Path
 
 import pytest
 
-from pymedia.data.types import OutputMediaType
 from pymedia.errors import (
     ExclusiveOptionsError,
     InvalidArgumentError,
@@ -20,6 +19,7 @@ from pymedia.models.mixins.outputs_mixin import (
     _process_output,
     _validate_name,
 )
+from pymedia.types import OutputMediaType
 
 
 def _video(codec: str | None = "h264") -> Video:
