@@ -2,79 +2,14 @@
 
 from dataclasses import dataclass
 from datetime import timedelta
-from fractions import Fraction
 from pathlib import Path
 
 from pymedia.ffmpeg.probe import probe
 from pymedia.logger import Logger
+from pymedia.models.audio import Audio
+from pymedia.models.subtitle import Subtitle
+from pymedia.models.video import Video
 from pymedia.utils import parse_fraction, to_float, to_int
-
-
-@dataclass(frozen=True, kw_only=True, slots=True)
-class Video:
-    """Metadatos de la pista de vídeo de un medio.
-
-    Attributes:
-        codec: Nombre del códec de vídeo.
-        width: Ancho en píxeles.
-        height: Alto en píxeles.
-        fps: Frecuencia de imágenes por segundo.
-        bit_rate: Tasa de bits en bps.
-        pix_fmt: Formato de píxeles.
-        aspect_ratio: Relación de aspecto mostrada.
-        profile: Perfil del códec.
-    """
-
-    codec: str | None = None
-    width: int | None = None
-    height: int | None = None
-    fps: Fraction | None = None
-    bit_rate: int | None = None
-    pix_fmt: str | None = None
-    aspect_ratio: str | None = None
-    profile: str | None = None
-
-
-@dataclass(frozen=True, kw_only=True, slots=True)
-class Audio:
-    """Metadatos de una pista de audio de un medio.
-
-    Attributes:
-        codec: Nombre del códec de audio.
-        sample_rate: Frecuencia de muestreo en Hz.
-        channels: Número de canales.
-        channel_layout: Distribución de canales (p. ej. "stereo").
-        bit_rate: Tasa de bits en bps.
-        language: Código de idioma de la pista.
-    """
-
-    codec: str | None = None
-    sample_rate: int | None = None
-    channels: int | None = None
-    channel_layout: str | None = None
-    bit_rate: int | None = None
-    language: str | None = None
-
-
-@dataclass(frozen=True, kw_only=True, slots=True)
-class Subtitle:
-    """Metadatos de una pista de subtítulos de un medio.
-
-    Attributes:
-        index: Índice de la pista dentro del contenedor.
-        codec: Nombre del códec de subtítulos.
-        language: Código de idioma de la pista.
-        title: Título descriptivo de la pista.
-        forced: Si la pista está marcada como forzada.
-        default: Si la pista está marcada como predeterminada.
-    """
-
-    index: int | None = None
-    codec: str | None = None
-    language: str | None = None
-    title: str | None = None
-    forced: bool | None = None
-    default: bool | None = None
 
 
 @dataclass(frozen=True, kw_only=True, slots=True)
