@@ -1,4 +1,9 @@
-"""Mixins para el procesamiento de la ruta o directorio de salida."""
+"""Mixins para el procesamiento de la ruta o directorio de salida.
+
+Cada tipo de medio de salida (imagen animada, imagen, subtítulo, ...) tiene
+su propio mixin minimalista con un atributo tipado, y delega el cálculo y la
+validación de la ruta en las funciones privadas compartidas del módulo.
+"""
 
 import re
 from dataclasses import dataclass
@@ -26,56 +31,39 @@ from pymedia.models.media import Media
 from pymedia.types import OutputMediaType
 
 
-class _HasSingleMedia(Protocol):
+class _HasMedia(Protocol):
+    """Objeto que expone la ruta y los metadatos del fichero de entrada."""
+
     media: Media
-    input_single: Path
-
-
-class _HasBatchMedia(Protocol):
-    media_list: list[Media]
-    input_list: list[Path]
 
 
 @dataclass(kw_only=True)
-class OutputSingleMixin(_HasSingleMedia):
-    """Mixin que gestiona la ruta de salida para comandos de fichero único.
+class AnimatedOutputMixin(_HasMedia):
+    """Mixin para la ruta de salida de imágenes animadas (GIF).
 
     Attributes:
-        output: Ruta del fichero de salida procesada, o None si aún no
+        animated_output: Ruta del fichero GIF de salida, o None si aún no
             se ha creado.
     """
 
-    output: Path | None = None
+    animated_output: Path | None = None
 
-    def create_output(
+    def create_animated_output(
         self,
-        media_type: OutputMediaType,
         affix: str | None = None,
         extension: str | None = None,
         output: Path | None = None,
     ) -> None:
-        """Procesa y asigna la ruta de salida a partir de los parámetros de entrada.
+        """Procesa y asigna la ruta del fichero GIF de salida.
 
         Args:
-            media_type: Tipo de medio de salida esperado.
             affix: Sufijo a añadir al nombre del fichero de salida.
             extension: Extensión a forzar en el fichero de salida.
             output: Ruta absoluta del fichero de salida procesado.
-
-        Raises:
-            MissingMediaError: Si no se pudieron obtener los metadatos del fichero.
-            MissingMediaPropertyError: Si no se pudo obtener la propiedad
-                `height` del vídeo.
-            PermissionDeniedError: Si el usuario no tiene permisos para crear el
-                directorio destino.
-            InvalidArgumentError: Si el nombre tiene caracteres inválidos para Windows.
-            InvalidContainerError: Si el contenedor no corresponde al códec usado.
-            InvalidContainerTypeError: Si el contenedor no corresponde al tipo de medio.
         """
-        self.output = _process_output(
-            input_single=self.input_single,
+        self.animated_output = _process_output(
             media=self.media,
-            media_type=media_type,
+            media_type=OutputMediaType.GIF,
             affix=affix,
             extension=extension,
             output=output,
@@ -83,61 +71,76 @@ class OutputSingleMixin(_HasSingleMedia):
 
 
 @dataclass(kw_only=True)
-class OutputBatchMixin(_HasBatchMedia):
-    """Mixin que gestiona la ruta o directorio de salida para comandos por lotes.
+class ImageOutputMixin(_HasMedia):
+    """Mixin para la ruta o directorio de salida de imágenes.
 
     Attributes:
-        output: Ruta del fichero de salida procesada, válida solo cuando
-            el lote contiene un único fichero.
-        output_directory: Directorio de salida procesado para lotes de
-            varios ficheros.
+        image_output: Ruta del fichero de imagen de salida, válida también
+            cuando el lote contiene un único fichero.
+        output_directory: Directorio de salida para lotes de varias imágenes.
     """
 
-    output: Path | None = None
+    image_output: Path | None = None
     output_directory: Path | None = None
 
-    def create_output(
+    def create_image_output(
         self,
-        input_single: Path,
-        media: Media,
-        media_type: OutputMediaType,
         output: Path | None = None,
         output_directory: Path | None = None,
         affix: str | None = None,
         extension: str | None = None,
     ) -> None:
-        """Procesa y asigna la ruta o directorio de salida para un lote de entradas.
+        """Procesa y asigna la ruta o directorio de salida de la imagen.
 
         Args:
-            input_single: Ruta del fichero de vídeo a procesar.
-            media: Metadatos del vídeo a procesar.
-            media_type: Tipo de medio de salida esperado.
             output: Ruta de salida explícita, válida solo para lotes de un
                 único fichero.
-            output_directory: Directorio de salida para lotes de varios
-                ficheros.
+            output_directory: Directorio de salida para lotes de varios ficheros.
             affix: Sufijo a añadir al nombre del fichero de salida.
             extension: Extensión a forzar en el fichero de salida.
-
-        Raises:
-            MissingMediaError: Si no se pudieron obtener los metadatos del fichero.
-            MissingMediaPropertyError: Si no se pudo obtener un name relevante.
-            PermissionDeniedError: Si el usuario no tiene permisos para crear el
-                directorio destino.
-            InvalidArgumentError: Si el nombre tiene caracteres inválidos para Windows.
-            InvalidContainerError: Si el contenedor no corresponde al códec usado.
-            InvalidContainerTypeError: Si el contenedor no corresponde al tipo de medio.
         """
         if output_directory is not None:
             self.output_directory = _process_output_directory(output_directory)
-        self.output = _process_output(
-            input_single=input_single,
-            media_type=media_type,
-            media=media,
+        self.image_output = _process_output(
+            media=self.media,
+            media_type=OutputMediaType.IMAGE,
             affix=affix,
             extension=extension,
             output=output,
             output_directory=self.output_directory,
+        )
+
+
+@dataclass(kw_only=True)
+class SubtitleOutputMixin(_HasMedia):
+    """Mixin para la ruta de salida de subtítulos.
+
+    Attributes:
+        subtitle_output: Ruta del fichero de subtítulos de salida, o None si
+            aún no se ha creado.
+    """
+
+    subtitle_output: Path | None = None
+
+    def create_subtitle_output(
+        self,
+        affix: str | None = None,
+        extension: str | None = None,
+        output: Path | None = None,
+    ) -> None:
+        """Procesa y asigna la ruta del fichero de subtítulos de salida.
+
+        Args:
+            affix: Sufijo a añadir al nombre del fichero de salida.
+            extension: Extensión a forzar en el fichero de salida.
+            output: Ruta absoluta del fichero de salida procesado.
+        """
+        self.subtitle_output = _process_output(
+            media=self.media,
+            media_type=OutputMediaType.SUBTITLE,
+            affix=affix,
+            extension=extension,
+            output=output,
         )
 
 
@@ -254,7 +257,6 @@ def _validate_output(output: Path, media: Media, media_type: OutputMediaType) ->
 
 
 def _process_output(
-    input_single: Path,
     media: Media,
     media_type: OutputMediaType,
     affix: str | None = None,
@@ -267,7 +269,7 @@ def _process_output(
         output = output.absolute()
     else:
         parent = output_directory if output_directory is not None else Path.cwd()
-        output = Path(parent / input_single.name).absolute()
+        output = Path(parent / media.path.name).absolute()
         if affix is not None:
             output = output.with_stem(f"{output.stem}{affix}")
         if extension is not None:

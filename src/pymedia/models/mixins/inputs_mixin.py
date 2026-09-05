@@ -2,144 +2,190 @@
 
 import subprocess
 from dataclasses import dataclass
+from datetime import timedelta
 from json import JSONDecodeError
 from pathlib import Path
 
 from pymedia.data.containers import VIDEO_CONTAINERS
 from pymedia.errors import (
     InvalidContainerTypeError,
-    MissingMediaError,
     MissingParameterError,
 )
+from pymedia.ffmpeg.probe import get_media_metadata
 from pymedia.logger import Logger
+from pymedia.models.audio import Audio
 from pymedia.models.media import Media
+from pymedia.models.subtitle import Subtitle
+from pymedia.models.video import Video
+from pymedia.utils import parse_fraction, to_float, to_int
 
 
 @dataclass(kw_only=True)
-class InputSingleMixin:
+class MediaMixin:
     """Mixin para recepción individual de inputs de vídeo.
 
     Attributes:
-        input_single: Ruta del fichero de vídeo a procesar.
         media: Metadatos del vídeo de entrada ya resuelto y validado.
-
-    Raises:
-        MissingMediaError: Si no se pudieron obtener los metadatos del fichero.
     """
 
-    input_single: Path | None = None
     media: Media | None = None
 
-    def create_input_single(self, input_single: Path, logger: Logger) -> None:
-        """Crea los atributos input_single y media.
+    def create_media_input(self, media_input: Path, logger: Logger) -> None:
+        """Crea los atributos media_input y media.
 
         Args:
-            input_single: Ruta del fichero de vídeo a procesar.
+            media_input: Ruta del fichero de vídeo a procesar.
             logger: Sistema de registro de mensajes.
-
-        Raises:
-            MissingMediaError: Si no se pudieron obtener los metadatos del fichero.
-            MissingParameterError: Si no se pudo obtener el parámetro `input_single`.
-            InvalidContainerTypeError: Si el contenedor no corresponde al tipo de medio.
         """
-        input_single = input_single.absolute()
-        self.input_single = input_single
-        self.media = _load_media(path=input_single, logger=logger)
+        self.media = _create_media(media_input=media_input, logger=logger)
 
-    def to_input_single_cmd(self) -> list[str]:
+    def to_media_input_cmd(self) -> list[str]:
         """Devuelve la lista de parámetros lista para el consumo de ffmpeg.
 
         Returns:
             Lista de parámetros lista para el consumo de ffmpeg.
 
         Raises:
-            MissingParameterError: Si no se pudo obtener el parámetro `input_single`.
+            MissingParameterError: Si no se obtiene el atributo `media`.
         """
-        if self.input_single is None:
-            raise MissingParameterError(name="input_single")
-        return ["-i", str(self.input_single)]
+        if self.media is None:
+            raise MissingParameterError(name="media")
+
+        return ["-i", str(self.media.path)]
 
 
 @dataclass(kw_only=True)
-class InputListMixin:
+class MediaListMixin:
     """Mixin para recepción de una lista de inputs de vídeo.
 
     Attributes:
-        input_list: Lista de rutas de los ficheros de vídeo a procesar.
         media_list: Lista de metadatos de los vídeos a procesar.
-
-    Raises:
-        MissingMediaError: Si no se pudieron obtener los metadatos del fichero.
     """
 
-    input_list: list[Path] | None = None
     media_list: list[Media] | None = None
 
-    def create_input_list(self, input_list: list[Path], logger: Logger) -> None:
-        """Crea los atributos input_list y media_list.
+    def create_media_list(self, media_input_list: list[Path], logger: Logger) -> None:
+        """Crea el atributo media_list con los metadatos de cada vídeo.
 
         Args:
-            input_list: Lista de rutas de los ficheros de vídeo a procesar.
+            media_input_list: Lista de rutas de los ficheros de vídeo a procesar.
             logger: Sistema de registro de mensajes.
-
-        Raises:
-            MissingMediaError: Si no se pudieron obtener los metadatos del fichero.
-            MissingParameterError: Si no se pudo obtener el parámetro `input_list`.
-            InvalidContainerTypeError: Si el contenedor no corresponde al tipo de medio.
         """
-        inputs: list[Path] = []
-        medias: list[Media] = []
+        media_list: list[Media] = []
 
-        for input_single in input_list:
-            input_single = input_single.absolute()
-            inputs.append(input_single)
-            medias.append(_load_media(path=input_single, logger=logger))
+        for m in media_input_list:
+            media = _create_media(media_input=m.absolute(), logger=logger)
+            media_list.append(media)
 
-        self.input_list = inputs
-        self.media_list = medias
+        self.media_list = media_list
 
-    def to_input_list_cmd(self) -> list[str]:
+    def to_media_input_list_cmd(self) -> list[str]:
         """Devuelve la lista de parámetros lista para el consumo de ffmpeg.
 
         Returns:
             Lista de parámetros lista para el consumo de ffmpeg.
 
         Raises:
-            MissingParameterError: Si no se pudo obtener el parámetro `input_list`.
+            MissingParameterError: Si no se obtiene el atributo `media_list`.
         """
-        if self.input_list is None:
-            raise MissingParameterError(name="input_list")
+        if self.media_list is None:
+            raise MissingParameterError(name="media_list")
 
         cmd_list: list[str] = []
-        for input_single in self.input_list:
+        for media in self.media_list:
             cmd_list.append("-i")
-            cmd_list.append(str(input_single))
+            cmd_list.append(str(media.path))
 
         return cmd_list
 
 
-def _load_media(path: Path, logger: Logger) -> Media:
-    """Carga los metadatos de un vídeo validando su extensión."""
+def _create_media(media_input: Path, logger: Logger) -> "Media":
+    """Mapea el JSON de ffprobe a MediaInput."""
 
-    def _validate_video_extension() -> None:
+    def _validate_media_extension() -> None:
         """Valida que la lista de ficheros tengan extensiones de vídeos."""
-        if path.suffix not in VIDEO_CONTAINERS:
+        if media_input.suffix not in VIDEO_CONTAINERS:
             raise InvalidContainerTypeError(
-                extension=path.suffix,
+                extension=media_input.suffix,
                 media_type="video",
                 supported=", ".join(VIDEO_CONTAINERS),
             )
 
-    _validate_video_extension()
+    _validate_media_extension()
+
+    data = get_media_metadata(path=media_input, logger=logger)
+
+    video = None
+    audio = None
+    subtitles = None
+
+    for stream in data.get("streams", []):
+        codec_type = stream.get("codec_type")
+        tags = stream.get("tags", {})
+        language = tags.get("language")
+
+        if codec_type == "video":
+            video = Video(
+                codec=stream.get("codec_name"),
+                width=stream.get("width"),
+                height=stream.get("height"),
+                fps=parse_fraction(stream.get("avg_frame_rate")),
+                bit_rate=to_int(stream.get("bit_rate")),
+                pix_fmt=stream.get("pix_fmt"),
+                aspect_ratio=stream.get("display_aspect_ratio"),
+                profile=stream.get("profile"),
+            )
+        elif codec_type == "audio":
+            if audio is None:
+                audio = []
+            audio.append(
+                Audio(
+                    path=media_input.absolute(),
+                    codec=stream.get("codec_name"),
+                    sample_rate=to_int(stream.get("sample_rate")),
+                    channels=stream.get("channels"),
+                    channel_layout=stream.get("channel_layout"),
+                    bit_rate=to_int(stream.get("bit_rate")),
+                    language=language,
+                )
+            )
+        elif codec_type == "subtitle":
+            if subtitles is None:
+                subtitles = []
+            disposition = stream.get("disposition", {})
+            subtitles.append(
+                Subtitle(
+                    path=media_input.absolute(),
+                    index=stream.get("index"),
+                    codec=stream.get("codec_name"),
+                    language=language,
+                    title=tags.get("title"),
+                    forced=bool(disposition.get("forced")),
+                    default=bool(disposition.get("default")),
+                )
+            )
+
+    fmt = data.get("format", {})
+    duration_val = to_float(fmt.get("duration"))
 
     try:
-        media: Media = Media.load(path=path, logger=logger)
+        media = Media(
+            path=media_input.absolute(),
+            duration=timedelta(seconds=duration_val)
+            if duration_val is not None
+            else None,
+            size=to_int(fmt.get("size")),
+            format_name=fmt.get("format_name"),
+            video=video,
+            audio=audio,
+            subtitle=subtitles,
+        )
     except (
         ValueError,
         subprocess.CalledProcessError,
         JSONDecodeError,
         OSError,
     ) as e:
-        raise MissingMediaError(path=str(path)) from e
+        raise MissingParameterError(name="media") from e
 
     return media

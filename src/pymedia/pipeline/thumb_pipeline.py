@@ -5,7 +5,6 @@ from pathlib import Path
 from pymedia.errors import (
     CommandGenerationError,
     ExclusiveOptionsError,
-    MissingMediaError,
     MissingParameterError,
     MissingRequiredOptionError,
 )
@@ -13,7 +12,7 @@ from pymedia.ffmpeg.thumb_cmd import ThumbCmd
 from pymedia.locales import _  # noqa
 from pymedia.models.parameters import ThumbParameters
 from pymedia.pipeline import BasePipeline
-from pymedia.types import OutputMediaType, OverwriteMode, RotateMode, ScaleMode
+from pymedia.types import OverwriteMode, RotateMode, ScaleMode
 
 
 class ThumbPipeline(BasePipeline[ThumbParameters]):
@@ -21,7 +20,7 @@ class ThumbPipeline(BasePipeline[ThumbParameters]):
 
     def process_parameters(
         self,
-        input_single: Path,
+        media_input: Path,
         output: Path | None = None,
         overwrite: OverwriteMode = OverwriteMode.ASK,
         every: int | None = None,
@@ -40,7 +39,7 @@ class ThumbPipeline(BasePipeline[ThumbParameters]):
         """Valida y parsea los argumentos en parámetros procesados.
 
         Attributes:
-            input_single: Ruta del fichero de vídeo a procesar.
+            media_input: Ruta del fichero de vídeo a procesar.
             output: Ruta absoluta del fichero de salida procesado.
             overwrite: Política ante conflicto de salida ya existente.
             every: Periodo, en segundos, entre capturas generadas.
@@ -63,13 +62,12 @@ class ThumbPipeline(BasePipeline[ThumbParameters]):
             vflip=vflip,
         )
 
-        params.create_input_single(
-            input_single=input_single,
+        params.create_media_input(
+            media_input=media_input,
             logger=self.logger,
         )
 
-        params.create_output(
-            media_type=OutputMediaType.IMAGE,
+        params.create_image_output(
             output=output,
             affix="_thumbnail",
             extension=".jpg",
@@ -110,10 +108,8 @@ class ThumbPipeline(BasePipeline[ThumbParameters]):
 
     def process_cmd(self) -> None:
         """Construye y ejecuta los comandos ffmpeg de las miniaturas."""
-        if self.params.input_single is None:
-            raise MissingParameterError(name="input_single")
         if self.params.media is None:
-            raise MissingMediaError(path=str(self.params.input_single))
+            raise MissingParameterError(name="media")
 
         if self.params.timestamp_at is not None:
             for timestamp in self.params.timestamp_at:
@@ -133,17 +129,15 @@ class ThumbPipeline(BasePipeline[ThumbParameters]):
 
         self.logger.debug(_("FFmpeg command: %(cmd)s"), cmd=cmd)
 
-        progress_time = self.resolve_progress_time(params=self.params)
-
         self.run_ffmpeg(
             cmd=cmd,
-            progress_time=progress_time,
+            progress_time=self.params.get_range_time(),
             description=_("Generating thumbnail"),
         )
 
         self.logger.info(
             msg=_("Thumbnail(s) generated successfully: %(output)s"),
-            output=self.params.output,
+            output=self.params.image_output,
         )
 
     def _validate_options(self) -> None:

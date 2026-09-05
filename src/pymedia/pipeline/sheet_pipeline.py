@@ -5,7 +5,6 @@ from pathlib import Path
 
 from pymedia.errors import (
     CommandGenerationError,
-    MissingMediaError,
     MissingMediaPropertyError,
     MissingParameterError,
 )
@@ -13,7 +12,7 @@ from pymedia.ffmpeg.sheet_cmd import SheetCmd
 from pymedia.locales import _  # noqa
 from pymedia.models.parameters import SheetParameters
 from pymedia.pipeline import BasePipeline
-from pymedia.types import OutputMediaType, OverwriteMode, PresetsSheetMode
+from pymedia.types import OverwriteMode, PresetsSheetMode
 
 
 class SheetPipeline(BasePipeline[SheetParameters]):
@@ -21,7 +20,7 @@ class SheetPipeline(BasePipeline[SheetParameters]):
 
     def process_parameters(
         self,
-        input_single: Path,
+        media_input: Path,
         overwrite: OverwriteMode,
         preset_sheet: PresetsSheetMode,
         output: Path | None = None,
@@ -30,24 +29,19 @@ class SheetPipeline(BasePipeline[SheetParameters]):
         """Valida y parsea los argumentos en parámetros procesados para un vídeo.
 
         Args:
-            input_single: Ruta del fichero de vídeo a procesar.
+            media_input: Ruta del fichero de vídeo a procesar.
             overwrite: Política ante conflicto de salida ya existente.
             preset_sheet: Estilo de hoja preajustado.
             output: Ruta absoluta del fichero de salida procesado.
             output_directory: Directorio de salida para lotes de ficheros.
         """
         params = SheetParameters(overwrite=overwrite)
-        params.create_input_single(input_single=input_single, logger=self.logger)
-        if params.input_single is None:
-            raise MissingParameterError(name="input_single")
+        params.create_media_input(media_input=media_input, logger=self.logger)
         if params.media is None:
             raise MissingParameterError(name="media")
-        params.create_output(
-            input_single=params.input_single,
-            media=params.media,
-            output_directory=output_directory,
-            media_type=OutputMediaType.IMAGE,
+        params.create_image_output(
             output=output,
+            output_directory=output_directory,
             affix="_sheet",
             extension=".jpg",
         )
@@ -56,10 +50,8 @@ class SheetPipeline(BasePipeline[SheetParameters]):
 
     def process_cmd(self) -> None:
         """Construye y ejecuta los comandos ffmpeg de capturas y cabecera."""
-        if self.params.input_single is None:
-            raise MissingParameterError(name="input_single")
         if self.params.media is None:
-            raise MissingMediaError(path=str(self.params.input_single))
+            raise MissingParameterError(name="media")
         if self.params.media.duration is None:
             raise MissingMediaPropertyError(name="media.duration")
 
@@ -91,5 +83,5 @@ class SheetPipeline(BasePipeline[SheetParameters]):
 
         self.logger.info(
             msg=_("Metadata generated successfully: %(output)s"),
-            output=self.params.output,
+            output=self.params.image_output,
         )

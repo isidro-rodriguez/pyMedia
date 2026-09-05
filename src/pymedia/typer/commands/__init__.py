@@ -1,1 +1,1 @@
-"""Módulos de subcomandos de Typer."""
+"""Instancias de subcomandos de Typer."""

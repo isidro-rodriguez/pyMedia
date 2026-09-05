@@ -1,10 +1,9 @@
 """Comandos de la familia thumbnails."""
 
+from pymedia.locales import _  # noqa
 import typer
 
-from pymedia.locales import _  # noqa
 from pymedia.pipeline.thumb_pipeline import ThumbPipeline
-from pymedia.typer.instance import typer_instance
 from pymedia.typer.options import (
     CropOption,
     DebugOption,
@@ -12,7 +11,7 @@ from pymedia.typer.options import (
     FlipHorizontalOption,
     FlipVerticalOption,
     HelpOption,
-    InputSingleArgument,
+    MediaInputArgument,
     OutputOption,
     OverwriteOption,
     RotateOption,
@@ -25,6 +24,8 @@ from pymedia.typer.options import (
     TimestampStartGifOption,
 )
 from pymedia.types import OverwriteMode, ScaleMode
+
+thumb_typer = typer.Typer()
 
 # =============================================================================
 #  Subcomando FRAMES
@@ -45,16 +46,14 @@ Captures thumbnails at the specified timestamps.
 )
 
 
-frames_command = typer.Typer(
+@thumb_typer.command(
     name="frames",
     help=_HELP_FRAMES,
+    rich_help_panel="Image commands",
     no_args_is_help=True,
 )
-
-
-@frames_command.callback(invoke_without_command=True)
-def _frames_run(
-    input_single: InputSingleArgument,
+def frames(
+    media_input: MediaInputArgument,
     output: OutputOption = None,
     overwrite: OverwriteOption = OverwriteMode.YES,
     timestamp_at: TimestampAtThumbnailOption = None,
@@ -71,7 +70,7 @@ def _frames_run(
     """Punto de entrada de Typer: construye los argumentos y ejecuta el comando.
 
     Args:
-        input_single: Ruta del fichero de vídeo a procesar.
+        media_input: Ruta del fichero de vídeo a procesar.
         output: Ruta absoluta del fichero de salida procesado.
         overwrite: Política ante conflicto de salida ya existente.
         timestamp_at: Lista de marcas de tiempo.
@@ -87,7 +86,7 @@ def _frames_run(
     """
     pipeline = ThumbPipeline(debug=debug)
     pipeline.process_parameters(
-        input_single=input_single,
+        media_input=media_input,
         output=output,
         overwrite=overwrite,
         timestamp_at=timestamp_at,
@@ -121,16 +120,16 @@ Captures thumbnails at regular intervals of the video.
     > pymedia interval input.mp4 --every 5 --output thumb.jpg
 """
 )
-interval_command = typer.Typer(
+
+
+@thumb_typer.command(
     name="interval",
     help=_HELP_INTERVAL,
+    rich_help_panel="Image commands",
     no_args_is_help=True,
 )
-
-
-@interval_command.callback(invoke_without_command=True)
-def _interval_run(
-    input_single: InputSingleArgument,
+def interval(
+    media_input: MediaInputArgument,
     output: OutputOption = None,
     overwrite: OverwriteOption = OverwriteMode.YES,
     every: EveryOption = None,
@@ -149,7 +148,7 @@ def _interval_run(
     """Punto de entrada de Typer: construye los argumentos y ejecuta el comando.
 
     Args:
-        input_single: Ruta del fichero de vídeo a procesar.
+        media_input: Ruta del fichero de vídeo a procesar.
         output: Ruta absoluta del fichero de salida procesado.
         overwrite: Política ante conflicto de salida ya existente.
         every: Periodo, en segundos, entre capturas generadas.
@@ -167,7 +166,7 @@ def _interval_run(
     """
     pipeline = ThumbPipeline(debug=debug)
     pipeline.process_parameters(
-        input_single=input_single,
+        media_input=media_input,
         output=output,
         overwrite=overwrite,
         every=every,
@@ -187,7 +186,7 @@ def _interval_run(
 
 
 if __name__ == "__main__":
-    typer_instance()
+    thumb_typer()
 
 # =============================================================================
 #  Subcomando SCENE
@@ -208,16 +207,16 @@ Captures thumbnails at the scene changes detected in the video.
     > pymedia scene input.mp4 --output thumb.jpg
 """
 )
-scene_command = typer.Typer(
+
+
+@thumb_typer.command(
     name="scene",
     help=_HELP_SCENE,
+    rich_help_panel="Image commands",
     no_args_is_help=True,
 )
-
-
-@scene_command.callback(invoke_without_command=True)
-def _scene_run(
-    input_single: InputSingleArgument,
+def scene(
+    media_input: MediaInputArgument,
     output: OutputOption = None,
     overwrite: OverwriteOption = OverwriteMode.YES,
     scene: SceneOption = None,
@@ -236,7 +235,7 @@ def _scene_run(
     """Punto de entrada de Typer: construye los argumentos y ejecuta el comando.
 
     Args:
-        input_single: Ruta del fichero de vídeo a procesar.
+        media_input: Ruta del fichero de vídeo a procesar.
         output: Ruta absoluta del fichero de salida procesado.
         overwrite: Política ante conflicto de salida ya existente.
         scene: Umbral de sensibilidad para detección de cambio de escena.
@@ -254,7 +253,7 @@ def _scene_run(
     """
     pipeline = ThumbPipeline(debug=debug)
     pipeline.process_parameters(
-        input_single=input_single,
+        media_input=media_input,
         output=output,
         overwrite=overwrite,
         scene=scene,

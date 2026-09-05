@@ -7,7 +7,6 @@ from rich.panel import Panel
 from rich.table import Table
 
 from pymedia.errors import (
-    MissingMediaError,
     MissingParameterError,
 )
 from pymedia.locale_manager import locale_manager
@@ -21,28 +20,26 @@ from pymedia.utils import parse_quantity, parse_size, parse_timedelta
 class InfoPipeline(BasePipeline[InfoParameters]):
     """Comando de CLI que imprime los metadatos de un vídeo de entrada."""
 
-    def process_parameters(self, input_single: Path) -> None:
+    def process_parameters(self, media_input: Path) -> None:
         """Valida y parsea los argumentos en parámetros procesados."""
         params: InfoParameters = InfoParameters()
-        params.create_input_single(input_single=input_single, logger=self.logger)
+        params.create_media_input(media_input=media_input, logger=self.logger)
         self.params = params
 
     def process_cmd(self) -> None:
         """Construye y muestra el panel Rich con los metadatos del vídeo."""
-        if self.params.input_single is None:
-            raise MissingParameterError(name="input_single")
         if self.params.media is None:
-            raise MissingMediaError(path=str(self.params.input_single))
+            raise MissingParameterError(name="media")
 
         panel = _build_info_panel(
             media=self.params.media,
-            single_input=self.params.input_single,
+            media_input=self.params.media.path,
             locale=locale_manager.detect_language(),
         )
         self.logger.print(panel)
 
 
-def _build_info_panel(media: Media, single_input: Path, locale: str = "en") -> Panel:
+def _build_info_panel(media: Media, media_input: Path, locale: str = "en") -> Panel:
     """Construye el panel Rich con los metadatos del vídeo."""
     panel_width = 80
     na = _("-")
@@ -52,7 +49,7 @@ def _build_info_panel(media: Media, single_input: Path, locale: str = "en") -> P
         table = Table(title=f"📁 {_('General')}", show_header=True, expand=True)
         table.add_column(header=_("Field"), style="bold", ratio=1)
         table.add_column(header=_("Value"), ratio=3)
-        table.add_row(_("File"), single_input.name)
+        table.add_row(_("File"), media_input.name)
         table.add_row(_("Container"), media.format_name or na)
         table.add_row(
             _("Duration"),
@@ -130,8 +127,8 @@ def _build_info_panel(media: Media, single_input: Path, locale: str = "en") -> P
         sections.append(_build_video_table(media.video))
     if media.audio:
         sections.append(_build_audio_table(media.audio))
-    if media.subtitles:
-        sections.append(_build_subtitles_table(media.subtitles))
+    if media.subtitle:
+        sections.append(_build_subtitles_table(media.subtitle))
 
     return Panel(
         renderable=Group(*sections),

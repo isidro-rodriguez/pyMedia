@@ -1,6 +1,7 @@
 """Tests de mixins de marcas de tiempo (pymedia.models.mixins.timestamps_mixin)."""
 
 from datetime import timedelta
+from pathlib import Path
 
 import pytest
 
@@ -18,7 +19,7 @@ from pymedia.models.mixins.timestamps_mixin import (
 
 def _media(duration: timedelta | None = timedelta(hours=2)) -> Media:
     """Vídeo fuente con 2 horas de duración por defecto."""
-    return Media(duration=duration)
+    return Media(path=Path("clip.mp4"), duration=duration)
 
 
 class TestCreateTimestampStart:

@@ -23,7 +23,7 @@ from pymedia.types import (
 # =============================================================================
 
 
-InputSingleArgument = Annotated[
+MediaInputArgument = Annotated[
     Path,
     typer.Argument(
         help=_("Video to process."),
@@ -31,7 +31,7 @@ InputSingleArgument = Annotated[
     ),
 ]
 
-InputListArgument = Annotated[
+MediaInputListArgument = Annotated[
     list[Path],
     typer.Argument(
         help=_("Video list to process."),

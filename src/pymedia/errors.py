@@ -100,6 +100,18 @@ class ExclusiveOptionsError(PyMediaError):
         super().__init__(message)
 
 
+class FfprobeError(PyMediaError):
+    """Errores relacionados con subtítulos."""
+
+    def __init__(self, msg: str) -> None:
+        """Inicializa el error con el mensaje indicado.
+
+        Args:
+            msg: Mensaje de error ya formateado.
+        """
+        super().__init__(msg)
+
+
 class InvalidArgumentError(PyMediaError):
     """Error por un argumento de CLI con valor no válido."""
 

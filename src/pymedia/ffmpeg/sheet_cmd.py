@@ -6,7 +6,6 @@ from pathlib import Path
 
 from pymedia.errors import (
     CommandGenerationError,
-    MissingMediaError,
     MissingMediaPropertyError,
     MissingParameterError,
 )
@@ -42,7 +41,7 @@ class SheetCmd:
             CommandGenerationError: Cuando ocurre un problema en generación de
                 comandos.
             MissingParameterError: Si falta algún parámetro requerido (preset,
-                input_single, output, pista de audio o subtítulo).
+                media_input, output, pista de audio o subtítulo).
             MissingMediaError: Si el objeto de metadatos del medio es None.
             MissingMediaPropertyError: Si falta alguna propiedad técnica requerida
                 en el objeto media (duration, fps, size, video, codec, etc.).
@@ -63,7 +62,7 @@ class SheetCmd:
             CommandGenerationError: Cuando ocurre un problema en generación de
                 comandos.
             MissingParameterError: Si falta algún parámetro requerido (preset,
-                input_single, output, pista de audio o subtítulo).
+                media_input, output, pista de audio o subtítulo).
             MissingMediaError: Si el objeto de metadatos del medio es None.
             MissingMediaPropertyError: Si falta alguna propiedad técnica requerida
                 en el objeto media (duration, fps, size, video, codec, etc.).
@@ -150,10 +149,8 @@ class SheetCmd:
 
         if preset is None:
             raise MissingParameterError(name="preset")
-        if params.input_single is None:
-            raise MissingParameterError(name="input_single")
         if media is None:
-            raise MissingMediaError(path=str(params.input_single))
+            raise MissingParameterError(name="media")
         if media.duration is None:
             raise MissingMediaPropertyError(name="duration")
         if media.video is None or media.video.fps is None:
@@ -191,7 +188,7 @@ class SheetCmd:
             "ffmpeg",
             "-y",
             "-i",
-            str(params.input_single),
+            str(media.path),
             "-filter_complex",
             ";".join(filter_complex_parts),
             "-map",
@@ -269,12 +266,10 @@ class SheetCmd:
         media = params.media
 
         # Validaciones críticas de estructura básica
-        if params.input_single is None:
-            raise MissingParameterError(name="input_single")
         if media is None:
-            raise MissingMediaError(path=str(params.input_single))
-        if params.output is None:
-            raise MissingParameterError(name="output")
+            raise MissingParameterError(name="media")
+        if params.image_output is None:
+            raise MissingParameterError(name="image_output")
         if preset is None:
             raise MissingParameterError(name="preset")
 
@@ -314,7 +309,7 @@ class SheetCmd:
             video_parts.append(f"{bit_rate_str} kb/s")
 
         # Ensamblado de líneas
-        lines = [f"{_('File')}: {params.input_single.name}"]
+        lines = [f"{_('File')}: {media.path}"]
 
         size_dur_parts = []
         if media.size:
@@ -339,9 +334,9 @@ class SheetCmd:
             if audio_line:
                 lines.append(audio_line)
 
-        if media.subtitles and len(media.subtitles) > 0:
+        if media.subtitle and len(media.subtitle) > 0:
             sub_line = _build_subtitles_line(
-                subtitles=media.subtitles, max_len=preset.max_line_length
+                subtitles=media.subtitle, max_len=preset.max_line_length
             )
             if sub_line:
                 lines.append(sub_line)
@@ -370,5 +365,5 @@ class SheetCmd:
             "-vf",
             ",".join(filters),
             *params.to_image_quality_cmd().compression,
-            str(params.output),
+            str(params.image_output),
         ]

@@ -25,8 +25,10 @@ class GifCmd:
         Raises:
             MissingParameterError: Si no se pudo obtener los parámetros.
         """
-        if self.params.output is None:
-            raise MissingParameterError(name="output")
+        if self.params.animated_output is None:
+            raise MissingParameterError(name="animated_output")
+        if self.params.media is None:
+            raise MissingParameterError(name="media")
 
         cmd = ["ffmpeg"]
 
@@ -41,13 +43,14 @@ class GifCmd:
 
         cmd.extend(
             [
-                *self.params.to_input_single_cmd(),
+                "-i",
+                str(self.params.media.path),
                 "-filter_complex",
                 self._build_filters(),
                 "-progress",
                 "pipe:1",
                 "-nostats",
-                str(self.params.output),
+                str(self.params.animated_output),
             ]
         )
 

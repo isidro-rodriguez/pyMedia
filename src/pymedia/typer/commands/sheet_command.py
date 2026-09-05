@@ -1,13 +1,13 @@
 """Comando Typer para mostrar la información de metadatos de un vídeo."""
 
+from pymedia.locales import _  # noqa
 import typer
 
-from pymedia.locales import _  # noqa
 from pymedia.pipeline.sheet_pipeline import SheetPipeline
 from pymedia.typer.options import (
     DebugOption,
     HelpOption,
-    InputListArgument,
+    MediaInputListArgument,
     OutputDirectoryOption,
     OutputOption,
     OverwriteOption,
@@ -15,6 +15,8 @@ from pymedia.typer.options import (
 )
 from pymedia.typer.service import validate_conflict_output_options
 from pymedia.types import OverwriteMode, PresetsSheetMode
+
+sheet_typer = typer.Typer()
 
 _HELP = _(
     """\
@@ -28,16 +30,15 @@ Generates a thumbnail grid sheet with media info header.
 """
 )
 
-sheet_command = typer.Typer(
+
+@sheet_typer.command(
     name="sheet",
     help=_HELP,
+    rich_help_panel="Analysis commands",
     no_args_is_help=True,
 )
-
-
-@sheet_command.callback(invoke_without_command=True)
-def _sheet_run(
-    input_list: InputListArgument,
+def sheet(
+    media_input_list: MediaInputListArgument,
     output: OutputOption = None,
     output_directory: OutputDirectoryOption = None,
     overwrite: OverwriteOption = OverwriteMode.ASK,
@@ -48,7 +49,7 @@ def _sheet_run(
     """Punto de entrada y desarrollo del pipeline.
 
     Args:
-        input_list: Lista de rutas de los ficheros de vídeo a procesar.
+        media_input_list: Lista de rutas de los ficheros de vídeo a procesar.
         output: Ruta absoluta del fichero de salida procesado.
         output_directory: Directorio de salida para lotes de ficheros.
         overwrite: Política ante conflicto de salida ya existente.
@@ -57,12 +58,14 @@ def _sheet_run(
         help_: Helper para mostrar esta línea en distintos idiomas.
     """
     validate_conflict_output_options(
-        input_list=input_list, output=output, output_directory=output_directory
+        media_input_list=media_input_list,
+        output=output,
+        output_directory=output_directory,
     )
-    for input_single in input_list:
+    for media_input in media_input_list:
         pipeline = SheetPipeline(debug=debug)
         pipeline.process_parameters(
-            input_single=input_single,
+            media_input=media_input,
             output=output,
             output_directory=output_directory,
             overwrite=overwrite,
@@ -71,7 +74,3 @@ def _sheet_run(
         if not pipeline.resolve_overwrite():
             continue
         pipeline.process_cmd()
-
-
-if __name__ == "__main__":
-    sheet_command()

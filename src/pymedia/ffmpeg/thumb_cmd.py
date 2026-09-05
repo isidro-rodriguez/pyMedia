@@ -44,17 +44,19 @@ class ThumbCmd:
             MissingParameterError: Si falta `output` o ningún parámetro
                 de modo (`timestamp_at`, `scene`, `fps`) está presente.
         """
-        if self.params.output is None:
-            raise MissingParameterError(name="output")
+        if self.params.image_output is None:
+            raise MissingParameterError(name="image_output")
 
         if self._mode is _ScreenshootMode.FRAMES:
             if timestamp is None:
                 raise MissingParameterError(name="timestamp_at")
-            output = self.params.output.with_stem(
-                f"{self.params.output.stem}_{str(timestamp).replace(':', '-')}"
+            output = self.params.image_output.with_stem(
+                f"{self.params.image_output.stem}_{str(timestamp).replace(':', '-')}"
             )
             return self._build_cmd(output=output, timestamp=timestamp)
-        output = self.params.output.with_stem(f"{self.params.output.stem}_%03d")
+        output = self.params.image_output.with_stem(
+            f"{self.params.image_output.stem}_%03d"
+        )
         return self._build_cmd(output=output)
 
     def _resolve_mode(self) -> _ScreenshootMode:
@@ -107,6 +109,9 @@ class ThumbCmd:
     ) -> list[str]:
         """Ensambla un único comando ffmpeg para el modo indicado."""
         params = self.params
+        if params.media is None:
+            raise MissingParameterError(name="media")
+
         cmd: list[str] = ["ffmpeg"]
 
         if self.params.overwrite is OverwriteMode.YES:
@@ -126,7 +131,8 @@ class ThumbCmd:
 
         cmd.extend(
             [
-                *params.to_input_single_cmd(),
+                "-i",
+                str(params.media.path),
                 "-vf",
                 self._build_filters(),
             ]

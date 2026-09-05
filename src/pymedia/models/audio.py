@@ -1,6 +1,7 @@
 """Metadatos de una pista de audio."""
 
 from dataclasses import dataclass
+from pathlib import Path
 
 
 @dataclass(frozen=True, kw_only=True, slots=True)
@@ -16,6 +17,7 @@ class Audio:
         language: Código de idioma de la pista.
     """
 
+    path: Path
     codec: str | None = None
     sample_rate: int | None = None
     channels: int | None = None

@@ -10,6 +10,7 @@ import subprocess
 import threading
 from abc import ABC, abstractmethod
 from datetime import timedelta
+from pathlib import Path
 from typing import TypeVar
 
 import typer
@@ -18,7 +19,6 @@ from rich.progress import Progress
 from pymedia.errors import (
     CommandError,
     InvalidParameterError,
-    MissingMediaPropertyError,
 )
 from pymedia.locales import _  # noqa
 from pymedia.logger import Logger
@@ -60,10 +60,24 @@ class BasePipeline[ParamsT](ABC):
 
     def resolve_overwrite(self) -> bool:
         """Comprueba si el fichero de salida existe y resuelve la sobrescritura."""
-        if (
-            self.params.overwrite != OverwriteMode.ASK
-            or not self.params.output.exists()
-        ):
+
+        def output_path() -> Path:
+            """Ruta absoluta del fichero de salida presente en los parámetros."""
+            output_fields = (
+                "animated_output",
+                "audio_output",
+                "image_output",
+                "media_output",
+                "subtitle_output",
+                "video_output",
+            )
+            for field_name in output_fields:
+                path = getattr(self.params, field_name, None)
+                if isinstance(path, Path):
+                    return path
+            raise InvalidParameterError(msg=_("Command has no output file to process."))
+
+        if self.params.overwrite != OverwriteMode.ASK or not output_path().exists():
             return True
         if typer.confirm(_("Output file already exists. Overwrite?")):
             self.params.overwrite = OverwriteMode.YES
@@ -176,27 +190,3 @@ class BasePipeline[ParamsT](ABC):
 
         if proc.returncode != 0:
             raise CommandError(msg=_("FFmpeg command failed during execution."))
-
-    @staticmethod
-    def resolve_progress_time(params: ParamsT) -> timedelta:
-        """Resuelve la duración del tramo de vídeo a procesar.
-
-        Calcula la duración del tramo de vídeo a procesar definido por los flags
-        `--start`, `--end` y `media.duration` para que muestre correctamente el avance
-        la barra de progreso de Rich.
-
-        Args:
-            params: Parámetros parseados y validados a partir de `args`.
-
-        Returns:
-            Duración del tramo de vídeo a procesar.
-        """
-        if params.media.duration is None:
-            raise MissingMediaPropertyError(name="duration")
-        if params.timestamp_start is not None and params.timestamp_end is not None:
-            return params.timestamp_end - params.timestamp_start
-        if params.timestamp_start is not None:
-            return params.media.duration - params.timestamp_start
-        if params.timestamp_end is not None:
-            return params.media.duration - params.timestamp_end
-        return params.media.duration

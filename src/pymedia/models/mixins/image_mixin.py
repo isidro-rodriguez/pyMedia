@@ -10,7 +10,7 @@ from pymedia.types import ImageQuality
 
 
 class _HasOutput(Protocol):
-    output: Path
+    image_output: Path
 
 
 @dataclass(kw_only=True)
@@ -19,7 +19,7 @@ class ImageQualityMixin(_HasOutput):
 
     def to_image_quality_cmd(self) -> ImageQuality:
         """Devuelve el filtro listo para consumo de ffmpeg."""
-        match self.output.suffix:
+        match self.image_output.suffix:
             case ".jpg":
                 return ImageQuality(
                     format="format=yuv420p",

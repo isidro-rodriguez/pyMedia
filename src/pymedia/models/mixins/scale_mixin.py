@@ -2,7 +2,6 @@
 
 from dataclasses import dataclass
 from enum import Enum
-from pathlib import Path
 from typing import Protocol
 
 from pymedia.errors import (
@@ -16,9 +15,8 @@ from pymedia.models.media import Media
 from pymedia.types import Dimensions, ScaleMode
 
 
-class _HasSingleMedia(Protocol):
+class _HasMedia(Protocol):
     media: Media
-    input_single: Path
 
 
 class _Dimension(Enum):
@@ -27,7 +25,7 @@ class _Dimension(Enum):
 
 
 @dataclass(kw_only=True)
-class ScaleMixin(_HasSingleMedia):
+class ScaleMixin(_HasMedia):
     """Mixin para los valores de redimensionado.
 
     Attributes:

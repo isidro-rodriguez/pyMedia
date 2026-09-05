@@ -1,5 +1,6 @@
 """Tests para el mixin de escalado (pymedia.models.mixins.scale_mixin)."""
 
+from pathlib import Path
 from unittest.mock import Mock
 
 import pytest
@@ -23,6 +24,7 @@ def _mixin(
     """ScaleMixin sobre un vídeo 1920x1080 por defecto, en el modo indicado."""
     mixin = ScaleMixin(scale_mode=scale_mode)
     mixin.media = Media(
+        path=Path("clip.mp4"),
         video=video if video is not None else Video(width=1920, height=1080)
     )
     return mixin
@@ -77,7 +79,7 @@ class TestParseErrors:
     def test_video_missing_raises(self):
         """Comprueba que la ausencia de vídeo lanza un error."""
         mixin = _mixin(video=None)
-        mixin.media = Media()
+        mixin.media = Media(path=Path("clip.mp4"))
 
         with pytest.raises(MissingMediaPropertyError, match="video dimensions"):
             mixin.create_scale(logger=Mock(), scale_upscale=False, scale_to="1280x720")

@@ -7,11 +7,16 @@ from pymedia.models.mixins.crop_mixin import CropMixin
 from pymedia.models.mixins.flip_mixin import FlipMixin
 from pymedia.models.mixins.fps_mixin import FpsGifMixin, FpsImageMixin
 from pymedia.models.mixins.image_mixin import ImageQualityMixin, SceneMixin
-from pymedia.models.mixins.inputs_mixin import InputSingleMixin
-from pymedia.models.mixins.outputs_mixin import OutputBatchMixin, OutputSingleMixin
+from pymedia.models.mixins.inputs_mixin import MediaMixin
+from pymedia.models.mixins.outputs_mixin import (
+    AnimatedOutputMixin,
+    ImageOutputMixin,
+    SubtitleOutputMixin,
+)
 from pymedia.models.mixins.rotate_mixin import RotateMixin
 from pymedia.models.mixins.scale_mixin import ScaleMixin
 from pymedia.models.mixins.sheet_presets_mixin import SheetPresetsMixin
+from pymedia.models.mixins.subtitle_mixin import SubtitleInputMixin
 from pymedia.models.mixins.timestamps_mixin import (
     TimestampAtMixin,
     TimestampStartEndMixin,
@@ -33,8 +38,8 @@ class BaseParameters(ABC):
 @dataclass(kw_only=True)
 class GifParameters(
     BaseParameters,
-    InputSingleMixin,
-    OutputSingleMixin,
+    MediaMixin,
+    AnimatedOutputMixin,
     FpsGifMixin,
     CropMixin,
     ScaleMixin,
@@ -47,7 +52,7 @@ class GifParameters(
 
 @dataclass(kw_only=True)
 class InfoParameters(
-    InputSingleMixin,
+    MediaMixin,
 ):
     """Parámetros utilizados por el comando Info."""
 
@@ -55,8 +60,8 @@ class InfoParameters(
 @dataclass(kw_only=True)
 class SheetParameters(
     BaseParameters,
-    InputSingleMixin,
-    OutputBatchMixin,
+    MediaMixin,
+    ImageOutputMixin,
     ImageQualityMixin,
     SheetPresetsMixin,
 ):
@@ -64,10 +69,20 @@ class SheetParameters(
 
 
 @dataclass(kw_only=True)
+class SubtitleParameters(
+    BaseParameters,
+    MediaMixin,
+    SubtitleInputMixin,
+    SubtitleOutputMixin,
+):
+    """Parámetros validados y parseados para la manipulación de subtítulos."""
+
+
+@dataclass(kw_only=True)
 class ThumbParameters(
     BaseParameters,
-    InputSingleMixin,
-    OutputSingleMixin,
+    MediaMixin,
+    ImageOutputMixin,
     ImageQualityMixin,
     TimestampAtMixin,
     TimestampStartEndMixin,

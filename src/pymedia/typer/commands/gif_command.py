@@ -1,8 +1,8 @@
 """Comando Typer para iniciar la generación de GIF."""
 
+from pymedia.locales import _  # noqa
 import typer
 
-from pymedia.locales import _  # noqa
 from pymedia.pipeline.gif_pipeline import GifPipeline
 from pymedia.typer.options import (
     CropOption,
@@ -11,7 +11,7 @@ from pymedia.typer.options import (
     FlipVerticalOption,
     FpsGifOption,
     HelpOption,
-    InputSingleArgument,
+    MediaInputArgument,
     OutputOption,
     OverwriteOption,
     RotateOption,
@@ -22,6 +22,8 @@ from pymedia.typer.options import (
     TimestampStartGifOption,
 )
 from pymedia.types import OverwriteMode, ScaleMode
+
+gif_typer = typer.Typer()
 
 _HELP = _(
     """\
@@ -39,16 +41,15 @@ Generates an animated GIF from the specified video.
 """
 )
 
-gif_command = typer.Typer(
+
+@gif_typer.command(
     name="gif",
     help=_HELP,
+    rich_help_panel="Animated commands",
     no_args_is_help=True,
 )
-
-
-@gif_command.callback(invoke_without_command=True)
-def _gif_run(
-    input_single: InputSingleArgument,
+def gif(
+    media_input: MediaInputArgument,
     output: OutputOption = None,
     overwrite: OverwriteOption = OverwriteMode.ASK,
     timestamp_start: TimestampStartGifOption = None,
@@ -67,7 +68,7 @@ def _gif_run(
     """Punto de entrada y desarrollo del pipeline.
 
     Args:
-        input_single: Ruta del fichero de vídeo a procesar.
+        media_input: Ruta del fichero de vídeo a procesar.
         output: Ruta absoluta del fichero de salida procesado.
         overwrite: Política ante conflicto de salida ya existente.
         timestamp_start: Marca de tiempo que indica el punto inicial.
@@ -85,7 +86,7 @@ def _gif_run(
     """
     pipeline = GifPipeline(debug=debug)
     pipeline.process_parameters(
-        input_single=input_single,
+        media_input=media_input,
         output=output,
         overwrite=overwrite,
         timestamp_start=timestamp_start,
@@ -102,7 +103,3 @@ def _gif_run(
     if not pipeline.resolve_overwrite():
         return
     pipeline.process_cmd()
-
-
-if __name__ == "__main__":
-    gif_command()

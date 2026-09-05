@@ -6,171 +6,121 @@ import pytest
 
 from pymedia.errors import (
     InvalidContainerTypeError,
-    MissingMediaError,
     MissingParameterError,
 )
 from pymedia.models.media import Media
-from pymedia.models.mixins.inputs_mixin import InputListMixin, InputSingleMixin
+from pymedia.models.mixins.inputs_mixin import MediaListMixin, MediaMixin
 
-
-def _fake_load_returns_media(path, logger) -> Media:
-    """Stub de Media.load: devuelve una Media vacía sin tocar ffprobe."""
-    return Media()
-
-
-def _fake_load_raises(path, logger) -> Media:
-    """Stub de Media.load: simula un fallo de ffprobe."""
-    raise ValueError("probe failed")
+_EMPTY_METADATA = {"streams": [], "format": {}}
 
 
 @pytest.fixture(autouse=True)
 def _fake_probe(monkeypatch):
     """Evita ejecutar ffprobe en todos los tests de este módulo."""
     monkeypatch.setattr(
-        "pymedia.models.mixins.inputs_mixin.Media.load", _fake_load_returns_media
+        "pymedia.models.mixins.inputs_mixin.get_media_metadata",
+        lambda path, logger: _EMPTY_METADATA,
     )
+
+
+def _media(path: Path) -> Media:
+    """Media con la ruta indicada y sin metadatos."""
+    return Media(path=path)
 
 
 class TestInputSingleCreate:
     """Pruebas de creación de la entrada individual."""
 
-    def test_sets_absolute_path_and_media(self, tmp_path, monkeypatch):
+    def test_sets_media_with_absolute_path(self, tmp_path, monkeypatch):
         """Comprueba que se guardan la ruta absoluta y los metadatos."""
         monkeypatch.chdir(tmp_path)
-        mixin = InputSingleMixin()
-        source = tmp_path / "clip.mp4"
+        mixin = MediaMixin()
+        source = Path("clip.mp4")
 
-        mixin.create_input_single(input_single=source, logger=None)
+        mixin.create_media_input(media_input=source, logger=None)
 
-        assert mixin.input_single == source.absolute()
-        assert mixin.media == Media()
+        assert mixin.media == _media(source.absolute())
 
     def test_invalid_extension_raises(self, tmp_path):
         """Comprueba que una extensión no de vídeo lanza un error."""
-        mixin = InputSingleMixin()
+        mixin = MediaMixin()
 
-        with pytest.raises(InvalidContainerTypeError) as exc_info:
-            mixin.create_input_single(input_single=tmp_path / "clip.txt", logger=None)
-
-        assert "Video" in exc_info.value.message
-
-    def test_converts_to_absolute_path(self, tmp_path, monkeypatch):
-        """Comprueba que una ruta relativa se convierte en absoluta."""
-        monkeypatch.chdir(tmp_path)
-        mixin = InputSingleMixin()
-        relative = Path("clip.mp4")
-
-        mixin.create_input_single(input_single=relative, logger=None)
-
-        assert mixin.input_single == relative.absolute()
+        with pytest.raises(InvalidContainerTypeError):
+            mixin.create_media_input(media_input=tmp_path / "clip.txt", logger=None)
 
 
 class TestInputSingleCmd:
     """Pruebas de generación del comando de entrada individual."""
 
-    def test_to_input_single_cmd(self):
+    def test_to_media_input_cmd(self):
         """Comprueba que se genera el argumento `-i` correctamente."""
         source = Path("clip.mp4")
-        mixin = InputSingleMixin(input_single=source)
+        mixin = MediaMixin(media=_media(source))
 
-        assert mixin.to_input_single_cmd() == ["-i", str(source)]
+        assert mixin.to_media_input_cmd() == ["-i", str(source)]
 
-    def test_to_input_single_cmd_missing_parameter(self):
-        """Comprueba que falta lanzar un error si no hay ruta."""
-        mixin = InputSingleMixin()
+    def test_to_media_input_cmd_missing_parameter(self):
+        """Comprueba que falta lanzar un error si no hay media."""
+        mixin = MediaMixin()
 
-        with pytest.raises(MissingParameterError, match="input_single"):
-            mixin.to_input_single_cmd()
+        with pytest.raises(MissingParameterError, match="media"):
+            mixin.to_media_input_cmd()
 
 
 class TestInputListCreate:
     """Pruebas de creación de la lista de entradas."""
 
-    def test_creates_absolute_paths_and_media(self, tmp_path, monkeypatch):
+    def test_creates_media_list(self, tmp_path, monkeypatch):
         """Comprueba que se guardan rutas absolutas y sus metadatos."""
         monkeypatch.chdir(tmp_path)
-        mixin = InputListMixin()
+        mixin = MediaListMixin()
         source_a = Path("a.mp4")
         source_b = Path("b.mp4")
 
-        mixin.create_input_list(input_list=[source_a, source_b], logger=None)
+        mixin.create_media_list(media_input_list=[source_a, source_b], logger=None)
 
-        assert mixin.input_list == [source_a.absolute(), source_b.absolute()]
-        assert mixin.media_list == [Media(), Media()]
+        assert mixin.media_list == [
+            Media(path=source_a.absolute()),
+            Media(path=source_b.absolute()),
+        ]
 
-    def test_replaces_existing_entries(self, tmp_path, monkeypatch):
-        """Comprueba que una nueva lista reemplaza los valores previos."""
-        monkeypatch.chdir(tmp_path)
-        previous = Path("prev.mp4").absolute()
-        mixin = InputListMixin(input_list=[previous], media_list=[Media()])
+    def test_invalid_extension_raises(self, tmp_path):
+        """Comprueba que una extensión no de vídeo lanza un error."""
+        mixin = MediaListMixin()
 
-        mixin.create_input_list(input_list=[Path("new.mp4")], logger=None)
+        with pytest.raises(InvalidContainerTypeError):
+            mixin.create_media_list(media_input_list=[tmp_path / "x.txt"], logger=None)
 
-        assert mixin.input_list == [Path("new.mp4").absolute()]
-        assert mixin.media_list == [Media()]
+    def test_load_failure_raises_missing_media(self, monkeypatch):
+        """Comprueba que un fallo de ffprobe lanza un error."""
+        import subprocess
 
-    def test_transactional_on_load_failure(self, monkeypatch):
-        """Comprueba que un fallo de carga no deja estado a medio llenar."""
-        calls = 0
-
-        def _flaky_load(path, logger):
-            nonlocal calls
-            calls += 1
-            if calls == 2:
-                raise ValueError("probe failed")
-            return Media()
+        def _failing_probe(path, logger):
+            raise subprocess.CalledProcessError(1, ["ffprobe"])
 
         monkeypatch.setattr(
-            "pymedia.models.mixins.inputs_mixin.Media.load", _flaky_load
+            "pymedia.models.mixins.inputs_mixin.get_media_metadata", _failing_probe
         )
-        mixin = InputListMixin()
+        mixin = MediaListMixin()
 
-        with pytest.raises(MissingMediaError):
-            mixin.create_input_list(
-                input_list=[Path("a.mp4"), Path("b.mp4")], logger=None
-            )
-
-        # La carga falló a mitad: el estado no queda a medio llenar.
-        assert mixin.input_list is None
-        assert mixin.media_list is None
+        with pytest.raises(subprocess.CalledProcessError):
+            mixin.create_media_list(media_input_list=[Path("x.mp4")], logger=None)
 
 
 class TestInputListCmd:
     """Pruebas de generación del comando de lista de entradas."""
 
-    def test_to_input_list_cmd(self):
+    def test_to_media_input_list_cmd(self):
         """Comprueba que se genera un `-i` por cada entrada."""
-        mixin = InputListMixin(input_list=[Path("a.mp4"), Path("b.mp4")])
-
-        assert mixin.to_input_list_cmd() == ["-i", "a.mp4", "-i", "b.mp4"]
-
-    def test_to_input_list_cmd_missing_parameter(self):
-        """Comprueba que falta lanzar un error si no hay lista."""
-        mixin = InputListMixin()
-
-        with pytest.raises(MissingParameterError, match="input_list"):
-            mixin.to_input_list_cmd()
-
-
-class TestLoadMedia:
-    """Pruebas de la carga de metadatos de un medio."""
-
-    def test_invalid_extension_raises(self):
-        """Comprueba que una extensión no válida lanza un error."""
-        with pytest.raises(InvalidContainerTypeError):
-            InputListMixin(input_list=[], media_list=[]).create_input_list(
-                input_list=[Path("x.txt")], logger=None
-            )
-
-    def test_load_error_raises_missing_media(self, monkeypatch):
-        """Comprueba que un fallo de ffprobe lanza MissingMediaError."""
-        monkeypatch.setattr(
-            "pymedia.models.mixins.inputs_mixin.Media.load", _fake_load_raises
+        mixin = MediaListMixin(
+            media_list=[Media(path=Path("a.mp4")), Media(path=Path("b.mp4"))]
         )
 
-        with pytest.raises(MissingMediaError) as exc_info:
-            InputListMixin(input_list=[], media_list=[]).create_input_list(
-                input_list=[Path("x.mp4")], logger=None
-            )
+        assert mixin.to_media_input_list_cmd() == ["-i", "a.mp4", "-i", "b.mp4"]
 
-        assert "x.mp4" in exc_info.value.message
+    def test_to_media_input_list_cmd_missing_parameter(self):
+        """Comprueba que falta lanzar un error si no hay lista."""
+        mixin = MediaListMixin()
+
+        with pytest.raises(MissingParameterError, match="media_list"):
+            mixin.to_media_input_list_cmd()

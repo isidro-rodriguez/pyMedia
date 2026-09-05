@@ -3,14 +3,13 @@
 from pathlib import Path
 
 from pymedia.errors import (
-    MissingMediaError,
     MissingParameterError,
 )
 from pymedia.ffmpeg.gif_cmd import GifCmd
 from pymedia.locales import _  # noqa
 from pymedia.models.parameters import GifParameters
 from pymedia.pipeline import BasePipeline
-from pymedia.types import OutputMediaType, OverwriteMode, RotateMode, ScaleMode
+from pymedia.types import OverwriteMode, RotateMode, ScaleMode
 
 
 class GifPipeline(BasePipeline[GifParameters]):
@@ -20,7 +19,7 @@ class GifPipeline(BasePipeline[GifParameters]):
 
     def process_parameters(
         self,
-        input_single: Path,
+        media_input: Path,
         overwrite: OverwriteMode,
         fps: int,
         scale_mode: ScaleMode,
@@ -43,16 +42,12 @@ class GifPipeline(BasePipeline[GifParameters]):
             vflip=vflip,
         )
 
-        params.create_input_single(
-            input_single=input_single,
+        params.create_media_input(
+            media_input=media_input,
             logger=self.logger,
         )
 
-        params.create_output(
-            media_type=OutputMediaType.GIF,
-            output=output,
-            extension=".gif",
-        )
+        params.create_animated_output(output=output, extension=".gif")
 
         params.create_crop(
             crop_str=crop,
@@ -77,10 +72,8 @@ class GifPipeline(BasePipeline[GifParameters]):
 
     def process_cmd(self) -> None:
         """Construye el comando ffmpeg y ejecuta la generación del GIF."""
-        if self.params.input_single is None:
-            raise MissingParameterError(name="input_single")
         if self.params.media is None:
-            raise MissingMediaError(path=str(self.params.input_single))
+            raise MissingParameterError(name="media")
 
         cmd = GifCmd(params=self.params).create()
 
@@ -89,9 +82,10 @@ class GifPipeline(BasePipeline[GifParameters]):
         self.run_ffmpeg(
             cmd=cmd,
             description=_("Generating GIF"),
-            progress_time=self.resolve_progress_time(params=self.params),
+            progress_time=self.params.get_range_time(),
         )
 
         self.logger.info(
-            msg=_("GIF generated successfully: %(output)s"), output=self.params.output
+            msg=_("GIF generated successfully: %(output)s"),
+            output=self.params.animated_output,
         )

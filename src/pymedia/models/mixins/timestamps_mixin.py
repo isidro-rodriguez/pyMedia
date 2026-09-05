@@ -3,7 +3,6 @@
 import re
 from dataclasses import dataclass
 from datetime import timedelta
-from pathlib import Path
 from typing import Protocol
 
 from pymedia.errors import (
@@ -17,13 +16,12 @@ from pymedia.locales import _  # noqa
 from pymedia.models.media import Media
 
 
-class _HasSingleMedia(Protocol):
+class _HasMedia(Protocol):
     media: Media
-    input_single: Path
 
 
 @dataclass(kw_only=True)
-class TimestampStartEndMixin(_HasSingleMedia):
+class TimestampStartEndMixin(_HasMedia):
     """Mixin para las marcas de tiempo que indican el punto inicial a procesar.
 
     Attributes:
@@ -68,28 +66,40 @@ class TimestampStartEndMixin(_HasSingleMedia):
                 )
 
     def to_timestamp_start_cmd(self) -> list[str]:
-        """Devuelve el filtro listo para consumo de ffmpeg.
-
-        Returns:
-            Lista de strings lista para consumo de ffmpeg.
-        """
+        """Devuelve el filtro listo para consumo de ffmpeg."""
         if self.timestamp_start is None:
             raise MissingParameterError(name="timestamp_start")
         return ["-ss", str(self.timestamp_start)]
 
     def to_timestamp_end_cmd(self) -> list[str]:
-        """Devuelve el filtro listo para consumo de ffmpeg.
-
-        Returns:
-            Lista de strings lista para consumo de ffmpeg.
-        """
+        """Devuelve el filtro listo para consumo de ffmpeg."""
         if self.timestamp_end is None:
             raise MissingParameterError(name="timestamp_end")
         return ["-to", str(self.timestamp_end)]
 
+    def get_range_time(self) -> timedelta:
+        """Resuelve la duración del tramo de vídeo a procesar.
+
+        Calcula la duración del tramo de vídeo a procesar definido por los flags
+        `--start`, `--end` y `media.duration` para que muestre correctamente el avance
+        la barra de progreso de Rich.
+        """
+        media_duration = self.media.duration
+        start, end = self.timestamp_start, self.timestamp_end
+
+        if media_duration is None:
+            raise MissingMediaPropertyError(name="duration")
+        if start is not None and end is not None:
+            return end - start
+        if start is not None:
+            return media_duration - start
+        if end is not None:
+            return media_duration - end
+        return media_duration
+
 
 @dataclass(kw_only=True)
-class TimestampAtMixin(_HasSingleMedia):
+class TimestampAtMixin(_HasMedia):
     """Mixin para listas de marcas de tiempo.
 
     Attributes:
@@ -123,7 +133,7 @@ class TimestampAtMixin(_HasSingleMedia):
             time = _process_time(time_str=time_str, media=self.media)
             times.append(time)
         times.sort()
-        
+
         self.timestamp_at = times
 
 

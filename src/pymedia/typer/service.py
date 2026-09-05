@@ -16,19 +16,19 @@ def show_help(ctx: typer.Context, value: bool) -> None:
 
 
 def validate_conflict_output_options(
-    input_list: list[Path], output: Path | None, output_directory: Path | None
+    media_input_list: list[Path], output: Path | None, output_directory: Path | None
 ) -> None:
     """Comprueba que no se han aportado combinaciones de opciones de salida ambiguas.
 
     Args:
-        input_list: Lista de rutas de los ficheros de vídeo a procesar.
+        media_input_list: Lista de rutas de los ficheros de vídeo a procesar.
         output: Ruta absoluta del fichero de salida procesado.
         output_directory: Directorio de salida para lotes de ficheros.
 
     """
     if output is not None and output_directory is not None:
         raise ExclusiveOptionsError(options=["output", "output_directory"])
-    if output is not None and len(input_list) > 1:
+    if output is not None and len(media_input_list) > 1:
         raise OptionError(
             msg=_(
                 "It is not allowed to specify an output with multiple inputs, "
