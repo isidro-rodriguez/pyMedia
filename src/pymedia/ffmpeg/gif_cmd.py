@@ -58,6 +58,10 @@ class GifCmd:
 
     def _build_filters(self) -> str:
         """Construye los filtros de ffmpeg para generar un Gif."""
+        output = self.params.animated_output
+        if output is None:
+            raise MissingParameterError(name="animated_output")
+
         filters: list[str] = []
 
         if self.params.crop_area is not None:
@@ -76,8 +80,9 @@ class GifCmd:
 
         filters.append(self.params.to_fps_cmd())
 
-        filters.append(
-            "split[a][b];[a]palettegen[p];[b][p]paletteuse=dither=floyd_steinberg"
-        )
+        if output.suffix == ".gif":
+            filters.append(
+                "split[a][b];[a]palettegen[p];[b][p]paletteuse=dither=floyd_steinberg"
+            )
 
         return ",".join(filters)

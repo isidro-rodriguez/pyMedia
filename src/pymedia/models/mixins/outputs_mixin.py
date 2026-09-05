@@ -11,12 +11,12 @@ from pathlib import Path
 from typing import Protocol
 
 from pymedia.data.audio_codecs import AUDIO_CODECS
-from pymedia.data.containers import (
-    ANIMATED_IMAGE_CONTAINERS,
-    AUDIO_CONTAINERS,
-    OUTPUT_IMAGE_CONTAINERS,
-    SUBTITLE_CONTAINERS,
-    VIDEO_CONTAINERS,
+from pymedia.data.supported import (
+    SUPPORTED_ANIMATED,
+    SUPPORTED_AUDIO,
+    SUPPORTED_IMAGES,
+    SUPPORTED_MEDIA,
+    SUPPORTED_SUBTITLES,
 )
 from pymedia.data.video_codecs import VIDEO_CODECS
 from pymedia.errors import (
@@ -39,35 +39,106 @@ class _HasMedia(Protocol):
 
 @dataclass(kw_only=True)
 class AnimatedOutputMixin(_HasMedia):
-    """Mixin para la ruta de salida de imágenes animadas (GIF).
+    """Mixin para la ruta de salida de imágenes animadas.
 
     Attributes:
-        animated_output: Ruta del fichero GIF de salida, o None si aún no
-            se ha creado.
+        animated_output: Ruta de salida del fichero de imagen animada.
     """
 
     animated_output: Path | None = None
+    output_directory: Path | None = None
 
     def create_animated_output(
         self,
         affix: str | None = None,
-        extension: str | None = None,
         output: Path | None = None,
+        output_directory: Path | None = None,
     ) -> None:
         """Procesa y asigna la ruta del fichero GIF de salida.
 
         Args:
             affix: Sufijo a añadir al nombre del fichero de salida.
-            extension: Extensión a forzar en el fichero de salida.
             output: Ruta absoluta del fichero de salida procesado.
+            output_directory: Directorio de salida para lotes de varias imágenes.
         """
-        self.animated_output = _process_output(
+        if output_directory is not None:
+            self.output_directory = _process_output_directory(output_directory)
+
+        output = _process_output(
             media=self.media,
-            media_type=OutputMediaType.GIF,
             affix=affix,
-            extension=extension,
+            extension=".gif",
             output=output,
+            output_directory=self.output_directory,
         )
+
+        if output.suffix not in SUPPORTED_ANIMATED:
+            raise InvalidContainerTypeError(
+                extension=output.suffix,
+                media_type=_("animated images"),
+                supported=", ".join(SUPPORTED_ANIMATED),
+            )
+
+        self.animated_output = output
+
+
+@dataclass(kw_only=True)
+class AudioOutputMixin(_HasMedia):
+    """Mixin para la ruta de salida de pistas de audio.
+
+    Attributes:
+        audio_output: Ruta de salida del fichero de pista de audio.
+        output_directory: Directorio de salida para lotes de varias imágenes.
+    """
+
+    audio_output: Path | None = None
+    output_directory: Path | None = None
+
+    def create_audio_output(
+        self,
+        affix: str | None = None,
+        output: Path | None = None,
+        output_directory: Path | None = None,
+    ) -> None:
+        """Procesa y asigna la ruta del fichero de subtítulos de salida.
+
+        Args:
+            affix: Sufijo a añadir al nombre del fichero de salida.
+            output: Ruta absoluta del fichero de salida procesado.
+            output_directory: Directorio de salida para lotes de varios ficheros.
+        """
+        if output_directory is not None:
+            self.output_directory = _process_output_directory(output_directory)
+
+        output = _process_output(
+            media=self.media,
+            affix=affix,
+            extension=".m4a",
+            output=output,
+            output_directory=self.output_directory,
+        )
+
+        if output.suffix not in SUPPORTED_AUDIO:
+            raise InvalidContainerTypeError(
+                extension=output.suffix,
+                media_type=OutputMediaType.AUDIO.value,
+                supported=",".join(SUPPORTED_AUDIO),
+            )
+
+        if self.media is not None:
+            if self.media.audio is None:
+                raise MissingMediaPropertyError(name="media.audio")
+            for audio_track in self.media.audio:
+                if audio_track.codec is None:
+                    raise MissingMediaPropertyError(name="audio codec")
+                if output.suffix not in AUDIO_CODECS[audio_track.codec].containers:
+                    raise InvalidContainerError(
+                        extension=output.suffix,
+                        codec=AUDIO_CODECS[audio_track.codec].name,
+                        supported=",".join(AUDIO_CODECS[audio_track.codec].containers),
+                    )
+
+        self.audio_output = output
 
 
 @dataclass(kw_only=True)
@@ -85,30 +156,105 @@ class ImageOutputMixin(_HasMedia):
 
     def create_image_output(
         self,
+        affix: str | None = None,
         output: Path | None = None,
         output_directory: Path | None = None,
-        affix: str | None = None,
-        extension: str | None = None,
     ) -> None:
         """Procesa y asigna la ruta o directorio de salida de la imagen.
 
         Args:
-            output: Ruta de salida explícita, válida solo para lotes de un
-                único fichero.
-            output_directory: Directorio de salida para lotes de varios ficheros.
             affix: Sufijo a añadir al nombre del fichero de salida.
-            extension: Extensión a forzar en el fichero de salida.
+            output: Ruta de salida explícita, no válida solo para lotes.
+            output_directory: Directorio de salida para lotes de varios ficheros.
         """
         if output_directory is not None:
             self.output_directory = _process_output_directory(output_directory)
-        self.image_output = _process_output(
+
+        output = _process_output(
             media=self.media,
-            media_type=OutputMediaType.IMAGE,
             affix=affix,
-            extension=extension,
+            extension=".jpg",
             output=output,
             output_directory=self.output_directory,
         )
+
+        if output.suffix not in SUPPORTED_IMAGES:
+            raise InvalidContainerTypeError(
+                extension=output.suffix,
+                media_type=OutputMediaType.IMAGE.value,
+                supported=", ".join(SUPPORTED_IMAGES),
+            )
+
+        self.image_output = output
+
+
+@dataclass(kw_only=True)
+class MediaOutputMixin(_HasMedia):
+    """Mixin para la ruta de salida de contenedores multimedia.
+
+    Attributes:
+        media_output: Ruta del fichero contenedor de salida.
+        output_directory: Directorio de salida para lotes de varias imágenes.
+    """
+
+    media_output: Path | None = None
+    output_directory: Path | None = None
+
+    def create_media_output(
+        self,
+        affix: str | None = None,
+        output: Path | None = None,
+        output_directory: Path | None = None,
+    ) -> None:
+        """Procesa y asigna la ruta del fichero de subtítulos de salida.
+
+        Args:
+            affix: Sufijo a añadir al nombre del fichero de salida.
+            output: Ruta absoluta del fichero de salida procesado.
+            output_directory: Directorio de salida para lotes de varios ficheros.
+        """
+        if output_directory is not None:
+            self.output_directory = _process_output_directory(output_directory)
+
+        output = _process_output(
+            media=self.media,
+            affix=affix,
+            extension=".mkv",
+            output=output,
+            output_directory=self.output_directory,
+        )
+
+        if self.media.video is None:
+            raise MissingMediaPropertyError(name="video")
+        if self.media.video.codec is None:
+            raise MissingMediaPropertyError(name="video codec")
+
+        if output.suffix not in SUPPORTED_MEDIA:
+            raise InvalidContainerTypeError(
+                extension=output.suffix,
+                media_type=OutputMediaType.VIDEO.value,
+                supported=",".join(SUPPORTED_MEDIA),
+            )
+
+        if output.suffix not in VIDEO_CODECS[self.media.video.codec].containers:
+            raise InvalidContainerError(
+                extension=output.suffix,
+                codec=VIDEO_CODECS[self.media.video.codec].name,
+                supported=",".join(VIDEO_CODECS[self.media.video.codec].containers),
+            )
+
+        if self.media.audio is not None:
+            for audio_track in self.media.audio:
+                if audio_track.codec is None:
+                    raise MissingMediaPropertyError(name="audio codec")
+                if output.suffix not in AUDIO_CODECS[audio_track.codec].containers:
+                    raise InvalidContainerError(
+                        extension=output.suffix,
+                        codec=AUDIO_CODECS[audio_track.codec].name,
+                        supported=",".join(AUDIO_CODECS[audio_track.codec].containers),
+                    )
+
+        self.media_output = output
 
 
 @dataclass(kw_only=True)
@@ -118,30 +264,44 @@ class SubtitleOutputMixin(_HasMedia):
     Attributes:
         subtitle_output: Ruta del fichero de subtítulos de salida, o None si
             aún no se ha creado.
+        output_directory: Directorio de salida para lotes de varias imágenes.
     """
 
     subtitle_output: Path | None = None
+    output_directory: Path | None = None
 
     def create_subtitle_output(
         self,
         affix: str | None = None,
-        extension: str | None = None,
         output: Path | None = None,
+        output_directory: Path | None = None,
     ) -> None:
         """Procesa y asigna la ruta del fichero de subtítulos de salida.
 
         Args:
             affix: Sufijo a añadir al nombre del fichero de salida.
-            extension: Extensión a forzar en el fichero de salida.
             output: Ruta absoluta del fichero de salida procesado.
+            output_directory: Directorio de salida para lotes de varios ficheros.
         """
-        self.subtitle_output = _process_output(
+        if output_directory is not None:
+            self.output_directory = _process_output_directory(output_directory)
+
+        output = _process_output(
             media=self.media,
-            media_type=OutputMediaType.SUBTITLE,
             affix=affix,
-            extension=extension,
+            extension=".srt",
             output=output,
+            output_directory=self.output_directory,
         )
+
+        if output.suffix not in SUPPORTED_SUBTITLES:
+            raise InvalidContainerTypeError(
+                extension=output.suffix,
+                media_type=_("subtitle files"),
+                supported=", ".join(SUPPORTED_SUBTITLES),
+            )
+
+        self.subtitle_output = output
 
 
 def _validate_name(name: str) -> None:
@@ -174,91 +334,8 @@ def _process_output_directory(directory: Path) -> Path:
     return directory
 
 
-def _validate_output(output: Path, media: Media, media_type: OutputMediaType) -> None:
-    """Comprueba que la salida tenga una extensión válida para el tipo de medio."""
-    _process_output_directory(output.parent)
-    _validate_name(output.stem)
-
-    match media_type:
-        case OutputMediaType.ANIMATED_IMAGE:
-            if output.suffix not in ANIMATED_IMAGE_CONTAINERS:
-                raise InvalidContainerTypeError(
-                    extension=output.suffix,
-                    media_type=OutputMediaType.ANIMATED_IMAGE.value,
-                    supported=",".join(ANIMATED_IMAGE_CONTAINERS),
-                )
-        case OutputMediaType.AUDIO:
-            if media.audio is None:
-                raise MissingMediaPropertyError(name="audio track")
-            if output.suffix not in AUDIO_CONTAINERS:
-                raise InvalidContainerTypeError(
-                    extension=output.suffix,
-                    media_type=OutputMediaType.AUDIO.value,
-                    supported=",".join(AUDIO_CONTAINERS),
-                )
-            for audio_track in media.audio:
-                if audio_track.codec is None:
-                    raise MissingMediaPropertyError(name="audio codec")
-                if output.suffix not in AUDIO_CODECS[audio_track.codec].containers:
-                    raise InvalidContainerError(
-                        extension=output.suffix,
-                        codec=AUDIO_CODECS[audio_track.codec].name,
-                        supported=",".join(AUDIO_CODECS[audio_track.codec].containers),
-                    )
-        case OutputMediaType.IMAGE:
-            if output.suffix not in OUTPUT_IMAGE_CONTAINERS:
-                raise InvalidContainerTypeError(
-                    extension=output.suffix,
-                    media_type=OutputMediaType.IMAGE.value,
-                    supported=",".join(OUTPUT_IMAGE_CONTAINERS),
-                )
-        case OutputMediaType.SUBTITLE:
-            if output.suffix not in SUBTITLE_CONTAINERS:
-                raise InvalidContainerTypeError(
-                    extension=output.suffix,
-                    media_type=OutputMediaType.SUBTITLE.value,
-                    supported=",".join(SUBTITLE_CONTAINERS),
-                )
-        case OutputMediaType.VIDEO:
-            if media.video is None:
-                raise MissingMediaPropertyError(name="video")
-            if media.video.codec is None:
-                raise MissingMediaPropertyError(name="video codec")
-            if output.suffix not in VIDEO_CONTAINERS:
-                raise InvalidContainerTypeError(
-                    extension=output.suffix,
-                    media_type=OutputMediaType.VIDEO.value,
-                    supported=",".join(VIDEO_CONTAINERS),
-                )
-            if output.suffix not in VIDEO_CODECS[media.video.codec].containers:
-                raise InvalidContainerError(
-                    extension=output.suffix,
-                    codec=VIDEO_CODECS[media.video.codec].name,
-                    supported=",".join(VIDEO_CODECS[media.video.codec].containers),
-                )
-            if media.audio is None:
-                return
-            for audio_track in media.audio:
-                if audio_track.codec is None:
-                    raise MissingMediaPropertyError(name="audio codec")
-                if output.suffix not in AUDIO_CODECS[audio_track.codec].containers:
-                    raise InvalidContainerError(
-                        extension=output.suffix,
-                        codec=AUDIO_CODECS[audio_track.codec].name,
-                        supported=",".join(AUDIO_CODECS[audio_track.codec].containers),
-                    )
-        case OutputMediaType.GIF:
-            if output.suffix != ".gif":
-                raise InvalidContainerTypeError(
-                    extension=output.suffix,
-                    media_type="gif files",
-                    supported=".gif",
-                )
-
-
 def _process_output(
     media: Media,
-    media_type: OutputMediaType,
     affix: str | None = None,
     extension: str | None = None,
     output: Path | None = None,
@@ -274,11 +351,5 @@ def _process_output(
             output = output.with_stem(f"{output.stem}{affix}")
         if extension is not None:
             output = output.with_suffix(extension)
-
-    _validate_output(
-        output=output,
-        media=media,
-        media_type=media_type,
-    )
 
     return output

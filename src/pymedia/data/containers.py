@@ -141,16 +141,3 @@ VIDEO_CONTAINERS: tuple[str, ...] = (
     ".wtv",
 )
 """tuple[str, ...]: Extensiones de contenedores para archivos de vídeo."""
-
-# =============================================================================
-#  Restricción de containers válidos para salidas de la aplicación.
-# =============================================================================
-
-
-OUTPUT_IMAGE_CONTAINERS: tuple[str, ...] = (
-    ".jpeg",
-    ".jpg",
-    ".png",
-    ".webp",
-)
-"""tuple[str, ...]: Extensiones de contenedores para imágenes de salida."""
