@@ -10,9 +10,8 @@ class Language:
     """Metadatos de una lengua según el estándar ISO 639-2.
 
     Attributes:
-        code: Código ISO 639-2 (variante bibliográfica) de 3 letras. Es la
-            clave de LANGUAGES y coincide con lo que reporta ffprobe en
-            los tags de idioma de pistas de audio/subtítulos.
+        code: Código ISO 639-2 de 3 letras. Es la clave de LANGUAGES y coincide con lo
+            que reporta ffprobe en los tags de idioma de pistas de audio/subtítulos.
         native_name: Nombre de la lengua en su propio idioma.
         english_name: Nombre de la lengua en inglés.
     """

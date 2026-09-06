@@ -11,7 +11,7 @@ from pymedia.errors import (
 from pymedia.ffmpeg.sheet_cmd import SheetCmd
 from pymedia.locales import _  # noqa
 from pymedia.models.parameters import SheetParameters
-from pymedia.pipeline import BasePipeline
+from pymedia.pipeline.base_pipeline import BasePipeline
 from pymedia.types import OverwriteMode, PresetsSheetMode
 
 

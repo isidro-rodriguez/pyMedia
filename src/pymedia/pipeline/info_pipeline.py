@@ -13,7 +13,7 @@ from pymedia.locale_manager import locale_manager
 from pymedia.locales import _  # noqa
 from pymedia.models.media import Audio, Media, Subtitle, Video
 from pymedia.models.parameters import InfoParameters
-from pymedia.pipeline import BasePipeline
+from pymedia.pipeline.base_pipeline import BasePipeline
 from pymedia.utils import parse_quantity, parse_size, parse_timedelta
 
 

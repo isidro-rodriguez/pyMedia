@@ -2,7 +2,6 @@
 
 from pymedia.errors import (
     MissingParameterError,
-    SubtitlesError,
 )
 from pymedia.locales import _  # noqa
 from pymedia.models.parameters import SubtitlesAddParameters
@@ -36,14 +35,16 @@ class SubtitlesAddCmd:
             raise MissingParameterError(name="media_output")
         if subtitles is None:
             raise MissingParameterError(name="subtitles")
+        if subtitles.codec is None:
+            raise MissingParameterError(name="subtitles.codec")
+        if subtitles.language is None:
+            raise MissingParameterError(name="subtitles.language")
         if subtitles.path is None:
             raise MissingParameterError(name="subtitles.path")
         if subtitles.stream_index is None:
             raise MissingParameterError(name="subtitles.stream_index")
         if subtitles.subtitles_index is None:
             raise MissingParameterError(name="subtitles.subtitles_index")
-        if subtitles.language is None:
-            raise MissingParameterError(name="subtitles.language")
         if subtitles.title is None:
             raise MissingParameterError(name="subtitles.title")
 
@@ -64,7 +65,7 @@ class SubtitlesAddCmd:
                 "-c",
                 "copy",
                 f"-c:s:{subtitles.subtitles_index}",
-                self._get_subtitles_codec(),
+                subtitles.codec,
                 f"-metadata:s:{subtitles.stream_index}",
                 f"language={subtitles.language}",
                 f"-metadata:s:{subtitles.stream_index}",
@@ -102,17 +103,3 @@ class SubtitlesAddCmd:
             f"-disposition:s:{subtitles.subtitles_index}",
             "+".join(dispositions) if len(dispositions) > 0 else "0",
         ]
-
-    def _get_subtitles_codec(self) -> str:
-        """Devuelve el códec del subtítulo dependiendo del contenedor utilizado."""
-        if self.params.media_output is None:
-            raise MissingParameterError(name="media_output")
-        match self.params.media_output.suffix:
-            case ".m2ts" | ".mov" | ".mp4" | ".ts":
-                return "mov_text"
-            case ".mkv":
-                return "srt"
-            case ".webm":
-                return "webvtt"
-            case _:
-                raise SubtitlesError(msg=_("Subtitles codec not supported."))

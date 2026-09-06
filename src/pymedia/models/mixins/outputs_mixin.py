@@ -11,13 +11,7 @@ from pathlib import Path
 from typing import Protocol
 
 from pymedia.data.audio_codecs import AUDIO_CODECS
-from pymedia.data.supported import (
-    SUPPORTED_ANIMATED,
-    SUPPORTED_AUDIO,
-    SUPPORTED_IMAGES,
-    SUPPORTED_MEDIA,
-    SUPPORTED_SUBTITLES,
-)
+from pymedia.data.supported import SUPPORTED
 from pymedia.data.video_codecs import VIDEO_CODECS
 from pymedia.errors import (
     InvalidArgumentError,
@@ -73,11 +67,11 @@ class AnimatedOutputMixin(_HasMedia):
             output_directory=self.output_directory,
         )
 
-        if output.suffix not in SUPPORTED_ANIMATED:
+        if output.suffix not in SUPPORTED.ANIMATED:
             raise InvalidContainerTypeError(
                 extension=output.suffix,
                 media_type=_("animated images"),
-                supported=", ".join(SUPPORTED_ANIMATED),
+                supported=", ".join(SUPPORTED.ANIMATED),
             )
 
         self.animated_output = output
@@ -102,7 +96,7 @@ class AudioOutputMixin(_HasMedia):
         output: Path | None = None,
         output_directory: Path | None = None,
     ) -> None:
-        """Procesa y asigna la ruta del fichero de subtítulos de salida.
+        """Procesa y asigna la ruta del fichero de pista de audio de salida.
 
         Args:
             extension: Extensión del fichero de salida.
@@ -121,11 +115,11 @@ class AudioOutputMixin(_HasMedia):
             output_directory=self.output_directory,
         )
 
-        if output.suffix not in SUPPORTED_AUDIO:
+        if output.suffix not in SUPPORTED.AUDIO:
             raise InvalidContainerTypeError(
                 extension=output.suffix,
                 media_type=_("audio"),
-                supported=", ".join(SUPPORTED_AUDIO),
+                supported=", ".join(SUPPORTED.AUDIO),
             )
 
         if self.media is not None:
@@ -183,11 +177,11 @@ class ImageOutputMixin(_HasMedia):
             output_directory=self.output_directory,
         )
 
-        if output.suffix not in SUPPORTED_IMAGES:
+        if output.suffix not in SUPPORTED.IMAGES:
             raise InvalidContainerTypeError(
                 extension=output.suffix,
                 media_type=_("image"),
-                supported=", ".join(SUPPORTED_IMAGES),
+                supported=", ".join(SUPPORTED.IMAGES),
             )
 
         self.image_output = output
@@ -212,7 +206,7 @@ class MediaOutputMixin(_HasMedia):
         output: Path | None = None,
         output_directory: Path | None = None,
     ) -> None:
-        """Procesa y asigna la ruta del fichero de subtítulos de salida.
+        """Procesa y asigna la ruta del fichero contenedor multimedia de salida.
 
         Args:
             extension: Extensión del fichero de salida.
@@ -236,11 +230,11 @@ class MediaOutputMixin(_HasMedia):
         if self.media.video.codec is None:
             raise MissingMediaPropertyError(name="video codec")
 
-        if output.suffix not in SUPPORTED_MEDIA:
+        if output.suffix not in SUPPORTED.CONTAINERS:
             raise InvalidContainerTypeError(
                 extension=output.suffix,
                 media_type=_("media"),
-                supported=", ".join(SUPPORTED_MEDIA),
+                supported=", ".join(SUPPORTED.CONTAINERS),
             )
 
         if output.suffix not in VIDEO_CODECS[self.media.video.codec].containers:
@@ -303,11 +297,11 @@ class SubtitleOutputMixin(_HasMedia):
             output_directory=self.output_directory,
         )
 
-        if output.suffix not in SUPPORTED_SUBTITLES:
+        if output.suffix not in SUPPORTED.SUBTITLES:
             raise InvalidContainerTypeError(
                 extension=output.suffix,
                 media_type=_("subtitle files"),
-                supported=", ".join(SUPPORTED_SUBTITLES),
+                supported=", ".join(SUPPORTED.SUBTITLES),
             )
 
         self.subtitle_output = output

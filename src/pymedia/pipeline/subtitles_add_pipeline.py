@@ -6,7 +6,7 @@ from pymedia.errors import MissingParameterError
 from pymedia.ffmpeg.subtitles_add_cmd import SubtitlesAddCmd
 from pymedia.locales import _  # noqa
 from pymedia.models.parameters import SubtitlesAddParameters
-from pymedia.pipeline import BasePipeline
+from pymedia.pipeline.base_pipeline import BasePipeline
 from pymedia.types import OverwriteMode
 
 

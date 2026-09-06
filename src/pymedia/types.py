@@ -24,31 +24,12 @@ class Channels(Enum):
     SURROUND = "5.1"
 
 
-class LocalesMode(Enum):
-    """Idiomas disponibles para la interfaz de la aplicación."""
-
-    ENGLISH = "english"
-    SPANISH = "spanish"
-    SYSTEM = "system"
-
-
 class OverwriteMode(Enum):
     """Resolución de conflicto si ya existe un fichero con el mismo nombre."""
 
     YES = "yes"
     NO = "no"
     ASK = "ask"
-
-
-class OutputMediaType(Enum):
-    """Tipos de ficheros multimedia de salida."""
-
-    ANIMATED_IMAGE = "animated_image"
-    AUDIO = "audio"
-    GIF = "gif"
-    IMAGE = "image"
-    SUBTITLE = "subtitle"
-    VIDEO = "video"
 
 
 class PresetsSheetMode(Enum):

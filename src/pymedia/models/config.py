@@ -8,15 +8,11 @@ from pathlib import Path
 import platformdirs
 
 from pymedia.data.audio_codecs import AUDIO_CODECS
-from pymedia.data.supported import (
-    SUPPORTED_ANIMATED,
-    SUPPORTED_IMAGES,
-    SUPPORTED_SUBTITLES,
-)
+from pymedia.data.supported import SUPPORTED
 from pymedia.data.video_codecs import VIDEO_CODECS
 from pymedia.errors import ConfigError
 from pymedia.locales import _  # noqa
-from pymedia.types import AudioCodecMode, LocalesMode, VideoCodecMode
+from pymedia.types import AudioCodecMode, VideoCodecMode
 
 
 @dataclass(frozen=True, kw_only=True, slots=True)
@@ -213,14 +209,14 @@ class Config:
 
         # default_container.animated_image
         animated_image_container = default_containers["animated_image"]
-        if animated_image_container not in SUPPORTED_ANIMATED:
+        if animated_image_container not in SUPPORTED.ANIMATED:
             errors.append(
                 "\n"
                 + _(
                     "Invalid configuration setting: default_container.animated_image "
                     "is expected one of: %(expected)s."
                 )
-                % {"expected": ", ".join(SUPPORTED_ANIMATED)}
+                % {"expected": ", ".join(SUPPORTED.ANIMATED)}
             )
 
         # default_container.audio
@@ -239,14 +235,14 @@ class Config:
 
         # default_container.image
         image_container = default_containers["image"]
-        if image_container not in SUPPORTED_IMAGES:
+        if image_container not in SUPPORTED.IMAGES:
             errors.append(
                 "\n"
                 + _(
                     "Invalid configuration setting: default_container.image "
                     "is expected one of: %(expected)s."
                 )
-                % {"expected": ", ".join(SUPPORTED_IMAGES)}
+                % {"expected": ", ".join(SUPPORTED.IMAGES)}
             )
 
         # default_container.media
@@ -270,27 +266,26 @@ class Config:
 
         # default_container.subtitles
         subtitle_container = default_containers["subtitles"]
-        if subtitle_container not in SUPPORTED_SUBTITLES:
+        if subtitle_container not in SUPPORTED.SUBTITLES:
             errors.append(
                 "\n"
                 + _(
                     "Invalid configuration setting: default_container.subtitles "
                     "is expected one of: %(expected)s."
                 )
-                % {"expected": ", ".join(SUPPORTED_SUBTITLES)}
+                % {"expected": ", ".join(SUPPORTED.SUBTITLES)}
             )
 
         # app.language
         language = app["language"]
-        valid_languages = {lang.value for lang in LocalesMode}
-        if language not in valid_languages:
+        if language not in SUPPORTED.LANGUAGES:
             errors.append(
                 "\n"
                 + _(
                     "Invalid configuration setting: app.language is expected one of: "
                     "%(expected)s."
                 )
-                % {"expected": ", ".join(sorted(valid_languages))}
+                % {"expected": ", ".join(SUPPORTED.LANGUAGES)}
             )
 
         # app.stall_timeout

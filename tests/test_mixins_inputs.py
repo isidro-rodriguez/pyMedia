@@ -1,4 +1,4 @@
-"""Tests para los mixins de entrada (pymedia.models.mixins.inputs_mixin)."""
+"""Tests para los mixins de entrada (pymedia.models.mixins.media_mixin)."""
 
 from pathlib import Path
 
@@ -9,7 +9,7 @@ from pymedia.errors import (
     MissingParameterError,
 )
 from pymedia.models.media import Media
-from pymedia.models.mixins.inputs_mixin import MediaListMixin, MediaMixin
+from pymedia.models.mixins.media_mixin import MediaInputMixin, MediaListMixin
 
 _EMPTY_METADATA = {"streams": [], "format": {}}
 
@@ -18,7 +18,7 @@ _EMPTY_METADATA = {"streams": [], "format": {}}
 def _fake_probe(monkeypatch):
     """Evita ejecutar ffprobe en todos los tests de este módulo."""
     monkeypatch.setattr(
-        "pymedia.models.mixins.inputs_mixin.get_media_metadata",
+        "pymedia.models.mixins.media_mixin.get_media_metadata",
         lambda path, logger: _EMPTY_METADATA,
     )
 
@@ -34,7 +34,7 @@ class TestInputSingleCreate:
     def test_sets_media_with_absolute_path(self, tmp_path, monkeypatch):
         """Comprueba que se guardan la ruta absoluta y los metadatos."""
         monkeypatch.chdir(tmp_path)
-        mixin = MediaMixin()
+        mixin = MediaInputMixin()
         source = Path("clip.mp4")
 
         mixin.create_media_input(media_input=source, logger=None)
@@ -43,7 +43,7 @@ class TestInputSingleCreate:
 
     def test_invalid_extension_raises(self, tmp_path):
         """Comprueba que una extensión no de vídeo lanza un error."""
-        mixin = MediaMixin()
+        mixin = MediaInputMixin()
 
         with pytest.raises(InvalidContainerTypeError):
             mixin.create_media_input(media_input=tmp_path / "clip.txt", logger=None)
@@ -55,13 +55,13 @@ class TestInputSingleCmd:
     def test_to_media_input_cmd(self):
         """Comprueba que se genera el argumento `-i` correctamente."""
         source = Path("clip.mp4")
-        mixin = MediaMixin(media=_media(source))
+        mixin = MediaInputMixin(media=_media(source))
 
         assert mixin.to_media_input_cmd() == ["-i", str(source)]
 
     def test_to_media_input_cmd_missing_parameter(self):
         """Comprueba que falta lanzar un error si no hay media."""
-        mixin = MediaMixin()
+        mixin = MediaInputMixin()
 
         with pytest.raises(MissingParameterError, match="media"):
             mixin.to_media_input_cmd()
@@ -99,7 +99,7 @@ class TestInputListCreate:
             raise subprocess.CalledProcessError(1, ["ffprobe"])
 
         monkeypatch.setattr(
-            "pymedia.models.mixins.inputs_mixin.get_media_metadata", _failing_probe
+            "pymedia.models.mixins.media_mixin.get_media_metadata", _failing_probe
         )
         mixin = MediaListMixin()
 

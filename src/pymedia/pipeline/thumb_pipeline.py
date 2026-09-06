@@ -11,7 +11,7 @@ from pymedia.errors import (
 from pymedia.ffmpeg.thumb_cmd import ThumbCmd
 from pymedia.locales import _  # noqa
 from pymedia.models.parameters import ThumbParameters
-from pymedia.pipeline import BasePipeline
+from pymedia.pipeline.base_pipeline import BasePipeline
 from pymedia.types import OverwriteMode, RotateMode, ScaleMode
 
 

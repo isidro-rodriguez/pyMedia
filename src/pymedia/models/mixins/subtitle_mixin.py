@@ -5,7 +5,7 @@ from pathlib import Path
 from typing import Protocol
 
 from pymedia.data.language_codes import LANGUAGES
-from pymedia.errors import InvalidArgumentError
+from pymedia.errors import InvalidArgumentError, SubtitlesError
 from pymedia.ffmpeg.probe import validate_subtitles_file_codec
 from pymedia.locales import _  # noqa
 from pymedia.logger import Logger
@@ -17,8 +17,12 @@ class _HasMedia(Protocol):
     media: Media
 
 
+class _HasMediaOutput(Protocol):
+    media_output: Path
+
+
 @dataclass(kw_only=True)
-class SubtitlesInputMixin(_HasMedia):
+class SubtitlesInputMixin(_HasMedia, _HasMediaOutput):
     """Mixin para la recepción de ficheros de subtítulos.
 
     Attributes:
@@ -56,12 +60,13 @@ class SubtitlesInputMixin(_HasMedia):
         Raises:
             InvalidArgumentError: si el idioma indicado no sigue el estándar ISO 639-2.
         """
+        validate_subtitles_file_codec(subtitles_input=subtitles_input, logger=logger)
         language_code = self._parse_language(raw=language)
         self.subtitles = Subtitle(
             path=subtitles_input.absolute(),
             stream_index=self._process_stream_index(media=self.media),
             subtitles_index=self._process_subtitles_index(media=self.media),
-            codec=validate_subtitles_file_codec(path=subtitles_input, logger=logger),
+            codec=self._process_codec(),
             language=language_code,
             title=self._process_subtitles_title(title=title, lang=language_code),
             forced=forced,
@@ -69,6 +74,17 @@ class SubtitlesInputMixin(_HasMedia):
             hearing_impaired=hearing_impaired,
             visual_impaired=visual_impaired,
         )
+
+    def _process_codec(self) -> str:
+        match self.media_output.suffix:
+            case ".m2ts" | ".mov" | ".mp4" | ".ts":
+                return "mov_text"
+            case ".mkv":
+                return "srt"
+            case ".webm":
+                return "webvtt"
+
+        raise SubtitlesError(msg=_("Subtitles codec not supported."))
 
     @staticmethod
     def _process_stream_index(media: Media) -> int:

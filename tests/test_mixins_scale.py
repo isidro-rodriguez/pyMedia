@@ -25,7 +25,7 @@ def _mixin(
     mixin = ScaleMixin(scale_mode=scale_mode)
     mixin.media = Media(
         path=Path("clip.mp4"),
-        video=video if video is not None else Video(width=1920, height=1080)
+        video=video if video is not None else Video(width=1920, height=1080),
     )
     return mixin
 

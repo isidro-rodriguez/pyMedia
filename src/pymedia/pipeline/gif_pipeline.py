@@ -8,7 +8,7 @@ from pymedia.errors import (
 from pymedia.ffmpeg.gif_cmd import GifCmd
 from pymedia.locales import _  # noqa
 from pymedia.models.parameters import GifParameters
-from pymedia.pipeline import BasePipeline
+from pymedia.pipeline.base_pipeline import BasePipeline
 from pymedia.types import OverwriteMode, RotateMode, ScaleMode
 
 

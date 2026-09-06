@@ -1,48 +1,70 @@
-"""Tipos de containers que soporta esta aplicación."""
+"""Tipos de `data` que soporta esta aplicación."""
 
-SUPPORTED_ANIMATED: tuple[str, ...] = (
-    ".apng",
-    ".gif",
-    ".webp",
-)
-"""tuple[str, ...]: Contenedores soportados para imágenes animadas."""
 
-SUPPORTED_AUDIO: tuple[str, ...] = (
-    ".m2ts",
-    ".m4a",
-    ".mka",
-    ".mkv",
-    ".mov",
-    ".mp4",
-    ".ogg",
-    ".opus",
-    ".ts",
-    ".webm",
-)
-"""tuple[str, ...]: Contenedores soportados para pistas de audio."""
+class SUPPORTED:
+    """Restricción de los tipos, considerados en `data`, que soporta la aplicación."""
 
-SUPPORTED_IMAGES: tuple[str, ...] = (
-    ".jpeg",
-    ".jpg",
-    ".png",
-    ".webp",
-)
-"""tuple[str, ...]: Contenedores soportados para imágenes."""
+    ANIMATED: tuple[str, ...] = (
+        ".apng",
+        ".gif",
+        ".webp",  # TODO: pendiente de implementar
+    )
 
-SUPPORTED_MEDIA: tuple[str, ...] = (
-    ".m2ts",
-    ".mkv",
-    ".mov",
-    ".mp4",
-    ".ogg",
-    ".ts",
-    ".webm",
-)
-"""tuple[str, ...]: Contenedores soportados para vídeos con audios y subtítulos."""
+    AUDIO: tuple[str, ...] = (
+        ".m2ts",
+        ".m4a",
+        ".mka",
+        ".mkv",
+        ".mov",
+        ".mp4",
+        ".ogg",
+        ".opus",
+        ".ts",
+        ".webm",
+    )
 
-SUPPORTED_SUBTITLES: tuple[str, ...] = (
-    ".ass",
-    ".srt",
-    ".ssa",
-)
-"""tuple[str, ...]: Contenedores soportados para subtítulos."""
+    AUDIO_CODECS: tuple[str, ...] = (
+        "aac",
+        "eac3",
+        "opus",
+    )
+
+    IMAGES: tuple[str, ...] = (
+        ".jpeg",
+        ".jpg",
+        ".png",
+        ".webp",
+    )
+
+    LANGUAGES: tuple[str, ...] = (
+        "english",
+        "spanish",
+        "system",
+    )
+
+    CONTAINERS: tuple[str, ...] = (
+        ".m2ts",
+        ".mkv",
+        ".mov",
+        ".mp4",
+        ".ts",
+        ".webm",
+    )
+
+    SUBTITLES: tuple[str, ...] = (
+        ".ass",
+        ".srt",
+        ".ssa",
+    )
+
+    SUBTITLE_CODECS: tuple[str, ...] = (
+        "ass",
+        "srt",
+        "ssa",
+    )
+
+    VIDEO_CODECS: tuple[str, ...] = (
+        "av1",
+        "h264",
+        "h265",
+    )

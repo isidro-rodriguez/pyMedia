@@ -8,10 +8,10 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-09-04 17:32+0100\n"
+"POT-Creation-Date: 2026-09-06 23:02+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
-"LocalesMode-Team: LANGUAGE <LL@li.org>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -22,142 +22,175 @@ msgstr ""
 msgid "FFmpeg command was not generated: %(command_name)s"
 msgstr ""
 
-#: pymedia/errors.py:128
+#: pymedia/errors.py:140
 #, python-format
 msgid ""
 "Invalid extension %(extension)s. Codec %(codec)s requires one of: "
 "%(supported)s."
 msgstr ""
 
-#: pymedia/errors.py:148
+#: pymedia/errors.py:160
 #, python-format
 msgid ""
 "Invalid extension %(extension)s. %(media_type)s requires one of: "
 "%(supported)s."
 msgstr ""
 
-#: pymedia/errors.py:176
+#: pymedia/errors.py:188
 msgid "Invalid timestamp format. Expected: hh:mm:ss."
 msgstr ""
 
-#: pymedia/errors.py:188
+#: pymedia/errors.py:200
 #, python-format
 msgid "Missing media information: %(path)s"
 msgstr ""
 
-#: pymedia/errors.py:201
+#: pymedia/errors.py:213
 #, python-format
 msgid "Missing media property: %(command_name)s"
 msgstr ""
 
-#: pymedia/errors.py:215
+#: pymedia/errors.py:227
 #, python-format
 msgid "Missing parameter: %(command_name)s"
 msgstr ""
 
-#: pymedia/errors.py:229
+#: pymedia/errors.py:241
 #, python-format
 msgid "One of the following options is required: %(options)s"
 msgstr ""
 
-#: pymedia/ffmpeg/probe.py:41
+#: pymedia/ffmpeg/probe.py:44 pymedia/ffmpeg/probe.py:84
 #, python-format
-msgid "ffprobe data: %(data)s"
+msgid "ffprobe couldn't read %(path)s: %(err.stderr)s"
 msgstr ""
 
-#: pymedia/ffmpeg/sheet_cmd.py:317 pymedia/pipeline/info_pipeline.py:55
+#: pymedia/ffmpeg/probe.py:49
+#, python-format
+msgid "ffprobe media data: %(data)s"
+msgstr ""
+
+#: pymedia/ffmpeg/probe.py:89
+#, python-format
+msgid "ffprobe subtitle file data: %(data)s"
+msgstr ""
+
+#: pymedia/ffmpeg/probe.py:102
+#, python-format
+msgid ""
+"\"%(path)s\" is not a recognized subtitle file (detected format: "
+"%(format_name)s)."
+msgstr ""
+
+#: pymedia/ffmpeg/probe.py:111
+#, python-format
+msgid "%(path.suffix)s extension doesn't support %(codec_name)s subtitles."
+msgstr ""
+
+#: pymedia/ffmpeg/sheet_cmd.py:312 pymedia/pipeline/info_pipeline.py:52
 msgid "File"
 msgstr ""
 
-#: pymedia/ffmpeg/sheet_cmd.py:322 pymedia/pipeline/info_pipeline.py:62
+#: pymedia/ffmpeg/sheet_cmd.py:317 pymedia/pipeline/info_pipeline.py:59
 msgid "Size"
 msgstr ""
 
-#: pymedia/ffmpeg/sheet_cmd.py:329 pymedia/pipeline/info_pipeline.py:58
+#: pymedia/ffmpeg/sheet_cmd.py:324 pymedia/pipeline/info_pipeline.py:55
 msgid "Duration"
 msgstr ""
 
-#: pymedia/ffmpeg/sheet_cmd.py:333 pymedia/pipeline/info_pipeline.py:67
+#: pymedia/ffmpeg/sheet_cmd.py:328 pymedia/pipeline/info_pipeline.py:64
 msgid "Video"
 msgstr ""
 
-#: pymedia/models/config.py:194
+#: pymedia/ffmpeg/subtitles_add_cmd.py:118
+msgid "Subtitles codec not supported."
+msgstr ""
+
+#: pymedia/models/config.py:153
 #, python-format
 msgid ""
 "Invalid configuration setting: encode.video_codec is expected one of: "
 "%(expected)s."
 msgstr ""
 
-#: pymedia/models/config.py:208
+#: pymedia/models/config.py:167
 #, python-format
 msgid ""
 "Invalid configuration setting: encode.video_preset is expected one of: "
 "%(expected)s."
 msgstr ""
 
-#: pymedia/models/config.py:222
+#: pymedia/models/config.py:181
 #, python-format
 msgid ""
 "Invalid configuration setting: encode.video_crf is expected between "
 "%(min)s and %(max)s."
 msgstr ""
 
-#: pymedia/models/config.py:235
+#: pymedia/models/config.py:194
 #, python-format
 msgid ""
 "Invalid configuration setting: encode.audio_codec is expected one of: "
 "%(expected)s."
 msgstr ""
 
-#: pymedia/models/config.py:249
+#: pymedia/models/config.py:208
 #, python-format
 msgid ""
 "Invalid configuration setting: encode.audio_bit_rate is expected one of: "
 "%(expected)s."
 msgstr ""
 
-#: pymedia/models/config.py:262
+#: pymedia/models/config.py:220
 #, python-format
 msgid ""
-"Invalid configuration setting: conflictive_concat.height is expected one "
+"Invalid configuration setting: default_container.animated_image is "
+"expected one of: %(expected)s."
+msgstr ""
+
+#: pymedia/models/config.py:234
+#, python-format
+msgid ""
+"Invalid configuration setting: default_container.audio is expected one "
 "of: %(expected)s."
 msgstr ""
 
-#: pymedia/models/config.py:275
+#: pymedia/models/config.py:246
 #, python-format
 msgid ""
-"Invalid configuration setting: conflictive_concat.fps is expected one of:"
-" %(expected)s."
+"Invalid configuration setting: default_container.image is expected one "
+"of: %(expected)s."
 msgstr ""
 
-#: pymedia/models/config.py:288
+#: pymedia/models/config.py:265
 #, python-format
 msgid ""
-"Invalid configuration setting: conflictive_concat.channels is expected "
+"Invalid configuration setting: default_container.media is expected one "
+"of: %(expected)s."
+msgstr ""
+
+#: pymedia/models/config.py:277
+#, python-format
+msgid ""
+"Invalid configuration setting: default_container.subtitles is expected "
 "one of: %(expected)s."
 msgstr ""
 
-#: pymedia/models/config.py:301
+#: pymedia/models/config.py:290
 #, python-format
 msgid ""
 "Invalid configuration setting: app.language is expected one of: "
 "%(expected)s."
 msgstr ""
 
-#: pymedia/models/config.py:320
-#, python-format
-msgid ""
-"Invalid configuration setting: encode.default_container is expected one "
-"of: %(expected)s."
-msgstr ""
-
-#: pymedia/models/config.py:332
+#: pymedia/models/config.py:302
 msgid ""
 "Invalid configuration setting: app.stall_timeout is expected to an "
 "integer between 30 to 600."
 msgstr ""
 
-#: pymedia/models/config.py:339
+#: pymedia/models/config.py:309
 #, python-format
 msgid "Invalid configuration: %(msg)s"
 msgstr ""
@@ -193,48 +226,74 @@ msgstr ""
 msgid "Image container not supported."
 msgstr ""
 
-#: pymedia/models/mixins/outputs_mixin.py:157
+#: pymedia/models/mixins/outputs_mixin.py:79
+msgid "animated images"
+msgstr ""
+
+#: pymedia/models/mixins/outputs_mixin.py:127
+msgid "audio"
+msgstr ""
+
+#: pymedia/models/mixins/outputs_mixin.py:189
+msgid "image"
+msgstr ""
+
+#: pymedia/models/mixins/outputs_mixin.py:242
+msgid "media"
+msgstr ""
+
+#: pymedia/models/mixins/outputs_mixin.py:309
+msgid "subtitle files"
+msgstr ""
+
+#: pymedia/models/mixins/outputs_mixin.py:329
 #, python-format
 msgid "%(name)s contains invalid characters: < > : \" / \\ | ? *"
 msgstr ""
 
-#: pymedia/models/mixins/outputs_mixin.py:169
+#: pymedia/models/mixins/outputs_mixin.py:341
 #, python-format
 msgid "Could not create directory: %(path)s"
 msgstr ""
 
-#: pymedia/models/mixins/scale_mixin.py:97
+#: pymedia/models/mixins/scale_mixin.py:95
 #, python-format
 msgid "Invalid dimensions %(value)s. Expected: WIDTHxHEIGHT"
 msgstr ""
 
-#: pymedia/models/mixins/scale_mixin.py:105
-#: pymedia/models/mixins/scale_mixin.py:121
+#: pymedia/models/mixins/scale_mixin.py:103
+#: pymedia/models/mixins/scale_mixin.py:119
 msgid "video dimensions"
 msgstr ""
 
-#: pymedia/models/mixins/scale_mixin.py:117
+#: pymedia/models/mixins/scale_mixin.py:115
 msgid "Scale mode not supported."
 msgstr ""
 
-#: pymedia/models/mixins/scale_mixin.py:126
+#: pymedia/models/mixins/scale_mixin.py:124
 msgid "Target dimensions must be even."
 msgstr ""
 
-#: pymedia/models/mixins/scale_mixin.py:131
+#: pymedia/models/mixins/scale_mixin.py:129
 msgid "Ignored scale. Target scale > video resolution, it requires upscale."
 msgstr ""
 
-#: pymedia/models/mixins/timestamps_mixin.py:66
+#: pymedia/models/mixins/subtitle_mixin.py:101
+msgid ""
+"Value doesn't match with ISO 639-2: Codes for the Representation of Names"
+" of Languages.[https://www.loc.gov/standards/iso639-2/php/code_list.php]"
+msgstr ""
+
+#: pymedia/models/mixins/timestamps_mixin.py:64
 #, python-format
 msgid "Invalid timestamps. Start (%(start)s) => End (%(end)s.)"
 msgstr ""
 
-#: pymedia/models/mixins/timestamps_mixin.py:119
+#: pymedia/models/mixins/timestamps_mixin.py:129
 msgid "Invalidad timestamp list format. Expected hh:mm:ss,hh:mm:ss,..."
 msgstr ""
 
-#: pymedia/models/mixins/timestamps_mixin.py:159
+#: pymedia/models/mixins/timestamps_mixin.py:169
 #, python-format
 msgid "Timestamp %(time)s exceeds video duration %(duration)s."
 msgstr ""
@@ -243,137 +302,148 @@ msgstr ""
 msgid "Invalid class name format!"
 msgstr ""
 
-#: pymedia/pipeline/base_pipeline.py:68
+#: pymedia/pipeline/base_pipeline.py:78
+msgid "Command has no output file to process."
+msgstr ""
+
+#: pymedia/pipeline/base_pipeline.py:82
 msgid "Output file already exists. Overwrite?"
 msgstr ""
 
-#: pymedia/pipeline/base_pipeline.py:71
+#: pymedia/pipeline/base_pipeline.py:85
 msgid "Process skipped since output file already exists."
 msgstr ""
 
-#: pymedia/pipeline/base_pipeline.py:119
+#: pymedia/pipeline/base_pipeline.py:133
 #, python-format
 msgid "FFmpeg command timed out: %(command_name)s"
 msgstr ""
 
-#: pymedia/pipeline/base_pipeline.py:178
+#: pymedia/pipeline/base_pipeline.py:195
 msgid "FFmpeg command failed during execution."
 msgstr ""
 
-#: pymedia/pipeline/gif_pipeline.py:19
-msgid "Generates an animated GIF from the specified video."
-msgstr ""
-
-#: pymedia/pipeline/gif_pipeline.py:87 pymedia/pipeline/sheet_pipeline.py:75
-#: pymedia/pipeline/sheet_pipeline.py:79 pymedia/pipeline/thumb_pipeline.py:134
+#: pymedia/pipeline/gif_pipeline.py:81 pymedia/pipeline/sheet_pipeline.py:67
+#: pymedia/pipeline/sheet_pipeline.py:71
+#: pymedia/pipeline/subtitles_add_pipeline.py:65
+#: pymedia/pipeline/thumb_pipeline.py:130
 #, python-format
 msgid "FFmpeg command: %(cmd)s"
 msgstr ""
 
-#: pymedia/pipeline/gif_pipeline.py:91
+#: pymedia/pipeline/gif_pipeline.py:85
 msgid "Generating GIF"
 msgstr ""
 
-#: pymedia/pipeline/gif_pipeline.py:96
+#: pymedia/pipeline/gif_pipeline.py:90
 #, python-format
 msgid "GIF generated successfully: %(output)s"
 msgstr ""
 
-#: pymedia/pipeline/info_pipeline.py:48
+#: pymedia/pipeline/info_pipeline.py:45
 msgid "-"
 msgstr ""
 
-#: pymedia/pipeline/info_pipeline.py:52
+#: pymedia/pipeline/info_pipeline.py:49
 msgid "General"
 msgstr ""
 
-#: pymedia/pipeline/info_pipeline.py:53 pymedia/pipeline/info_pipeline.py:68
+#: pymedia/pipeline/info_pipeline.py:50 pymedia/pipeline/info_pipeline.py:65
 msgid "Field"
 msgstr ""
 
-#: pymedia/pipeline/info_pipeline.py:54 pymedia/pipeline/info_pipeline.py:69
+#: pymedia/pipeline/info_pipeline.py:51 pymedia/pipeline/info_pipeline.py:66
 msgid "Value"
 msgstr ""
 
-#: pymedia/pipeline/info_pipeline.py:56
+#: pymedia/pipeline/info_pipeline.py:53
 msgid "Container"
 msgstr ""
 
-#: pymedia/pipeline/info_pipeline.py:71 pymedia/pipeline/info_pipeline.py:93
+#: pymedia/pipeline/info_pipeline.py:68 pymedia/pipeline/info_pipeline.py:90
 msgid "Codec"
 msgstr ""
 
-#: pymedia/pipeline/info_pipeline.py:78
+#: pymedia/pipeline/info_pipeline.py:75
 msgid "Resolution"
 msgstr ""
 
-#: pymedia/pipeline/info_pipeline.py:79
+#: pymedia/pipeline/info_pipeline.py:76
 msgid "FPS"
 msgstr ""
 
-#: pymedia/pipeline/info_pipeline.py:81
+#: pymedia/pipeline/info_pipeline.py:78
 msgid "Bitrate"
 msgstr ""
 
-#: pymedia/pipeline/info_pipeline.py:82
+#: pymedia/pipeline/info_pipeline.py:79
 #, python-format
 msgid "%(bit_rate)s bps"
 msgstr ""
 
-#: pymedia/pipeline/info_pipeline.py:91
+#: pymedia/pipeline/info_pipeline.py:88
 msgid "Audio"
 msgstr ""
 
-#: pymedia/pipeline/info_pipeline.py:94
+#: pymedia/pipeline/info_pipeline.py:91
 msgid "Sample rate"
 msgstr ""
 
-#: pymedia/pipeline/info_pipeline.py:95
+#: pymedia/pipeline/info_pipeline.py:92
 msgid "Channels"
 msgstr ""
 
-#: pymedia/pipeline/info_pipeline.py:96 pymedia/pipeline/info_pipeline.py:112
+#: pymedia/pipeline/info_pipeline.py:93 pymedia/pipeline/info_pipeline.py:109
 msgid "LocalesMode"
 msgstr ""
 
-#: pymedia/pipeline/info_pipeline.py:110
+#: pymedia/pipeline/info_pipeline.py:107
 msgid "Subtitles"
 msgstr ""
 
-#: pymedia/pipeline/info_pipeline.py:113
+#: pymedia/pipeline/info_pipeline.py:110
 msgid "Title"
 msgstr ""
 
-#: pymedia/pipeline/info_pipeline.py:114
+#: pymedia/pipeline/info_pipeline.py:111
 msgid "Forced"
 msgstr ""
 
-#: pymedia/pipeline/info_pipeline.py:115
+#: pymedia/pipeline/info_pipeline.py:112
 msgid "Default"
 msgstr ""
 
-#: pymedia/pipeline/info_pipeline.py:138
+#: pymedia/pipeline/info_pipeline.py:135
 msgid "Metadata"
 msgstr ""
 
-#: pymedia/pipeline/sheet_pipeline.py:83
+#: pymedia/pipeline/sheet_pipeline.py:75
 msgid "Generating sheet snapshots"
 msgstr ""
 
-#: pymedia/pipeline/sheet_pipeline.py:89
+#: pymedia/pipeline/sheet_pipeline.py:81
 msgid "Generating sheet header"
 msgstr ""
 
-#: pymedia/pipeline/sheet_pipeline.py:93
+#: pymedia/pipeline/sheet_pipeline.py:85
 #, python-format
 msgid "Metadata generated successfully: %(output)s"
 msgstr ""
 
-#: pymedia/pipeline/thumb_pipeline.py:141
+#: pymedia/pipeline/subtitles_add_pipeline.py:69
+msgid "Adding subtitles"
+msgstr ""
+
+#: pymedia/pipeline/subtitles_add_pipeline.py:73
+#, python-format
+msgid "Subtitles added successfully: %(output)s"
+msgstr ""
+
+#: pymedia/pipeline/thumb_pipeline.py:135
 msgid "Generating thumbnail"
 msgstr ""
 
-#: pymedia/pipeline/thumb_pipeline.py:145
+#: pymedia/pipeline/thumb_pipeline.py:139
 #, python-format
 msgid "Thumbnail(s) generated successfully: %(output)s"
 msgstr ""
@@ -397,110 +467,144 @@ msgstr ""
 msgid "Video list to process."
 msgstr ""
 
-#: pymedia/typer/options.py:52
+#: pymedia/typer/options.py:45
+msgid "Subtitles to insert in a media container."
+msgstr ""
+
+#: pymedia/typer/options.py:60
 msgid "Log level DEBUG"
 msgstr ""
 
-#: pymedia/typer/options.py:61
+#: pymedia/typer/options.py:69
 msgid "Show this message and exit."
 msgstr ""
 
-#: pymedia/typer/options.py:78 pymedia/typer/options.py:88
-#: pymedia/typer/options.py:98
+#: pymedia/typer/options.py:86 pymedia/typer/options.py:96
+#: pymedia/typer/options.py:106
 msgid "Output options"
 msgstr ""
 
-#: pymedia/typer/options.py:79
+#: pymedia/typer/options.py:87
 msgid "Output directory for multiple output files."
 msgstr ""
 
-#: pymedia/typer/options.py:89
+#: pymedia/typer/options.py:97
 msgid "Output file name."
 msgstr ""
 
-#: pymedia/typer/options.py:99
+#: pymedia/typer/options.py:107
 msgid "Action to use if output file already exists."
 msgstr ""
 
-#: pymedia/typer/options.py:113 pymedia/typer/options.py:123
-#: pymedia/typer/options.py:135 pymedia/typer/options.py:146
-#: pymedia/typer/options.py:156 pymedia/typer/options.py:167
-#: pymedia/typer/options.py:178 pymedia/typer/options.py:189
+#: pymedia/typer/options.py:121 pymedia/typer/options.py:131
+#: pymedia/typer/options.py:143 pymedia/typer/options.py:154
+#: pymedia/typer/options.py:164 pymedia/typer/options.py:175
+#: pymedia/typer/options.py:186 pymedia/typer/options.py:197
 msgid "Command options"
 msgstr ""
 
-#: pymedia/typer/options.py:114
+#: pymedia/typer/options.py:122
 msgid "Interval between thumbnails, in seconds."
 msgstr ""
 
-#: pymedia/typer/options.py:124
+#: pymedia/typer/options.py:132
 msgid "Preset sheet style."
 msgstr ""
 
-#: pymedia/typer/options.py:136
+#: pymedia/typer/options.py:144
 msgid "Scene-change sensitivity for thumbnail detection."
 msgstr ""
 
-#: pymedia/typer/options.py:147
+#: pymedia/typer/options.py:155
 msgid "Take a thumbnail at specific TIMESTAMP(s)."
 msgstr ""
 
-#: pymedia/typer/options.py:157
+#: pymedia/typer/options.py:165
 msgid "Time point at which GIF generation ends."
 msgstr ""
 
-#: pymedia/typer/options.py:168
+#: pymedia/typer/options.py:176
 msgid "Time point at which thumbnails generation ends."
 msgstr ""
 
-#: pymedia/typer/options.py:179
+#: pymedia/typer/options.py:187
 msgid "Time point at which GIF generation starts."
 msgstr ""
 
-#: pymedia/typer/options.py:190
+#: pymedia/typer/options.py:198
 msgid "Time point at which thumbnails generation starts."
 msgstr ""
 
-#: pymedia/typer/options.py:203 pymedia/typer/options.py:213
-#: pymedia/typer/options.py:222 pymedia/typer/options.py:234
-#: pymedia/typer/options.py:244
-msgid "Filter options"
+#: pymedia/typer/options.py:212 pymedia/typer/options.py:222
+#: pymedia/typer/options.py:232 pymedia/typer/options.py:242
+#: pymedia/typer/options.py:252 pymedia/typer/options.py:262
+msgid "Subtitles options"
 msgstr ""
 
-#: pymedia/typer/options.py:204
-msgid "Crop to WIDTH×HEIGHT at offset X,Y (from top-left)."
-msgstr ""
-
-#: pymedia/typer/options.py:214
-msgid "Flip the image horizontally, swapping left and right."
+#: pymedia/typer/options.py:213
+msgid "Set as default subtitle of the container."
 msgstr ""
 
 #: pymedia/typer/options.py:223
+msgid "Set as forced to be displayed."
+msgstr ""
+
+#: pymedia/typer/options.py:233
+msgid "Set as targeted for hearing impaired people."
+msgstr ""
+
+#: pymedia/typer/options.py:243
+msgid "Set subtitles language, formatted as ISO 639-2 code."
+msgstr ""
+
+#: pymedia/typer/options.py:253
+msgid "Set a custom title for video player."
+msgstr ""
+
+#: pymedia/typer/options.py:263
+msgid "Set as targeted for visual impaired people."
+msgstr ""
+
+#: pymedia/typer/options.py:277 pymedia/typer/options.py:287
+#: pymedia/typer/options.py:296 pymedia/typer/options.py:308
+#: pymedia/typer/options.py:318
+msgid "Filter options"
+msgstr ""
+
+#: pymedia/typer/options.py:278
+msgid "Crop to WIDTH×HEIGHT at offset X,Y (from top-left)."
+msgstr ""
+
+#: pymedia/typer/options.py:288
+msgid "Flip the image horizontally, swapping left and right."
+msgstr ""
+
+#: pymedia/typer/options.py:297
 msgid "Flip the image vertically, swapping top and bottom."
 msgstr ""
 
-#: pymedia/typer/options.py:235
+#: pymedia/typer/options.py:309
 msgid "Set the GIF frame rate in frames per second."
 msgstr ""
 
-#: pymedia/typer/options.py:245
+#: pymedia/typer/options.py:319
 msgid "Specify an orthogonal arc degree to rotate the image."
 msgstr ""
 
-#: pymedia/typer/options.py:258 pymedia/typer/options.py:269
-#: pymedia/typer/options.py:279
+#: pymedia/typer/options.py:332 pymedia/typer/options.py:343
+#: pymedia/typer/options.py:353
 msgid "Scale filter options"
 msgstr ""
 
-#: pymedia/typer/options.py:259
+#: pymedia/typer/options.py:333
 msgid "Specify different ways to scale the video."
 msgstr ""
 
-#: pymedia/typer/options.py:270
+#: pymedia/typer/options.py:344
 msgid "Target resolution, in pixels, to resize the video."
 msgstr ""
 
-#: pymedia/typer/options.py:280
+#: pymedia/typer/options.py:354
 msgid "Allows upscaling beyond the source dimensions."
 msgstr ""
 
@@ -515,7 +619,7 @@ msgstr ""
 msgid "%(path)s is not a file."
 msgstr ""
 
-#: pymedia/typer/commands/gif_command.py:27
+#: pymedia/typer/commands/gif_command.py:29
 msgid ""
 "Generates an animated GIF from the specified video.\n"
 "\n"
@@ -530,7 +634,7 @@ msgid ""
 "    > pymedia gif input.mp4 --output output.gif\n"
 msgstr ""
 
-#: pymedia/typer/commands/info_command.py:10
+#: pymedia/typer/commands/info_command.py:12
 msgid ""
 "Shows information about a video.\n"
 "\n"
@@ -539,7 +643,7 @@ msgid ""
 "    > pymedia info input.mp4\n"
 msgstr ""
 
-#: pymedia/typer/commands/sheet_command.py:20
+#: pymedia/typer/commands/sheet_command.py:22
 msgid ""
 "Generates a thumbnail grid sheet with media info header.\n"
 "\n"
@@ -550,7 +654,19 @@ msgid ""
 "    > pymedia sheet input.mp4 --preset fhd -o vcs.webp\n"
 msgstr ""
 
-#: pymedia/typer/commands/thumb_commands.py:34
+#: pymedia/typer/commands/subtitle_commands.py:30
+msgid ""
+"Add subtitles to a media file.\n"
+"\n"
+"[bold]Examples[/bold]:\n"
+"  Add english subtitles to a media container:\n"
+"    > pymedia add input.mp4 eng_subs.srt --language eng\n"
+"  Add default forced spanish subtitles with custom title: \n"
+"    > pymedia add input.mp4 eng_subs.srt --language spa --title \"Español"
+" (forced)\" --default --forced\n"
+msgstr ""
+
+#: pymedia/typer/commands/thumb_commands.py:35
 msgid ""
 "Captures thumbnails at the specified timestamps.\n"
 "\n"
@@ -563,7 +679,7 @@ msgid ""
 "    > pymedia frames input.mp4 --at 00:01:30 --output thumb.jpg\n"
 msgstr ""
 
-#: pymedia/typer/commands/thumb_commands.py:112
+#: pymedia/typer/commands/thumb_commands.py:111
 msgid ""
 "Captures thumbnails at regular intervals of the video.\n"
 "\n"
@@ -577,7 +693,7 @@ msgid ""
 "    > pymedia interval input.mp4 --every 5 --output thumb.jpg\n"
 msgstr ""
 
-#: pymedia/typer/commands/thumb_commands.py:197
+#: pymedia/typer/commands/thumb_commands.py:196
 msgid ""
 "Captures thumbnails at the scene changes detected in the video.\n"
 "\n"

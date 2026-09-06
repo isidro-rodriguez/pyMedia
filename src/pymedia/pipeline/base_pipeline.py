@@ -191,4 +191,6 @@ class BasePipeline[ParamsT](ABC):
         if proc.returncode != 0:
             tail = "".join(stderr_lines[-10:]).strip()
             detail = f"\nffmpeg stderr:\n{tail}" if tail else ""
-            raise CommandError(msg=_("FFmpeg command failed during execution.") + detail)
+            raise CommandError(
+                msg=_("FFmpeg command failed during execution.") + detail
+            )
