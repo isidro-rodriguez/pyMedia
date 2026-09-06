@@ -1,4 +1,4 @@
-"""Mixins de entrada de vídeo (individual y por lotes)."""
+"""Mixins de entrada de contenedores multimedia."""
 
 import subprocess
 from dataclasses import dataclass
@@ -21,7 +21,7 @@ from pymedia.utils import parse_fraction, to_float, to_int
 
 
 @dataclass(kw_only=True)
-class MediaMixin:
+class MediaInputMixin:
     """Mixin para recepción individual de inputs de vídeo.
 
     Attributes:

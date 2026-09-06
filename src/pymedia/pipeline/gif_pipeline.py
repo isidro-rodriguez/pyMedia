@@ -47,7 +47,10 @@ class GifPipeline(BasePipeline[GifParameters]):
             logger=self.logger,
         )
 
-        params.create_animated_output(output=output)
+        params.create_animated_output(
+            output=output,
+            extension=self.config.default_containers.animated_image,
+        )
 
         params.create_crop(
             crop_str=crop,

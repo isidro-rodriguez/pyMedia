@@ -7,7 +7,7 @@ from pymedia.models.mixins.crop_mixin import CropMixin
 from pymedia.models.mixins.flip_mixin import FlipMixin
 from pymedia.models.mixins.fps_mixin import FpsGifMixin, FpsImageMixin
 from pymedia.models.mixins.image_mixin import ImageQualityMixin, SceneMixin
-from pymedia.models.mixins.inputs_mixin import MediaMixin
+from pymedia.models.mixins.media_mixin import MediaInputMixin
 from pymedia.models.mixins.outputs_mixin import (
     AnimatedOutputMixin,
     ImageOutputMixin,
@@ -38,7 +38,7 @@ class BaseParameters(ABC):
 @dataclass(kw_only=True)
 class GifParameters(
     BaseParameters,
-    MediaMixin,
+    MediaInputMixin,
     AnimatedOutputMixin,
     FpsGifMixin,
     CropMixin,
@@ -52,7 +52,7 @@ class GifParameters(
 
 @dataclass(kw_only=True)
 class InfoParameters(
-    MediaMixin,
+    MediaInputMixin,
 ):
     """Parámetros utilizados por el comando Info."""
 
@@ -60,7 +60,7 @@ class InfoParameters(
 @dataclass(kw_only=True)
 class SheetParameters(
     BaseParameters,
-    MediaMixin,
+    MediaInputMixin,
     ImageOutputMixin,
     ImageQualityMixin,
     SheetPresetsMixin,
@@ -71,7 +71,7 @@ class SheetParameters(
 @dataclass(kw_only=True)
 class SubtitleParameters(
     BaseParameters,
-    MediaMixin,
+    MediaInputMixin,
     SubtitleInputMixin,
     SubtitleOutputMixin,
 ):
@@ -81,7 +81,7 @@ class SubtitleParameters(
 @dataclass(kw_only=True)
 class ThumbParameters(
     BaseParameters,
-    MediaMixin,
+    MediaInputMixin,
     ImageOutputMixin,
     ImageQualityMixin,
     TimestampAtMixin,

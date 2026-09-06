@@ -43,7 +43,7 @@ class SheetPipeline(BasePipeline[SheetParameters]):
             output=output,
             output_directory=output_directory,
             affix="_sheet",
-            extension=".jpg",
+            extension=self.config.default_containers.image,
         )
         params.create_preset_sheet(preset=preset_sheet)
         self.params = params

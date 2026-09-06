@@ -11,7 +11,7 @@ msgstr ""
 "POT-Creation-Date: 2026-09-04 17:32+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
-"Language-Team: LANGUAGE <LL@li.org>\n"
+"LocalesMode-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -369,7 +369,7 @@ msgid "Channels"
 msgstr "Canales"
 
 #: pymedia/pipeline/info_pipeline.py:96 pymedia/pipeline/info_pipeline.py:112
-msgid "Language"
+msgid "LocalesMode"
 msgstr "Lenguaje"
 
 #: pymedia/pipeline/info_pipeline.py:110

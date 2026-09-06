@@ -1,29 +1,28 @@
-# +-------------+----------------------+------------------+
-# |             |             Vídeo    |       Audio      |
-# |  Perfiles   +-------+--------+-----+-------+----------+
-# |             | Códec | Preset | CRF | Códec | bit rate |
-# +-------------+-------+--------+-----+-------+----------+
-# | Rápido      | h264  |  fast  |  22 | aac   |     160k |
-# | Equilibrado | h265  |  slow  |  24 | opus  |     128k |
-# | Máximo      | av1   |     4  |  32 | opus  |      96k |
-# +-------------+-------+--------+-----+-------+----------+
-# - Rápido: transcodifica sin esperar mucho
-# - Equilibrado: 40% menos espacio, pero tarda el triple
-# - Máximo: 15% menos espacio que equilibrado, pero aún más lento
+# | Formato | MKV | MP4 | WebM | M4A | OGG | Archivo |
+# | ------- | --- | --- | ---- | --- | --- | ------- |
+# | AV1     |  ✓  |  ✓  |  ✓   |     |     |         |
+# | H.264   |  ✓  |  ✓  |      |     |     |         |
+# | H.265   |  ✓  |  ✓  |      |     |     |         |
+# | AAC     |  ✓  |  ✓  |      |  ✓  |     |         |
+# | E-AC-3  |  ✓  |  ✓  |      |     |     |         |
+# | Opus    |  ✓  |     |  ✓   |     |  ✓  |         |
+# | SRT     |  ✓  |  ✓  |      |     |     |    ✓    |
+# | ASS     |  ✓  |     |      |     |     |    ✓    |
 
 [encode]
-video_codec = "h265"            # h264 | h265 | av1
+video_codec = "h265"
 video_preset = "slow"
 video_crf = 24
-audio_codec = "opus"            # aac | opus | eac3
+audio_codec = "aac"
 audio_bit_rate = "128k"
 
-[conflictive_concat]
-height = "reject_increase"      # min_height | max_height | reject_increase
-fps = "min_fps"                 # min_fps | max_fps
-channels = "stereo"             # stereo | mono | 5.1
+[default_containers]
+animated_image = ".gif"
+audio_track = ".m4a"
+image = ".jpg"
+media = ".mp4"
+subtitles = ".srt"
 
 [app]
-language = "english"
-default_container = ".mkv"      # .mkv | .mp4 | .mov (recomendados)
-stall_timeout = 60              # in time
+language = "system"
+stall_timeout = 60

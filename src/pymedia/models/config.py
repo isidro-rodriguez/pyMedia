@@ -2,67 +2,21 @@
 
 import tomllib
 from dataclasses import dataclass
-from enum import Enum
 from importlib.resources import files
 from pathlib import Path
 
 import platformdirs
 
 from pymedia.data.audio_codecs import AUDIO_CODECS
+from pymedia.data.supported import (
+    SUPPORTED_ANIMATED,
+    SUPPORTED_IMAGES,
+    SUPPORTED_SUBTITLES,
+)
 from pymedia.data.video_codecs import VIDEO_CODECS
 from pymedia.errors import ConfigError
 from pymedia.locales import _  # noqa
-
-
-class AudioCodec(Enum):
-    """Lista de códecs de audio disponibles en esta aplicación."""
-
-    AAC = "aac"
-    EAC3 = "eac3"
-    OPUS = "opus"
-
-
-class Channels(Enum):
-    """Refiere al uso de canales de audio en uniones conflictivas."""
-
-    MONO = "mono"
-    STEREO = "stereo"
-    SURROUND = "5.1"
-
-
-class Language(Enum):
-    """Idiomas disponibles para la interfaz de la aplicación."""
-
-    ENGLISH = "english"
-    # FRENCH = "french"
-    # GERMAN = "german"
-    # ITALIAN = "italian"
-    SPANISH = "spanish"
-    SYSTEM = "system"
-
-
-class Height(Enum):
-    """Altura en que se redimensionan los vídeos en uniones conflictivas."""
-
-    MAX_HEIGHT = "max_height"
-    MIN_HEIGHT = "min_height"
-    REJECT_INCREASE = "reject_increase"
-
-
-class TargetFPS(Enum):
-    """FPS en el que se transcodificarán los vídeos en uniones conflictivas."""
-
-    MAX_FPS = "max_fps"
-    MIN_FPS = "min_fps"
-
-
-class VideoCodec(Enum):
-    """Lista de códecs de vídeo modernos disponibles en esta aplicación."""
-
-    AV1 = "av1"
-    H264 = "h264"
-    H265 = "h265"
-    HEVC = "hevc"
+from pymedia.types import AudioCodecMode, LocalesMode, VideoCodecMode
 
 
 @dataclass(frozen=True, kw_only=True, slots=True)
@@ -86,18 +40,22 @@ class Encode:
 
 
 @dataclass(frozen=True, kw_only=True, slots=True)
-class ConflictiveConcat:
-    """Actuaciones ante valores conflictivos en CONCAT filter.
+class DefaultContainers:
+    """Contenedores por defecto según el tipo fichero multimedia.
 
     Attributes:
-        fps: Si transcodifica los vídeos al de menor FPS o el mayor.
-        channels: Canales de salida de audio por defecto si los vídeos a
-                concatenar tienes pistas de audio con canales incompatibles.
+        animated_image: Contenedor por defecto de imágenes animadas.
+        audio_track: Contenedor por defecto de pistas de audio.
+        image: Contenedor por defecto de imágenes.
+        media: Contenedor por defecto de vídeos con audios y subtítulos.
+        subtitles: Contenedor por defecto de subtítulos.
     """
 
-    height: str
-    fps: str
-    channels: str
+    animated_image: str
+    audio_track: str
+    image: str
+    media: str
+    subtitles: str
 
 
 @dataclass(frozen=True, kw_only=True, slots=True)
@@ -106,12 +64,10 @@ class App:
 
     Attributes:
         language: Lenguaje de la aplicación.
-        default_container: Formato que agrupa y sincroniza video, audio y subtítulos.
         stall_timeout: Retardo, en segundos, para matar el proceso ante bloqueo.
     """
 
     language: str
-    default_container: str
     stall_timeout: int
 
 
@@ -121,12 +77,11 @@ class Config:
 
     Attributes:
         encode: Parámetros de transcodificación que se usarán en ffmpeg.
-        conflictive_concat: Actuaciones ante valores conflictivos en CONCAT filter.
         app: Opciones de configuración de la aplicación.
     """
 
     encode: Encode
-    conflictive_concat: ConflictiveConcat
+    default_containers: DefaultContainers
     app: App
 
     @classmethod
@@ -160,12 +115,12 @@ class Config:
 
         return cls(
             encode=Encode(**data["encode"]),
-            conflictive_concat=ConflictiveConcat(**data["conflictive_concat"]),
+            default_containers=DefaultContainers(**data["default_containers"]),
             app=App(**data["app"]),
         )
 
-    @classmethod
-    def _create(cls, path: Path) -> None:
+    @staticmethod
+    def _create(path: Path) -> None:
         """Copia el config por defecto desde los recursos a la ruta de usuario."""
         path.parent.mkdir(parents=True, exist_ok=True)
         src = (
@@ -175,18 +130,22 @@ class Config:
         )
         path.write_text(src, encoding="utf-8")
 
-    @classmethod
-    def _validate(cls, data: dict) -> None:
+    # =========================================================================
+    #  Validación de config.toml
+    # =========================================================================
+
+    @staticmethod
+    def _validate(data: dict) -> None:
         """Valida los valores del config.toml."""
         errors: list[str] = []
 
         encode = data["encode"]
-        conflictive_concat = data["conflictive_concat"]
+        default_containers = data["default_containers"]
         app = data["app"]
 
         # encode.video_codec
         video_codec = encode["video_codec"]
-        valid_video_codecs = {v.value for v in VideoCodec}
+        valid_video_codecs = {v.value for v in VideoCodecMode}
         if video_codec not in valid_video_codecs:
             errors.append(
                 "\n"
@@ -227,7 +186,7 @@ class Config:
 
         # encode.audio_codec
         audio_codec = encode["audio_codec"]
-        valid_audio_codecs = {a.value for a in AudioCodec}
+        valid_audio_codecs = {a.value for a in AudioCodecMode}
         if audio_codec not in valid_audio_codecs:
             errors.append(
                 "\n"
@@ -252,48 +211,78 @@ class Config:
                     % {"expected": ", ".join(bit_rates)}
                 )
 
-        # conflictive_concat.height
-        height = conflictive_concat["height"]
-        valid_height = {r.value for r in Height}
-        if height not in valid_height:
+        # default_container.animated_image
+        animated_image_container = default_containers["animated_image"]
+        if animated_image_container not in SUPPORTED_ANIMATED:
             errors.append(
                 "\n"
                 + _(
-                    "Invalid configuration setting: conflictive_concat.height is "
-                    "expected one of: %(expected)s."
+                    "Invalid configuration setting: default_container.animated_image "
+                    "is expected one of: %(expected)s."
                 )
-                % {"expected": ", ".join(sorted(valid_height))}
+                % {"expected": ", ".join(SUPPORTED_ANIMATED)}
             )
 
-        # conflictive_concat.fps
-        fps = conflictive_concat["fps"]
-        valid_fps = {f.value for f in TargetFPS}
-        if fps not in valid_fps:
+        # default_container.audio
+        audio_container = default_containers["audio_track"]
+        if audio_codec in AUDIO_CODECS:
+            supported_audio_containers = AUDIO_CODECS[audio_codec].containers
+            if audio_container not in supported_audio_containers:
+                errors.append(
+                    "\n"
+                    + _(
+                        "Invalid configuration setting: default_container.audio is "
+                        "expected one of: %(expected)s."
+                    )
+                    % {"expected": ", ".join(set(supported_audio_containers))}
+                )
+
+        # default_container.image
+        image_container = default_containers["image"]
+        if image_container not in SUPPORTED_IMAGES:
             errors.append(
                 "\n"
                 + _(
-                    "Invalid configuration setting: conflictive_concat.fps is "
-                    "expected one of: %(expected)s."
+                    "Invalid configuration setting: default_container.image "
+                    "is expected one of: %(expected)s."
                 )
-                % {"expected": ", ".join(sorted(valid_fps))}
+                % {"expected": ", ".join(SUPPORTED_IMAGES)}
             )
 
-        # conflictive_concat.channels
-        channels = conflictive_concat["channels"]
-        valid_channels = {c.value for c in Channels}
-        if channels not in valid_channels:
+        # default_container.media
+        media_container = default_containers["media"]
+        if video_codec in VIDEO_CODECS and audio_codec in AUDIO_CODECS:
+            video_containers = VIDEO_CODECS[video_codec].containers
+            audio_containers = AUDIO_CODECS[audio_codec].containers
+            if (
+                media_container not in video_containers
+                or media_container not in audio_containers
+            ):
+                common = sorted(set(video_containers) & set(audio_containers))
+                errors.append(
+                    "\n"
+                    + _(
+                        "Invalid configuration setting: default_container.media is "
+                        "expected one of: %(expected)s."
+                    )
+                    % {"expected": ", ".join(common)}
+                )
+
+        # default_container.subtitles
+        subtitle_container = default_containers["subtitles"]
+        if subtitle_container not in SUPPORTED_SUBTITLES:
             errors.append(
                 "\n"
                 + _(
-                    "Invalid configuration setting: conflictive_concat.channels is "
-                    "expected one of: %(expected)s."
+                    "Invalid configuration setting: default_container.subtitles "
+                    "is expected one of: %(expected)s."
                 )
-                % {"expected": ", ".join(sorted(valid_channels))}
+                % {"expected": ", ".join(SUPPORTED_SUBTITLES)}
             )
 
         # app.language
         language = app["language"]
-        valid_languages = {lang.value for lang in Language}
+        valid_languages = {lang.value for lang in LocalesMode}
         if language not in valid_languages:
             errors.append(
                 "\n"
@@ -303,25 +292,6 @@ class Config:
                 )
                 % {"expected": ", ".join(sorted(valid_languages))}
             )
-
-        # app.default_container
-        default_container = app["default_container"]
-        if video_codec in VIDEO_CODECS and audio_codec in AUDIO_CODECS:
-            video_containers = VIDEO_CODECS[video_codec].containers
-            audio_containers = AUDIO_CODECS[audio_codec].containers
-            if (
-                default_container not in video_containers
-                or default_container not in audio_containers
-            ):
-                common = sorted(set(video_containers) & set(audio_containers))
-                errors.append(
-                    "\n"
-                    + _(
-                        "Invalid configuration setting: encode.default_container is "
-                        "expected one of: %(expected)s."
-                    )
-                    % {"expected": ", ".join(common)}
-                )
 
         # app.stall_timeout
         stall_timeout = app["stall_timeout"]

@@ -70,7 +70,7 @@ class ThumbPipeline(BasePipeline[ThumbParameters]):
         params.create_image_output(
             output=output,
             affix="_thumbnail",
-            extension=".jpg",
+            extension=self.config.default_containers.image,
         )
 
         params.create_timestamp_at(

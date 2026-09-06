@@ -28,7 +28,6 @@ from pymedia.errors import (
 )
 from pymedia.locales import _  # noqa
 from pymedia.models.media import Media
-from pymedia.types import OutputMediaType
 
 
 class _HasMedia(Protocol):
@@ -50,6 +49,7 @@ class AnimatedOutputMixin(_HasMedia):
 
     def create_animated_output(
         self,
+        extension: str,
         affix: str | None = None,
         output: Path | None = None,
         output_directory: Path | None = None,
@@ -57,6 +57,7 @@ class AnimatedOutputMixin(_HasMedia):
         """Procesa y asigna la ruta del fichero GIF de salida.
 
         Args:
+            extension: Extensión del fichero de salida.
             affix: Sufijo a añadir al nombre del fichero de salida.
             output: Ruta absoluta del fichero de salida procesado.
             output_directory: Directorio de salida para lotes de varias imágenes.
@@ -67,7 +68,7 @@ class AnimatedOutputMixin(_HasMedia):
         output = _process_output(
             media=self.media,
             affix=affix,
-            extension=".gif",
+            extension=extension,
             output=output,
             output_directory=self.output_directory,
         )
@@ -96,6 +97,7 @@ class AudioOutputMixin(_HasMedia):
 
     def create_audio_output(
         self,
+        extension: str,
         affix: str | None = None,
         output: Path | None = None,
         output_directory: Path | None = None,
@@ -103,6 +105,7 @@ class AudioOutputMixin(_HasMedia):
         """Procesa y asigna la ruta del fichero de subtítulos de salida.
 
         Args:
+            extension: Extensión del fichero de salida.
             affix: Sufijo a añadir al nombre del fichero de salida.
             output: Ruta absoluta del fichero de salida procesado.
             output_directory: Directorio de salida para lotes de varios ficheros.
@@ -113,7 +116,7 @@ class AudioOutputMixin(_HasMedia):
         output = _process_output(
             media=self.media,
             affix=affix,
-            extension=".m4a",
+            extension=extension,
             output=output,
             output_directory=self.output_directory,
         )
@@ -121,8 +124,8 @@ class AudioOutputMixin(_HasMedia):
         if output.suffix not in SUPPORTED_AUDIO:
             raise InvalidContainerTypeError(
                 extension=output.suffix,
-                media_type=OutputMediaType.AUDIO.value,
-                supported=",".join(SUPPORTED_AUDIO),
+                media_type=_("audio"),
+                supported=", ".join(SUPPORTED_AUDIO),
             )
 
         if self.media is not None:
@@ -135,7 +138,7 @@ class AudioOutputMixin(_HasMedia):
                     raise InvalidContainerError(
                         extension=output.suffix,
                         codec=AUDIO_CODECS[audio_track.codec].name,
-                        supported=",".join(AUDIO_CODECS[audio_track.codec].containers),
+                        supported=", ".join(AUDIO_CODECS[audio_track.codec].containers),
                     )
 
         self.audio_output = output
@@ -156,6 +159,7 @@ class ImageOutputMixin(_HasMedia):
 
     def create_image_output(
         self,
+        extension: str,
         affix: str | None = None,
         output: Path | None = None,
         output_directory: Path | None = None,
@@ -163,6 +167,7 @@ class ImageOutputMixin(_HasMedia):
         """Procesa y asigna la ruta o directorio de salida de la imagen.
 
         Args:
+            extension: Extensión del fichero de salida.
             affix: Sufijo a añadir al nombre del fichero de salida.
             output: Ruta de salida explícita, no válida solo para lotes.
             output_directory: Directorio de salida para lotes de varios ficheros.
@@ -173,7 +178,7 @@ class ImageOutputMixin(_HasMedia):
         output = _process_output(
             media=self.media,
             affix=affix,
-            extension=".jpg",
+            extension=extension,
             output=output,
             output_directory=self.output_directory,
         )
@@ -181,7 +186,7 @@ class ImageOutputMixin(_HasMedia):
         if output.suffix not in SUPPORTED_IMAGES:
             raise InvalidContainerTypeError(
                 extension=output.suffix,
-                media_type=OutputMediaType.IMAGE.value,
+                media_type=_("image"),
                 supported=", ".join(SUPPORTED_IMAGES),
             )
 
@@ -202,6 +207,7 @@ class MediaOutputMixin(_HasMedia):
 
     def create_media_output(
         self,
+        extension: str,
         affix: str | None = None,
         output: Path | None = None,
         output_directory: Path | None = None,
@@ -209,6 +215,7 @@ class MediaOutputMixin(_HasMedia):
         """Procesa y asigna la ruta del fichero de subtítulos de salida.
 
         Args:
+            extension: Extensión del fichero de salida.
             affix: Sufijo a añadir al nombre del fichero de salida.
             output: Ruta absoluta del fichero de salida procesado.
             output_directory: Directorio de salida para lotes de varios ficheros.
@@ -219,7 +226,7 @@ class MediaOutputMixin(_HasMedia):
         output = _process_output(
             media=self.media,
             affix=affix,
-            extension=".mkv",
+            extension=extension,
             output=output,
             output_directory=self.output_directory,
         )
@@ -232,15 +239,15 @@ class MediaOutputMixin(_HasMedia):
         if output.suffix not in SUPPORTED_MEDIA:
             raise InvalidContainerTypeError(
                 extension=output.suffix,
-                media_type=OutputMediaType.VIDEO.value,
-                supported=",".join(SUPPORTED_MEDIA),
+                media_type=_("media"),
+                supported=", ".join(SUPPORTED_MEDIA),
             )
 
         if output.suffix not in VIDEO_CODECS[self.media.video.codec].containers:
             raise InvalidContainerError(
                 extension=output.suffix,
                 codec=VIDEO_CODECS[self.media.video.codec].name,
-                supported=",".join(VIDEO_CODECS[self.media.video.codec].containers),
+                supported=", ".join(VIDEO_CODECS[self.media.video.codec].containers),
             )
 
         if self.media.audio is not None:
@@ -251,7 +258,7 @@ class MediaOutputMixin(_HasMedia):
                     raise InvalidContainerError(
                         extension=output.suffix,
                         codec=AUDIO_CODECS[audio_track.codec].name,
-                        supported=",".join(AUDIO_CODECS[audio_track.codec].containers),
+                        supported=", ".join(AUDIO_CODECS[audio_track.codec].containers),
                     )
 
         self.media_output = output
@@ -272,6 +279,7 @@ class SubtitleOutputMixin(_HasMedia):
 
     def create_subtitle_output(
         self,
+        extension: str,
         affix: str | None = None,
         output: Path | None = None,
         output_directory: Path | None = None,
@@ -279,6 +287,7 @@ class SubtitleOutputMixin(_HasMedia):
         """Procesa y asigna la ruta del fichero de subtítulos de salida.
 
         Args:
+            extension: Extensión del fichero de salida.
             affix: Sufijo a añadir al nombre del fichero de salida.
             output: Ruta absoluta del fichero de salida procesado.
             output_directory: Directorio de salida para lotes de varios ficheros.
@@ -289,7 +298,7 @@ class SubtitleOutputMixin(_HasMedia):
         output = _process_output(
             media=self.media,
             affix=affix,
-            extension=".srt",
+            extension=extension,
             output=output,
             output_directory=self.output_directory,
         )
@@ -336,8 +345,8 @@ def _process_output_directory(directory: Path) -> Path:
 
 def _process_output(
     media: Media,
+    extension: str,
     affix: str | None = None,
-    extension: str | None = None,
     output: Path | None = None,
     output_directory: Path | None = None,
 ) -> Path:

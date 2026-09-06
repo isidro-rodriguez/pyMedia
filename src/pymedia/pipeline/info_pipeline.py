@@ -90,7 +90,7 @@ def _build_info_panel(media: Media, media_input: Path, locale: str = "en") -> Pa
             _("Codec"),
             _("Sample rate"),
             _("Channels"),
-            _("Language"),
+            _("LocalesMode"),
         ):
             table.add_column(header=column, ratio=1)
         for track in audio:
@@ -106,7 +106,7 @@ def _build_info_panel(media: Media, media_input: Path, locale: str = "en") -> Pa
         """Construye la tabla de metadatos de las pistas de subtítulos."""
         table = Table(title=f"💬 {_('Subtitles')}", expand=True)
         for column in (
-            _("Language"),
+            _("LocalesMode"),
             _("Title"),
             _("Forced"),
             _("Default"),

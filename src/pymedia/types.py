@@ -8,6 +8,30 @@ from typing import NamedTuple
 # =============================================================================
 
 
+class AudioCodecMode(Enum):
+    """Lista de códecs de audio disponibles en esta aplicación."""
+
+    AAC = "aac"
+    EAC3 = "eac3"
+    OPUS = "opus"
+
+
+class Channels(Enum):
+    """Refiere al uso de canales de audio en uniones conflictivas."""
+
+    MONO = "mono"
+    STEREO = "stereo"
+    SURROUND = "5.1"
+
+
+class LocalesMode(Enum):
+    """Idiomas disponibles para la interfaz de la aplicación."""
+
+    ENGLISH = "english"
+    SPANISH = "spanish"
+    SYSTEM = "system"
+
+
 class OverwriteMode(Enum):
     """Resolución de conflicto si ya existe un fichero con el mismo nombre."""
 
@@ -49,6 +73,15 @@ class ScaleMode(Enum):
     STRETCH = "stretch"  # Re-escala a la dimensión objetivo, modifica aspect ratio.
     FIT = "fit"  # Re-escala hasta encajar en la dimensión objetivo, no modifica AR.
     COVER = "cover"  # Re-escala hasta cubrir la dimensión objetivo, no modifica AR.
+
+
+class VideoCodecMode(Enum):
+    """Lista de códecs de vídeo modernos disponibles en esta aplicación."""
+
+    AV1 = "av1"
+    H264 = "h264"
+    H265 = "h265"
+    HEVC = "hevc"
 
 
 # =============================================================================
