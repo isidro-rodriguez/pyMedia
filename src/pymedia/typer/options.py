@@ -39,6 +39,14 @@ MediaInputListArgument = Annotated[
     ),
 ]
 
+SubtitlesArgument = Annotated[
+    Path,
+    typer.Argument(
+        help=_("Subtitles to insert in a media container."),
+        callback=validate_path,
+    ),
+]
+
 
 # =============================================================================
 #  Opciones de aplicación
@@ -190,6 +198,72 @@ TimestampStartThumbnailOption = Annotated[
         help=_("Time point at which thumbnails generation starts."),
     ),
 ]
+
+
+# =============================================================================
+#  Opciones de subtítulos
+# =============================================================================
+
+
+SubtitlesDefaultOption = Annotated[
+    bool,
+    typer.Option(
+        default="--default",
+        rich_help_panel=_("Subtitles options"),
+        help=_("Set as default subtitle of the container."),
+    ),
+]
+
+
+SubtitlesForcedOption = Annotated[
+    bool,
+    typer.Option(
+        default="--forced",
+        rich_help_panel=_("Subtitles options"),
+        help=_("Set as forced to be displayed."),
+    ),
+]
+
+
+SubtitlesHearingImpairedOption = Annotated[
+    bool,
+    typer.Option(
+        default="--hearing-impaired",
+        rich_help_panel=_("Subtitles options"),
+        help=_("Set as targeted for hearing impaired people."),
+    ),
+]
+
+
+SubtitlesLanguageOption = Annotated[
+    str,
+    typer.Option(
+        default="--language",
+        rich_help_panel=_("Subtitles options"),
+        help=_("Set subtitles language, formatted as ISO 639-2 code."),
+    ),
+]
+
+
+SubtitlesTitleOption = Annotated[
+    str | None,
+    typer.Option(
+        default="--title",
+        rich_help_panel=_("Subtitles options"),
+        help=_("Set a custom title for video player."),
+    ),
+]
+
+
+SubtitlesVisualImpairedOption = Annotated[
+    bool,
+    typer.Option(
+        default="--visual-impaired",
+        rich_help_panel=_("Subtitles options"),
+        help=_("Set as targeted for visual impaired people."),
+    ),
+]
+
 
 # =============================================================================
 #  Opciones de filtros

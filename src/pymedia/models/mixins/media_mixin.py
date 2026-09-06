@@ -160,8 +160,10 @@ def _create_media(media_input: Path, logger: Logger) -> "Media":
                     codec=stream.get("codec_name"),
                     language=language,
                     title=tags.get("title"),
-                    forced=bool(disposition.get("forced")),
-                    default=bool(disposition.get("default")),
+                    forced=bool(disposition.get("forced", 0)),
+                    default=bool(disposition.get("default", 0)),
+                    hearing_impaired=bool(disposition.get("hearing_impaired", 0)),
+                    visual_impaired=bool(disposition.get("visual_impaired", 0)),
                 )
             )
 

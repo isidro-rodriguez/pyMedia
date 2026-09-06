@@ -42,7 +42,6 @@ SUPPORTED_MEDIA: tuple[str, ...] = (
 
 SUPPORTED_SUBTITLES: tuple[str, ...] = (
     ".ass",
-    ".mkv",
     ".srt",
     ".ssa",
 )

@@ -15,8 +15,6 @@ from pymedia.types import OverwriteMode, RotateMode, ScaleMode
 class GifPipeline(BasePipeline[GifParameters]):
     """Comando de CLI que genera un GIF animado desde el vídeo de entrada."""
 
-    help = _("Generates an animated GIF from the specified video.")
-
     def process_parameters(
         self,
         media_input: Path,

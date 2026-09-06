@@ -265,3 +265,15 @@ class PermissionDeniedError(PyMediaError):
             msg: Mensaje de error ya formateado.
         """
         super().__init__(msg)
+
+
+class SubtitlesError(PyMediaError):
+    """Errores relacionados con subtítulos."""
+
+    def __init__(self, msg: str) -> None:
+        """Inicializa el error con el mensaje indicado.
+
+        Args:
+            msg: Mensaje de error ya formateado.
+        """
+        super().__init__(msg)

@@ -360,5 +360,5 @@ def _process_output(
             output = output.with_stem(f"{output.stem}{affix}")
         if extension is not None:
             output = output.with_suffix(extension)
-
+    _process_output_directory(output.parent)
     return output

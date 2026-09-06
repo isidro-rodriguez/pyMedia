@@ -46,33 +46,28 @@ def get_media_metadata(path: Path, logger: Logger) -> dict:
         ) from err
 
     data = json.loads(result.stdout)
-    logger.debug(msg=_("ffprobe data: %(data)s"), data=data)
+    logger.debug(msg=_("ffprobe media data: %(data)s"), data=data)
 
     return data
 
 
-def validate_subtitle_codec(path: Path, logger: Logger) -> str:
-    """Verifica que el códec real del archivo coincide con su extensión.
+def validate_subtitles_file_codec(path: Path, logger: Logger) -> str:
+    """Verifica que el archivo de subtítulos externo sea realmente subtítulos.
 
     Args:
         path: Ruta del archivo de subtítulos a verificar.
         logger: Servicio de registro de mensajes.
 
     Raises:
-        ValueError: Si ffprobe no detecta ningún stream de subtítulos, o si
-            el códec detectado no es compatible con la extensión del archivo.
+        FfprobeError: Si ffprobe no puede leer el archivo, no detecta un
+            formato de subtítulos conocido, o el formato detectado no es
+            compatible con la extensión del archivo.
     """
     try:
         cmd = [
             "ffprobe",
-            "-v",
-            "error",
-            "-select_streams",
-            "s",
-            "-show_entries",
-            "stream=codec_name",
-            "-of",
-            "csv=p=0",
+            "-print_format", "json",
+            "-show_format",
             str(path),
         ]
         result = subprocess.run(
@@ -90,19 +85,27 @@ def validate_subtitle_codec(path: Path, logger: Logger) -> str:
         ) from err
 
     data = json.loads(result.stdout)
-    logger.debug(msg=_("ffprobe data: %(data)s"), data=data)
+    logger.debug(msg=_("ffprobe subtitle file data: %(data)s"), data=data)
 
-    codec_name = result.stdout.strip()
-    if not codec_name:
+    format_name = data.get("format", {}).get("format_name", "")
+    detected_codecs = {token.strip() for token in format_name.split(",") if token.strip()}
+    codec_name = next(
+        (c for c in detected_codecs if c in SUBTITLE_FORMATS),
+        None,
+    )
+    if codec_name is None:
         raise FfprobeError(
-            msg=_("ffprobe couldn't detect any subtitle stream in %(path)s")
-            % {"path": path}
+            msg=_(
+                "\"%(path)s\" is not a recognized subtitle file "
+                "(detected format: %(format_name)s)."
+            )
+            % {"path": path, "format_name": format_name or "unknown"}
         )
 
     fmt = SUBTITLE_FORMATS.get(codec_name)
     if fmt is None or path.suffix.lower() not in fmt.containers:
         raise FfprobeError(
-            msg=_("%(path.suffix)s container doesn't support %(codec_name)s.")
+            msg=_("%(path.suffix)s extension doesn't support %(codec_name)s subtitles.")
             % {"path.suffix": path.suffix, "codec_name": codec_name}
         )
     return codec_name

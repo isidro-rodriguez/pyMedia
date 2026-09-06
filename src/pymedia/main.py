@@ -19,12 +19,14 @@ if sys.platform == "win32" and isinstance(sys.stdout, io.TextIOWrapper):
 from pymedia.typer.commands.gif_command import gif_typer
 from pymedia.typer.commands.info_command import info_typer
 from pymedia.typer.commands.sheet_command import sheet_typer
+from pymedia.typer.commands.subtitle_commands import subtitles_typer
 from pymedia.typer.commands.thumb_commands import thumb_typer
 from pymedia.typer.instance import typer_instance
 
 app = typer_instance
 app.add_typer(info_typer)
 app.add_typer(sheet_typer)
+app.add_typer(subtitles_typer)
 app.add_typer(thumb_typer)
 app.add_typer(gif_typer)
 

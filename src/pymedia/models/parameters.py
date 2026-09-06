@@ -11,12 +11,12 @@ from pymedia.models.mixins.media_mixin import MediaInputMixin
 from pymedia.models.mixins.outputs_mixin import (
     AnimatedOutputMixin,
     ImageOutputMixin,
-    SubtitleOutputMixin,
+    MediaOutputMixin,
 )
 from pymedia.models.mixins.rotate_mixin import RotateMixin
 from pymedia.models.mixins.scale_mixin import ScaleMixin
 from pymedia.models.mixins.sheet_presets_mixin import SheetPresetsMixin
-from pymedia.models.mixins.subtitle_mixin import SubtitleInputMixin
+from pymedia.models.mixins.subtitle_mixin import SubtitlesInputMixin
 from pymedia.models.mixins.timestamps_mixin import (
     TimestampAtMixin,
     TimestampStartEndMixin,
@@ -69,11 +69,11 @@ class SheetParameters(
 
 
 @dataclass(kw_only=True)
-class SubtitleParameters(
+class SubtitlesAddParameters(
     BaseParameters,
     MediaInputMixin,
-    SubtitleInputMixin,
-    SubtitleOutputMixin,
+    MediaOutputMixin,
+    SubtitlesInputMixin,
 ):
     """Parámetros validados y parseados para la manipulación de subtítulos."""
 

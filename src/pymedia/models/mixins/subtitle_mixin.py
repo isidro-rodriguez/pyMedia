@@ -6,7 +6,7 @@ from typing import Protocol
 
 from pymedia.data.language_codes import LANGUAGES
 from pymedia.errors import InvalidArgumentError
-from pymedia.ffmpeg.probe import validate_subtitle_codec
+from pymedia.ffmpeg.probe import validate_subtitles_file_codec
 from pymedia.locales import _  # noqa
 from pymedia.logger import Logger
 from pymedia.models.media import Media
@@ -18,20 +18,19 @@ class _HasMedia(Protocol):
 
 
 @dataclass(kw_only=True)
-class SubtitleInputMixin(_HasMedia):
+class SubtitlesInputMixin(_HasMedia):
     """Mixin para la recepción de ficheros de subtítulos.
 
     Attributes:
-        subtitle:
+        subtitles: Objeto de metadatos para subtítulos.
     """
 
-    subtitle: Subtitle
+    subtitles: Subtitle | None = None
 
     def create_subtitle(
         self,
-        subtitle_input: Path,
-        lang: str,
-        media: Media,
+        subtitles_input: Path,
+        language: str,
         logger: Logger,
         title: str | None = None,
         forced: bool = False,
@@ -45,9 +44,8 @@ class SubtitleInputMixin(_HasMedia):
         genera el nombre nativo como título si no se ha aportado ninguno.
 
         Args:
-            subtitle_input: Ruta del fichero de subtítulo a procesar.
-            lang: Lenguaje del fichero de subtítulos.
-            media: Metadatos del vídeo de entrada ya resuelto y validado.
+            subtitles_input: Ruta del fichero de subtítulo a procesar.
+            language: Lenguaje del fichero de subtítulos.
             logger: Interfaz principal de la aplicación para generar mensajes.
             title: Título descriptivo de la pista de subtítulos.
             forced: Si es una pista de subtítulos forzada a mostrar en el reproductor.
@@ -58,13 +56,14 @@ class SubtitleInputMixin(_HasMedia):
         Raises:
             InvalidArgumentError: si el idioma indicado no sigue el estándar ISO 639-2.
         """
-        language_code = self._parse_language(raw=lang)
-        self.subtitle = Subtitle(
-            path=subtitle_input.absolute(),
-            index=self._process_subtitle_index(media=media),
-            codec=validate_subtitle_codec(path=subtitle_input, logger=logger),
+        language_code = self._parse_language(raw=language)
+        self.subtitles = Subtitle(
+            path=subtitles_input.absolute(),
+            stream_index=self._process_stream_index(media=self.media),
+            subtitles_index=self._process_subtitles_index(media=self.media),
+            codec=validate_subtitles_file_codec(path=subtitles_input, logger=logger),
             language=language_code,
-            title=self._process_subtitle_title(title=title, lang=language_code),
+            title=self._process_subtitles_title(title=title, lang=language_code),
             forced=forced,
             default=default,
             hearing_impaired=hearing_impaired,
@@ -72,7 +71,16 @@ class SubtitleInputMixin(_HasMedia):
         )
 
     @staticmethod
-    def _process_subtitle_index(media: Media) -> int:
+    def _process_stream_index(media: Media) -> int:
+        """Calcula el índice absoluto que ocupará el nuevo subtítulo en el output."""
+        return (
+            (1 if media.video is not None else 0)
+            + len(media.audio or [])
+            + len(media.subtitle or [])
+        )
+
+    @staticmethod
+    def _process_subtitles_index(media: Media) -> int:
         """Calcula el próximo índice local de subtítulo (s:N) libre en el output."""
         return len(media.subtitle) if media.subtitle is not None else 0
 
@@ -97,7 +105,7 @@ class SubtitleInputMixin(_HasMedia):
         )
 
     @staticmethod
-    def _process_subtitle_title(title: str | None, lang: str) -> str:
+    def _process_subtitles_title(title: str | None, lang: str) -> str:
         """Utiliza el nombre del idioma como título si no lo ha indicado el usuario."""
         if title is not None:
             return title

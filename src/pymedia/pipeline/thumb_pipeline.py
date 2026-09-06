@@ -1,4 +1,4 @@
-"""Subcomando `thumbnail`: genera una o varias miniaturas desde un vídeo."""
+"""Pipeline para la familia de subcomandos de capturas de imágenes."""
 
 from pathlib import Path
 
