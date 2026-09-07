@@ -9,6 +9,9 @@ class Audio:
     """Metadatos de una pista de audio de un medio.
 
     Attributes:
+        path: Ruta al fichero de pista de audio.
+        global_index:  Número de emisión asignado en el contenedor.
+        track_index: Índice en el listado de pistas de audio.
         codec: Nombre del códec de audio.
         sample_rate: Frecuencia de muestreo en Hz.
         channels: Número de canales.
@@ -18,6 +21,8 @@ class Audio:
     """
 
     path: Path
+    global_index: int | None = None
+    track_index: int | None = None
     codec: str | None = None
     sample_rate: int | None = None
     channels: int | None = None

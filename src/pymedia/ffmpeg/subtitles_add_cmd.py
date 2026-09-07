@@ -41,10 +41,10 @@ class SubtitlesAddCmd:
             raise MissingParameterError(name="subtitles.language")
         if subtitles.path is None:
             raise MissingParameterError(name="subtitles.path")
-        if subtitles.stream_index is None:
-            raise MissingParameterError(name="subtitles.stream_index")
-        if subtitles.subtitles_index is None:
-            raise MissingParameterError(name="subtitles.subtitles_index")
+        if subtitles.global_index is None:
+            raise MissingParameterError(name="subtitles.global_index")
+        if subtitles.track_index is None:
+            raise MissingParameterError(name="subtitles.track_index")
         if subtitles.title is None:
             raise MissingParameterError(name="subtitles.title")
 
@@ -64,11 +64,11 @@ class SubtitlesAddCmd:
                 "1:0",
                 "-c",
                 "copy",
-                f"-c:s:{subtitles.subtitles_index}",
+                f"-c:s:{subtitles.track_index}",
                 subtitles.codec,
-                f"-metadata:s:{subtitles.stream_index}",
+                f"-metadata:s:{subtitles.global_index}",
                 f"language={subtitles.language}",
-                f"-metadata:s:{subtitles.stream_index}",
+                f"-metadata:s:{subtitles.global_index}",
                 f"title={subtitles.title}",
                 *self._build_subtitles_dispositions(),
                 "-progress",
@@ -85,8 +85,8 @@ class SubtitlesAddCmd:
         subtitles = self.params.subtitles
         if subtitles is None:
             raise MissingParameterError(name="subtitles")
-        if subtitles.subtitles_index is None:
-            raise MissingParameterError(name="subtitles.subtitles_index")
+        if subtitles.track_index is None:
+            raise MissingParameterError(name="subtitles.track_index")
 
         dispositions: list[str] = []
 
@@ -100,6 +100,6 @@ class SubtitlesAddCmd:
             dispositions.append("visual_impaired")
 
         return [
-            f"-disposition:s:{subtitles.subtitles_index}",
+            f"-disposition:s:{subtitles.track_index}",
             "+".join(dispositions) if len(dispositions) > 0 else "0",
         ]

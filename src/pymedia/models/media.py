@@ -5,7 +5,7 @@ from datetime import timedelta
 from pathlib import Path
 
 from pymedia.models.audio import Audio
-from pymedia.models.subtitle import Subtitle
+from pymedia.models.subtitles import Subtitles
 from pymedia.models.video import Video
 
 
@@ -29,4 +29,4 @@ class Media:
     format_name: str | None = None
     video: Video | None = None
     audio: list[Audio] | None = None
-    subtitle: list[Subtitle] | None = None
+    subtitle: list[Subtitles] | None = None

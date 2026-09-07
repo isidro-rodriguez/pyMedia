@@ -7,12 +7,13 @@ from pymedia.locales import _  # noqa
 
 
 @dataclass(frozen=True, kw_only=True, slots=True)
-class Subtitle:
+class Subtitles:
     """Metadatos de una pista de subtítulos de un medio.
 
     Attributes:
-        stream_index: Índice de la pista dentro del contenedor.
-        subtitles_index: Índice de la pista en el listado de subtítulos.
+        path: Ruta absoluta al fichero de subtítulos.
+        global_index: Índice de la pista dentro del contenedor.
+        track_index: Índice de la pista en el listado de subtítulos.
         codec: Nombre del códec de subtítulos.
         language: Código de idioma de la pista.
         title: Título descriptivo de la pista.
@@ -23,8 +24,8 @@ class Subtitle:
     """
 
     path: Path
-    stream_index: int | None = None
-    subtitles_index: int | None = None
+    global_index: int | None = None
+    track_index: int | None = None
     codec: str | None = None
     language: str | None = None
     title: str | None = None

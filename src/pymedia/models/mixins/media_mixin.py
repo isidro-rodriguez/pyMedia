@@ -15,7 +15,7 @@ from pymedia.ffmpeg.probe import get_media_metadata
 from pymedia.logger import Logger
 from pymedia.models.audio import Audio
 from pymedia.models.media import Media
-from pymedia.models.subtitle import Subtitle
+from pymedia.models.subtitles import Subtitles
 from pymedia.models.video import Video
 from pymedia.utils import parse_fraction, to_float, to_int
 
@@ -115,9 +115,8 @@ def _create_media(media_input: Path, logger: Logger) -> "Media":
 
     data = get_media_metadata(path=media_input, logger=logger)
 
-    video = None
-    audio = None
-    subtitles = None
+    video, audio, subtitles = None, None, None
+    video_track_index, audio_track_index, subtitles_track_index = 0, 0, 0
 
     for stream in data.get("streams", []):
         codec_type = stream.get("codec_type")
@@ -126,6 +125,9 @@ def _create_media(media_input: Path, logger: Logger) -> "Media":
 
         if codec_type == "video":
             video = Video(
+                path=media_input.absolute(),
+                global_index=stream.get("index"),
+                track_index=video_track_index,
                 codec=stream.get("codec_name"),
                 width=stream.get("width"),
                 height=stream.get("height"),
@@ -135,12 +137,15 @@ def _create_media(media_input: Path, logger: Logger) -> "Media":
                 aspect_ratio=stream.get("display_aspect_ratio"),
                 profile=stream.get("profile"),
             )
+            video_track_index += 1
         elif codec_type == "audio":
             if audio is None:
                 audio = []
             audio.append(
                 Audio(
                     path=media_input.absolute(),
+                    global_index=stream.get("index"),
+                    track_index=audio_track_index,
                     codec=stream.get("codec_name"),
                     sample_rate=to_int(stream.get("sample_rate")),
                     channels=stream.get("channels"),
@@ -149,14 +154,16 @@ def _create_media(media_input: Path, logger: Logger) -> "Media":
                     language=language,
                 )
             )
+            audio_track_index += 1
         elif codec_type == "subtitle":
             if subtitles is None:
                 subtitles = []
             disposition = stream.get("disposition", {})
             subtitles.append(
-                Subtitle(
+                Subtitles(
                     path=media_input.absolute(),
-                    index=stream.get("index"),
+                    global_index=stream.get("index"),
+                    track_index=subtitles_track_index,
                     codec=stream.get("codec_name"),
                     language=language,
                     title=tags.get("title"),
@@ -166,6 +173,7 @@ def _create_media(media_input: Path, logger: Logger) -> "Media":
                     visual_impaired=bool(disposition.get("visual_impaired", 0)),
                 )
             )
+            subtitles_track_index += 1
 
     fmt = data.get("format", {})
     duration_val = to_float(fmt.get("duration"))

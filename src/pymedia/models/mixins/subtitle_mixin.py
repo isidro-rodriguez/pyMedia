@@ -10,7 +10,7 @@ from pymedia.ffmpeg.probe import validate_subtitles_file_codec
 from pymedia.locales import _  # noqa
 from pymedia.logger import Logger
 from pymedia.models.media import Media
-from pymedia.models.subtitle import Subtitle
+from pymedia.models.subtitles import Subtitles
 
 
 class _HasMedia(Protocol):
@@ -29,7 +29,7 @@ class SubtitlesInputMixin(_HasMedia, _HasMediaOutput):
         subtitles: Objeto de metadatos para subtítulos.
     """
 
-    subtitles: Subtitle | None = None
+    subtitles: Subtitles | None = None
 
     def create_subtitle(
         self,
@@ -62,10 +62,10 @@ class SubtitlesInputMixin(_HasMedia, _HasMediaOutput):
         """
         validate_subtitles_file_codec(subtitles_input=subtitles_input, logger=logger)
         language_code = self._parse_language(raw=language)
-        self.subtitles = Subtitle(
+        self.subtitles = Subtitles(
             path=subtitles_input.absolute(),
-            stream_index=self._process_stream_index(media=self.media),
-            subtitles_index=self._process_subtitles_index(media=self.media),
+            global_index=self._process_stream_index(media=self.media),
+            track_index=self._process_subtitles_index(media=self.media),
             codec=self._process_codec(),
             language=language_code,
             title=self._process_subtitles_title(title=title, lang=language_code),

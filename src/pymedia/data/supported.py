@@ -11,16 +11,9 @@ class SUPPORTED:
     )
 
     AUDIO: tuple[str, ...] = (
-        ".m2ts",
         ".m4a",
         ".mka",
-        ".mkv",
-        ".mov",
-        ".mp4",
         ".ogg",
-        ".opus",
-        ".ts",
-        ".webm",
     )
 
     AUDIO_CODECS: tuple[str, ...] = (
@@ -43,11 +36,8 @@ class SUPPORTED:
     )
 
     CONTAINERS: tuple[str, ...] = (
-        ".m2ts",
         ".mkv",
-        ".mov",
         ".mp4",
-        ".ts",
         ".webm",
     )
 

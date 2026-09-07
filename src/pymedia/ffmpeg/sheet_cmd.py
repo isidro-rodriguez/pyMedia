@@ -11,7 +11,7 @@ from pymedia.errors import (
 )
 from pymedia.locale_manager import locale_manager
 from pymedia.locales import _  # noqa
-from pymedia.models.media import Audio, Subtitle
+from pymedia.models.media import Audio, Subtitles
 from pymedia.models.parameters import SheetParameters
 from pymedia.utils import parse_quantity, parse_size, parse_timedelta, to_ffmpeg_path
 
@@ -245,7 +245,7 @@ class SheetCmd:
             return _truncate_list_display(prefix, formatted_items, max_len)
 
         def _build_subtitles_line(
-            subtitles: list[Subtitle], max_len: int
+            subtitles: list[Subtitles], max_len: int
         ) -> str | None:
             """Construye línea informativa de las pistas de subtítulos en cabecera."""
             if not subtitles:
