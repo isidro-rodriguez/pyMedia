@@ -21,15 +21,27 @@ class PyMediaError(Exception):
     El mensaje se registra automáticamente en el log.
     """
 
-    def __init__(self, message: str) -> None:
+    def __init__(self, msg: str) -> None:
         """Inicializa el error y registra el mensaje en el log.
 
         Args:
-            message: Mensaje de error ya formateado.
+            msg: Mensaje de error ya formateado.
         """
-        self.message = message
-        super().__init__(self.message)
-        logger.error(self.message)
+        self.msg = msg
+        super().__init__(self.msg)
+        logger.error(self.msg)
+
+
+class AudioError(PyMediaError):
+    """Error relacionado con la manipulación de pistas de audio."""
+
+    def __init__(self, msg: str) -> None:
+        """Inicializa el error con el mensaje indicado.
+
+        Args:
+            msg: Mensaje de error ya formateado.
+        """
+        super().__init__(msg)
 
 
 class CommandError(PyMediaError):
@@ -188,6 +200,18 @@ class InvalidTimeFormatError(PyMediaError):
         super().__init__(_("Invalid timestamp format. Expected: hh:mm:ss."))
 
 
+class MissingArgumentError(PyMediaError):
+    """Error cuando no se pudo obtener un argumento requerido."""
+
+    def __init__(self, name: str) -> None:
+        """Inicializa el error con el nombre del argumento ausente.
+
+        Args:
+            name: Nombre del argumento que falta.
+        """
+        super().__init__(_("Missing argument: %(name)s") % {"name": name})
+
+
 class MissingMediaError(PyMediaError):
     """Error cuando no se pudieron obtener los metadatos de un vídeo."""
 
@@ -209,9 +233,7 @@ class MissingMediaPropertyError(PyMediaError):
         Args:
             name: Nombre de la propiedad del medio que falta.
         """
-        super().__init__(
-            _("Missing media property: %(command_name)s") % {"command_name": name}
-        )
+        super().__init__(_("Missing media property: %(name)s") % {"name": name})
 
 
 class MissingParameterError(PyMediaError):
@@ -223,9 +245,7 @@ class MissingParameterError(PyMediaError):
         Args:
             name: Nombre del parámetro que falta.
         """
-        super().__init__(
-            _("Missing parameter: %(command_name)s") % {"command_name": name}
-        )
+        super().__init__(_("Missing parameter: %(name)s") % {"name": name})
 
 
 class MissingRequiredOptionError(PyMediaError):

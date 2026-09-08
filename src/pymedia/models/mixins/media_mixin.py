@@ -156,6 +156,7 @@ def _create_media(media_input: Path, logger: Logger) -> "Media":
             )
             audio_track_index += 1
         elif codec_type == "subtitle":
+            # ffprobe reporta el valor en singular para las pistas de subtítulos.
             if subtitles is None:
                 subtitles = []
             disposition = stream.get("disposition", {})
@@ -188,7 +189,7 @@ def _create_media(media_input: Path, logger: Logger) -> "Media":
             format_name=fmt.get("format_name"),
             video=video,
             audio=audio,
-            subtitle=subtitles,
+            subtitles=subtitles,
         )
     except (
         ValueError,

@@ -210,7 +210,7 @@ SubtitlesDefaultOption = Annotated[
     typer.Option(
         default="--default",
         rich_help_panel=_("Subtitles options"),
-        help=_("Set as default subtitle of the container."),
+        help=_("Set as default subtitles of the container."),
     ),
 ]
 
@@ -236,11 +236,32 @@ SubtitlesHearingImpairedOption = Annotated[
 
 
 SubtitlesLanguageOption = Annotated[
-    str,
+    str | None,
     typer.Option(
         default="--language",
         rich_help_panel=_("Subtitles options"),
         help=_("Set subtitles language, formatted as ISO 639-2 code."),
+    ),
+]
+
+
+SubtitlesStreamTrackListOption = Annotated[
+    str | None,
+    typer.Option(
+        default="--tracks",
+        metavar="int,int,...",
+        rich_help_panel=_("Subtitles options"),
+        help=_("List subtitles tracks to delete."),
+    ),
+]
+
+SubtitlesStreamTrackOption = Annotated[
+    str | None,
+    typer.Option(
+        default="--track",
+        metavar="int",
+        rich_help_panel=_("Subtitles options"),
+        help=_("Subtitles track to edit."),
     ),
 ]
 

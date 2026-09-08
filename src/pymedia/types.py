@@ -56,6 +56,23 @@ class ScaleMode(Enum):
     COVER = "cover"  # Re-escala hasta cubrir la dimensión objetivo, no modifica AR.
 
 
+class StreamsMode(Enum):
+    """Tipos de streams presentes en un contenedor."""
+
+    AUDIO = "audio"
+    SUBTITLES = "subtitles"
+    VIDEO = "video"
+
+
+class SubtitlesMode(Enum):
+    """Modelo de comando de subtítulos."""
+
+    ADD = "add"
+    DELETE = "delete"
+    EDIT = "edit"
+    EXTRACT = "extract"
+
+
 class VideoCodecMode(Enum):
     """Lista de códecs de vídeo modernos disponibles en esta aplicación."""
 

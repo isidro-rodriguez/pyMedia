@@ -20,7 +20,7 @@ class Media:
         format_name: Nombre del formato contenedor.
         video: Metadatos de la pista de vídeo, o None si no existe.
         audio: Lista de pistas de audio, o None si no hay.
-        subtitle: Lista de pistas de subtítulos, o None si no hay.
+        subtitles: Lista de pistas de subtítulos, o None si no hay.
     """
 
     path: Path
@@ -29,4 +29,4 @@ class Media:
     format_name: str | None = None
     video: Video | None = None
     audio: list[Audio] | None = None
-    subtitle: list[Subtitles] | None = None
+    subtitles: list[Subtitles] | None = None

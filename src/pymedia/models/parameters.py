@@ -12,16 +12,18 @@ from pymedia.models.mixins.outputs_mixin import (
     AnimatedOutputMixin,
     ImageOutputMixin,
     MediaOutputMixin,
+    SubtitlesOutputMixin,
 )
 from pymedia.models.mixins.rotate_mixin import RotateMixin
 from pymedia.models.mixins.scale_mixin import ScaleMixin
 from pymedia.models.mixins.sheet_presets_mixin import SheetPresetsMixin
-from pymedia.models.mixins.subtitle_mixin import SubtitlesInputMixin
+from pymedia.models.mixins.streams_mixin import StreamsMixin
+from pymedia.models.mixins.subtitles_mixin import SubtitlesInputMixin
 from pymedia.models.mixins.timestamps_mixin import (
     TimestampAtMixin,
     TimestampStartEndMixin,
 )
-from pymedia.types import OverwriteMode
+from pymedia.types import OverwriteMode, SubtitlesMode
 
 
 @dataclass(kw_only=True)
@@ -69,13 +71,17 @@ class SheetParameters(
 
 
 @dataclass(kw_only=True)
-class SubtitlesAddParameters(
+class SubtitlesParameters(
     BaseParameters,
     MediaInputMixin,
     MediaOutputMixin,
     SubtitlesInputMixin,
+    SubtitlesOutputMixin,
+    StreamsMixin,
 ):
     """Parámetros validados y parseados para la manipulación de subtítulos."""
+
+    subtitles_mode: SubtitlesMode
 
 
 @dataclass(kw_only=True)

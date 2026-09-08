@@ -4,7 +4,7 @@ import json
 import subprocess
 from pathlib import Path
 
-from pymedia.data.subtitle_formats import SUBTITLE_FORMATS
+from pymedia.data.subtitles_formats import SUBTITLES_FORMATS
 from pymedia.errors import FfprobeError
 from pymedia.locales import _  # noqa
 from pymedia.logger import Logger
@@ -86,26 +86,26 @@ def validate_subtitles_file_codec(subtitles_input: Path, logger: Logger) -> str:
         ) from err
 
     data = json.loads(result.stdout)
-    logger.debug(msg=_("ffprobe subtitle file data: %(data)s"), data=data)
+    logger.debug(msg=_("ffprobe subtitles file data: %(data)s"), data=data)
 
     format_name = data.get("format", {}).get("format_name", "")
     detected_codecs: set[str] = {
         token.strip() for token in format_name.split(",") if token.strip()
     }
     codec_name = next(
-        (c for c in detected_codecs if c in SUBTITLE_FORMATS),
+        (c for c in detected_codecs if c in SUBTITLES_FORMATS),
         None,
     )
     if codec_name is None:
         raise FfprobeError(
             msg=_(
-                '"%(path)s" is not a recognized subtitle file '
+                '"%(path)s" is not a recognized subtitles file '
                 "(detected format: %(format_name)s)."
             )
             % {"path": subtitles_input, "format_name": format_name or "unknown"}
         )
 
-    fmt = SUBTITLE_FORMATS.get(codec_name)
+    fmt = SUBTITLES_FORMATS.get(codec_name)
     if fmt is None or subtitles_input.suffix.lower() not in fmt.containers:
         raise FfprobeError(
             msg=_("%(path.suffix)s extension doesn't support %(codec_name)s subtitles.")

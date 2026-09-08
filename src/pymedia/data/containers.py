@@ -33,7 +33,7 @@ class ContainerData:
             vídeo. Vacía si el contenedor no admite vídeo.
         audio_codecs: Claves de ``AUDIO_CODECS`` admitidas como pistas de
             audio. Vacía si el contenedor no admite audio.
-        subtitle_codecs: Claves de ``SUBTITLE_FORMATS`` admitidas. Vacía
+        subtitles_codecs: Claves de ``SUBTITLES_FORMATS`` admitidas. Vacía
             si el contenedor no admite subtítulos.
     """
 
@@ -42,7 +42,7 @@ class ContainerData:
     mime_type: str
     video_codecs: tuple[str, ...] = ()
     audio_codecs: tuple[str, ...] = ()
-    subtitle_codecs: tuple[str, ...] = ()
+    subtitles_codecs: tuple[str, ...] = ()
 
 
 _CONTAINERS: tuple[ContainerData, ...] = (
@@ -58,7 +58,7 @@ _CONTAINERS: tuple[ContainerData, ...] = (
         mime_type="video/3gpp",
         video_codecs=("h263", "h264", "mpeg4"),
         audio_codecs=("amr_nb", "amr_wb"),
-        subtitle_codecs=("mov_text",),
+        subtitles_codecs=("mov_text",),
     ),
     ContainerData(
         name="ac3",
@@ -88,7 +88,7 @@ _CONTAINERS: tuple[ContainerData, ...] = (
         name="ass",
         extension=".ass",
         mime_type="text/x-ssa",
-        subtitle_codecs=("ass",),
+        subtitles_codecs=("ass",),
     ),
     ContainerData(
         name="au",
@@ -146,7 +146,7 @@ _CONTAINERS: tuple[ContainerData, ...] = (
         mime_type="video/mp2t",
         video_codecs=("h264", "h265", "mpeg2video", "mpeg4", "vc1"),
         audio_codecs=("ac3", "eac3", "truehd"),
-        subtitle_codecs=("hdmv_pgs_subtitle",),
+        subtitles_codecs=("hdmv_pgs_subtitle",),
     ),
     ContainerData(
         name="m4a",
@@ -226,7 +226,7 @@ _CONTAINERS: tuple[ContainerData, ...] = (
             "truehd",
             "vorbis",
         ),
-        subtitle_codecs=(
+        subtitles_codecs=(
             "ass",
             "dvd_subtitle",
             "hdmv_pgs_subtitle",
@@ -278,7 +278,7 @@ _CONTAINERS: tuple[ContainerData, ...] = (
             "pcm_s24le",
             "pcm_s32le",
         ),
-        subtitle_codecs=("mov_text",),
+        subtitles_codecs=("mov_text",),
     ),
     ContainerData(
         name="mp1",
@@ -325,7 +325,7 @@ _CONTAINERS: tuple[ContainerData, ...] = (
             "wmv3",
         ),
         audio_codecs=("aac", "alac", "eac3", "opus"),
-        subtitle_codecs=("mov_text",),
+        subtitles_codecs=("mov_text",),
     ),
     ContainerData(
         name="mpeg",
@@ -413,13 +413,13 @@ _CONTAINERS: tuple[ContainerData, ...] = (
         name="srt",
         extension=".srt",
         mime_type="application/x-subrip",
-        subtitle_codecs=("srt",),
+        subtitles_codecs=("srt",),
     ),
     ContainerData(
         name="ssa",
         extension=".ssa",
         mime_type="text/x-ssa",
-        subtitle_codecs=("ass",),
+        subtitles_codecs=("ass",),
     ),
     ContainerData(
         name="thd",
@@ -449,13 +449,13 @@ _CONTAINERS: tuple[ContainerData, ...] = (
         mime_type="video/mpeg",
         video_codecs=("mpeg1video", "mpeg2video"),
         audio_codecs=("mp2",),
-        subtitle_codecs=("dvd_subtitle",),
+        subtitles_codecs=("dvd_subtitle",),
     ),
     ContainerData(
         name="webvtt",
         extension=".vtt",
         mime_type="text/vtt",
-        subtitle_codecs=("webvtt",),
+        subtitles_codecs=("webvtt",),
     ),
     ContainerData(
         name="wav",
@@ -476,7 +476,7 @@ _CONTAINERS: tuple[ContainerData, ...] = (
         mime_type="video/webm",
         video_codecs=("av1", "vp8", "vp9"),
         audio_codecs=("opus", "vorbis"),
-        subtitle_codecs=("webvtt",),
+        subtitles_codecs=("webvtt",),
     ),
     ContainerData(
         name="wmv",
@@ -511,7 +511,7 @@ AUDIO_CONTAINERS: tuple[str, ...] = tuple(
 )
 """tuple[str, ...]: Extensiones de contenedores que admiten pistas de audio."""
 
-SUBTITLE_CONTAINERS: tuple[str, ...] = tuple(
-    container.extension for container in _CONTAINERS if container.subtitle_codecs
+SUBTITLES_CONTAINERS: tuple[str, ...] = tuple(
+    container.extension for container in _CONTAINERS if container.subtitles_codecs
 )
 """tuple[str, ...]: Extensiones de contenedores que admiten subtítulos."""

@@ -265,8 +265,8 @@ class Config:
                 )
 
         # default_container.subtitles
-        subtitle_container = default_containers["subtitles"]
-        if subtitle_container not in SUPPORTED.SUBTITLES:
+        subtitles_container = default_containers["subtitles"]
+        if subtitles_container not in SUPPORTED.SUBTITLES:
             errors.append(
                 "\n"
                 + _(

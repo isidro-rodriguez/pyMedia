@@ -259,19 +259,19 @@ class MediaOutputMixin(_HasMedia):
 
 
 @dataclass(kw_only=True)
-class SubtitleOutputMixin(_HasMedia):
+class SubtitlesOutputMixin(_HasMedia):
     """Mixin para la ruta de salida de subtítulos.
 
     Attributes:
-        subtitle_output: Ruta del fichero de subtítulos de salida, o None si
+        subtitles_output: Ruta del fichero de subtítulos de salida, o None si
             aún no se ha creado.
         output_directory: Directorio de salida para lotes de varias imágenes.
     """
 
-    subtitle_output: Path | None = None
+    subtitles_output: Path | None = None
     output_directory: Path | None = None
 
-    def create_subtitle_output(
+    def create_subtitles_output(
         self,
         extension: str,
         affix: str | None = None,
@@ -300,11 +300,11 @@ class SubtitleOutputMixin(_HasMedia):
         if output.suffix not in SUPPORTED.SUBTITLES:
             raise InvalidContainerTypeError(
                 extension=output.suffix,
-                media_type=_("subtitle files"),
+                media_type=_("subtitles files"),
                 supported=", ".join(SUPPORTED.SUBTITLES),
             )
 
-        self.subtitle_output = output
+        self.subtitles_output = output
 
 
 def _validate_name(name: str) -> None:

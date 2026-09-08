@@ -118,6 +118,111 @@ class TestInputListCmd:
 
         assert mixin.to_media_input_list_cmd() == ["-i", "a.mp4", "-i", "b.mp4"]
 
+
+_SUBTITLE_METADATA = {
+    "streams": [
+        {
+            "index": 0,
+            "codec_name": "h264",
+            "codec_type": "video",
+            "width": 1280,
+            "height": 720,
+            "avg_frame_rate": "25/1",
+        },
+        {
+            "index": 1,
+            "codec_name": "aac",
+            "codec_type": "audio",
+            "tags": {"language": "eng"},
+        },
+        {
+            "index": 2,
+            "codec_name": "subrip",
+            "codec_type": "subtitle",
+            "tags": {"language": "spa", "title": "Español"},
+            "disposition": {"default": 1, "forced": 0, "hearing_impaired": 0},
+        },
+        {
+            "index": 3,
+            "codec_name": "hdmv_pgs_subtitle",
+            "codec_type": "subtitle",
+            "tags": {"language": "ita"},
+            "disposition": {"default": 0, "forced": 1},
+        },
+    ],
+    "format": {"duration": "10.0", "size": "1024"},
+}
+
+
+class TestSubtitlesStreamParsing:
+    """Regresión: ffprobe reporta `codec_type == "subtitle"` en singular."""
+
+    def _media_with_streams(self, tmp_path):
+        """Media parseado con metadatos ffprobe simulados."""
+        mixin = MediaInputMixin()
+        source = tmp_path / "clip.mkv"
+
+        mixin.create_media_input(media_input=source, logger=None)
+
+        return mixin.media
+
+    def test_populates_subtitles_streams(self, tmp_path, monkeypatch):
+        """Comprueba que las pistas `subtitle` se parsean y se indexan."""
+        monkeypatch.setattr(
+            "pymedia.models.mixins.media_mixin.get_media_metadata",
+            lambda path, logger: _SUBTITLE_METADATA,
+        )
+        media = self._media_with_streams(tmp_path)
+
+        assert media.subtitles is not None
+        assert len(media.subtitles) == 2
+        first, second = media.subtitles
+
+        assert first.global_index == 2
+        assert first.track_index == 0
+        assert first.codec == "subrip"
+        assert first.language == "spa"
+        assert first.title == "Español"
+        assert first.default is True
+        assert first.forced is False
+
+        assert second.global_index == 3
+        assert second.track_index == 1
+        assert second.codec == "hdmv_pgs_subtitle"
+        assert second.language == "ita"
+        assert second.forced is True
+
+    def test_video_and_audio_coexist_with_subtitles(self, tmp_path, monkeypatch):
+        """Comprueba que video/audio siguen indexándose en presencia de subtítulos."""
+        monkeypatch.setattr(
+            "pymedia.models.mixins.media_mixin.get_media_metadata",
+            lambda path, logger: _SUBTITLE_METADATA,
+        )
+        media = self._media_with_streams(tmp_path)
+
+        assert media.video.global_index == 0
+        assert media.video.track_index == 0
+        assert len(media.audio) == 1
+        assert media.audio[0].global_index == 1
+        assert media.audio[0].track_index == 0
+        assert media.audio[0].language == "eng"
+
+    def test_singular_codec_type_is_required(self, tmp_path, monkeypatch):
+        """Comprueba que `subtitles` (plural) no se parsea: ffprobe usa `subtitle`."""
+        metadata = {
+            "streams": [
+                {"index": 0, "codec_name": "subrip", "codec_type": "subtitles"}
+            ],
+            "format": {},
+        }
+        monkeypatch.setattr(
+            "pymedia.models.mixins.media_mixin.get_media_metadata",
+            lambda path, logger: metadata,
+        )
+        media = self._media_with_streams(tmp_path)
+
+        assert media.subtitles is None
+
     def test_to_media_input_list_cmd_missing_parameter(self):
         """Comprueba que falta lanzar un error si no hay lista."""
         mixin = MediaListMixin()

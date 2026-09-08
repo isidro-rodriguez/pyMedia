@@ -68,7 +68,7 @@ class BasePipeline[ParamsT](ABC):
                 "audio_output",
                 "image_output",
                 "media_output",
-                "subtitle_output",
+                "subtitles_output",
                 "video_output",
             )
             for field_name in output_fields:

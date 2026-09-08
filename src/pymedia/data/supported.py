@@ -47,7 +47,7 @@ class SUPPORTED:
         ".ssa",
     )
 
-    SUBTITLE_CODECS: tuple[str, ...] = (
+    SUBTITLES_CODECS: tuple[str, ...] = (
         "ass",
         "srt",
         "ssa",

@@ -16,7 +16,7 @@ from pymedia.models.mixins.outputs_mixin import (
     AudioOutputMixin,
     ImageOutputMixin,
     MediaOutputMixin,
-    SubtitleOutputMixin,
+    SubtitlesOutputMixin,
     _process_output,
     _validate_name,
 )
@@ -73,9 +73,9 @@ def _media_mixin(media: Media | None = None) -> MediaOutputMixin:
     return mixin
 
 
-def _subtitle_mixin(media: Media | None = None) -> SubtitleOutputMixin:
-    """SubtitleOutputMixin con la media indicada."""
-    mixin = SubtitleOutputMixin()
+def _subtitles_mixin(media: Media | None = None) -> SubtitlesOutputMixin:
+    """SubtitlesOutputMixin con la media indicada."""
+    mixin = SubtitlesOutputMixin()
     mixin.media = media
     return mixin
 
@@ -208,25 +208,25 @@ class TestImageOutputMixin:
         assert mixin.image_output is None
 
 
-class TestSubtitleOutputMixin:
+class TestSubtitlesOutputMixin:
     """Pruebas del mixin de salida de subtítulos."""
 
-    def test_sets_subtitle_output(self, tmp_path):
+    def test_sets_subtitles_output(self, tmp_path):
         """Comprueba que se asigna la salida al campo tipado."""
-        mixin = _subtitle_mixin()
+        mixin = _subtitles_mixin()
 
-        mixin.create_subtitle_output(extension=".srt", output=tmp_path / "out.srt")
+        mixin.create_subtitles_output(extension=".srt", output=tmp_path / "out.srt")
 
-        assert mixin.subtitle_output == (tmp_path / "out.srt").absolute()
+        assert mixin.subtitles_output == (tmp_path / "out.srt").absolute()
 
     def test_invalid_extension_raises(self, tmp_path):
         """Comprueba que una extensión no de subtítulo lanza un error."""
-        mixin = _subtitle_mixin()
+        mixin = _subtitles_mixin()
 
         with pytest.raises(InvalidContainerTypeError) as exc_info:
-            mixin.create_subtitle_output(extension=".srt", output=tmp_path / "out.xyz")
+            mixin.create_subtitles_output(extension=".srt", output=tmp_path / "out.xyz")
 
-        assert ".xyz" in exc_info.value.message
+        assert ".xyz" in str(exc_info.value)
 
 
 class TestProcessOutput:

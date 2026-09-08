@@ -334,9 +334,9 @@ class SheetCmd:
             if audio_line:
                 lines.append(audio_line)
 
-        if media.subtitle and len(media.subtitle) > 0:
+        if media.subtitles and len(media.subtitles) > 0:
             sub_line = _build_subtitles_line(
-                subtitles=media.subtitle, max_len=preset.max_line_length
+                subtitles=media.subtitles, max_len=preset.max_line_length
             )
             if sub_line:
                 lines.append(sub_line)

@@ -69,13 +69,13 @@ def _build_info_panel(media: Media, media_input: Path, locale: str = "en") -> Pa
             raise MissingParameterError(name=_("video dimensions"))
 
         table = Table(title=f"🎬 {_('Video')}", show_header=True, expand=True)
-        table.add_column(header=_("Stream"), ratio=1, justify="center")
+        table.add_column(header=_("Track"), ratio=1, justify="center")
         table.add_column(header=_("Codec"), ratio=2, justify="center")
         table.add_column(header=_("Resolution"), ratio=2, justify="center")
         table.add_column(header=_("FPS"), ratio=1, justify="center")
         table.add_column(header=_("Bit rate"), ratio=1, justify="center")
         table.add_row(
-            str(video.global_index),
+            str(video.track_index),
             f"{video.codec} ({video.profile})"
             if video.codec and video.profile
             else video.codec or na,
@@ -91,20 +91,18 @@ def _build_info_panel(media: Media, media_input: Path, locale: str = "en") -> Pa
     def _build_audio_table(audio: list[Audio]) -> Table:
         """Construye la tabla de metadatos de las pistas de audio."""
         table = Table(title=f"🎵 {_('Audio')}", expand=True)
-        table.add_column(header=_("Stream"), ratio=1, justify="center")
+        table.add_column(header=_("Track"), ratio=1, justify="center")
         table.add_column(header=_("Codec"), ratio=2, justify="center")
         table.add_column(header=_("Sample rate"), ratio=2, justify="center")
         table.add_column(header=_("Channels"), ratio=1, justify="center")
         table.add_column(header=_("Locale"), ratio=1, justify="center")
 
         for track in audio:
-            if track.global_index is None:
-                raise MissingParameterError(name="global_index")
             if track.track_index is None:
                 raise MissingParameterError(name="track_index")
 
             table.add_row(
-                str(track.global_index),
+                str(track.track_index),
                 track.codec or na,
                 f"{track.sample_rate} Hz" if track.sample_rate else na,
                 str(track.channels or na),
@@ -116,19 +114,17 @@ def _build_info_panel(media: Media, media_input: Path, locale: str = "en") -> Pa
     def _build_subtitles_table(subtitles: list[Subtitles]) -> Table:
         """Construye la tabla de metadatos de las pistas de subtítulos."""
         table = Table(title=f"💬 {_('Subtitles')}", expand=True)
-        table.add_column(header=_("Stream"), ratio=1, justify="center")
+        table.add_column(header=_("Track"), ratio=1, justify="center")
         table.add_column(header=_("Locale"), ratio=2, justify="center")
         table.add_column(header=_("Title"), ratio=2, justify="center")
         table.add_column(header=_("Forced"), ratio=1, justify="center")
         table.add_column(header=_("Default"), ratio=1, justify="center")
         for sub in subtitles:
-            if sub.global_index is None:
-                raise MissingParameterError(name="global_index")
             if sub.track_index is None:
                 raise MissingParameterError(name="track_index")
 
             table.add_row(
-                str(sub.global_index),
+                str(sub.track_index),
                 sub.language or na,
                 sub.title or na,
                 "✓" if sub.forced else "",
@@ -142,8 +138,8 @@ def _build_info_panel(media: Media, media_input: Path, locale: str = "en") -> Pa
         sections.append(_build_video_table(media.video))
     if media.audio:
         sections.append(_build_audio_table(media.audio))
-    if media.subtitle:
-        sections.append(_build_subtitles_table(media.subtitle))
+    if media.subtitles:
+        sections.append(_build_subtitles_table(media.subtitles))
 
     return Panel(
         renderable=Group(*sections),

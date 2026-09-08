@@ -6,7 +6,7 @@ from enum import Enum
 from types import MappingProxyType
 
 
-class SubtitleType(Enum):
+class SubtitlesType(Enum):
     """Tipos de subtítulos según su naturaleza de renderizado."""
 
     TEXT = "text"
@@ -14,7 +14,7 @@ class SubtitleType(Enum):
 
 
 @dataclass(frozen=True)
-class SubtitleFormatData:
+class SubtitlesFormatData:
     """Configuración e información técnica de un formato o códec de subtítulos.
 
     Esta clase inmutable almacena los parámetros necesarios para la
@@ -22,13 +22,13 @@ class SubtitleFormatData:
 
     Attributes:
         codec_name: Nombre del códec tal como lo reporta ffprobe (p. ej.,
-            'srt', 'hdmv_pgs_subtitle'). Es la clave de SUBTITLE_FORMATS.
+            'srt', 'hdmv_pgs_subtitle'). Es la clave de SUBTITLES_FORMATS.
         library: Nombre de la librería o códec utilizado por FFmpeg al
             construir el comando (p. ej., 'srt', 'pgssub'). Puede diferir
             de codec_name, especialmente en formatos de imagen.
         containers: Tupla con las extensiones de contenedor soportadas (p.
             ej., ('.mkv', '.srt')).
-        sub_type: Tipo de subtítulo (texto o mapa de bits/imagen).
+        subtitles_type: Tipo de subtítulos (texto o mapa de bits/imagen).
         supports_styles: Indica si el formato admite estilos avanzados como
             fuentes, colores y posiciones. Por defecto es False.
     """
@@ -36,58 +36,59 @@ class SubtitleFormatData:
     codec_name: str
     library: str
     containers: tuple[str, ...]
-    sub_type: SubtitleType
+    subtitles_type: SubtitlesType
     supports_styles: bool = False
 
 
-_SUBTITLE_FORMATS: tuple[SubtitleFormatData, ...] = (
+_SUBTITLES_FORMATS: tuple[SubtitlesFormatData, ...] = (
     # --- Codecs basados en texto ---
-    SubtitleFormatData(
+    SubtitlesFormatData(
         codec_name="srt",
         library="srt",
         containers=(".mkv", ".srt"),
-        sub_type=SubtitleType.TEXT,
+        subtitles_type=SubtitlesType.TEXT,
         supports_styles=False,
     ),
-    SubtitleFormatData(
+    SubtitlesFormatData(
         codec_name="ass",
         library="ass",
         containers=(".mkv", ".ass", ".ssa"),
-        sub_type=SubtitleType.TEXT,
+        subtitles_type=SubtitlesType.TEXT,
         supports_styles=True,  # Soporta fuentes, colores y posiciones complejas
     ),
-    SubtitleFormatData(
+    SubtitlesFormatData(
         codec_name="webvtt",
         library="webvtt",
         containers=(".mkv", ".webm", ".vtt"),
-        sub_type=SubtitleType.TEXT,
+        subtitles_type=SubtitlesType.TEXT,
         supports_styles=True,
     ),
-    SubtitleFormatData(
+    SubtitlesFormatData(
         codec_name="mov_text",
         library="mov_text",
         containers=(".mp4", ".mov", ".3gp"),
-        sub_type=SubtitleType.TEXT,
+        subtitles_type=SubtitlesType.TEXT,
         supports_styles=False,  # Subtítulo de texto plano nativo de MP4
     ),
     # --- Codecs basados en imagen (solo lectura / burn-in) ---
-    SubtitleFormatData(
+    # Los codec_name son los valores oficiales de ffprobe: van en singular.
+    SubtitlesFormatData(
         codec_name="dvd_subtitle",
         library="dvdsub",
         containers=(".mkv", ".vob"),
-        sub_type=SubtitleType.IMAGE,
+        subtitles_type=SubtitlesType.IMAGE,
         supports_styles=False,
     ),
-    SubtitleFormatData(
+    SubtitlesFormatData(
         codec_name="hdmv_pgs_subtitle",
         library="pgssub",
         containers=(".mkv", ".m2ts"),
-        sub_type=SubtitleType.IMAGE,
+        subtitles_type=SubtitlesType.IMAGE,
         supports_styles=False,
     ),
 )
 
-SUBTITLE_FORMATS: Mapping[str, SubtitleFormatData] = MappingProxyType(
-    {fmt.codec_name: fmt for fmt in _SUBTITLE_FORMATS}
+SUBTITLES_FORMATS: Mapping[str, SubtitlesFormatData] = MappingProxyType(
+    {fmt.codec_name: fmt for fmt in _SUBTITLES_FORMATS}
 )
-"""dict[str, SubtitleFormatData]: Subtítulos indexados por nombre de códec."""
+"""dict[str, SubtitlesFormatData]: Subtítulos indexados por nombre de códec."""

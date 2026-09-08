@@ -4,10 +4,10 @@ from pymedia.data.audio_codecs import AUDIO_CODECS
 from pymedia.data.containers import (
     AUDIO_CONTAINERS,
     CONTAINERS,
-    SUBTITLE_CONTAINERS,
+    SUBTITLES_CONTAINERS,
     VIDEO_CONTAINERS,
 )
-from pymedia.data.subtitle_formats import SUBTITLE_FORMATS
+from pymedia.data.subtitles_formats import SUBTITLES_FORMATS
 from pymedia.data.video_codecs import VIDEO_CODECS
 
 # ---------------------------------------------------------------- catálogo
@@ -61,10 +61,10 @@ def test_audio_codecs_are_known():
         assert not unknown, msg
 
 
-def test_subtitle_codecs_are_known():
-    """Los códecs de subtítulo de cada contenedor existen en SUBTITLE_FORMATS."""
+def test_subtitles_codecs_are_known():
+    """Los códecs de subtítulos de cada contenedor existen en SUBTITLES_FORMATS."""
     for container in CONTAINERS.values():
-        unknown = set(container.subtitle_codecs) - set(SUBTITLE_FORMATS)
+        unknown = set(container.subtitles_codecs) - set(SUBTITLES_FORMATS)
         msg = f"{container.extension}: códecs de subtítulo desconocidos {unknown}"
 
         assert not unknown, msg
@@ -80,7 +80,7 @@ def test_no_orphan_codec_containers():
         referenced.update(codec.containers)
     for codec in AUDIO_CODECS.values():
         referenced.update(codec.containers)
-    for codec in SUBTITLE_FORMATS.values():
+    for codec in SUBTITLES_FORMATS.values():
         referenced.update(codec.containers)
 
     orphans = referenced - set(CONTAINERS)
@@ -90,7 +90,7 @@ def test_no_orphan_codec_containers():
 
 def test_all_codecs_have_containers():
     """Ningún códec del catálogo tiene la lista de contenedores vacía."""
-    for catalog in (VIDEO_CODECS, AUDIO_CODECS, SUBTITLE_FORMATS):
+    for catalog in (VIDEO_CODECS, AUDIO_CODECS, SUBTITLES_FORMATS):
         for name, codec in catalog.items():
             assert codec.containers, f"El códec '{name}' no tiene contenedores"
 
@@ -116,11 +116,11 @@ def test_audio_codec_mapping_is_bidirectional():
             )
 
 
-def test_subtitle_mapping_is_bidirectional():
+def test_subtitles_mapping_is_bidirectional():
     """Cada códec de subtítulo de un contenedor lo lista en sus containers."""
     for container in CONTAINERS.values():
-        for codec_name in container.subtitle_codecs:
-            assert container.extension in SUBTITLE_FORMATS[codec_name].containers, (
+        for codec_name in container.subtitles_codecs:
+            assert container.extension in SUBTITLES_FORMATS[codec_name].containers, (
                 f"{container.extension} no aparece en {codec_name}.containers"
             )
 
@@ -150,12 +150,12 @@ def test_derived_audio_containers_match_catalog():
     assert AUDIO_CONTAINERS == expected
 
 
-def test_derived_subtitle_containers_match_catalog():
-    """SUBTITLE_CONTAINERS se deriva del catálogo de contenedores."""
+def test_derived_subtitles_containers_match_catalog():
+    """SUBTITLES_CONTAINERS se deriva del catálogo de contenedores."""
     expected = tuple(
         container.extension
         for container in CONTAINERS.values()
-        if container.subtitle_codecs
+        if container.subtitles_codecs
     )
 
-    assert SUBTITLE_CONTAINERS == expected
+    assert SUBTITLES_CONTAINERS == expected
