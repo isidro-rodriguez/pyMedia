@@ -1,9 +1,13 @@
 """Comandos de la familia thumbnails."""
 
-from pymedia.locales import _  # noqa
 import typer
 
 from pymedia.pipeline.thumb_pipeline import ThumbPipeline
+from pymedia.typer.help import (
+    THUMB_FRAMES_HELP,
+    THUMB_INTERVAL_HELP,
+    THUMB_SCENE_HELP,
+)
 from pymedia.typer.options import (
     CropOption,
     DebugOption,
@@ -31,24 +35,10 @@ thumb_typer = typer.Typer()
 #  Subcomando FRAMES
 # =============================================================================
 
-_HELP_FRAMES = _(
-    """\
-Captures thumbnails at the specified timestamps.
-
-[bold]Examples[/bold]:
-  Capture a single thumbnail at a given time:
-    > pymedia frames input.mp4 --at 00:01:30
-  Capture thumbnails at several timestamps:
-    > pymedia frames input.mp4 --at 00:01:30,00:05:15
-  Save to a specific file:
-    > pymedia frames input.mp4 --at 00:01:30 --output thumb.jpg
-"""
-)
-
 
 @thumb_typer.command(
     name="frames",
-    help=_HELP_FRAMES,
+    help=THUMB_FRAMES_HELP,
     rich_help_panel="Image commands",
     no_args_is_help=True,
 )
@@ -107,24 +97,10 @@ def frames(
 #  Subcomando INTERVAL
 # =============================================================================
 
-_HELP_INTERVAL = _(
-    """\
-Captures thumbnails at regular intervals of the video.
-
-[bold]Examples[/bold]:
-  Capture a thumbnail every second:
-    > pymedia interval input.mp4 --every 1
-  Capture a thumbnail every 5 seconds within a time range:
-    > pymedia interval input.mp4 --every 5 --start 00:00:10 --end 00:01:00
-  Save to a specific file:
-    > pymedia interval input.mp4 --every 5 --output thumb.jpg
-"""
-)
-
 
 @thumb_typer.command(
     name="interval",
-    help=_HELP_INTERVAL,
+    help=THUMB_INTERVAL_HELP,
     rich_help_panel="Image commands",
     no_args_is_help=True,
 )
@@ -192,26 +168,10 @@ if __name__ == "__main__":
 #  Subcomando SCENE
 # =============================================================================
 
-_HELP_SCENE = _(
-    """\
-Captures thumbnails at the scene changes detected in the video.
-
-[bold]Examples[/bold]:
-  Detect scene changes with default sensitivity:
-    > pymedia scene input.mp4
-  Adjust the scene-change sensitivity:
-    > pymedia scene input.mp4 --scene 0.3
-  Limit the search to a time range:
-    > pymedia scene input.mp4 --start 00:00:05 --end 00:00:30
-  Save to a specific file:
-    > pymedia scene input.mp4 --output thumb.jpg
-"""
-)
-
 
 @thumb_typer.command(
     name="scene",
-    help=_HELP_SCENE,
+    help=THUMB_SCENE_HELP,
     rich_help_panel="Image commands",
     no_args_is_help=True,
 )

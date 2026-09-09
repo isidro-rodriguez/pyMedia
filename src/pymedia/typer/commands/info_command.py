@@ -1,27 +1,17 @@
 """Comando Typer para mostrar la información de metadatos de un vídeo."""
 
-from pymedia.locales import _  # noqa
 import typer
 
 from pymedia.pipeline.info_pipeline import InfoPipeline
+from pymedia.typer.help import INFO_HELP
 from pymedia.typer.options import DebugOption, HelpOption, MediaInputArgument
 
 info_typer = typer.Typer()
 
-_HELP = _(
-    """\
-Shows information about a video.
-
-[bold]Example[/bold]:
-  Shows video's metadata:
-    > pymedia info input.mp4
-"""
-)
-
 
 @info_typer.command(
     name="info",
-    help=_HELP,
+    help=INFO_HELP,
     rich_help_panel="Analysis commands",
     no_args_is_help=True,
 )

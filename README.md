@@ -26,7 +26,7 @@ procesamiento de vídeos.
 
 > ⚠ = Se transcodifica a `mov_text`
 
-### Compatibilidad entre códes y contenedores de audio
+### Compatibilidad entre códecs y contenedores de audio
 
 |     | AAC | ALAC | FLAC | Opus | MP3 |
 |-----|:---:|:----:|:----:|:----:|:---:|

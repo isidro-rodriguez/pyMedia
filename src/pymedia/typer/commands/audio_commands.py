@@ -2,8 +2,13 @@
 
 import typer
 
-from pymedia.locales import _  # noqa
 from pymedia.pipeline.audio_pipeline import AudioPipeline
+from pymedia.typer.help import (
+    AUDIO_ADD_HELP,
+    AUDIO_DELETE_HELP,
+    AUDIO_EDIT_HELP,
+    AUDIO_EXTRACT_HELP,
+)
 from pymedia.typer.options import (
     AudioArgument,
     AudioCommentaryOption,
@@ -28,22 +33,10 @@ audio_typer = typer.Typer()
 #  Subcomando ADD
 # =============================================================================
 
-_HELP_ADD = _(
-    """\
-Add an audio track to a media file.
-
-[bold]Examples[/bold]:
-  Add english audio to a media container:
-    > pymedia add-audio input.mp4 eng_audio.aac --language eng
-  Add default commentary spanish audio with custom title: 
-    > pymedia add-audio input.mp4 spa_audio.aac --language spa --title "Comentario director" --default --commentary
-"""  # noqa
-)
-
 
 @audio_typer.command(
     name="add-audio",
-    help=_HELP_ADD,
+    help=AUDIO_ADD_HELP,
     rich_help_panel="Audio commands",
     no_args_is_help=True,
 )
@@ -100,22 +93,10 @@ def add(
 #  Subcomando DELETE
 # =============================================================================
 
-_HELP_DELETE = _(
-    """\
-Delete audio tracks from a media file.
-
-[bold]Examples[/bold]:
-  Delete all audio tracks from a media file:
-    > pymedia delete-audio input.mp4
-  Delete a list of audio tracks from a media file: 
-    > pymedia delete-audio input.mp4 --tracks 1,2
-"""  # noqa
-)
-
 
 @audio_typer.command(
     name="delete-audio",
-    help=_HELP_DELETE,
+    help=AUDIO_DELETE_HELP,
     rich_help_panel="Audio commands",
     no_args_is_help=True,
 )
@@ -154,22 +135,10 @@ def delete(
 #  Subcomando EDIT
 # =============================================================================
 
-_HELP_EDIT = _(
-    """\
-Edit audio track metadata from a media file.
-
-[bold]Examples[/bold]:
-  Edit language metadata of audio stream track 1 from a media container:
-    > pymedia edit-audio input.mp4 --track 1 --language eng
-  Edit multiple tags in a single call: 
-    > pymedia edit-audio input.mp4 --track 1 --language spa --title "Comentario director" --default --commentary
-"""  # noqa
-)
-
 
 @audio_typer.command(
     name="edit-audio",
-    help=_HELP_EDIT,
+    help=AUDIO_EDIT_HELP,
     rich_help_panel="Audio commands",
     no_args_is_help=True,
 )
@@ -226,24 +195,10 @@ def edit(
 #  Subcomando EXTRACT
 # =============================================================================
 
-_HELP_EXTRACT = _(
-    """\
-Extract audio tracks from a media file.
-
-[bold]Examples[/bold]:
-  Extract all audio tracks from a media file:
-    > pymedia extract-audio input.mp4
-  Extract a list of audio tracks from a media file: 
-    > pymedia extract-audio input.mp4 --tracks 1,2
-  Extract audio tracks with custom output:
-    > pymedia extract-audio input.mp4 --tracks 1,2 -o input-audio.aac
-"""  # noqa
-)
-
 
 @audio_typer.command(
     name="extract-audio",
-    help=_HELP_EXTRACT,
+    help=AUDIO_EXTRACT_HELP,
     rich_help_panel="Audio commands",
     no_args_is_help=True,
 )

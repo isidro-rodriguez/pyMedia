@@ -2,8 +2,13 @@
 
 import typer
 
-from pymedia.locales import _  # noqa
 from pymedia.pipeline.subtitles_pipeline import SubtitlesPipeline
+from pymedia.typer.help import (
+    SUBTITLES_ADD_HELP,
+    SUBTITLES_DELETE_HELP,
+    SUBTITLES_EDIT_HELP,
+    SUBTITLES_EXTRACT_HELP,
+)
 from pymedia.typer.options import (
     DebugOption,
     HelpOption,
@@ -28,22 +33,10 @@ subtitles_typer = typer.Typer()
 #  Subcomando ADD
 # =============================================================================
 
-_HELP_ADD = _(
-    """\
-Add subtitles to a media file.
-
-[bold]Examples[/bold]:
-  Add english subtitles to a media container:
-    > pymedia add-subs input.mp4 eng_subs.srt --language eng
-  Add default forced spanish subtitles with custom title: 
-    > pymedia add-subs input.mp4 eng_subs.srt --language spa --title "Español (forced)" --default --forced
-"""  # noqa
-)
-
 
 @subtitles_typer.command(
     name="add-subs",
-    help=_HELP_ADD,
+    help=SUBTITLES_ADD_HELP,
     rich_help_panel="Subtitles commands",
     no_args_is_help=True,
 )
@@ -100,22 +93,10 @@ def add(
 #  Subcomando DELETE
 # =============================================================================
 
-_HELP_DELETE = _(
-    """\
-Delete subtitles from a media file.
-
-[bold]Examples[/bold]:
-  Delete all subtitles from a media file:
-    > pymedia delete-subs input.mp4
-  Delete a list of subtitles tracks from a media file: 
-    > pymedia delete-subs input.mp4 --tracks 3,4,5
-"""  # noqa
-)
-
 
 @subtitles_typer.command(
     name="delete-subs",
-    help=_HELP_DELETE,
+    help=SUBTITLES_DELETE_HELP,
     rich_help_panel="Subtitles commands",
     no_args_is_help=True,
 )
@@ -154,22 +135,10 @@ def delete(
 #  Subcomando EDIT
 # =============================================================================
 
-_HELP_EDIT = _(
-    """\
-Edit subtitles metadata from a media file.
-
-[bold]Examples[/bold]:
-  Edit language metadata to subtitles stream track 2 from a media container:
-    > pymedia edit-subs input.mp4 --track 2 --language eng
-  Edit multiple tags in a single call: 
-    > pymedia edit-subs input.mp4 --track 2 --language spa --title "Español (forced)" --default --forced
-"""  # noqa
-)
-
 
 @subtitles_typer.command(
     name="edit-subs",
-    help=_HELP_EDIT,
+    help=SUBTITLES_EDIT_HELP,
     rich_help_panel="Subtitles commands",
     no_args_is_help=True,
 )
@@ -226,24 +195,10 @@ def edit(
 #  Subcomando EXTRACT
 # =============================================================================
 
-_HELP_EXTRACT = _(
-    """\
-Extract subtitles from a media file.
-
-[bold]Examples[/bold]:
-  Extract all subtitles from a media file:
-    > pymedia extract-subs input.mp4
-  Extract a list of subtitles tracks from a media file: 
-    > pymedia extract-subs input.mp4 --tracks 3,4,5
-  Extract subtitles tracks with custom output:
-    > pymedia extract-subs input.mp4 --tracks 3,5 -o input-subtitles.srt
-"""  # noqa
-)
-
 
 @subtitles_typer.command(
     name="extract-subs",
-    help=_HELP_EXTRACT,
+    help=SUBTITLES_EXTRACT_HELP,
     rich_help_panel="Subtitles commands",
     no_args_is_help=True,
 )
