@@ -22,6 +22,13 @@ from pymedia.types import (
 #  Argumentos
 # =============================================================================
 
+AudioArgument = Annotated[
+    Path,
+    typer.Argument(
+        help=_("Audio track to insert in a media container."),
+        callback=validate_path,
+    ),
+]
 
 MediaInputArgument = Annotated[
     Path,
@@ -47,11 +54,9 @@ SubtitlesArgument = Annotated[
     ),
 ]
 
-
 # =============================================================================
 #  Opciones de aplicación
 # =============================================================================
-
 
 DebugOption = Annotated[
     bool,
@@ -60,7 +65,6 @@ DebugOption = Annotated[
         help=_("Log level DEBUG"),
     ),
 ]
-
 
 HelpOption = Annotated[
     bool,
@@ -72,7 +76,6 @@ HelpOption = Annotated[
         expose_value=False,
     ),
 ]
-
 
 # =============================================================================
 #  Opciones de salida
@@ -108,11 +111,9 @@ OverwriteOption = Annotated[
     ),
 ]
 
-
 # =============================================================================
 #  Opciones de comando
 # =============================================================================
-
 
 EveryOption = Annotated[
     int | None,
@@ -123,7 +124,6 @@ EveryOption = Annotated[
     ),
 ]
 
-
 PresetSheetOption = Annotated[
     PresetsSheetMode,
     typer.Option(
@@ -132,7 +132,6 @@ PresetSheetOption = Annotated[
         help=_("Preset sheet style."),
     ),
 ]
-
 
 SceneOption = Annotated[
     float | None,
@@ -144,7 +143,6 @@ SceneOption = Annotated[
         help=_("Scene-change sensitivity for thumbnail detection."),
     ),
 ]
-
 
 TimestampAtThumbnailOption = Annotated[
     str | None,
@@ -166,7 +164,6 @@ TimestampEndGifOption = Annotated[
     ),
 ]
 
-
 TimestampEndThumbnailOption = Annotated[
     str | None,
     typer.Option(
@@ -176,7 +173,6 @@ TimestampEndThumbnailOption = Annotated[
         help=_("Time point at which thumbnails generation ends."),
     ),
 ]
-
 
 TimestampStartGifOption = Annotated[
     str | None,
@@ -188,7 +184,6 @@ TimestampStartGifOption = Annotated[
     ),
 ]
 
-
 TimestampStartThumbnailOption = Annotated[
     str | None,
     typer.Option(
@@ -199,11 +194,87 @@ TimestampStartThumbnailOption = Annotated[
     ),
 ]
 
+# =============================================================================
+#  Opciones de audio
+# =============================================================================
+
+AudioCommentaryOption = Annotated[
+    bool,
+    typer.Option(
+        default="--commentary",
+        rich_help_panel=_("Audio options"),
+        help=_("Set as commentary audio track."),
+    ),
+]
+
+AudioDefaultOption = Annotated[
+    bool,
+    typer.Option(
+        default="--default",
+        rich_help_panel=_("Audio options"),
+        help=_("Set as default audio track of the container."),
+    ),
+]
+
+AudioForcedOption = Annotated[
+    bool,
+    typer.Option(
+        default="--forced",
+        rich_help_panel=_("Audio options"),
+        help=_("Set as forced to be displayed."),
+    ),
+]
+
+AudioHearingImpairedOption = Annotated[
+    bool,
+    typer.Option(
+        default="--hearing-impaired",
+        rich_help_panel=_("Audio options"),
+        help=_("Set audio track as targeted for hearing impaired people."),
+    ),
+]
+
+AudioLanguageOption = Annotated[
+    str | None,
+    typer.Option(
+        default="--language",
+        rich_help_panel=_("Audio options"),
+        help=_("Set audio language, formatted as ISO 639-2 code."),
+    ),
+]
+
+AudioStreamTrackListOption = Annotated[
+    str | None,
+    typer.Option(
+        default="--tracks",
+        metavar="int,int,...",
+        rich_help_panel=_("Audio options"),
+        help=_("List of audio tracks to delete."),
+    ),
+]
+
+AudioStreamTrackOption = Annotated[
+    str | None,
+    typer.Option(
+        default="--track",
+        metavar="int",
+        rich_help_panel=_("Audio options"),
+        help=_("Audio track to edit."),
+    ),
+]
+
+AudioTitleOption = Annotated[
+    str | None,
+    typer.Option(
+        default="--title",
+        rich_help_panel=_("Audio options"),
+        help=_("Set a custom audio track title for video player."),
+    ),
+]
 
 # =============================================================================
 #  Opciones de subtítulos
 # =============================================================================
-
 
 SubtitlesDefaultOption = Annotated[
     bool,
@@ -214,7 +285,6 @@ SubtitlesDefaultOption = Annotated[
     ),
 ]
 
-
 SubtitlesForcedOption = Annotated[
     bool,
     typer.Option(
@@ -223,7 +293,6 @@ SubtitlesForcedOption = Annotated[
         help=_("Set as forced to be displayed."),
     ),
 ]
-
 
 SubtitlesHearingImpairedOption = Annotated[
     bool,
@@ -234,7 +303,6 @@ SubtitlesHearingImpairedOption = Annotated[
     ),
 ]
 
-
 SubtitlesLanguageOption = Annotated[
     str | None,
     typer.Option(
@@ -243,7 +311,6 @@ SubtitlesLanguageOption = Annotated[
         help=_("Set subtitles language, formatted as ISO 639-2 code."),
     ),
 ]
-
 
 SubtitlesStreamTrackListOption = Annotated[
     str | None,
@@ -265,7 +332,6 @@ SubtitlesStreamTrackOption = Annotated[
     ),
 ]
 
-
 SubtitlesTitleOption = Annotated[
     str | None,
     typer.Option(
@@ -275,7 +341,6 @@ SubtitlesTitleOption = Annotated[
     ),
 ]
 
-
 SubtitlesVisualImpairedOption = Annotated[
     bool,
     typer.Option(
@@ -284,7 +349,6 @@ SubtitlesVisualImpairedOption = Annotated[
         help=_("Set as targeted for visual impaired people."),
     ),
 ]
-
 
 # =============================================================================
 #  Opciones de filtros
@@ -299,7 +363,6 @@ CropOption = Annotated[
         help=_("Crop to WIDTH×HEIGHT at offset X,Y (from top-left)."),
     ),
 ]
-
 
 FlipHorizontalOption = Annotated[
     bool,
@@ -319,7 +382,6 @@ FlipVerticalOption = Annotated[
     ),
 ]
 
-
 FpsGifOption = Annotated[
     int,
     typer.Option(
@@ -331,7 +393,6 @@ FpsGifOption = Annotated[
     ),
 ]
 
-
 RotateOption = Annotated[
     RotateMode | None,
     typer.Option(
@@ -340,7 +401,6 @@ RotateOption = Annotated[
         help=_("Specify an orthogonal arc degree to rotate the image."),
     ),
 ]
-
 
 # =============================================================================
 #  Opciones de filtros de escalado
@@ -355,7 +415,6 @@ ScaleModeOption = Annotated[
     ),
 ]
 
-
 ScaleToOption = Annotated[
     str | None,
     typer.Option(
@@ -365,7 +424,6 @@ ScaleToOption = Annotated[
         help=_("Target resolution, in pixels, to resize the video."),
     ),
 ]
-
 
 ScaleUpscaleOption = Annotated[
     bool,

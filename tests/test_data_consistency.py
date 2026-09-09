@@ -125,6 +125,18 @@ def test_subtitles_mapping_is_bidirectional():
             )
 
 
+def test_remux_containers_subset_of_containers():
+    """Los destinos de remux seguro son subconjunto de los contenedores válidos."""
+    catalogos = (VIDEO_CODECS, AUDIO_CODECS, SUBTITLES_FORMATS)
+
+    for catalogo in catalogos:
+        for codec_name, codec_data in catalogo.items():
+            assert set(codec_data.remux_containers) <= set(codec_data.containers), (
+                f"{codec_name}: {codec_data.remux_containers} no es subconjunto "
+                f"de {codec_data.containers}"
+            )
+
+
 # ------------------------------------------------ tuplas derivadas
 
 

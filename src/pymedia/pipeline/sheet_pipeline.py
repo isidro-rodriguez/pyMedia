@@ -5,8 +5,8 @@ from pathlib import Path
 
 from pymedia.errors import (
     CommandGenerationError,
-    MissingMediaPropertyError,
     MissingParameterError,
+    MissingPropertyError,
 )
 from pymedia.ffmpeg.sheet_cmd import SheetCmd
 from pymedia.locales import _  # noqa
@@ -53,7 +53,7 @@ class SheetPipeline(BasePipeline[SheetParameters]):
         if self.params.media is None:
             raise MissingParameterError(name="media")
         if self.params.media.duration is None:
-            raise MissingMediaPropertyError(name="media.duration")
+            raise MissingPropertyError(name="media.duration")
 
         with tempfile.TemporaryDirectory() as tmp_dir:
             tile_tmp = Path(tmp_dir) / "tile_tmp.jpg"

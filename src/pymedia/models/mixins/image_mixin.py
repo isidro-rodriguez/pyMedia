@@ -9,12 +9,12 @@ from pymedia.locales import _  # noqa
 from pymedia.types import ImageQuality
 
 
-class _HasOutput(Protocol):
+class _ImageContext(Protocol):
     image_output: Path
 
 
 @dataclass(kw_only=True)
-class ImageQualityMixin(_HasOutput):
+class ImageQualityMixin(_ImageContext):
     """Mixin para optimizar calidad y pixel_fmt dependiendo del formato de imagen."""
 
     def to_image_quality_cmd(self) -> ImageQuality:

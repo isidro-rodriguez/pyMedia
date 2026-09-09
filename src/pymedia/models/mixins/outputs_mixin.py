@@ -11,13 +11,15 @@ from pathlib import Path
 from typing import Protocol
 
 from pymedia.data.audio_codecs import AUDIO_CODECS
+from pymedia.data.subtitles_formats import SUBTITLES_FORMATS
 from pymedia.data.supported import SUPPORTED
 from pymedia.data.video_codecs import VIDEO_CODECS
 from pymedia.errors import (
     InvalidArgumentError,
     InvalidContainerError,
     InvalidContainerTypeError,
-    MissingMediaPropertyError,
+    InvalidRemuxError,
+    MissingPropertyError,
     PermissionDeniedError,
 )
 from pymedia.locales import _  # noqa
@@ -25,9 +27,11 @@ from pymedia.models.media import Media
 
 
 class _HasMedia(Protocol):
-    """Objeto que expone la ruta y los metadatos del fichero de entrada."""
-
     media: Media
+
+
+class _HasStreamTracks(Protocol):
+    stream_tracks: list[int] | None
 
 
 @dataclass(kw_only=True)
@@ -78,7 +82,7 @@ class AnimatedOutputMixin(_HasMedia):
 
 
 @dataclass(kw_only=True)
-class AudioOutputMixin(_HasMedia):
+class AudioOutputMixin(_HasMedia, _HasStreamTracks):
     """Mixin para la ruta de salida de pistas de audio.
 
     Attributes:
@@ -97,6 +101,9 @@ class AudioOutputMixin(_HasMedia):
         output_directory: Path | None = None,
     ) -> None:
         """Procesa y asigna la ruta del fichero de pista de audio de salida.
+
+        Valida el contenedor contra las pistas seleccionadas en ``stream_tracks``;
+        sin selección, contra todas las pistas de audio de la media.
 
         Args:
             extension: Extensión del fichero de salida.
@@ -124,16 +131,28 @@ class AudioOutputMixin(_HasMedia):
 
         if self.media is not None:
             if self.media.audio is None:
-                raise MissingMediaPropertyError(name="media.audio")
-            for audio_track in self.media.audio:
+                raise MissingPropertyError(name="media.audio")
+            audio_tracks = self.media.audio
+            # stream_tracks lo aporta StreamsMixin en el contexto real (protocolo);
+            # en uso aislado del mixin no existe y se validan todas las pistas.
+            stream_tracks = getattr(self, "stream_tracks", None)
+            if stream_tracks is not None:
+                audio_tracks = [
+                    track
+                    for track in self.media.audio
+                    if track.track_index in stream_tracks
+                ]
+            for audio_track in audio_tracks:
                 if audio_track.codec is None:
-                    raise MissingMediaPropertyError(name="audio codec")
-                if output.suffix not in AUDIO_CODECS[audio_track.codec].containers:
-                    raise InvalidContainerError(
-                        extension=output.suffix,
-                        codec=AUDIO_CODECS[audio_track.codec].name,
-                        supported=", ".join(AUDIO_CODECS[audio_track.codec].containers),
-                    )
+                    raise MissingPropertyError(name="audio codec")
+                codec_data = AUDIO_CODECS[audio_track.codec]
+                _validate_remux(
+                    suffix=output.suffix,
+                    source_suffix=self.media.path.suffix,
+                    codec_name=codec_data.name,
+                    containers=codec_data.containers,
+                    remux_containers=codec_data.remux_containers,
+                )
 
         self.audio_output = output
 
@@ -226,9 +245,9 @@ class MediaOutputMixin(_HasMedia):
         )
 
         if self.media.video is None:
-            raise MissingMediaPropertyError(name="video")
+            raise MissingPropertyError(name="video")
         if self.media.video.codec is None:
-            raise MissingMediaPropertyError(name="video codec")
+            raise MissingPropertyError(name="video codec")
 
         if output.suffix not in SUPPORTED.CONTAINERS:
             raise InvalidContainerTypeError(
@@ -247,7 +266,7 @@ class MediaOutputMixin(_HasMedia):
         if self.media.audio is not None:
             for audio_track in self.media.audio:
                 if audio_track.codec is None:
-                    raise MissingMediaPropertyError(name="audio codec")
+                    raise MissingPropertyError(name="audio codec")
                 if output.suffix not in AUDIO_CODECS[audio_track.codec].containers:
                     raise InvalidContainerError(
                         extension=output.suffix,
@@ -259,7 +278,7 @@ class MediaOutputMixin(_HasMedia):
 
 
 @dataclass(kw_only=True)
-class SubtitlesOutputMixin(_HasMedia):
+class SubtitlesOutputMixin(_HasMedia, _HasStreamTracks):
     """Mixin para la ruta de salida de subtítulos.
 
     Attributes:
@@ -279,6 +298,9 @@ class SubtitlesOutputMixin(_HasMedia):
         output_directory: Path | None = None,
     ) -> None:
         """Procesa y asigna la ruta del fichero de subtítulos de salida.
+
+        Valida el contenedor contra las pistas seleccionadas en ``stream_tracks``;
+        sin selección, contra todas las pistas de subtítulos de la media.
 
         Args:
             extension: Extensión del fichero de salida.
@@ -304,7 +326,55 @@ class SubtitlesOutputMixin(_HasMedia):
                 supported=", ".join(SUPPORTED.SUBTITLES),
             )
 
+        if self.media is not None:
+            if self.media.subtitles is None:
+                raise MissingPropertyError(name="media.subtitles")
+            subtitles_tracks = self.media.subtitles
+            # stream_tracks lo aporta StreamsMixin en el contexto real (protocolo);
+            # en uso aislado del mixin no existe y se validan todas las pistas.
+            stream_tracks = getattr(self, "stream_tracks", None)
+            if stream_tracks is not None:
+                subtitles_tracks = [
+                    track
+                    for track in self.media.subtitles
+                    if track.track_index in stream_tracks
+                ]
+            for subtitles_track in subtitles_tracks:
+                if subtitles_track.codec is None:
+                    raise MissingPropertyError(name="subtitles codec")
+                fmt_data = SUBTITLES_FORMATS[subtitles_track.codec]
+                _validate_remux(
+                    suffix=output.suffix,
+                    source_suffix=self.media.path.suffix,
+                    codec_name=fmt_data.codec_name,
+                    containers=fmt_data.containers,
+                    remux_containers=fmt_data.remux_containers,
+                )
+
         self.subtitles_output = output
+
+
+def _validate_remux(
+    suffix: str,
+    source_suffix: str,
+    codec_name: str,
+    containers: tuple[str, ...],
+    remux_containers: tuple[str, ...],
+) -> None:
+    """Valida el contenedor de salida para una pista sin recodificar."""
+    if suffix == source_suffix:
+        if suffix not in containers:
+            raise InvalidContainerError(
+                extension=suffix,
+                codec=codec_name,
+                supported=", ".join(containers),
+            )
+    elif suffix not in remux_containers:
+        raise InvalidRemuxError(
+            extension=suffix,
+            codec=codec_name,
+            supported=", ".join(remux_containers),
+        )
 
 
 def _validate_name(name: str) -> None:

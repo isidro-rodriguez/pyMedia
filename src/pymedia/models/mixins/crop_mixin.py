@@ -5,8 +5,8 @@ from dataclasses import dataclass
 from pymedia.errors import (
     InvalidArgumentError,
     InvalidParameterError,
-    MissingMediaPropertyError,
     MissingParameterError,
+    MissingPropertyError,
 )
 from pymedia.locales import _  # noqa
 from pymedia.models.media import Media
@@ -31,7 +31,7 @@ class CropMixin:
 
         Raises:
             InvalidParameterError: Si el valor del parametro no es válido.
-            MissingMediaPropertyError: Si no se ha obtenido un parámetro importante.
+            MissingPropertyError: Si no se ha obtenido un parámetro importante.
         """
         if crop_str is None:
             return
@@ -73,7 +73,7 @@ class CropMixin:
             """Comprueba que los valores aportados puedan resultar en un crop válido."""
             video = media.video
             if video is None or video.width is None or video.height is None:
-                raise MissingMediaPropertyError(name="video")
+                raise MissingPropertyError(name="video")
 
             if crop_area.width == 0 or crop_area.height == 0:
                 raise InvalidParameterError(

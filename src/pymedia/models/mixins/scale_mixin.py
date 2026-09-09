@@ -7,7 +7,7 @@ from typing import Protocol
 from pymedia.errors import (
     InvalidArgumentError,
     InvalidParameterError,
-    MissingMediaPropertyError,
+    MissingPropertyError,
 )
 from pymedia.locales import _  # noqa
 from pymedia.logger import Logger
@@ -15,7 +15,7 @@ from pymedia.models.media import Media
 from pymedia.types import Dimensions, ScaleMode
 
 
-class _HasMedia(Protocol):
+class _ScaleContext(Protocol):
     media: Media
 
 
@@ -25,7 +25,7 @@ class _Dimension(Enum):
 
 
 @dataclass(kw_only=True)
-class ScaleMixin(_HasMedia):
+class ScaleMixin(_ScaleContext):
     """Mixin para los valores de redimensionado.
 
     Attributes:
@@ -56,7 +56,7 @@ class ScaleMixin(_HasMedia):
                 válido (se esperaba WIDTHxHEIGHT).
             InvalidParameterError: Si la dimensión objetivo no es par o el modo
                 de escalado no tiene un valor válido.
-            MissingMediaPropertyError: Si las dimensiones del vídeo no se
+            MissingPropertyError: Si las dimensiones del vídeo no se
                 pueden obtener.
         """
         if scale_to is None:
@@ -100,7 +100,7 @@ class ScaleMixin(_HasMedia):
         def _get_target_increment() -> tuple[float, _Dimension]:
             """Devuelve el incremento proporcional y la dimensión dominante."""
             if video is None or video.width is None or video.height is None:
-                raise MissingMediaPropertyError(name=_("video dimensions"))
+                raise MissingPropertyError(name=_("video dimensions"))
             width_proportion = target.width / video.width
             height_proportion = target.height / video.height
             if self.scale_mode == ScaleMode.FIT:
@@ -116,7 +116,7 @@ class ScaleMixin(_HasMedia):
 
         video = media.video
         if video is None or video.width is None or video.height is None:
-            raise MissingMediaPropertyError(name=_("video dimensions"))
+            raise MissingPropertyError(name=_("video dimensions"))
 
         target = _parse_dimensions(scale_str)
 

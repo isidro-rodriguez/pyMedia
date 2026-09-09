@@ -16,6 +16,15 @@ class AudioCodecMode(Enum):
     OPUS = "opus"
 
 
+class AudioMode(Enum):
+    """Modos de comandos de audio."""
+
+    ADD = "add"
+    DELETE = "delete"
+    EDIT = "edit"
+    EXTRACT = "extract"
+
+
 class Channels(Enum):
     """Refiere al uso de canales de audio en uniones conflictivas."""
 

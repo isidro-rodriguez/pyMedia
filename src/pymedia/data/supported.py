@@ -11,9 +11,14 @@ class SUPPORTED:
     )
 
     AUDIO: tuple[str, ...] = (
+        ".ac3",
+        ".flac",
         ".m4a",
         ".mka",
+        ".mp3",
         ".ogg",
+        ".opus",
+        ".wav",
     )
 
     AUDIO_CODECS: tuple[str, ...] = (

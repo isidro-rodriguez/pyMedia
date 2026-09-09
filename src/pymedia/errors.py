@@ -35,25 +35,9 @@ class PyMediaError(Exception):
 class AudioError(PyMediaError):
     """Error relacionado con la manipulación de pistas de audio."""
 
-    def __init__(self, msg: str) -> None:
-        """Inicializa el error con el mensaje indicado.
-
-        Args:
-            msg: Mensaje de error ya formateado.
-        """
-        super().__init__(msg)
-
 
 class CommandError(PyMediaError):
     """Error durante la ejecución de un comando ffmpeg."""
-
-    def __init__(self, msg: str) -> None:
-        """Inicializa el error con el mensaje indicado.
-
-        Args:
-            msg: Mensaje de error ya formateado.
-        """
-        super().__init__(msg)
 
 
 class CommandGenerationError(PyMediaError):
@@ -73,14 +57,6 @@ class CommandGenerationError(PyMediaError):
 
 class ConfigError(PyMediaError):
     """Error de validación de la configuración de la aplicación."""
-
-    def __init__(self, msg: str) -> None:
-        """Inicializa el error con el mensaje indicado.
-
-        Args:
-            msg: Mensaje de error ya formateado.
-        """
-        super().__init__(msg)
 
 
 class ExclusiveOptionsError(PyMediaError):
@@ -115,25 +91,9 @@ class ExclusiveOptionsError(PyMediaError):
 class FfprobeError(PyMediaError):
     """Errores relacionados con subtítulos."""
 
-    def __init__(self, msg: str) -> None:
-        """Inicializa el error con el mensaje indicado.
-
-        Args:
-            msg: Mensaje de error ya formateado.
-        """
-        super().__init__(msg)
-
 
 class InvalidArgumentError(PyMediaError):
     """Error por un argumento de CLI con valor no válido."""
-
-    def __init__(self, msg: str) -> None:
-        """Inicializa el error con el mensaje indicado.
-
-        Args:
-            msg: Mensaje de error ya formateado.
-        """
-        super().__init__(msg)
 
 
 class InvalidContainerError(PyMediaError):
@@ -153,6 +113,27 @@ class InvalidContainerError(PyMediaError):
                 "%(supported)s."
             )
             % {"extension": extension, "codec": codec, "supported": supported}
+        )
+
+
+class InvalidRemuxError(InvalidContainerError):
+    """Error cuando el códec no admite remux seguro al contenedor indicado."""
+
+    def __init__(self, extension: str, codec: str, supported: str) -> None:
+        """Inicializa el error con la extensión, el códec y los destinos.
+
+        Args:
+            extension: Extensión de remux solicitada.
+            codec: Códec de la pista a remuxar.
+            supported: Contenedores seguros de remux para el códec.
+        """
+        PyMediaError.__init__(
+            self,
+            _(
+                "Cannot remux %(codec)s to %(extension)s. Safe remux targets: "
+                "%(supported)s."
+            )
+            % {"codec": codec, "extension": extension, "supported": supported},
         )
 
 
@@ -183,14 +164,6 @@ class InvalidContainerTypeError(PyMediaError):
 class InvalidParameterError(PyMediaError):
     """Error por un parámetro procesado con un valor no válido."""
 
-    def __init__(self, msg: str) -> None:
-        """Inicializa el error con el mensaje indicado.
-
-        Args:
-            msg: Mensaje de error ya formateado.
-        """
-        super().__init__(msg)
-
 
 class InvalidTimeFormatError(PyMediaError):
     """Error por una marca de tiempo con un formato no soportado."""
@@ -212,30 +185,6 @@ class MissingArgumentError(PyMediaError):
         super().__init__(_("Missing argument: %(name)s") % {"name": name})
 
 
-class MissingMediaError(PyMediaError):
-    """Error cuando no se pudieron obtener los metadatos de un vídeo."""
-
-    def __init__(self, path: str) -> None:
-        """Inicializa el error con la ruta del medio fallido.
-
-        Args:
-            path: Ruta del fichero cuyos metadatos no se obtuvieron.
-        """
-        super().__init__(_("Missing media information: %(path)s") % {"path": path})
-
-
-class MissingMediaPropertyError(PyMediaError):
-    """Error cuando falta una propiedad técnica de los metadatos del medio."""
-
-    def __init__(self, name: str) -> None:
-        """Inicializa el error con el nombre de la propiedad ausente.
-
-        Args:
-            name: Nombre de la propiedad del medio que falta.
-        """
-        super().__init__(_("Missing media property: %(name)s") % {"name": name})
-
-
 class MissingParameterError(PyMediaError):
     """Error cuando no se pudo obtener un parámetro requerido."""
 
@@ -246,6 +195,18 @@ class MissingParameterError(PyMediaError):
             name: Nombre del parámetro que falta.
         """
         super().__init__(_("Missing parameter: %(name)s") % {"name": name})
+
+
+class MissingPropertyError(PyMediaError):
+    """Error cuando falta una propiedad técnica de los metadatos del medio."""
+
+    def __init__(self, name: str) -> None:
+        """Inicializa el error con el nombre de la propiedad ausente.
+
+        Args:
+            name: Nombre de la propiedad del medio que falta.
+        """
+        super().__init__(_("Missing property: %(name)s") % {"name": name})
 
 
 class MissingRequiredOptionError(PyMediaError):
@@ -266,34 +227,10 @@ class MissingRequiredOptionError(PyMediaError):
 class OptionError(PyMediaError):
     """Error de uso de una opción de CLI."""
 
-    def __init__(self, msg: str) -> None:
-        """Inicializa el error con el mensaje indicado.
-
-        Args:
-            msg: Mensaje de error ya formateado.
-        """
-        super().__init__(msg)
-
 
 class PermissionDeniedError(PyMediaError):
     """Error cuando no se tienen permisos para crear un fichero o directorio."""
 
-    def __init__(self, msg: str) -> None:
-        """Inicializa el error con el mensaje indicado.
-
-        Args:
-            msg: Mensaje de error ya formateado.
-        """
-        super().__init__(msg)
-
 
 class SubtitlesError(PyMediaError):
     """Errores relacionados con subtítulos."""
-
-    def __init__(self, msg: str) -> None:
-        """Inicializa el error con el mensaje indicado.
-
-        Args:
-            msg: Mensaje de error ya formateado.
-        """
-        super().__init__(msg)

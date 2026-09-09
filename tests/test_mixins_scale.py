@@ -8,7 +8,7 @@ import pytest
 from pymedia.errors import (
     InvalidArgumentError,
     InvalidParameterError,
-    MissingMediaPropertyError,
+    MissingPropertyError,
 )
 from pymedia.models.media import Media, Video
 from pymedia.models.mixins.scale_mixin import ScaleMixin
@@ -81,14 +81,14 @@ class TestParseErrors:
         mixin = _mixin(video=None)
         mixin.media = Media(path=Path("clip.mp4"))
 
-        with pytest.raises(MissingMediaPropertyError, match="video dimensions"):
+        with pytest.raises(MissingPropertyError, match="video dimensions"):
             mixin.create_scale(logger=Mock(), scale_upscale=False, scale_to="1280x720")
 
     def test_video_without_dimensions_raises(self):
         """Comprueba que un vídeo sin dimensiones lanza un error."""
         mixin = _mixin(video=Video())
 
-        with pytest.raises(MissingMediaPropertyError, match="video dimensions"):
+        with pytest.raises(MissingPropertyError, match="video dimensions"):
             mixin.create_scale(logger=Mock(), scale_upscale=False, scale_to="1280x720")
 
 

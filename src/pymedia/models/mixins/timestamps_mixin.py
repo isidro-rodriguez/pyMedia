@@ -9,19 +9,19 @@ from pymedia.errors import (
     InvalidArgumentError,
     InvalidParameterError,
     InvalidTimeFormatError,
-    MissingMediaPropertyError,
     MissingParameterError,
+    MissingPropertyError,
 )
 from pymedia.locales import _  # noqa
 from pymedia.models.media import Media
 
 
-class _HasMedia(Protocol):
+class _TimestampsContext(Protocol):
     media: Media
 
 
 @dataclass(kw_only=True)
-class TimestampStartEndMixin(_HasMedia):
+class TimestampStartEndMixin(_TimestampsContext):
     """Mixin para las marcas de tiempo que indican el punto inicial a procesar.
 
     Attributes:
@@ -42,7 +42,7 @@ class TimestampStartEndMixin(_HasMedia):
 
         Raises:
             InvalidTimeFormatError: Si el formato de la marca no es válido.
-            MissingMediaPropertyError: Si no se pudo obtener la duración del vídeo.
+            MissingPropertyError: Si no se pudo obtener la duración del vídeo.
             MissingParameterError: Si no se pudo obtener el parámetro.
             TimeExceedsDurationError: Si marca de tiempo superior a la duración.
         """
@@ -88,7 +88,7 @@ class TimestampStartEndMixin(_HasMedia):
         start, end = self.timestamp_start, self.timestamp_end
 
         if media_duration is None:
-            raise MissingMediaPropertyError(name="duration")
+            raise MissingPropertyError(name="duration")
         if start is not None and end is not None:
             return end - start
         if start is not None:
@@ -99,7 +99,7 @@ class TimestampStartEndMixin(_HasMedia):
 
 
 @dataclass(kw_only=True)
-class TimestampAtMixin(_HasMedia):
+class TimestampAtMixin(_TimestampsContext):
     """Mixin para listas de marcas de tiempo.
 
     Attributes:
@@ -163,7 +163,7 @@ def _process_time(time_str: str, media: Media) -> timedelta:
     def _validate_time() -> None:
         """Valida que la marca de tiempo no supere la duración del vídeo."""
         if media.duration is None:
-            raise MissingMediaPropertyError(name="video.duration")
+            raise MissingPropertyError(name="video.duration")
         if time_delta > media.duration:
             raise InvalidParameterError(
                 _("Timestamp %(time)s exceeds video duration %(duration)s.")

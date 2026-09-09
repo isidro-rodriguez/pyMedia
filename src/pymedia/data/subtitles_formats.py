@@ -28,6 +28,8 @@ class SubtitlesFormatData:
             de codec_name, especialmente en formatos de imagen.
         containers: Tupla con las extensiones de contenedor soportadas (p.
             ej., ('.mkv', '.srt')).
+        remux_containers: Contenedores seguros para remux con ``-c copy``,
+            sin recodificación del formato de subtítulos.
         subtitles_type: Tipo de subtítulos (texto o mapa de bits/imagen).
         supports_styles: Indica si el formato admite estilos avanzados como
             fuentes, colores y posiciones. Por defecto es False.
@@ -36,6 +38,7 @@ class SubtitlesFormatData:
     codec_name: str
     library: str
     containers: tuple[str, ...]
+    remux_containers: tuple[str, ...]
     subtitles_type: SubtitlesType
     supports_styles: bool = False
 
@@ -46,6 +49,7 @@ _SUBTITLES_FORMATS: tuple[SubtitlesFormatData, ...] = (
         codec_name="srt",
         library="srt",
         containers=(".mkv", ".srt"),
+        remux_containers=(".mkv", ".srt"),
         subtitles_type=SubtitlesType.TEXT,
         supports_styles=False,
     ),
@@ -53,6 +57,7 @@ _SUBTITLES_FORMATS: tuple[SubtitlesFormatData, ...] = (
         codec_name="ass",
         library="ass",
         containers=(".mkv", ".ass", ".ssa"),
+        remux_containers=(".mkv", ".ass", ".ssa"),
         subtitles_type=SubtitlesType.TEXT,
         supports_styles=True,  # Soporta fuentes, colores y posiciones complejas
     ),
@@ -60,6 +65,7 @@ _SUBTITLES_FORMATS: tuple[SubtitlesFormatData, ...] = (
         codec_name="webvtt",
         library="webvtt",
         containers=(".mkv", ".webm", ".vtt"),
+        remux_containers=(".mkv", ".webm", ".vtt"),
         subtitles_type=SubtitlesType.TEXT,
         supports_styles=True,
     ),
@@ -67,6 +73,7 @@ _SUBTITLES_FORMATS: tuple[SubtitlesFormatData, ...] = (
         codec_name="mov_text",
         library="mov_text",
         containers=(".mp4", ".mov", ".3gp"),
+        remux_containers=(".mp4", ".mov", ".3gp"),
         subtitles_type=SubtitlesType.TEXT,
         supports_styles=False,  # Subtítulo de texto plano nativo de MP4
     ),
@@ -76,6 +83,7 @@ _SUBTITLES_FORMATS: tuple[SubtitlesFormatData, ...] = (
         codec_name="dvd_subtitle",
         library="dvdsub",
         containers=(".mkv", ".vob"),
+        remux_containers=(".mkv", ".vob"),
         subtitles_type=SubtitlesType.IMAGE,
         supports_styles=False,
     ),
@@ -83,6 +91,7 @@ _SUBTITLES_FORMATS: tuple[SubtitlesFormatData, ...] = (
         codec_name="hdmv_pgs_subtitle",
         library="pgssub",
         containers=(".mkv", ".m2ts"),
+        remux_containers=(".mkv", ".m2ts"),
         subtitles_type=SubtitlesType.IMAGE,
         supports_styles=False,
     ),

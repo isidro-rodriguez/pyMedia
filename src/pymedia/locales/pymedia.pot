@@ -22,6 +22,14 @@ msgstr ""
 msgid "FFmpeg command was not generated: %(command_name)s"
 msgstr ""
 
+#: pymedia/errors.py:133
+#, python-format
+msgid ""
+"Cannot remux %(codec)s to %(extension)s. Safe remux targets: "
+"%(supported)s."
+msgstr ""
+
+
 #: pymedia/errors.py:152
 #, python-format
 msgid ""
@@ -43,16 +51,6 @@ msgstr ""
 #: pymedia/errors.py:212
 #, python-format
 msgid "Missing argument: %(name)s"
-msgstr ""
-
-#: pymedia/errors.py:224
-#, python-format
-msgid "Missing media information: %(path)s"
-msgstr ""
-
-#: pymedia/errors.py:236
-#, python-format
-msgid "Missing media property: %(name)s"
 msgstr ""
 
 #: pymedia/errors.py:248
@@ -397,11 +395,6 @@ msgstr ""
 
 #: pymedia/pipeline/info_pipeline.py:53
 msgid "Container"
-msgstr ""
-
-#: pymedia/pipeline/info_pipeline.py:72 pymedia/pipeline/info_pipeline.py:94
-#: pymedia/pipeline/info_pipeline.py:119
-msgid "Stream"
 msgstr ""
 
 #: pymedia/pipeline/info_pipeline.py:73 pymedia/pipeline/info_pipeline.py:95

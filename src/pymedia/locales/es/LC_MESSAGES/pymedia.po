@@ -1,9 +1,7 @@
-# Translations template for PROJECT.
+# Spanish translations for PROJECT.
 # Copyright (C) 2026 ORGANIZATION
 # This file is distributed under the same license as the PROJECT project.
-# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
 #
-#, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
@@ -21,6 +19,16 @@ msgstr ""
 #, python-format
 msgid "FFmpeg command was not generated: %(command_name)s"
 msgstr "El comando FFmpeg %(command_name)s no se generó."
+
+#: pymedia/errors.py:133
+#, python-format
+msgid ""
+"Cannot remux %(codec)s to %(extension)s. Safe remux targets: "
+"%(supported)s."
+msgstr ""
+"No se puede hacer remux del códec %(codec)s a %(extension)s. Destinos "
+"seguros para remux: %(supported)s."
+
 
 #: pymedia/errors.py:152
 #, python-format
@@ -48,16 +56,6 @@ msgstr "Formato de marca de tiempo no válido. Esperado: hh:mm:ss."
 #, python-format
 msgid "Missing argument: %(name)s"
 msgstr "Falta el argumento: %(name)s"
-
-#: pymedia/errors.py:224
-#, python-format
-msgid "Missing media information: %(path)s"
-msgstr "Falta información de vídeo: %(path)s"
-
-#: pymedia/errors.py:236
-#, python-format
-msgid "Missing media property: %(name)s"
-msgstr "Falta la propiedad del medio: %(name)s"
 
 #: pymedia/errors.py:248
 #, python-format
@@ -442,11 +440,6 @@ msgstr "Valor"
 #: pymedia/pipeline/info_pipeline.py:53
 msgid "Container"
 msgstr "Contenedor"
-
-#: pymedia/pipeline/info_pipeline.py:72 pymedia/pipeline/info_pipeline.py:94
-#: pymedia/pipeline/info_pipeline.py:119
-msgid "Stream"
-msgstr "Stream"
 
 #: pymedia/pipeline/info_pipeline.py:73 pymedia/pipeline/info_pipeline.py:95
 msgid "Codec"

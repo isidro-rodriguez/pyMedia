@@ -1,8 +1,8 @@
 """Modelos de parámetros de pipelines."""
 
-from abc import ABC
 from dataclasses import dataclass
 
+from pymedia.models.mixins.audio_mixin import AudioInputMixin
 from pymedia.models.mixins.crop_mixin import CropMixin
 from pymedia.models.mixins.flip_mixin import FlipMixin
 from pymedia.models.mixins.fps_mixin import FpsGifMixin, FpsImageMixin
@@ -10,6 +10,7 @@ from pymedia.models.mixins.image_mixin import ImageQualityMixin, SceneMixin
 from pymedia.models.mixins.media_mixin import MediaInputMixin
 from pymedia.models.mixins.outputs_mixin import (
     AnimatedOutputMixin,
+    AudioOutputMixin,
     ImageOutputMixin,
     MediaOutputMixin,
     SubtitlesOutputMixin,
@@ -23,23 +24,25 @@ from pymedia.models.mixins.timestamps_mixin import (
     TimestampAtMixin,
     TimestampStartEndMixin,
 )
-from pymedia.types import OverwriteMode, SubtitlesMode
+from pymedia.types import AudioMode, OverwriteMode, SubtitlesMode
 
 
 @dataclass(kw_only=True)
-class BaseParameters(ABC):
-    """Base para los dataclasses de parámetros de comandos.
-
-    Attributes:
-        overwrite: Política ante conflicto de salida ya existente.
-    """
+class AudioParameters(
+    MediaInputMixin,
+    MediaOutputMixin,
+    AudioInputMixin,
+    AudioOutputMixin,
+    StreamsMixin,
+):
+    """Parámetros validados y parseados para la manipulación de subtítulos."""
 
     overwrite: OverwriteMode
+    audio_mode: AudioMode
 
 
 @dataclass(kw_only=True)
 class GifParameters(
-    BaseParameters,
     MediaInputMixin,
     AnimatedOutputMixin,
     FpsGifMixin,
@@ -51,6 +54,8 @@ class GifParameters(
 ):
     """Parámetros utilizados por el comando GIF."""
 
+    overwrite: OverwriteMode
+
 
 @dataclass(kw_only=True)
 class InfoParameters(
@@ -61,7 +66,6 @@ class InfoParameters(
 
 @dataclass(kw_only=True)
 class SheetParameters(
-    BaseParameters,
     MediaInputMixin,
     ImageOutputMixin,
     ImageQualityMixin,
@@ -69,10 +73,11 @@ class SheetParameters(
 ):
     """Parámetros utilizados por el comando Sheet."""
 
+    overwrite: OverwriteMode
+
 
 @dataclass(kw_only=True)
 class SubtitlesParameters(
-    BaseParameters,
     MediaInputMixin,
     MediaOutputMixin,
     SubtitlesInputMixin,
@@ -81,12 +86,12 @@ class SubtitlesParameters(
 ):
     """Parámetros validados y parseados para la manipulación de subtítulos."""
 
+    overwrite: OverwriteMode
     subtitles_mode: SubtitlesMode
 
 
 @dataclass(kw_only=True)
 class ThumbParameters(
-    BaseParameters,
     MediaInputMixin,
     ImageOutputMixin,
     ImageQualityMixin,
@@ -100,3 +105,5 @@ class ThumbParameters(
     RotateMixin,
 ):
     """Parámetros validados y parseados para generar capturas de vídeo."""
+
+    overwrite: OverwriteMode

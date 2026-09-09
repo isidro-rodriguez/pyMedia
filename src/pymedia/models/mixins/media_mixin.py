@@ -141,6 +141,7 @@ def _create_media(media_input: Path, logger: Logger) -> "Media":
         elif codec_type == "audio":
             if audio is None:
                 audio = []
+            disposition = stream.get("disposition", {})
             audio.append(
                 Audio(
                     path=media_input.absolute(),
@@ -152,6 +153,11 @@ def _create_media(media_input: Path, logger: Logger) -> "Media":
                     channel_layout=stream.get("channel_layout"),
                     bit_rate=to_int(stream.get("bit_rate")),
                     language=language,
+                    title=tags.get("title"),
+                    forced=bool(disposition.get("forced", 0)),
+                    default=bool(disposition.get("default", 0)),
+                    hearing_impaired=bool(disposition.get("hearing_impaired", 0)),
+                    commentary=bool(disposition.get("comment", 0)),
                 )
             )
             audio_track_index += 1

@@ -18,20 +18,14 @@ from pymedia.models.media import Media
 from pymedia.models.subtitles import Subtitles
 
 
-class _HasMedia(Protocol):
+class _SubtitlesContext(Protocol):
     media: Media
-
-
-class _HasMediaOutput(Protocol):
     media_output: Path
-
-
-class _HasStreams(Protocol):
     stream_tracks: list[int]
 
 
 @dataclass(kw_only=True)
-class SubtitlesInputMixin(_HasMedia, _HasMediaOutput, _HasStreams):
+class SubtitlesInputMixin(_SubtitlesContext):
     """Mixin para la recepción de ficheros de subtítulos.
 
     Attributes:

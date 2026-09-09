@@ -16,14 +16,12 @@ from pymedia.models.media import Media
 from pymedia.types import StreamsMode
 
 
-class _HasMedia(Protocol):
-    """Objeto que expone la ruta y los metadatos del fichero de entrada."""
-
+class _StreamsContext(Protocol):
     media: Media
 
 
 @dataclass(kw_only=True)
-class StreamsMixin(_HasMedia):
+class StreamsMixin(_StreamsContext):
     """Mixin para listados de streams proporcionados por el usuario.
 
     Los índices de pistas de streams se validan que presentan enumeración correcta y

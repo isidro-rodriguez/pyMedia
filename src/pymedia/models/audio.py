@@ -18,6 +18,11 @@ class Audio:
         channel_layout: Distribución de canales (p. ej. "stereo").
         bit_rate: Tasa de bits en bps.
         language: Código de idioma de la pista.
+        title: Titulo de la pista.
+        default: Si es la pista de audio por defecto del contenedor.
+        forced: Si es una pista de reproducción forzada.
+        hearing_impaired: Si es una pista orientada a personas con problemas auditivos.
+        commentary: Si es una pista de comentarios de audio.
     """
 
     path: Path
@@ -29,3 +34,8 @@ class Audio:
     channel_layout: str | None = None
     bit_rate: int | None = None
     language: str | None = None
+    title: str | None = None
+    default: bool | None = False
+    forced: bool | None = False
+    hearing_impaired: bool | None = False
+    commentary: bool | None = False

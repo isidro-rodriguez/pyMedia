@@ -8,8 +8,8 @@ import pytest
 from pymedia.errors import (
     InvalidParameterError,
     InvalidTimeFormatError,
-    MissingMediaPropertyError,
     MissingParameterError,
+    MissingPropertyError,
 )
 from pymedia.models.media import Media
 from pymedia.models.mixins.timestamps_mixin import (
@@ -56,7 +56,7 @@ class TestCreateTimestampStart:
         mixin = TimestampStartEndMixin()
         mixin.media = _media(duration=None)
 
-        with pytest.raises(MissingMediaPropertyError, match="duration"):
+        with pytest.raises(MissingPropertyError, match="duration"):
             mixin.create_timestamp_start_end(
                 timestamp_start="00:00:05", timestamp_end=None
             )
@@ -115,7 +115,7 @@ class TestCreateTimestampEnd:
         mixin = TimestampStartEndMixin()
         mixin.media = _media(duration=None)
 
-        with pytest.raises(MissingMediaPropertyError, match="duration"):
+        with pytest.raises(MissingPropertyError, match="duration"):
             mixin.create_timestamp_start_end(
                 timestamp_start=None, timestamp_end="00:00:05"
             )

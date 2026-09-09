@@ -6,8 +6,8 @@ from pathlib import Path
 
 from pymedia.errors import (
     CommandGenerationError,
-    MissingMediaPropertyError,
     MissingParameterError,
+    MissingPropertyError,
 )
 from pymedia.locale_manager import locale_manager
 from pymedia.locales import _  # noqa
@@ -43,7 +43,7 @@ class SheetCmd:
             MissingParameterError: Si falta algún parámetro requerido (preset,
                 media_input, output, pista de audio o subtítulo).
             MissingMediaError: Si el objeto de metadatos del medio es None.
-            MissingMediaPropertyError: Si falta alguna propiedad técnica requerida
+            MissingPropertyError: Si falta alguna propiedad técnica requerida
                 en el objeto media (duration, fps, size, video, codec, etc.).
         """
         snapshots_cmd = self._generate_snapshots()
@@ -64,7 +64,7 @@ class SheetCmd:
             MissingParameterError: Si falta algún parámetro requerido (preset,
                 media_input, output, pista de audio o subtítulo).
             MissingMediaError: Si el objeto de metadatos del medio es None.
-            MissingMediaPropertyError: Si falta alguna propiedad técnica requerida
+            MissingPropertyError: Si falta alguna propiedad técnica requerida
                 en el objeto media (duration, fps, size, video, codec, etc.).
         """
         header_cmd = self._generate_header()
@@ -152,9 +152,9 @@ class SheetCmd:
         if media is None:
             raise MissingParameterError(name="media")
         if media.duration is None:
-            raise MissingMediaPropertyError(name="duration")
+            raise MissingPropertyError(name="duration")
         if media.video is None or media.video.fps is None:
-            raise MissingMediaPropertyError(name="fps")
+            raise MissingPropertyError(name="fps")
 
         total_frames = int(media.duration.total_seconds() * media.video.fps)
         n_captures = preset.columns * preset.rows
@@ -275,7 +275,7 @@ class SheetCmd:
 
         video = media.video
         if video is None or video.width is None or video.height is None:
-            raise MissingMediaPropertyError(name="width/height")
+            raise MissingPropertyError(name="width/height")
 
         # Construcción dinámica de detalles de vídeo (manejando opcionales)
         video_parts = [f"{video.width}x{video.height}"]
