@@ -20,6 +20,7 @@ from pymedia.typer.commands.audio_commands import audio_typer
 from pymedia.typer.commands.gif_command import gif_typer
 from pymedia.typer.commands.info_command import info_typer
 from pymedia.typer.commands.sheet_command import sheet_typer
+from pymedia.typer.commands.split_command import split_typer
 from pymedia.typer.commands.subtitles_commands import subtitles_typer
 from pymedia.typer.commands.thumb_commands import thumb_typer
 from pymedia.typer.commands.transcode_command import transcode_typer
@@ -28,6 +29,7 @@ from pymedia.typer.instance import typer_instance
 app = typer_instance
 app.add_typer(info_typer)
 app.add_typer(sheet_typer)
+app.add_typer(split_typer)
 app.add_typer(transcode_typer)
 app.add_typer(audio_typer)
 app.add_typer(subtitles_typer)

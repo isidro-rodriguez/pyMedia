@@ -224,6 +224,7 @@ class MediaOutputMixin(_HasMedia):
         affix: str | None = None,
         output: Path | None = None,
         output_directory: Path | None = None,
+        remux: bool = False,
     ) -> None:
         """Procesa y asigna la ruta del fichero contenedor multimedia de salida.
 
@@ -232,6 +233,7 @@ class MediaOutputMixin(_HasMedia):
             affix: Sufijo a añadir al nombre del fichero de salida.
             output: Ruta absoluta del fichero de salida procesado.
             output_directory: Directorio de salida para lotes de varios ficheros.
+            remux: Indica si es una operación de remux.
         """
         if output_directory is not None:
             self.output_directory = _process_output_directory(output_directory)
@@ -263,6 +265,16 @@ class MediaOutputMixin(_HasMedia):
                 supported=", ".join(VIDEO_CODECS[self.media.video.codec].containers),
             )
 
+        if remux:
+            codec = self.media.video.codec
+            _validate_remux(
+                suffix=output.suffix,
+                source_suffix=self.media.path.suffix,
+                codec_name=codec,
+                containers=VIDEO_CODECS[codec].containers,
+                remux_containers=VIDEO_CODECS[codec].remux_containers,
+            )
+
         if self.media.audio is not None:
             for audio_track in self.media.audio:
                 if audio_track.codec is None:
@@ -272,6 +284,15 @@ class MediaOutputMixin(_HasMedia):
                         extension=output.suffix,
                         codec=AUDIO_CODECS[audio_track.codec].name,
                         supported=", ".join(AUDIO_CODECS[audio_track.codec].containers),
+                    )
+                if remux:
+                    codec = audio_track.codec
+                    _validate_remux(
+                        suffix=output.suffix,
+                        source_suffix=self.media.path.suffix,
+                        codec_name=codec,
+                        containers=AUDIO_CODECS[codec].containers,
+                        remux_containers=AUDIO_CODECS[codec].remux_containers,
                     )
 
         self.media_output = output

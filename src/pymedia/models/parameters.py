@@ -42,7 +42,7 @@ class AudioParameters(
     AudioOutputMixin,
     StreamsMixin,
 ):
-    """Parámetros validados y parseados para la manipulación de subtítulos."""
+    """Parámetros validados y parseados para la manipulación de pistas de audio."""
 
     audio_mode: AudioMode
 
@@ -84,7 +84,7 @@ class SplitParameters(
     MediaOutputMixin,
     TimestampAtMixin,
 ):
-    """Parámetros validados y parseados para la manipulación de subtítulos."""
+    """Parámetros validados y parseados para la división de contenedores."""
 
 
 @dataclass(kw_only=True)
