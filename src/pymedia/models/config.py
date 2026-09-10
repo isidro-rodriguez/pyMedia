@@ -16,7 +16,7 @@ from pymedia.types import AudioCodecMode, PresetsTranscodeMode, VideoCodecMode
 
 
 @dataclass(frozen=True, kw_only=True, slots=True)
-class Encode:
+class Transcode:
     """Parámetros de transcodificación que se usarán en ffmpeg.
 
     Attributes:
@@ -37,7 +37,7 @@ class Encode:
 
 
 @dataclass(frozen=True, kw_only=True, slots=True)
-class Transcode:
+class TranscodePreset:
     """Perfiles de transcodificación declarados en `config.toml`.
 
     Attributes:
@@ -46,9 +46,9 @@ class Transcode:
         slow: Perfil de máxima calidad de compresión.
     """
 
-    fast: Encode
-    even: Encode
-    slow: Encode
+    fast: Transcode
+    even: Transcode
+    slow: Transcode
 
 
 @dataclass(frozen=True, kw_only=True, slots=True)
@@ -93,7 +93,7 @@ class Config:
         app: Opciones de configuración de la aplicación.
     """
 
-    transcode: Transcode
+    transcode: TranscodePreset
     default_containers: DefaultContainers
     app: App
 
@@ -127,9 +127,9 @@ class Config:
             cls._validate(data)
 
         return cls(
-            transcode=Transcode(
+            transcode=TranscodePreset(
                 **{
-                    preset: Encode(**params)
+                    preset: Transcode(**params)
                     for preset, params in data["transcode"].items()
                 }
             ),

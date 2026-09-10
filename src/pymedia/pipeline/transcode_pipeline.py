@@ -39,9 +39,22 @@ class TranscodePipeline(BasePipeline[TranscodeParameters]):
         vflip: bool = False,
     ) -> None:
         """Valida y parsea los argumentos en parámetros procesados."""
+        if not all(
+            [
+                crop is None,
+                scale_to is None,
+                rotate is None,
+                hflip is False,
+                vflip is False,
+            ]
+        ):
+            transcode_video = True
+
         params = TranscodeParameters(
             overwrite=overwrite,
             scale_mode=scale_mode,
+            transcode=getattr(self.config.transcode, preset_transcode.value),
+            transcode_video=transcode_video,
             hflip=hflip,
             vflip=vflip,
         )
@@ -61,11 +74,6 @@ class TranscodePipeline(BasePipeline[TranscodeParameters]):
         params.create_streams(
             stream_tracks=transcode_audio,
             streams_type=StreamsMode.AUDIO,
-        )
-
-        params.create_transcode(
-            mode=preset_transcode,
-            video=transcode_video,
         )
 
         params.create_crop(
@@ -89,7 +97,7 @@ class TranscodePipeline(BasePipeline[TranscodeParameters]):
         if self.params.media is None:
             raise MissingParameterError(name="media")
 
-        cmd = TranscodeCmd(params=self.params).create()
+        cmd = TranscodeCmd(params=self.params, config=self.config).create()
 
         self.logger.debug(_("FFmpeg command: %(cmd)s"), cmd=cmd)
 

@@ -139,7 +139,7 @@ PresetsTranscodeOption = Annotated[
     typer.Option(
         default="--preset",
         rich_help_panel=_("Command options"),
-        help=_("Transcode preset from config.toml."),
+        help=_("TranscodePreset preset from config.toml."),
     ),
 ]
 

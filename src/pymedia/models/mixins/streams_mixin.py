@@ -7,7 +7,6 @@ from pymedia.errors import (
     AudioError,
     InvalidArgumentError,
     InvalidParameterError,
-    MissingArgumentError,
     MissingParameterError,
     SubtitlesError,
 )
@@ -38,7 +37,7 @@ class StreamsMixin(_StreamsContext):
     ) -> None:
         """Añade la lista de streams como parámetro validado."""
         if stream_tracks is None:
-            raise MissingArgumentError(name="stream_tracks")
+            return
 
         track_list: list[int] = self._parse_stream_list(stream_tracks_str=stream_tracks)
 

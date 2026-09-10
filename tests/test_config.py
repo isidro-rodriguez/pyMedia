@@ -6,7 +6,7 @@ from unittest.mock import patch
 import pytest
 
 from pymedia.errors import ConfigError
-from pymedia.models.config import Config, Encode, Transcode
+from pymedia.models.config import Config, Transcode, TranscodePreset
 
 _DEFAULT_CONFIG = """\
 [app]
@@ -54,8 +54,8 @@ def test_load_carga_perfiles_y_valores_por_defecto(tmp_path: Path) -> None:
     """Un `config.toml` válido expone los tres perfiles `transcode`."""
     config = _load(_DEFAULT_CONFIG, tmp_path)
 
-    assert isinstance(config.transcode, Transcode)
-    assert isinstance(config.transcode.fast, Encode)
+    assert isinstance(config.transcode, TranscodePreset)
+    assert isinstance(config.transcode.fast, Transcode)
     assert config.transcode.fast.video_crf == 25
     assert config.transcode.even.video_preset == "medium"
     assert config.transcode.slow.audio_bit_rate == "256k"

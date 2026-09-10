@@ -2,6 +2,7 @@
 
 import typer
 
+from pymedia.errors import MissingRequiredOptionError
 from pymedia.pipeline.transcode_pipeline import TranscodePipeline
 from pymedia.typer.help import TRANSCODE_HELP
 from pymedia.typer.options import (
@@ -53,11 +54,33 @@ def transcode(
     help_: HelpOption = False,  # noqa
 ) -> None:
     """Comando para componer la llamada ffmpeg de transcodificación de vídeos."""
+    if (
+        transcode_audio is None
+        and transcode_video is False
+        and crop is None
+        and rotate is None
+        and scale_to is None
+        and hflip is False
+        and vflip is False
+    ):
+        raise MissingRequiredOptionError(
+            options=[
+                "transcode_audio",
+                "transcode_video",
+                "crop",
+                "rotate",
+                "scale_to",
+                "hflip",
+                "vflip",
+            ]
+        )
+
     validate_conflict_output_options(
         media_input_list=media_input_list,
         output=media_output,
         output_directory=output_directory,
     )
+
     for media_input in media_input_list:
         pipeline = TranscodePipeline(debug=debug)
         pipeline.process_parameters(

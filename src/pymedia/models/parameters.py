@@ -1,5 +1,6 @@
 """Modelos de parámetros de pipelines."""
 
+from abc import ABC
 from dataclasses import dataclass
 
 from pymedia.models.mixins.audio_mixin import AudioInputMixin
@@ -29,7 +30,15 @@ from pymedia.types import AudioMode, OverwriteMode, SubtitlesMode
 
 
 @dataclass(kw_only=True)
+class _BaseParameters(ABC):
+    """Parámetros validados y parseados para la manipulación de subtítulos."""
+
+    overwrite: OverwriteMode
+
+
+@dataclass(kw_only=True)
 class AudioParameters(
+    _BaseParameters,
     MediaInputMixin,
     MediaOutputMixin,
     AudioInputMixin,
@@ -38,12 +47,12 @@ class AudioParameters(
 ):
     """Parámetros validados y parseados para la manipulación de subtítulos."""
 
-    overwrite: OverwriteMode
     audio_mode: AudioMode
 
 
 @dataclass(kw_only=True)
 class GifParameters(
+    _BaseParameters,
     MediaInputMixin,
     AnimatedOutputMixin,
     FpsGifMixin,
@@ -55,8 +64,6 @@ class GifParameters(
 ):
     """Parámetros utilizados por el comando GIF."""
 
-    overwrite: OverwriteMode
-
 
 @dataclass(kw_only=True)
 class InfoParameters(
@@ -67,6 +74,7 @@ class InfoParameters(
 
 @dataclass(kw_only=True)
 class SheetParameters(
+    _BaseParameters,
     MediaInputMixin,
     ImageOutputMixin,
     ImageQualityMixin,
@@ -74,11 +82,10 @@ class SheetParameters(
 ):
     """Parámetros utilizados por el comando Sheet."""
 
-    overwrite: OverwriteMode
-
 
 @dataclass(kw_only=True)
 class SubtitlesParameters(
+    _BaseParameters,
     MediaInputMixin,
     MediaOutputMixin,
     SubtitlesInputMixin,
@@ -87,12 +94,12 @@ class SubtitlesParameters(
 ):
     """Parámetros validados y parseados para la manipulación de subtítulos."""
 
-    overwrite: OverwriteMode
     subtitles_mode: SubtitlesMode
 
 
 @dataclass(kw_only=True)
 class ThumbParameters(
+    _BaseParameters,
     MediaInputMixin,
     ImageOutputMixin,
     ImageQualityMixin,
@@ -107,11 +114,10 @@ class ThumbParameters(
 ):
     """Parámetros validados y parseados para generar capturas de vídeo."""
 
-    overwrite: OverwriteMode
-
 
 @dataclass(kw_only=True)
 class TranscodeParameters(
+    _BaseParameters,
     MediaInputMixin,
     MediaOutputMixin,
     StreamsMixin,
@@ -122,5 +128,3 @@ class TranscodeParameters(
     RotateMixin,
 ):
     """Parámetros validados y parseados para la transcodificación de contenedores."""
-
-    overwrite: OverwriteMode
