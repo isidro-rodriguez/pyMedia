@@ -205,7 +205,7 @@ TimestampStartThumbnailOption = Annotated[
 ]
 
 TranscodeAudioOption = Annotated[
-    list[int] | None,
+    str | None,
     typer.Option(
         default="--audio",
         metavar="int,int,...",
