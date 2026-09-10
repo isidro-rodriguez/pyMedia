@@ -14,6 +14,7 @@ from pymedia.typer.service import show_help, validate_path, validate_path_list
 from pymedia.types import (
     OverwriteMode,
     PresetsSheetMode,
+    PresetsTranscodeMode,
     RotateMode,
     ScaleMode,
 )
@@ -133,6 +134,15 @@ PresetSheetOption = Annotated[
     ),
 ]
 
+PresetsTranscodeOption = Annotated[
+    PresetsTranscodeMode,
+    typer.Option(
+        default="--preset",
+        rich_help_panel=_("Command options"),
+        help=_("Transcode preset from config.toml."),
+    ),
+]
+
 SceneOption = Annotated[
     float | None,
     typer.Option(
@@ -191,6 +201,25 @@ TimestampStartThumbnailOption = Annotated[
         metavar="hh:mm:ss",
         rich_help_panel=_("Command options"),
         help=_("Time point at which thumbnails generation starts."),
+    ),
+]
+
+TranscodeAudioOption = Annotated[
+    list[int] | None,
+    typer.Option(
+        default="--audio",
+        metavar="int,int,...",
+        rich_help_panel=_("Command options"),
+        help=_("Set to transcode an audio track."),
+    ),
+]
+
+TranscodeVideoOption = Annotated[
+    bool,
+    typer.Option(
+        default="--video",
+        rich_help_panel=_("Command options"),
+        help=_("Set to transcode the video track."),
     ),
 ]
 

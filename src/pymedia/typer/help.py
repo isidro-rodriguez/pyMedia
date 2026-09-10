@@ -7,79 +7,6 @@ modo que respetan el idioma activo.
 
 from pymedia.locales import _  # noqa
 
-# =============================================================================
-#  Ayuda global de la aplicación
-# =============================================================================
-
-MAIN_HELP = _(
-    """\
-Easy CLI for ffmpeg.
-
-[bold]Examples[/bold]:
-  Generate an animated GIF from a video:   
-    > pymedia gif input.mp4
-  Print GIF's help:     
-    > pymedia gif --help
-"""
-)
-
-
-# =============================================================================
-#  Comando GIF
-# =============================================================================
-
-GIF_HELP = _(
-    """\
-Generates an animated GIF from the specified video.
-
-[bold]Examples[/bold]:
-  Convert a video to GIF:
-    > pymedia gif input.mp4
-  Convert a time range:
-    > pymedia gif input.mp4 --start 00:00:05 --end 00:00:12
-  Set size and frame rate:
-    > pymedia gif input.mp4 --size 480x270 --fps 15
-  Save to a specific file:
-    > pymedia gif input.mp4 --output output.gif
-"""
-)
-
-
-# =============================================================================
-#  Comando info
-# =============================================================================
-
-INFO_HELP = _(
-    """\
-Shows information about a video.
-
-[bold]Example[/bold]:
-  Shows video's metadata:
-    > pymedia info input.mp4
-"""
-)
-
-
-# =============================================================================
-#  Comando sheet
-# =============================================================================
-
-SHEET_HELP = _(
-    """\
-Generates a thumbnail grid sheet with media info header.
-
-[bold]Examples[/bold]:
-  Generate a vcs with default HD preset:
-    > pymedia sheet input.mp4
-  Generates a vcs with different preset and specified output:
-    > pymedia sheet input.mp4 --preset fhd -o vcs.webp
-"""
-)
-
-
-# =============================================================================
-#  Familia de comandos de audio
-# =============================================================================
 
 AUDIO_ADD_HELP = _(
     """\
@@ -135,9 +62,57 @@ Extract audio tracks from a media file.
 )
 
 
-# =============================================================================
-#  Familia de subtítulos
-# =============================================================================
+ANIMATED_HELP = _(
+    """\
+Generates an animated image from the specified video.
+
+[bold]Examples[/bold]:
+  Convert a video to GIF:
+    > pymedia gif input.mp4
+  Convert a time range:
+    > pymedia gif input.mp4 --start 00:00:05 --end 00:00:12
+  Set size and frame rate:
+    > pymedia gif input.mp4 --size 480x270 --fps 15
+  Save to a specific file:
+    > pymedia gif input.mp4 --output output.gif
+"""
+)
+INFO_HELP = _(
+    """\
+Shows information about a video.
+
+[bold]Example[/bold]:
+  Shows video's metadata:
+    > pymedia info input.mp4
+"""
+)
+
+
+MAIN_HELP = _(
+    """\
+Easy CLI for ffmpeg.
+
+[bold]Examples[/bold]:
+  Generate an animated GIF from a video:   
+    > pymedia gif input.mp4
+  Print GIF's help:     
+    > pymedia gif --help
+"""
+)
+
+
+SHEET_HELP = _(
+    """\
+Generates a thumbnail grid sheet with media info header.
+
+[bold]Examples[/bold]:
+  Generate a vcs with default HD preset:
+    > pymedia sheet input.mp4
+  Generates a vcs with different preset and specified output:
+    > pymedia sheet input.mp4 --preset fhd -o vcs.webp
+"""
+)
+
 
 SUBTITLES_ADD_HELP = _(
     """\
@@ -192,11 +167,6 @@ Extract subtitles from a media file.
 """  # noqa
 )
 
-
-# =============================================================================
-#  Familia de comandos de captura de imágenes
-# =============================================================================
-
 THUMB_FRAMES_HELP = _(
     """\
 Captures thumbnails at the specified timestamps.
@@ -240,5 +210,21 @@ Captures thumbnails at the scene changes detected in the video.
     > pymedia scene input.mp4 --start 00:00:05 --end 00:00:30
   Save to a specific file:
     > pymedia scene input.mp4 --output thumb.jpg
+"""
+)
+
+TRANSCODE_HELP = _(
+    """\
+Transcode video container changing its codecs and compression.
+
+You can edit preset profiles in config.toml.
+
+[bold]Examples[/bold]:
+    Transcode only video track changing with a configurated profile:
+    > pymedia transcode source.mp4 --profile balanced --video -o target.mp4
+    Transcode video and audio track 1 changing its codecs with a configurated profile:
+    > pymedia transcode source.mp4 --profile slow --video --audio 1 -o target.mp4
+    Transcode video track meanwhile its applied multiple filters: 
+    > pymedia transcode source.mp4 --profile fast --size 1280x720 --hflip
 """
 )

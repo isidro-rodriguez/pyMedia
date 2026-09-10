@@ -24,6 +24,7 @@ from pymedia.models.mixins.timestamps_mixin import (
     TimestampAtMixin,
     TimestampStartEndMixin,
 )
+from pymedia.models.mixins.transcode_mixin import TranscodeMixin
 from pymedia.types import AudioMode, OverwriteMode, SubtitlesMode
 
 
@@ -105,5 +106,21 @@ class ThumbParameters(
     RotateMixin,
 ):
     """Parámetros validados y parseados para generar capturas de vídeo."""
+
+    overwrite: OverwriteMode
+
+
+@dataclass(kw_only=True)
+class TranscodeParameters(
+    MediaInputMixin,
+    MediaOutputMixin,
+    StreamsMixin,
+    TranscodeMixin,
+    CropMixin,
+    ScaleMixin,
+    FlipMixin,
+    RotateMixin,
+):
+    """Parámetros validados y parseados para la transcodificación de contenedores."""
 
     overwrite: OverwriteMode

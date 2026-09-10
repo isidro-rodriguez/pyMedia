@@ -1,9 +1,6 @@
-[encode]
-video_codec = "h265"
-video_preset = "slow"
-video_crf = 24
-audio_codec = "aac"
-audio_bit_rate = "128k"
+[app]
+language = "system"
+stall_timeout = 60
 
 [default_containers]
 animated_image = ".gif"
@@ -12,6 +9,25 @@ image = ".jpg"
 media = ".mp4"
 subtitles = ".srt"
 
-[app]
-language = "system"
-stall_timeout = 60
+[transcode]
+
+[transcode.fast]
+video_codec = "h265"
+video_preset = "veryfast"
+video_crf = 25
+audio_codec = "aac"
+audio_bit_rate = "160k"
+
+[transcode.even]
+video_codec = "h265"
+video_preset = "medium"
+video_crf = 23
+audio_codec = "aac"
+audio_bit_rate = "192k"
+
+[transcode.slow]
+video_codec = "h265"
+video_preset = "slower"
+video_crf = 20
+audio_codec = "aac"
+audio_bit_rate = "256k"

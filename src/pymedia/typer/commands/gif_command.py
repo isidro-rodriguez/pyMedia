@@ -3,7 +3,7 @@
 import typer
 
 from pymedia.pipeline.gif_pipeline import GifPipeline
-from pymedia.typer.help import GIF_HELP
+from pymedia.typer.help import ANIMATED_HELP
 from pymedia.typer.options import (
     CropOption,
     DebugOption,
@@ -27,9 +27,9 @@ gif_typer = typer.Typer()
 
 
 @gif_typer.command(
-    name="gif",
-    help=GIF_HELP,
-    rich_help_panel="Animated commands",
+    name="animated",
+    help=ANIMATED_HELP,
+    rich_help_panel="Image commands",
     no_args_is_help=True,
 )
 def gif(

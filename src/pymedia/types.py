@@ -49,6 +49,14 @@ class PresetsSheetMode(Enum):
     WEB = "web"
 
 
+class PresetsTranscodeMode(Enum):
+    """Presets de los perfiles de transcodificación presentes en config.toml."""
+
+    FAST = "fast"
+    EVEN = "even"
+    SLOW = "slow"
+
+
 class RotateMode(Enum):
     """Ángulos de giro disponibles."""
 
