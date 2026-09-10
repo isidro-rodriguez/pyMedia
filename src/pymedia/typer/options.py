@@ -154,6 +154,16 @@ SceneOption = Annotated[
     ),
 ]
 
+TimestampAtMediaOption = Annotated[
+    str | None,
+    typer.Option(
+        default="--at",
+        metavar="hh:mm:ss,hh:mm:ss,...",
+        rich_help_panel=_("Command options"),
+        help=_("Timestamps list to split a media container."),
+    ),
+]
+
 TimestampAtThumbnailOption = Annotated[
     str | None,
     typer.Option(

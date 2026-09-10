@@ -114,6 +114,18 @@ Generates a thumbnail grid sheet with media info header.
 )
 
 
+SPLIT_HELP = _(
+    """\
+Split a video container in different media files.
+
+[bold]Examples[/bold]:
+  Split a media file at specific timestamps:
+    > pymedia split input.mp4 --at 10:05,40:30,1:20:00
+  Split a media file and remux container:
+    > pymedia split input.mp4 --at 5:00 -o output.mkv
+"""  # noqa
+)
+
 SUBTITLES_ADD_HELP = _(
     """\
 Add subtitles to a media file.

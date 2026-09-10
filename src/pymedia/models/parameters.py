@@ -31,7 +31,7 @@ from pymedia.types import AudioMode, OverwriteMode, SubtitlesMode
 
 @dataclass(kw_only=True)
 class _BaseParameters(ABC):
-    """Parámetros validados y parseados para la manipulación de subtítulos."""
+    """Parámetros base."""
 
     overwrite: OverwriteMode
 
@@ -81,6 +81,16 @@ class SheetParameters(
     SheetPresetsMixin,
 ):
     """Parámetros utilizados por el comando Sheet."""
+
+
+@dataclass(kw_only=True)
+class SplitParameters(
+    _BaseParameters,
+    MediaInputMixin,
+    MediaOutputMixin,
+    TimestampAtMixin,
+):
+    """Parámetros validados y parseados para la manipulación de subtítulos."""
 
 
 @dataclass(kw_only=True)
