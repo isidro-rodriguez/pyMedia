@@ -981,19 +981,19 @@ msgstr ""
 
 #: pymedia/typer/help.py:217
 msgid ""
-"Transcode video container changing its codecs and compression.\n"
+"TranscodePreset video container changing its codecs and compression.\n"
 "\n"
 "You can edit preset profiles in config.toml.\n"
 "\n"
 "[bold]Examples[/bold]:\n"
-"    Transcode only video track changing with a configurated profile:\n"
+"    TranscodePreset only video track changing with a configurated profile:\n"
 "    > pymedia transcode source.mp4 --profile balanced --video -o "
 "target.mp4\n"
-"    Transcode video and audio track 1 changing its codecs with a "
+"    TranscodePreset video and audio track 1 changing its codecs with a "
 "configurated profile:\n"
 "    > pymedia transcode source.mp4 --profile slow --video --audio 1 -o "
 "target.mp4\n"
-"    Transcode video track meanwhile its applied multiple filters: \n"
+"    TranscodePreset video track meanwhile its applied multiple filters: \n"
 "    > pymedia transcode source.mp4 --profile fast --size 1280x720 --hflip"
 "\n"
 msgstr ""
@@ -1074,7 +1074,7 @@ msgid "Preset sheet style."
 msgstr "Estilo de hoja preestablecido."
 
 #: pymedia/typer/options.py:142
-msgid "Transcode preset from config.toml."
+msgid "TranscodePreset preset from config.toml."
 msgstr "Preset de transcodificación de config.toml."
 
 #: pymedia/typer/options.py:153
