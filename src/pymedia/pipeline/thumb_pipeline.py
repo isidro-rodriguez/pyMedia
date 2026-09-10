@@ -57,9 +57,6 @@ class ThumbPipeline(BasePipeline[ThumbParameters]):
         """
         params = ThumbParameters(
             overwrite=overwrite,
-            scale_mode=scale_mode,
-            hflip=hflip,
-            vflip=vflip,
         )
 
         params.create_media_input(
@@ -90,18 +87,15 @@ class ThumbPipeline(BasePipeline[ThumbParameters]):
             every=every,
         )
 
-        params.create_crop(
-            crop_str=crop,
-        )
-
-        params.create_scale(
+        params.create_filters(
             logger=self.logger,
-            scale_upscale=scale_upscale,
+            crop=crop,
             scale_to=scale_to,
-        )
-
-        params.create_rotate(
+            scale_upscale=scale_upscale,
+            scale_mode=scale_mode,
             rotate=rotate,
+            hflip=hflip,
+            vflip=vflip,
         )
 
         self.params = params

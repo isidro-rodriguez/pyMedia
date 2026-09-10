@@ -64,19 +64,9 @@ class GifCmd:
 
         filters: list[str] = []
 
-        if self.params.crop_area is not None:
-            filters.append(self.params.to_crop_cmd())
-
-        if self.params.scale_to is not None:
-            scale_filter = self.params.to_scale_cmd()
-            if scale_filter is not None:
-                filters.append(scale_filter)
-
-        if self.params.hflip or self.params.vflip:
-            filters.append(self.params.to_flip_cmd())
-
-        if self.params.rotate is not None:
-            filters.append(self.params.to_rotate_cmd())
+        filters_cmd = self.params.to_filters_cmd()
+        if filters_cmd:
+            filters.append(filters_cmd)
 
         filters.append(self.params.to_fps_cmd())
 

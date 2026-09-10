@@ -4,8 +4,7 @@ from abc import ABC
 from dataclasses import dataclass
 
 from pymedia.models.mixins.audio_mixin import AudioInputMixin
-from pymedia.models.mixins.crop_mixin import CropMixin
-from pymedia.models.mixins.flip_mixin import FlipMixin
+from pymedia.models.mixins.filters_mixin import FiltersMixin
 from pymedia.models.mixins.fps_mixin import FpsGifMixin, FpsImageMixin
 from pymedia.models.mixins.image_mixin import ImageQualityMixin, SceneMixin
 from pymedia.models.mixins.media_mixin import MediaInputMixin
@@ -16,8 +15,6 @@ from pymedia.models.mixins.outputs_mixin import (
     MediaOutputMixin,
     SubtitlesOutputMixin,
 )
-from pymedia.models.mixins.rotate_mixin import RotateMixin
-from pymedia.models.mixins.scale_mixin import ScaleMixin
 from pymedia.models.mixins.sheet_presets_mixin import SheetPresetsMixin
 from pymedia.models.mixins.streams_mixin import StreamsMixin
 from pymedia.models.mixins.subtitles_mixin import SubtitlesInputMixin
@@ -56,10 +53,7 @@ class GifParameters(
     MediaInputMixin,
     AnimatedOutputMixin,
     FpsGifMixin,
-    CropMixin,
-    ScaleMixin,
-    FlipMixin,
-    RotateMixin,
+    FiltersMixin,
     TimestampStartEndMixin,
 ):
     """Parámetros utilizados por el comando GIF."""
@@ -117,10 +111,7 @@ class ThumbParameters(
     TimestampStartEndMixin,
     SceneMixin,
     FpsImageMixin,
-    CropMixin,
-    ScaleMixin,
-    FlipMixin,
-    RotateMixin,
+    FiltersMixin,
 ):
     """Parámetros validados y parseados para generar capturas de vídeo."""
 
@@ -132,9 +123,6 @@ class TranscodeParameters(
     MediaOutputMixin,
     StreamsMixin,
     TranscodeMixin,
-    CropMixin,
-    ScaleMixin,
-    FlipMixin,
-    RotateMixin,
+    FiltersMixin,
 ):
     """Parámetros validados y parseados para la transcodificación de contenedores."""

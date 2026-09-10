@@ -34,7 +34,7 @@ class ScaleMixin(_ScaleContext):
         scale_to: Dimensión objetivo, en píxeles, o `None` si no se cambia.
     """
 
-    scale_mode: ScaleMode
+    scale_mode: ScaleMode = ScaleMode.FIT
     scale_upscale: bool = False
     scale_to: Dimensions | None = None
 

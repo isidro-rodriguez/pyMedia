@@ -33,7 +33,7 @@ class TranscodeCmd:
         if self.params.media is None:
             raise MissingParameterError(name="media")
 
-        filters = self._build_filters()
+        filters = self.params.to_filters_cmd()
 
         cmd = ["ffmpeg"]
 
@@ -48,7 +48,7 @@ class TranscodeCmd:
         )
 
         if filters is not None:
-            cmd.extend(["-filter_complex", filters])
+            cmd.extend(["-filter_complex", f"{filters}[v]"])
 
         if self.params.media.audio is not None:
             cmd.extend([*self.params.to_audio_transcode_cmd()])
@@ -68,29 +68,3 @@ class TranscodeCmd:
         )
 
         return cmd
-
-    def _build_filters(self) -> str | None:
-        """Construye los filtros de ffmpeg."""
-        output = self.params.media_output
-        if output is None:
-            raise MissingParameterError(name="media_output")
-
-        filters: list[str] = []
-
-        if self.params.crop_area is not None:
-            filters.append(self.params.to_crop_cmd())
-
-        if self.params.scale_to is not None:
-            scale_filter = self.params.to_scale_cmd()
-            if scale_filter is not None:
-                filters.append(scale_filter)
-
-        if self.params.hflip or self.params.vflip:
-            filters.append(self.params.to_flip_cmd())
-
-        if self.params.rotate is not None:
-            filters.append(self.params.to_rotate_cmd())
-
-        if len(filters) > 0:
-            return f"{','.join(filters)}[v]"
-        return None

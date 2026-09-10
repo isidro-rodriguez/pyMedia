@@ -15,8 +15,8 @@ class FlipMixin:
         vflip: Invierte la imagen verticalmente, intercambiando arriba y abajo.
     """
 
-    hflip: bool
-    vflip: bool
+    hflip: bool = False
+    vflip: bool = False
 
     def to_flip_cmd(self) -> str:
         """Devuelve el filtro listo para consumo de ffmpeg."""

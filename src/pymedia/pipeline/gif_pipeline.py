@@ -34,10 +34,7 @@ class GifPipeline(BasePipeline[GifParameters]):
         """Valida y parsea los argumentos en parámetros procesados."""
         params = GifParameters(
             overwrite=overwrite,
-            scale_mode=scale_mode,
             fps=fps,
-            hflip=hflip,
-            vflip=vflip,
         )
 
         params.create_media_input(
@@ -50,18 +47,15 @@ class GifPipeline(BasePipeline[GifParameters]):
             extension=self.config.default_containers.animated_image,
         )
 
-        params.create_crop(
-            crop_str=crop,
-        )
-
-        params.create_scale(
+        params.create_filters(
             logger=self.logger,
-            scale_upscale=scale_upscale,
+            crop=crop,
             scale_to=scale_to,
-        )
-
-        params.create_rotate(
+            scale_upscale=scale_upscale,
+            scale_mode=scale_mode,
             rotate=rotate,
+            hflip=hflip,
+            vflip=vflip,
         )
 
         params.create_timestamp_start_end(
