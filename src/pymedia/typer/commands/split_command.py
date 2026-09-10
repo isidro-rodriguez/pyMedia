@@ -52,7 +52,4 @@ def split(
         media_output=media_output,
         overwrite=overwrite,
     )
-    counter = len(pipeline.params.timestamp_at) + 1
-    if not pipeline.resolve_overwrite(counter=counter):
-        return
     pipeline.process_cmd()

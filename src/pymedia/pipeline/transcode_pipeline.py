@@ -90,6 +90,10 @@ class TranscodePipeline(BasePipeline[TranscodeParameters]):
         """Construye el comando ffmpeg y ejecuta la transcodificación del contenedor."""
         if self.params.media is None:
             raise MissingParameterError(name="media")
+        if self.params.media_output is None:
+            raise MissingParameterError(name="media_output")
+
+        self.resolve_overwrite(output_list=[self.params.media_output])
 
         cmd = TranscodeCmd(params=self.params, config=self.config).create()
 

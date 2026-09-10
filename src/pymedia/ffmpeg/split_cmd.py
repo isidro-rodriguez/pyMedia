@@ -49,8 +49,6 @@ class SplitCmd:
                 "segment",
                 "-segment_times",
                 times_str,
-                "-segment_start_number",
-                "1",
                 "-reset_timestamps",
                 "1",
                 "-progress",

@@ -69,6 +69,10 @@ class GifPipeline(BasePipeline[GifParameters]):
         """Construye el comando ffmpeg y ejecuta la generación del GIF."""
         if self.params.media is None:
             raise MissingParameterError(name="media")
+        if self.params.animated_output is None:
+            raise MissingParameterError(name="animated_output")
+
+        self.resolve_overwrite(output_list=[self.params.animated_output])
 
         cmd = GifCmd(params=self.params).create()
 

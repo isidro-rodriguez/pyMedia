@@ -84,8 +84,6 @@ def add(
         subtitles_hearing_impaired=hearing_impaired,
         subtitles_visual_impaired=visual_impaired,
     )
-    if not pipeline.resolve_overwrite():
-        return
     pipeline.process_cmd()
 
 
@@ -126,8 +124,6 @@ def delete(
         overwrite=overwrite,
         subtitles_mode=SubtitlesMode.DELETE,
     )
-    if not pipeline.resolve_overwrite():
-        return
     pipeline.process_cmd()
 
 
@@ -186,8 +182,6 @@ def edit(
         subtitles_hearing_impaired=hearing_impaired,
         subtitles_visual_impaired=visual_impaired,
     )
-    if not pipeline.resolve_overwrite():
-        return
     pipeline.process_cmd()
 
 
@@ -228,6 +222,4 @@ def extract(
         overwrite=overwrite,
         subtitles_mode=SubtitlesMode.EXTRACT,
     )
-    if not pipeline.resolve_overwrite():
-        return
     pipeline.process_cmd()

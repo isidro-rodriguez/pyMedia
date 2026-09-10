@@ -27,7 +27,7 @@ from pymedia.typer.options import (
     TimestampEndGifOption,
     TimestampStartGifOption,
 )
-from pymedia.types import OverwriteMode, ScaleMode
+from pymedia.types import OverwriteMode, ScaleMode, ThumbnailsMode
 
 thumb_typer = typer.Typer()
 
@@ -77,6 +77,7 @@ def frames(
     pipeline = ThumbPipeline(debug=debug)
     pipeline.process_parameters(
         media_input=media_input,
+        thumbnails_mode=ThumbnailsMode.FRAMES,
         output=output,
         overwrite=overwrite,
         timestamp_at=timestamp_at,
@@ -88,8 +89,6 @@ def frames(
         hflip=hflip,
         vflip=vflip,
     )
-    if not pipeline.resolve_overwrite():
-        return
     pipeline.process_cmd()
 
 
@@ -143,6 +142,7 @@ def interval(
     pipeline = ThumbPipeline(debug=debug)
     pipeline.process_parameters(
         media_input=media_input,
+        thumbnails_mode=ThumbnailsMode.INTERVAL,
         output=output,
         overwrite=overwrite,
         every=every,
@@ -156,13 +156,8 @@ def interval(
         hflip=hflip,
         vflip=vflip,
     )
-    if not pipeline.resolve_overwrite():
-        return
     pipeline.process_cmd()
 
-
-if __name__ == "__main__":
-    thumb_typer()
 
 # =============================================================================
 #  Subcomando SCENE
@@ -214,6 +209,7 @@ def scene(
     pipeline = ThumbPipeline(debug=debug)
     pipeline.process_parameters(
         media_input=media_input,
+        thumbnails_mode=ThumbnailsMode.SCENE,
         output=output,
         overwrite=overwrite,
         scene=scene,
@@ -227,6 +223,8 @@ def scene(
         hflip=hflip,
         vflip=vflip,
     )
-    if not pipeline.resolve_overwrite():
-        return
     pipeline.process_cmd()
+
+
+if __name__ == "__main__":
+    thumb_typer()

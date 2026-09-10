@@ -59,6 +59,4 @@ def sheet(
             overwrite=overwrite,
             preset_sheet=preset_sheet,
         )
-        if not pipeline.resolve_overwrite():
-            continue
         pipeline.process_cmd()

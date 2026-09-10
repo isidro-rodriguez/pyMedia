@@ -113,29 +113,33 @@ class SubtitlesPipeline(BasePipeline[SubtitlesParameters]):
         """Construye el comando ffmpeg y ejecuta la manipulación de subtítulos."""
         if self.params.media is None:
             raise MissingParameterError(name="media")
+        if self.params.media_output is None:
+            raise MissingParameterError(name="media_output")
 
-        cmd = SubtitlesCmd(params=self.params).create()
+        sub_cmd = SubtitlesCmd(params=self.params)
+        match self.params.subtitles_mode:
+            case SubtitlesMode.ADD:
+                cmd = sub_cmd.create_add_subtitles_cmd()
+                self.resolve_overwrite(output_list=[self.params.media_output])
+                description = _("Adding subtitles")
+                success = _("Subtitles added successfully: %(output)s")
+            case SubtitlesMode.DELETE:
+                cmd = sub_cmd.create_delete_subtitles_cmd()
+                self.resolve_overwrite(output_list=[self.params.media_output])
+                description = _("Deleting subtitles")
+                success = _("Subtitles deleted successfully: %(output)s")
+            case SubtitlesMode.EDIT:
+                cmd = sub_cmd.create_edit_subtitles_cmd()
+                self.resolve_overwrite(output_list=[self.params.media_output])
+                description = _("Editing subtitles metadata")
+                success = _("Subtitles metadata edited successfully: %(output)s")
+            case SubtitlesMode.EXTRACT:
+                cmd, output_list = sub_cmd.create_extract_subtitles_cmd()
+                self.resolve_overwrite(output_list=output_list)
+                description = _("Extracting subtitles")
+                success = _("Subtitles extracted successfully: %(output)s")
 
         self.logger.debug(_("FFmpeg command: %(cmd)s"), cmd=cmd)
-
-        description, success = {
-            SubtitlesMode.ADD: (
-                _("Adding subtitles"),
-                _("Subtitles added successfully: %(output)s"),
-            ),
-            SubtitlesMode.DELETE: (
-                _("Deleting subtitles"),
-                _("Subtitles deleted successfully: %(output)s"),
-            ),
-            SubtitlesMode.EDIT: (
-                _("Editing subtitles metadata"),
-                _("Subtitles metadata edited successfully: %(output)s"),
-            ),
-            SubtitlesMode.EXTRACT: (
-                _("Extracting subtitles"),
-                _("Subtitles extracted successfully: %(output)s"),
-            ),
-        }[self.params.subtitles_mode]
 
         self.run_ffmpeg(cmd=cmd, description=description)
 

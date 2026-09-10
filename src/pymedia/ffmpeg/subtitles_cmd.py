@@ -1,11 +1,13 @@
 """Composición de comandos ffmpeg para la familia de subtítulos."""
 
+from pathlib import Path
+
 from pymedia.errors import (
     MissingParameterError,
 )
 from pymedia.locales import _  # noqa
 from pymedia.models.parameters import SubtitlesParameters
-from pymedia.types import OverwriteMode, SubtitlesMode
+from pymedia.types import OverwriteMode
 
 
 class SubtitlesCmd:
@@ -19,19 +21,7 @@ class SubtitlesCmd:
         """
         self.params = params
 
-    def create(self) -> list[str]:
-        """Elige el generador ffmpeg dependiendo del subcomando ejecutado."""
-        match self.params.subtitles_mode:
-            case SubtitlesMode.ADD:
-                return self._create_add_subtitles_cmd()
-            case SubtitlesMode.DELETE:
-                return self._create_delete_subtitles_cmd()
-            case SubtitlesMode.EDIT:
-                return self._create_edit_subtitles_cmd()
-            case SubtitlesMode.EXTRACT:
-                return self._create_extract_subtitles_cmd()
-
-    def _create_add_subtitles_cmd(self) -> list[str]:
+    def create_add_subtitles_cmd(self) -> list[str]:
         """Compone el comando de ffmpeg para insertar subtítulos en contenedores."""
         subtitles = self.params.subtitles
         if self.params.media is None:
@@ -79,7 +69,7 @@ class SubtitlesCmd:
 
         return cmd
 
-    def _create_delete_subtitles_cmd(self) -> list[str]:
+    def create_delete_subtitles_cmd(self) -> list[str]:
         """Compone el comando de ffmpeg para eliminar subtítulos en contenedores."""
 
         def _build_streams_list() -> list[str]:
@@ -122,7 +112,7 @@ class SubtitlesCmd:
 
         return cmd
 
-    def _create_edit_subtitles_cmd(self) -> list[str]:
+    def create_edit_subtitles_cmd(self) -> list[str]:
         """Compone el comando de ffmpeg para editar subtítulos en contenedores."""
         if self.params.media is None:
             raise MissingParameterError(name="media")
@@ -152,7 +142,7 @@ class SubtitlesCmd:
 
         return cmd
 
-    def _create_extract_subtitles_cmd(self) -> list[str]:
+    def create_extract_subtitles_cmd(self) -> tuple[list[str], list[Path]]:
         """Compone el comando de ffmpeg para extraer subtítulos en contenedores."""
 
         def _build_streams_list() -> list[str]:
@@ -172,11 +162,17 @@ class SubtitlesCmd:
             for stream in self.params.stream_tracks:
                 str_list.append("-map")
                 str_list.append(f"0:s:{stream}")
-                str_list.append(output.with_stem(f"{output.stem}_{stream}"))
+                final_output = output.with_stem(
+                    f"{output.stem}_subtitles_track_{stream}"
+                )
+                str_list.append(final_output)
+                output_list.append(final_output)
             return str_list
 
         if self.params.media is None:
             raise MissingParameterError(name="media")
+
+        output_list: list[Path] = []
 
         cmd = ["ffmpeg"]
 
@@ -191,4 +187,4 @@ class SubtitlesCmd:
             ]
         )
 
-        return cmd
+        return cmd, output_list

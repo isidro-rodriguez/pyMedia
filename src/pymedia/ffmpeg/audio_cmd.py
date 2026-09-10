@@ -1,11 +1,13 @@
 """Composición de comandos ffmpeg para la familia de audio."""
 
+from pathlib import Path
+
 from pymedia.errors import (
     MissingParameterError,
 )
 from pymedia.locales import _  # noqa
 from pymedia.models.parameters import AudioParameters
-from pymedia.types import AudioMode, OverwriteMode
+from pymedia.types import OverwriteMode
 
 
 class AudioCmd:
@@ -19,19 +21,7 @@ class AudioCmd:
         """
         self.params = params
 
-    def create(self) -> list[str]:
-        """Elige el generador ffmpeg dependiendo del subcomando ejecutado."""
-        match self.params.audio_mode:
-            case AudioMode.ADD:
-                return self._create_add_audio_cmd()
-            case AudioMode.DELETE:
-                return self._create_delete_audio_cmd()
-            case AudioMode.EDIT:
-                return self._create_edit_audio_cmd()
-            case AudioMode.EXTRACT:
-                return self._create_extract_audio_cmd()
-
-    def _create_add_audio_cmd(self) -> list[str]:
+    def create_add_audio_cmd(self) -> list[str]:
         """Compone el comando de ffmpeg para insertar audio en contenedores."""
         audio = self.params.audio
         if self.params.media is None:
@@ -79,7 +69,7 @@ class AudioCmd:
 
         return cmd
 
-    def _create_delete_audio_cmd(self) -> list[str]:
+    def create_delete_audio_cmd(self) -> list[str]:
         """Compone el comando de ffmpeg para eliminar audio en contenedores."""
 
         def _build_streams_list() -> list[str]:
@@ -122,7 +112,7 @@ class AudioCmd:
 
         return cmd
 
-    def _create_edit_audio_cmd(self) -> list[str]:
+    def create_edit_audio_cmd(self) -> list[str]:
         """Compone el comando de ffmpeg para editar audio en contenedores."""
         if self.params.media is None:
             raise MissingParameterError(name="media")
@@ -152,7 +142,7 @@ class AudioCmd:
 
         return cmd
 
-    def _create_extract_audio_cmd(self) -> list[str]:
+    def create_extract_audio_cmd(self) -> tuple[list[str], list[Path]]:
         """Compone el comando de ffmpeg para extraer audio en contenedores."""
 
         def _build_streams_list() -> list[str]:
@@ -172,12 +162,14 @@ class AudioCmd:
             for stream in self.params.stream_tracks:
                 str_list.append("-map")
                 str_list.append(f"0:a:{stream}")
-                str_list.append(output.with_stem(f"{output.stem}_{stream}"))
+                final_output = output.with_stem(f"{output.stem}_audio_track_{stream}")
+                str_list.append(final_output)
+                output_list.append(final_output)
             return str_list
 
         if self.params.media is None:
             raise MissingParameterError(name="media")
-
+        output_list: list[Path] = []
         cmd = ["ffmpeg"]
 
         if self.params.overwrite == OverwriteMode.YES:
@@ -191,4 +183,4 @@ class AudioCmd:
             ]
         )
 
-        return cmd
+        return cmd, output_list

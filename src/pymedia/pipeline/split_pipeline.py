@@ -51,6 +51,8 @@ class SplitPipeline(BasePipeline[SplitParameters]):
         if self.params.media is None:
             raise MissingParameterError(name="media")
 
+        self.resolve_overwrite(output_list=self._resolve_output_list())
+
         cmd = SplitCmd(params=self.params).create()
 
         self.logger.debug(_("FFmpeg command: %(cmd)s"), cmd=cmd)
@@ -65,3 +67,16 @@ class SplitPipeline(BasePipeline[SplitParameters]):
             msg=_("Container split successfully: %(output)s"),
             output=self.params.media_output,
         )
+
+    def _resolve_output_list(self) -> list[Path]:
+        if self.params.timestamp_at is None:
+            raise MissingParameterError(name="timestamp_at")
+
+        base_path = str(self.params.media_output)
+        path_list: list[Path] = []
+
+        for i in range(len(self.params.timestamp_at)):
+            base_path = base_path.replace("_%03d", f"_{i:3d}")
+            path_list.append(Path(base_path))
+
+        return path_list

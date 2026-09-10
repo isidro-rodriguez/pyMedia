@@ -90,6 +90,14 @@ class SubtitlesMode(Enum):
     EXTRACT = "extract"
 
 
+class ThumbnailsMode(Enum):
+    """Modos de comando de thumbnails."""
+
+    FRAMES = "frames"
+    INTERVAL = "interval"
+    SCENE = "scene"
+
+
 class VideoCodecMode(Enum):
     """Lista de códecs de vídeo modernos disponibles en esta aplicación."""
 

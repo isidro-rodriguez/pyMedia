@@ -84,6 +84,4 @@ def gif(
         hflip=hflip,
         vflip=vflip,
     )
-    if not pipeline.resolve_overwrite():
-        return
     pipeline.process_cmd()

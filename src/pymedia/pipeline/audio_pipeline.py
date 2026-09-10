@@ -113,29 +113,33 @@ class AudioPipeline(BasePipeline[AudioParameters]):
         """Construye el comando ffmpeg y ejecuta la manipulación de audio."""
         if self.params.media is None:
             raise MissingParameterError(name="media")
+        if self.params.media_output is None:
+            raise MissingParameterError(name="media_output")
 
-        cmd = AudioCmd(params=self.params).create()
+        audio_cmd = AudioCmd(params=self.params)
+        match self.params.audio_mode:
+            case AudioMode.ADD:
+                cmd = audio_cmd.create_add_audio_cmd()
+                self.resolve_overwrite(output_list=[self.params.media_output])
+                description = _("Adding audio")
+                success = _("Audio added successfully: %(output)s")
+            case AudioMode.DELETE:
+                cmd = audio_cmd.create_delete_audio_cmd()
+                self.resolve_overwrite(output_list=[self.params.media_output])
+                description = _("Deleting audio")
+                success = _("Audio deleted successfully: %(output)s")
+            case AudioMode.EDIT:
+                cmd = audio_cmd.create_edit_audio_cmd()
+                self.resolve_overwrite(output_list=[self.params.media_output])
+                description = _("Editing audio metadata")
+                success = _("Audio metadata edited successfully: %(output)s")
+            case AudioMode.EXTRACT:
+                cmd, output_list = audio_cmd.create_extract_audio_cmd()
+                self.resolve_overwrite(output_list=output_list)
+                description = _("Extracting audio")
+                success = _("Audio extracted successfully: %(output)s")
 
         self.logger.debug(_("FFmpeg command: %(cmd)s"), cmd=cmd)
-
-        description, success = {
-            AudioMode.ADD: (
-                _("Adding audio"),
-                _("Audio added successfully: %(output)s"),
-            ),
-            AudioMode.DELETE: (
-                _("Deleting audio"),
-                _("Audio deleted successfully: %(output)s"),
-            ),
-            AudioMode.EDIT: (
-                _("Editing audio metadata"),
-                _("Audio metadata edited successfully: %(output)s"),
-            ),
-            AudioMode.EXTRACT: (
-                _("Extracting audio"),
-                _("Audio extracted successfully: %(output)s"),
-            ),
-        }[self.params.audio_mode]
 
         self.run_ffmpeg(cmd=cmd, description=description)
 

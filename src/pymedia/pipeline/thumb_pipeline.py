@@ -1,18 +1,21 @@
 """Pipeline para la familia de subcomandos de capturas de imágenes."""
 
+import math
+import re
+from datetime import timedelta
 from pathlib import Path
+
+import typer
 
 from pymedia.errors import (
     CommandGenerationError,
-    ExclusiveOptionsError,
     MissingParameterError,
-    MissingRequiredOptionError,
 )
 from pymedia.ffmpeg.thumb_cmd import ThumbCmd
 from pymedia.locales import _  # noqa
 from pymedia.models.parameters import ThumbParameters
 from pymedia.pipeline.base_pipeline import BasePipeline
-from pymedia.types import OverwriteMode, RotateMode, ScaleMode
+from pymedia.types import OverwriteMode, RotateMode, ScaleMode, ThumbnailsMode
 
 
 class ThumbPipeline(BasePipeline[ThumbParameters]):
@@ -21,6 +24,7 @@ class ThumbPipeline(BasePipeline[ThumbParameters]):
     def process_parameters(
         self,
         media_input: Path,
+        thumbnails_mode: ThumbnailsMode,
         output: Path | None = None,
         overwrite: OverwriteMode = OverwriteMode.ASK,
         every: int | None = None,
@@ -57,6 +61,7 @@ class ThumbPipeline(BasePipeline[ThumbParameters]):
         """
         params = ThumbParameters(
             overwrite=overwrite,
+            thumbnails_mode=thumbnails_mode,
         )
 
         params.create_media_input(
@@ -105,19 +110,115 @@ class ThumbPipeline(BasePipeline[ThumbParameters]):
         if self.params.media is None:
             raise MissingParameterError(name="media")
 
-        if self.params.timestamp_at is not None:
-            for timestamp in self.params.timestamp_at:
-                cmd = ThumbCmd(params=self.params).create(timestamp=timestamp)
-                self._run_cmd(cmd=cmd)
-        else:
-            cmd = ThumbCmd(params=self.params).create()
-            self._run_cmd(cmd=cmd)
+        thumb_cmd = ThumbCmd(params=self.params)
+        match self.params.thumbnails_mode:
+            case ThumbnailsMode.FRAMES:
+                if self.params.timestamp_at is None:
+                    raise MissingParameterError(name="timestamp_at")
+                for timestamp in self.params.timestamp_at:
+                    cmd = thumb_cmd.create_frames_cmd(timestamp=timestamp)
+                    self.resolve_overwrite([self._frames_output_path(timestamp)])
+                    self._run_cmd(cmd=cmd)
+            case ThumbnailsMode.INTERVAL:
+                cmd = thumb_cmd.create_interval_cmd()
+                output_list = self._resolve_interval_output_list(self.params)
+                skip = False
+                if self.params.overwrite == OverwriteMode.ASK:
+                    skip = not self._resolve_overwrite_list(output_list)
+                if not skip:
+                    self._run_cmd(cmd=cmd)
+            case ThumbnailsMode.SCENE:
+                path = self.params.image_output
+                if path is None:
+                    raise MissingParameterError(name="image_output")
+                cmd = thumb_cmd.create_scene_cmd()
+                output_template = path.with_stem(f"{path.stem}_%03d")
+                skip = False
+                if self.params.overwrite == OverwriteMode.ASK:
+                    skip = not self._resolve_scene_overwrite(output_template)
+                if not skip:
+                    self._run_cmd(cmd=cmd)
+
+    def _frames_output_path(self, timestamp: timedelta) -> Path:
+        """Devuelve la ruta de salida para un fotograma en timestamp dado."""
+        if self.params.image_output is None:
+            raise MissingParameterError(name="image_output")
+        return self.params.image_output.with_stem(
+            f"{self.params.image_output.stem}_{str(timestamp).replace(':', '-')}"
+        )
+
+    @staticmethod
+    def _resolve_interval_output_list(params: ThumbParameters) -> list[Path]:
+        """Genera la lista de outputs esperados para modo INTERVAL."""
+        if params.image_output is None:
+            raise MissingParameterError(name="image_output")
+        if params.media is None or params.media.duration is None:
+            raise MissingParameterError(name="media.duration")
+
+        output: Path = params.image_output
+        output_list: list[Path] = []
+        duration_secs = params.media.duration.total_seconds()
+        frames = duration_secs * params.fps
+        counter = math.floor(frames)
+
+        for i in range(counter):
+            output_str = str(output)
+            output_str = output_str.replace("_%03d", f"_{i:3d}")
+            output_list.append(Path(output_str))
+        return output_list
+
+    def _resolve_overwrite_list(self, output_list: list[Path]) -> bool:
+        """Pregunta al usuario por cada archivo existente en la lista."""
+        for output in output_list:
+            if output.exists():
+                self.logger.warning(_(f"Output file already exists: {output.name}"))
+                if not typer.confirm(_("Overwrite?")):
+                    self.logger.warning(
+                        _("Process skipped since output file already exists.")
+                    )
+                    return False
+        return True
+
+    def _resolve_scene_overwrite(self, output_template: Path) -> bool:
+        """Detecta si existen archivos con patrón 'filename_XXX.ext'."""
+        # Construir regex a partir del template
+        stem = output_template.stem  # ej: thumbnails_%03d
+        suffix = output_template.suffix  # ej: .jpg
+        # Extraer la parte fija antes del %03d
+        match = re.match(r"^(.+)_%03d$", stem)
+        if not match:
+            # Si no hay patrón reconocible, se aborta para seguridad
+            self.logger.warning(_("Cannot resolve scene output pattern from template."))
+            return False
+        base_stem = match.group(1)  # ej: thumbnails
+
+        # Directorio donde se escribirán los archivos
+        directory = output_template.parent
+        pattern = re.compile(rf"^{re.escape(base_stem)}_(\d{3}){re.escape(suffix)}$")
+
+        # Buscar archivos existentes
+        existing_files = []
+        if directory.exists():
+            for item in directory.iterdir():
+                if item.is_file() and pattern.match(item.name):
+                    existing_files.append(item)
+
+        if existing_files:
+            self.logger.warning(
+                _("Found existing scene thumbnail files: %(files)s")
+                % {"files": ", ".join(f.name for f in existing_files)}
+            )
+            if not typer.confirm(_("Overwrite?")):
+                self.logger.warning(
+                    _("Process skipped since output files already exist.")
+                )
+                return False
+        return True
 
     def _run_cmd(self, cmd: list[str]) -> None:
         """Ejecuta un comando ffmpeg de miniaturas y registra el resultado."""
         if cmd is None:
             raise CommandGenerationError(name=self.command_name)
-
         if self.params.media is None:
             raise MissingParameterError(name="media")
 
@@ -133,24 +234,3 @@ class ThumbPipeline(BasePipeline[ThumbParameters]):
             msg=_("Thumbnail(s) generated successfully: %(output)s"),
             output=self.params.image_output,
         )
-
-    def _validate_options(self) -> None:
-        """Verifica las opciones requeridas y descarta combinaciones ambiguas."""
-        params = self.params
-        at, scene, fps = params.timestamp_at, params.scene, params.fps
-        start, end = params.timestamp_start, params.timestamp_end
-
-        # 1. Al menos uno debe existir (evaluando presencia explícita)
-        if not any(x is not None for x in (at, scene, fps)):
-            raise MissingRequiredOptionError(options=["--at", "--scene", "--every"])
-
-        # 2. Exclusividad mutua (máximo 1 de las opciones principales)
-        if sum(x is not None for x in (at, scene, fps)) > 1:
-            raise ExclusiveOptionsError(options=["--at", "--scene", "--every"])
-
-        # 3. Conflicto entre --at y rango (--timestamp_start / --timestamp_end)
-        if at is not None and any(x is not None for x in (start, end)):
-            raise ExclusiveOptionsError(
-                option="--at",
-                incompatible_with=["--timestamp_start", "--timestamp_end"],
-            )

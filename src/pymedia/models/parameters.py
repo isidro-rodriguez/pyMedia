@@ -23,7 +23,7 @@ from pymedia.models.mixins.timestamps_mixin import (
     TimestampStartEndMixin,
 )
 from pymedia.models.mixins.transcode_mixin import TranscodeMixin
-from pymedia.types import AudioMode, OverwriteMode, SubtitlesMode
+from pymedia.types import AudioMode, OverwriteMode, SubtitlesMode, ThumbnailsMode
 
 
 @dataclass(kw_only=True)
@@ -114,6 +114,8 @@ class ThumbParameters(
     FiltersMixin,
 ):
     """Parámetros validados y parseados para generar capturas de vídeo."""
+
+    thumbnails_mode: ThumbnailsMode
 
 
 @dataclass(kw_only=True)

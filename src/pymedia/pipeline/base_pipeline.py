@@ -8,7 +8,7 @@ de fichero único y de procesamiento por lotes.
 import queue
 import subprocess
 import threading
-from abc import ABC, abstractmethod
+from abc import ABC
 from datetime import timedelta
 from pathlib import Path
 from typing import TypeVar
@@ -53,60 +53,25 @@ class BasePipeline[ParamsT](ABC):
         self.config = Config.load()
         self.logger = Logger.create(debug=debug)
 
-    @abstractmethod
-    def process_cmd(self) -> None:
-        """Preparación y obtención del cmd de ffmpeg."""
-        pass
+    def resolve_overwrite(self, output_list: list[Path]) -> bool:
+        """Comprueba si algún fichero de salida existe y resuelve la sobrescritura."""
 
-    def resolve_overwrite(self, counter: int | None = None) -> bool:
-        """Comprueba si algún fichero de salida existe y resuelve la sobrescritura.
+        def conflict_ask(file: Path) -> bool:
+            self.logger.warning(_(f"Output file already exists: {file.name}"))
+            if typer.confirm(_("Overwrite?")):
+                self.params.overwrite = OverwriteMode.YES
+                return True
+            self.logger.warning(_("Process skipped since output file already exists."))
+            return False
 
-        Args:
-            counter: Número de salidas enumeradas que generará el comando
-                (p. ej. los segmentos de `split`). Implica un patrón de salida
-                con `_%03d` en el nombre, que se expande a `_001`, `_002`, ...
-                Si es `None`, se comprueba un único fichero de salida.
-
-        Returns:
-            True si se puede continuar (ningún fichero existe o se acepta
-            sobrescribir), False si el proceso debe omitirse.
-        """
-
-        def output_path() -> Path:
-            """Ruta absoluta del fichero de salida presente en los parámetros."""
-            output_fields = (
-                "animated_output",
-                "audio_output",
-                "image_output",
-                "media_output",
-                "subtitles_output",
-                "video_output",
-            )
-            for field_name in output_fields:
-                path = getattr(self.params, field_name, None)
-                if isinstance(path, Path):
-                    return path
-            raise InvalidParameterError(msg=_("Command has no output file to process."))
-
-        def output_paths() -> list[Path]:
-            """Rutas de salida a comprobar, expandiendo `_%03d` si hay contador."""
-            if counter is None:
-                return [output_path()]
-            path = output_path()
-            stem = path.stem.removesuffix("%03d")
-            return [path.with_stem(f"{stem}{i:03d}") for i in range(1, counter + 1)]
-
-        if self.params.overwrite != OverwriteMode.ASK:
+        if self.params.overwrite == OverwriteMode.ASK:
             return True
 
-        if not any(path.exists() for path in output_paths()):
-            return True
-
-        if typer.confirm(_("Output file already exists. Overwrite?")):
-            self.params.overwrite = OverwriteMode.YES
-            return True
-        self.logger.warning(_("Process skipped since output file already exists."))
-        return False
+        for output in output_list:
+            if output.exists():
+                if not conflict_ask(file=output):
+                    return False
+        return True
 
     def run_ffmpeg(
         self,

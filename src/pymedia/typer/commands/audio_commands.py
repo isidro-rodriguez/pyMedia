@@ -84,8 +84,6 @@ def add(
         audio_hearing_impaired=hearing_impaired,
         audio_commentary=commentary,
     )
-    if not pipeline.resolve_overwrite():
-        return
     pipeline.process_cmd()
 
 
@@ -126,8 +124,6 @@ def delete(
         overwrite=overwrite,
         audio_mode=AudioMode.DELETE,
     )
-    if not pipeline.resolve_overwrite():
-        return
     pipeline.process_cmd()
 
 
@@ -186,8 +182,6 @@ def edit(
         audio_hearing_impaired=hearing_impaired,
         audio_commentary=commentary,
     )
-    if not pipeline.resolve_overwrite():
-        return
     pipeline.process_cmd()
 
 
@@ -228,6 +222,4 @@ def extract(
         overwrite=overwrite,
         audio_mode=AudioMode.EXTRACT,
     )
-    if not pipeline.resolve_overwrite():
-        return
     pipeline.process_cmd()
