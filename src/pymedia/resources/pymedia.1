@@ -1,6 +1,6 @@
-.TH PYMEDIA 1 "August 2026" "pyMedia" "General Commands Manual"
+.TH PYMEDIA 1 "November 2026" "pyMedia" "General Commands Manual"
 .SH NAME
-pymedia - command-line media processing tool based on FFmpeg
+pymedia \- command-line media processing tool based on FFmpeg
 .SH SYNOPSIS
 .B pymedia
 .RI [ OPTIONS ]
@@ -13,166 +13,361 @@ is a command-line tool for processing audio and video media using
 and
 .BR ffprobe (1).
 
-It provides higher-level commands for common media-processing operations
-while handling input validation, media information, output files, and
-output-name conflicts.
-
+It provides higher-level commands for common media-processing operations:
+metadata inspection, thumbnail sheets, container joining, splitting and
+remuxing, profile-based transcoding, audio and subtitles track editing and
+animated image generation. It also handles input validation, output-path
+resolution and output-name conflicts, and shows a progress bar for long
+operations.
 .SH COMMANDS
+.SS Analysis
 .TP
-.B encode
-Transcode or transcode media using a configured media-processing pipeline.
+.B info
+Show the metadata of a media file (codecs, streams, size, duration).
 
 .TP
-.B gif
-Create an animated GIF from video input.
-
+.B sheet
+Generate a thumbnail-grid sheet with a media-info header. Select the layout
+with
+.B --preset
+.I fhd
+/
+.I hd
+/
+.I web
+(default:
+.BR hd ).
+.SS Video
 .TP
-.B concat
-Concatenate multiple media files into a single output.
-
+.B join
+Concatenate two or more video files into a single media container. The output
+file is required.
+.TP
+.B remux
+Change the container and metadata without transcoding.
+.B --fast-start
+moves the index to the beginning of the file (MP4 output only),
+.B --genpts
+regenerates broken timestamps and
+.B --sort-tracks
+orders the stream tracks by type and language.
 .TP
 .B split
-Split media into multiple segments according to specified split points.
-
+Split a media file into segments at the timestamps given with
+.B --at
+(comma-separated,
+.I hh:mm:ss
+). Segments are written as
+.I name_000.ext
+,
+.I name_001.ext
+and so on.
+.TP
+.B transcode
+Transcode the video track and/or selected audio tracks
+.RB ( --video ,
+.B --audio
+.I int,int,...
+) using a profile selected with
+.B --preset
+.I fast
+/
+.I even
+/
+.I slow
+and applying the requested filters. At least one transcoding option or filter
+is required.
+.SS Audio
+.TP
+.B add-audio
+Add an audio track to a media file. The language is set with
+.B --language
+.I code
+(ISO 639-2).
+.TP
+.B delete-audio
+Delete audio tracks. Without
+.B --tracks
+(comma-separated indices) all audio tracks are removed.
+.TP
+.B edit-audio
+Edit the metadata of an audio track selected with
+.B --track
+.I int
+using
+.BR --language ,
+.BR --title ,
+.BR --default ,
+.BR --forced ,
+.BR --commentary
+or
+.BR --hearing-impaired .
+.TP
+.B extract-audio
+Extract audio tracks to standalone audio files. Without
+.B --tracks
+all audio tracks are extracted.
+.SS Subtitles
+.TP
+.B add-subs
+Add a subtitles track (SRT, ASS, SSA) to a media file. The language is set
+with
+.B --language
+.I code
+(ISO 639-2).
+.TP
+.B delete-subs
+Delete subtitles tracks. Without
+.B --tracks
+(comma-separated indices) all subtitles are removed.
+.TP
+.B edit-subs
+Edit the metadata of a subtitles track selected with
+.B --track
+.I int
+using
+.BR --language ,
+.BR --title ,
+.BR --default ,
+.BR --forced ,
+.BR --hearing-impaired
+or
+.BR --visual-impaired .
+.TP
+.B extract-subs
+Extract subtitles tracks to standalone files. Without
+.B --tracks
+all subtitles are extracted.
+.SS Image
+.TP
+.B animated
+Convert a video clip into an animated image (GIF by default). The time range
+and frame rate are set with
+.BR --start ,
+.BR --end
+and
+.B --fps
+(4\-20).
+.TP
+.B frames
+Capture thumbnails at specific timestamps given with
+.B --at
+(comma-separated,
+.I hh:mm:ss
+).
+.TP
+.B interval
+Capture thumbnails at regular intervals given with
+.B --every
+.I seconds
+, optionally bounded by
+.BR --start
+and
+.BR --end .
+.TP
+.B scene
+Capture thumbnails at scene changes using a sensitivity threshold set with
+.B --scene
+(0.1\-0.5).
 .SH OPTIONS
+The common options are accepted by every command:
 .TP
-.BR -h ", " --help
-Display help information and exit.
-
+.B --help
+Display the localized help of the application or of the selected command and
+exit.
 .TP
-.B --version
-Display the installed pyMedia version and exit.
+.BR -o ", " --output
+.I path
+Output file path.
+.TP
+.BR -d ", " --directory
+.I dir
+Output directory for batch processing. Mutually exclusive with
+.BR --output .
+.TP
+.B --overwrite
+.I mode
+Policy when the output file already exists:
+.BR yes ,
+.BR no
+or
+.BR ask
+(default:
+.BR ask ).
+.TP
+.B --debug
+Enable DEBUG log level.
 
+Image and video commands also accept the following filters:
+.TP
+.B --crop
+.I WIDTH,HEIGHT,X,Y
+Crop to WIDTH x HEIGHT at the offset (X, Y) from the top-left corner.
+.TP
+.B --rotate
+.I 90
+/
+.I 180
+/
+.I 270
+Rotate the image by an orthogonal angle.
+.TP
+.B --size
+.I WIDTHxHEIGHT
+Target resolution in pixels.
+.TP
+.B --mode
+.I fit
+/
+.I stretch
+/
+.I cover
+Scaling policy (default:
+.BR fit ).
+.TP
+.B --upscale
+Allow upscaling beyond the source dimensions.
+.TP
+.BR --hflip ", " --vflip
+Flip the image horizontally or vertically.
 .SH OUTPUT CONFLICTS
-When an output file already exists, pyMedia can handle the conflict according
-to the selected output conflict mode.
-
+When an output file already exists, pyMedia resolves the conflict according
+to the selected overwrite mode:
 .TP
-.B fail
-Abort the operation and report the existing output as an error.
-
-.TP
-.B overwrite
+.B yes
 Replace the existing output file.
-
 .TP
-.B rename
-Generate a different output filename instead of replacing the existing file.
-
+.B no
+Skip the process when a destination already exists.
 .TP
-.B skip
-Do not generate the output when the destination already exists.
-
-The selected mode is translated into the appropriate FFmpeg behaviour where
-applicable.
-
+.B ask
+Prompt for confirmation before replacing an existing file. The thumbnail
+commands
+.RB ( frames ,
+.BR interval ,
+.BR scene )
+default to
+.BR yes ;
+the rest of the commands default to
+.BR ask .
 .SH INPUTS
 Commands operate on media files supported by the underlying FFmpeg
-installation.
-
-pyMedia uses
+installation. pyMedia uses
 .BR ffprobe (1)
-to inspect media and obtain information required by processing operations.
-
+to inspect media and obtain the information required by processing
+operations.
 .SH OUTPUTS
-Output files are generated by FFmpeg.
-
-Output paths may be affected by the configured output conflict mode when a
-destination already exists.
-
+Output files are generated by FFmpeg. When no output path is provided, a
+default name is derived from the input file using the default container of
+the media type (see CONFIGURATION). Output paths may be affected by the
+configured overwrite mode when a destination already exists.
 .SH EXAMPLES
 .TP
-.B pymedia encode input.mp4 -o output.mp4
-Transcode a media file to an output file.
-
+.B pymedia info input.mp4
+Show the metadata of a media file.
 .TP
-.B pymedia gif input.mp4 -o output.gif
-Create an animated GIF from a video.
-
+.B pymedia remux input.mp4 -o output.mkv
+Change the container without transcoding.
 .TP
-.B pymedia concat first.mp4 second.mp4 -o output.mp4
-Concatenate multiple media files.
-
+.B pymedia join part1.mp4 part2.mp4 -o movie.mp4
+Concatenate two media files.
 .TP
-.B pymedia split input.mp4 ...
-Split a media file into multiple segments.
-
+.B pymedia split input.mp4 --at 10:05,40:30
+Split a media file into three segments.
+.TP
+.B pymedia transcode source.mp4 --preset slow --video --audio 1
+Transcode the video track and audio track 1 using the "slow" profile.
+.TP
+.B pymedia add-audio input.mp4 audio.m4a --language eng
+Add an English audio track.
+.TP
+.B pymedia add-subs input.mp4 subs_es.srt --language spa --default
+Add Spanish subtitles as the default track.
+.TP
+.B pymedia animated input.mp4 --start 00:00:05 --end 00:00:12
+Create an animated image from a time range.
+.TP
+.B pymedia frames input.mp4 --at 00:01:30,00:05:15
+Capture thumbnails at two timestamps.
+.TP
+.B pymedia interval input.mp4 --every 5
+Capture a thumbnail every five seconds.
 .SH CONFIGURATION
 pyMedia stores persistent application configuration in the user's
-configuration directory.
-
-On Linux, the default configuration location is:
+configuration directory. On Linux the default location is:
 
 .nf
 ~/.config/pymedia/config.toml
 .fi
 
-Application-specific persistent resources may be stored under:
+The file is created on first run from the bundled defaults and is read on
+each invocation. Main settings:
 
-.nf
-~/.local/share/pymedia/
-.fi
-
-Runtime state and logs may be stored under:
-
-.nf
-~/.local/state/pymedia/
-.fi
-
+.TP
+.B [app] language
+Interface language:
+.BR system ,
+.BR spanish
+or
+.BR english .
+.TP
+.B [app] stall_timeout
+Seconds (30\-600) after which a stalled ffmpeg process is killed. Default: 60.
+.TP
+.B [default_containers]
+Default output extensions per media type: animated image (.gif), audio track
+(.m4a), image (.jpg), media (.mp4) and subtitles (.srt).
+.TP
+.B [transcode]
+Transcode profiles (
+.BR fast ,
+.BR even ,
+.BR slow ) defining the video and audio codecs, the video CRF and preset, and
+the audio bit rate.
 .SH FILES
 .TP
 .I ~/.config/pymedia/config.toml
-User configuration.
-
+User configuration, created on first run from the bundled defaults.
 .TP
-.I ~/.local/share/pymedia/
-Application resources.
-
-.TP
-.I ~/.local/state/pymedia/
-Application state and logs.
-
+.I ~/.config/pymedia/logging.log
+Application log with timestamps, levels and messages.
 .SH ENVIRONMENT
-pyMedia relies on FFmpeg and FFprobe being available to the application.
+.TP
+.B PYMEDIA_LOCALEDIR
+Optional directory containing the gettext catalogs
+.RB ( \fIlang\fP /LC_MESSAGES/pymedia.mo ),
+overrideable for frozen builds.
 
-The exact executable resolution mechanism depends on the installation and
-runtime environment.
-
+pyMedia relies on
+.BR ffmpeg (1)
+and
+.BR ffprobe (1)
+being available to the application. The exact executable resolution mechanism
+depends on the installation and runtime environment.
 .SH DEPENDENCIES
 .TP
 .BR ffmpeg (1)
 Media processing backend.
-
 .TP
 .BR ffprobe (1)
 Media inspection and metadata extraction backend.
-
 .SH EXIT STATUS
 .TP
 .B 0
 The operation completed successfully.
-
 .TP
 .B non-zero
-The operation failed.
-
-Errors may result from invalid input, incompatible media, an existing output
-file according to the selected conflict mode, an FFmpeg execution failure,
-or another processing error.
-
+The operation failed. Errors may result from invalid input, incompatible
+media, an existing output file according to the overwrite mode, an FFmpeg
+execution failure (including stall timeouts) or another processing error.
 .SH NOTES
 pyMedia is a higher-level interface to FFmpeg. It does not replace FFmpeg's
-full command-line interface.
-
-For operations requiring functionality not exposed by pyMedia, use FFmpeg
-directly.
-
+full command-line interface. For operations requiring functionality not
+exposed by pyMedia, use FFmpeg directly.
 .SH SEE ALSO
 .BR ffmpeg (1),
 .BR ffprobe (1)
-
 .SH AUTHORS
-pyMedia contributors.
-
+pyMedia contributors. Project: https://github.com/isidro-rodriguez/pyMedia
 .SH COPYRIGHT
 See the project distribution for licensing information.
