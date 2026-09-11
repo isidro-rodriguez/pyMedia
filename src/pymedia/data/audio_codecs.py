@@ -47,6 +47,12 @@ _AUDIO_CODECS: tuple[AudioCodecData, ...] = (
         remux_containers=(".ac3", ".m2ts", ".mka", ".mkv", ".ts"),
         bit_rates=("192k", "224k", "384k", "448k", "640k"),
     ),
+    AudioCodecData(
+        name="adpcm_ms",
+        library="adpcm_ms",
+        containers=(".avi", ".wav", ".asf", ".mkv"),
+        remux_containers=(".avi", ".wav", ".asf", ".mkv"),
+    ),
     # Lossless: FFmpeg no requiere ni acepta el flag -b:a.
     AudioCodecData(
         name="alac",

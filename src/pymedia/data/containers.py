@@ -109,7 +109,7 @@ _CONTAINERS: tuple[ContainerData, ...] = (
             "utvideo",
             "vc1",
         ),
-        audio_codecs=("mp1", "mp2", "pcm_s16le"),
+        audio_codecs=("adpcm_ms", "mp1", "mp2", "pcm_s16le"),
     ),
     ContainerData(
         name="awb",

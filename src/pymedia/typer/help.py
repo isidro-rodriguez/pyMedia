@@ -7,7 +7,6 @@ modo que respetan el idioma activo.
 
 from pymedia.locales import _  # noqa
 
-
 AUDIO_ADD_HELP = _(
     """\
 Add an audio track to a media file.
@@ -19,7 +18,6 @@ Add an audio track to a media file.
     > pymedia add-audio input.mp4 spa_audio.aac --language spa --title "Comentario director" --default --commentary
 """  # noqa
 )
-
 
 AUDIO_DELETE_HELP = _(
     """\
@@ -33,7 +31,6 @@ Delete audio tracks from a media file.
 """  # noqa
 )
 
-
 AUDIO_EDIT_HELP = _(
     """\
 Edit audio track metadata from a media file.
@@ -45,7 +42,6 @@ Edit audio track metadata from a media file.
     > pymedia edit-audio input.mp4 --track 1 --language spa --title "Comentario director" --default --commentary
 """  # noqa
 )
-
 
 AUDIO_EXTRACT_HELP = _(
     """\
@@ -60,7 +56,6 @@ Extract audio tracks from a media file.
     > pymedia extract-audio input.mp4 --tracks 1,2 -o input-audio.aac
 """  # noqa
 )
-
 
 ANIMATED_HELP = _(
     """\
@@ -77,6 +72,7 @@ Generates an animated image from the specified video.
     > pymedia gif input.mp4 --output output.gif
 """
 )
+
 INFO_HELP = _(
     """\
 Shows information about a video.
@@ -87,6 +83,15 @@ Shows information about a video.
 """
 )
 
+JOIN_HELP = _(
+    """\
+Concatenate different videos into a single media container.
+
+[bold]Example[/bold]:
+  Join videos in the specified order:
+    > pymedia join input1.mp4 input2.mp4 input3.mp4 -o output.mp4
+"""
+)
 
 MAIN_HELP = _(
     """\
@@ -100,7 +105,6 @@ Easy CLI for ffmpeg.
 """
 )
 
-
 SHEET_HELP = _(
     """\
 Generates a thumbnail grid sheet with media info header.
@@ -112,7 +116,6 @@ Generates a thumbnail grid sheet with media info header.
     > pymedia sheet input.mp4 --preset fhd -o vcs.webp
 """
 )
-
 
 SPLIT_HELP = _(
     """\
@@ -138,7 +141,6 @@ Add subtitles to a media file.
 """  # noqa
 )
 
-
 SUBTITLES_DELETE_HELP = _(
     """\
 Delete subtitles from a media file.
@@ -151,7 +153,6 @@ Delete subtitles from a media file.
 """  # noqa
 )
 
-
 SUBTITLES_EDIT_HELP = _(
     """\
 Edit subtitles metadata from a media file.
@@ -163,7 +164,6 @@ Edit subtitles metadata from a media file.
     > pymedia edit-subs input.mp4 --track 2 --language spa --title "Español (forced)" --default --forced
 """  # noqa
 )
-
 
 SUBTITLES_EXTRACT_HELP = _(
     """\
@@ -193,7 +193,6 @@ Captures thumbnails at the specified timestamps.
 """
 )
 
-
 THUMB_INTERVAL_HELP = _(
     """\
 Captures thumbnails at regular intervals of the video.
@@ -207,7 +206,6 @@ Captures thumbnails at regular intervals of the video.
     > pymedia interval input.mp4 --every 5 --output thumb.jpg
 """
 )
-
 
 THUMB_SCENE_HELP = _(
     """\

@@ -63,6 +63,13 @@ msgstr "Falta el argumento: %(name)s"
 msgid "Missing parameter: %(name)s"
 msgstr "Falta el parámetro: %(name)s"
 
+#: pymedia/errors.py:212
+#, python-format
+msgid "Incompatible media files for join output %(output)s. Incompatibilities: %(incompatible_list)s"
+msgstr ""
+"Archivos incompatibles para unir en %(output)s. "
+"Incompatibilidades: %(incompatible_list)s"
+
 #: pymedia/errors.py:209
 #, python-format
 msgid "Missing property: %(name)s"

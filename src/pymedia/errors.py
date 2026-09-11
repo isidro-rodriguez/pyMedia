@@ -6,6 +6,7 @@ automáticamente el mensaje en el log.
 """
 
 import logging
+from pathlib import Path
 
 from pymedia.locales import _  # noqa
 from pymedia.logger import Logger
@@ -226,6 +227,30 @@ class MissingRequiredOptionError(PyMediaError):
 
 class OptionError(PyMediaError):
     """Error de uso de una opción de CLI."""
+
+
+class IncompatibleMediaError(PyMediaError):
+    """Error cuando los medios de una lista no son compatibles entre sí."""
+
+    def __init__(self, output: Path, incompatible_list: list[str]) -> None:
+        """Inicializa el error con el archivo de salida y la lista de
+        incompatibilidades.
+
+        Args:
+            output: Ruta del archivo de salida solicitado.
+            incompatible_list: Lista de descripciones de incompatibilidad
+                formateadas como texto.
+        """
+        super().__init__(
+            _(
+                "Incompatible media files for join output %(output)s. "
+                "Incompatibilities: %(incompatible_list)s"
+            )
+            % {
+                "output": output,
+                "incompatible_list": "\n".join(incompatible_list),
+            }
+        )
 
 
 class PermissionDeniedError(PyMediaError):

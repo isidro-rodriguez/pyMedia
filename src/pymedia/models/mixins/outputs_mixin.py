@@ -224,6 +224,7 @@ class MediaOutputMixin(_HasMedia):
         affix: str | None = None,
         output: Path | None = None,
         output_directory: Path | None = None,
+        media_list: list[Media] | None = None,
         remux: bool = False,
     ) -> None:
         """Procesa y asigna la ruta del fichero contenedor multimedia de salida.
@@ -233,22 +234,25 @@ class MediaOutputMixin(_HasMedia):
             affix: Sufijo a añadir al nombre del fichero de salida.
             output: Ruta absoluta del fichero de salida procesado.
             output_directory: Directorio de salida para lotes de varios ficheros.
+            media_list: Lista de contenedores multimedia para validar output.
             remux: Indica si es una operación de remux.
         """
         if output_directory is not None:
             self.output_directory = _process_output_directory(output_directory)
 
+        media = self.media if media_list is None else media_list[0]
+
         output = _process_output(
-            media=self.media,
+            media=media,
             affix=affix,
             extension=extension,
             output=output,
             output_directory=self.output_directory,
         )
 
-        if self.media.video is None:
+        if media.video is None:
             raise MissingPropertyError(name="video")
-        if self.media.video.codec is None:
+        if media.video.codec is None:
             raise MissingPropertyError(name="video codec")
 
         if output.suffix not in SUPPORTED.CONTAINERS:
@@ -258,25 +262,25 @@ class MediaOutputMixin(_HasMedia):
                 supported=", ".join(SUPPORTED.CONTAINERS),
             )
 
-        if output.suffix not in VIDEO_CODECS[self.media.video.codec].containers:
+        if output.suffix not in VIDEO_CODECS[media.video.codec].containers:
             raise InvalidContainerError(
                 extension=output.suffix,
-                codec=VIDEO_CODECS[self.media.video.codec].name,
-                supported=", ".join(VIDEO_CODECS[self.media.video.codec].containers),
+                codec=VIDEO_CODECS[media.video.codec].name,
+                supported=", ".join(VIDEO_CODECS[media.video.codec].containers),
             )
 
         if remux:
-            codec = self.media.video.codec
+            codec = media.video.codec
             _validate_remux(
                 suffix=output.suffix,
-                source_suffix=self.media.path.suffix,
+                source_suffix=media.path.suffix,
                 codec_name=codec,
                 containers=VIDEO_CODECS[codec].containers,
                 remux_containers=VIDEO_CODECS[codec].remux_containers,
             )
 
-        if self.media.audio is not None:
-            for audio_track in self.media.audio:
+        if media.audio is not None:
+            for audio_track in media.audio:
                 if audio_track.codec is None:
                     raise MissingPropertyError(name="audio codec")
                 if output.suffix not in AUDIO_CODECS[audio_track.codec].containers:
@@ -289,7 +293,7 @@ class MediaOutputMixin(_HasMedia):
                     codec = audio_track.codec
                     _validate_remux(
                         suffix=output.suffix,
-                        source_suffix=self.media.path.suffix,
+                        source_suffix=media.path.suffix,
                         codec_name=codec,
                         containers=AUDIO_CODECS[codec].containers,
                         remux_containers=AUDIO_CODECS[codec].remux_containers,

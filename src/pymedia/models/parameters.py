@@ -7,7 +7,7 @@ from pymedia.models.mixins.audio_mixin import AudioInputMixin
 from pymedia.models.mixins.filters_mixin import FiltersMixin
 from pymedia.models.mixins.fps_mixin import FpsGifMixin, FpsImageMixin
 from pymedia.models.mixins.image_mixin import ImageQualityMixin, SceneMixin
-from pymedia.models.mixins.media_mixin import MediaInputMixin
+from pymedia.models.mixins.media_mixin import MediaInputMixin, MediaListMixin
 from pymedia.models.mixins.outputs_mixin import (
     AnimatedOutputMixin,
     AudioOutputMixin,
@@ -55,6 +55,15 @@ class GifParameters(
     FpsGifMixin,
     FiltersMixin,
     TimestampStartEndMixin,
+):
+    """Parámetros utilizados por el comando GIF."""
+
+
+@dataclass(kw_only=True)
+class JoinParameters(
+    _BaseParameters,
+    MediaListMixin,
+    MediaOutputMixin,
 ):
     """Parámetros utilizados por el comando GIF."""
 
