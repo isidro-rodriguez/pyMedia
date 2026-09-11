@@ -57,7 +57,8 @@ class SheetPipeline(BasePipeline[SheetParameters]):
         if self.params.image_output is None:
             raise MissingPropertyError(name="image_output")
 
-        self.resolve_overwrite(output_list=[self.params.image_output])
+        if not self.resolve_overwrite(output_list=[self.params.image_output]):
+            return
 
         with tempfile.TemporaryDirectory() as tmp_dir:
             tile_tmp = Path(tmp_dir) / "tile_tmp.jpg"

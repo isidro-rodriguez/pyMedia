@@ -125,6 +125,24 @@ EveryOption = Annotated[
     ),
 ]
 
+FastStartOption = Annotated[
+    bool,
+    typer.Option(
+        default="--fast-start",
+        rich_help_panel=_("Command options"),
+        help=_("Move metadata index at the start, quickening web streaming."),
+    ),
+]
+
+RegeneratePtsOption = Annotated[
+    bool,
+    typer.Option(
+        default="--genpts",
+        rich_help_panel=_("Command options"),
+        help=_("Regenerates broken timestamps."),
+    ),
+]
+
 PresetSheetOption = Annotated[
     PresetsSheetMode,
     typer.Option(
@@ -151,6 +169,15 @@ SceneOption = Annotated[
         max=0.5,
         rich_help_panel=_("Command options"),
         help=_("Scene-change sensitivity for thumbnail detection."),
+    ),
+]
+
+SortTracksOption = Annotated[
+    bool,
+    typer.Option(
+        default="--sort-tracks",
+        rich_help_panel=_("Command options"),
+        help=_("Sort stream track by type and alphabetically by language."),
     ),
 ]
 

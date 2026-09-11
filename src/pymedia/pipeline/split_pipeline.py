@@ -51,7 +51,8 @@ class SplitPipeline(BasePipeline[SplitParameters]):
         if self.params.media is None:
             raise MissingParameterError(name="media")
 
-        self.resolve_overwrite(output_list=self._resolve_output_list())
+        if not self.resolve_overwrite(output_list=self._resolve_output_list()):
+            return
 
         cmd = SplitCmd(params=self.params).create()
 

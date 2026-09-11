@@ -72,7 +72,8 @@ class GifPipeline(BasePipeline[GifParameters]):
         if self.params.animated_output is None:
             raise MissingParameterError(name="animated_output")
 
-        self.resolve_overwrite(output_list=[self.params.animated_output])
+        if not self.resolve_overwrite(output_list=[self.params.animated_output]):
+            return
 
         cmd = GifCmd(params=self.params).create()
 

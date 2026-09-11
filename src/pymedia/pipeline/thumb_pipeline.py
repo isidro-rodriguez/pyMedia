@@ -117,7 +117,10 @@ class ThumbPipeline(BasePipeline[ThumbParameters]):
                     raise MissingParameterError(name="timestamp_at")
                 for timestamp in self.params.timestamp_at:
                     cmd = thumb_cmd.create_frames_cmd(timestamp=timestamp)
-                    self.resolve_overwrite([self._frames_output_path(timestamp)])
+                    if not self.resolve_overwrite(
+                        [self._frames_output_path(timestamp)]
+                    ):
+                        continue
                     self._run_cmd(cmd=cmd)
             case ThumbnailsMode.INTERVAL:
                 cmd = thumb_cmd.create_interval_cmd()

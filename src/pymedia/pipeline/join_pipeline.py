@@ -49,7 +49,8 @@ class JoinPipeline(BasePipeline[JoinParameters]):
         if self.params.media_output is None:
             raise MissingParameterError(name="media_output")
 
-        self.resolve_overwrite(output_list=[self.params.media_output])
+        if not self.resolve_overwrite(output_list=[self.params.media_output]):
+            return
 
         self._check_media_compatibility()
 

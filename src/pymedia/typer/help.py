@@ -105,6 +105,22 @@ Easy CLI for ffmpeg.
 """
 )
 
+REMUX_HELP = _(
+    """\
+Change container and metadata without transcoding.
+
+[bold]Examples[/bold]:
+  Change video container:
+    > pymedia remux input.mp4 -o output.mkv
+  Fix faststart moving moov atom at the start 
+    > pymedia remux input.mp4 --faststart -o output.mkv 
+  Fix broken timestamps
+    > pymedia remux input.mp4 --getpts -o output.mkv
+  Sort stream tracks
+    > pymedia remux input.mp4 --sort-tracks -o output.mp4
+"""
+)
+
 SHEET_HELP = _(
     """\
 Generates a thumbnail grid sheet with media info header.

@@ -55,22 +55,21 @@ class BasePipeline[ParamsT](ABC):
 
     def resolve_overwrite(self, output_list: list[Path]) -> bool:
         """Comprueba si algún fichero de salida existe y resuelve la sobrescritura."""
-
-        def conflict_ask(file: Path) -> bool:
-            self.logger.warning(_(f"Output file already exists: {file.name}"))
-            if typer.confirm(_("Overwrite?")):
-                self.params.overwrite = OverwriteMode.YES
-                return True
-            self.logger.warning(_("Process skipped since output file already exists."))
-            return False
-
-        if self.params.overwrite == OverwriteMode.ASK:
+        if self.params.overwrite == OverwriteMode.YES:
             return True
 
+        process_skip_msg = _("Process skipped since output file already exists.")
         for output in output_list:
             if output.exists():
-                if not conflict_ask(file=output):
+                if self.params.overwrite == OverwriteMode.NO:
+                    self.logger.warning(process_skip_msg)
                     return False
+                self.logger.warning(_(f"Output file already exists: {output.name}"))
+                if typer.confirm(_("Overwrite?")):
+                    self.params.overwrite = OverwriteMode.YES
+                    return True
+                self.logger.warning(process_skip_msg)
+                return False
         return True
 
     def run_ffmpeg(

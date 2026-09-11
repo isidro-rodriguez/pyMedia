@@ -120,22 +120,26 @@ class AudioPipeline(BasePipeline[AudioParameters]):
         match self.params.audio_mode:
             case AudioMode.ADD:
                 cmd = audio_cmd.create_add_audio_cmd()
-                self.resolve_overwrite(output_list=[self.params.media_output])
+                if not self.resolve_overwrite(output_list=[self.params.media_output]):
+                    return
                 description = _("Adding audio")
                 success = _("Audio added successfully: %(output)s")
             case AudioMode.DELETE:
                 cmd = audio_cmd.create_delete_audio_cmd()
-                self.resolve_overwrite(output_list=[self.params.media_output])
+                if not self.resolve_overwrite(output_list=[self.params.media_output]):
+                    return
                 description = _("Deleting audio")
                 success = _("Audio deleted successfully: %(output)s")
             case AudioMode.EDIT:
                 cmd = audio_cmd.create_edit_audio_cmd()
-                self.resolve_overwrite(output_list=[self.params.media_output])
+                if not self.resolve_overwrite(output_list=[self.params.media_output]):
+                    return
                 description = _("Editing audio metadata")
                 success = _("Audio metadata edited successfully: %(output)s")
             case AudioMode.EXTRACT:
                 cmd, output_list = audio_cmd.create_extract_audio_cmd()
-                self.resolve_overwrite(output_list=output_list)
+                if not self.resolve_overwrite(output_list=output_list):
+                    return
                 description = _("Extracting audio")
                 success = _("Audio extracted successfully: %(output)s")
 

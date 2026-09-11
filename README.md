@@ -12,9 +12,22 @@ procesamiento de vídeos.
 - Windows: `winget install ffmpeg` o <https://ffmpeg.org/download.html>
 - Debian/Ubuntu: `sudo apt install ffmpeg`
 
+## Comandos de pyMedia
+
+| Comando     | Acción                                                         |
+| ----------- | -------------------------------------------------------------- |
+| `info`      | Muestra metadatos del archivo multimedia.                      |
+| `sheet`     | Genera una imagen con múltiples fotogramas en cuadrícula.      |
+| `join`      | Une varios vídeos consecutivamente.                            |
+| `remux`     | Cambia contenedor y metadatos sin transcodificar.              |
+| `split`     | Divide un vídeo en varios archivos.                            |
+| `transcode` | Transcodifica el contenedor cambiando códecs de vídeo o audio. |
+| `audio`     | Familia de comandos de modificación de pistas de audio.        |
+| `subs`      | Familia de comandos de modificación de pistas de subtítulos.   |
+| `thumb`     | Familia de comandos de capturas de imágenes.                   |
+| `animated`  | Convierte un fragmento de vídeo en imagen animada.             |
+
 ## Configuración
-
-
 
 ### Compatibilidad entre códecs y contenedores de vídeo
 

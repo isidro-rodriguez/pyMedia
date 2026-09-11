@@ -15,6 +15,11 @@ from pymedia.models.mixins.outputs_mixin import (
     MediaOutputMixin,
     SubtitlesOutputMixin,
 )
+from pymedia.models.mixins.remux_mixin import (
+    FastStartMixin,
+    RegeneratePtsMixin,
+    SortTracksMixin,
+)
 from pymedia.models.mixins.sheet_presets_mixin import SheetPresetsMixin
 from pymedia.models.mixins.streams_mixin import StreamsMixin
 from pymedia.models.mixins.subtitles_mixin import SubtitlesInputMixin
@@ -73,6 +78,18 @@ class InfoParameters(
     MediaInputMixin,
 ):
     """Parámetros utilizados por el comando Info."""
+
+
+@dataclass(kw_only=True)
+class RemuxParameters(
+    _BaseParameters,
+    MediaInputMixin,
+    MediaOutputMixin,
+    FastStartMixin,
+    RegeneratePtsMixin,
+    SortTracksMixin,
+):
+    """Parámetros utilizados por el comando Sheet."""
 
 
 @dataclass(kw_only=True)

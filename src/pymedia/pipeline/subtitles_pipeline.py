@@ -120,22 +120,26 @@ class SubtitlesPipeline(BasePipeline[SubtitlesParameters]):
         match self.params.subtitles_mode:
             case SubtitlesMode.ADD:
                 cmd = sub_cmd.create_add_subtitles_cmd()
-                self.resolve_overwrite(output_list=[self.params.media_output])
+                if not self.resolve_overwrite(output_list=[self.params.media_output]):
+                    return
                 description = _("Adding subtitles")
                 success = _("Subtitles added successfully: %(output)s")
             case SubtitlesMode.DELETE:
                 cmd = sub_cmd.create_delete_subtitles_cmd()
-                self.resolve_overwrite(output_list=[self.params.media_output])
+                if not self.resolve_overwrite(output_list=[self.params.media_output]):
+                    return
                 description = _("Deleting subtitles")
                 success = _("Subtitles deleted successfully: %(output)s")
             case SubtitlesMode.EDIT:
                 cmd = sub_cmd.create_edit_subtitles_cmd()
-                self.resolve_overwrite(output_list=[self.params.media_output])
+                if not self.resolve_overwrite(output_list=[self.params.media_output]):
+                    return
                 description = _("Editing subtitles metadata")
                 success = _("Subtitles metadata edited successfully: %(output)s")
             case SubtitlesMode.EXTRACT:
                 cmd, output_list = sub_cmd.create_extract_subtitles_cmd()
-                self.resolve_overwrite(output_list=output_list)
+                if not self.resolve_overwrite(output_list=output_list):
+                    return
                 description = _("Extracting subtitles")
                 success = _("Subtitles extracted successfully: %(output)s")
 

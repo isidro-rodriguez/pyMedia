@@ -28,7 +28,7 @@ class PyMediaError(Exception):
         Args:
             msg: Mensaje de error ya formateado.
         """
-        self.msg = msg
+        self.msg = f"\n{msg}"
         super().__init__(self.msg)
         logger.error(self.msg)
 
@@ -63,28 +63,14 @@ class ConfigError(PyMediaError):
 class ExclusiveOptionsError(PyMediaError):
     """Excepción para opciones de CLI incompatibles entre sí."""
 
-    def __init__(
-        self,
-        options: list[str] | None = None,
-        option: str | None = None,
-        incompatible_with: list[str] | None = None,
-    ):
+    def __init__(self, options: list[str]):
         """Inicializa el error con las opciones en conflicto.
 
         Args:
-            options: Opciones mutuamente excluyentes, si el conflicto es
-                de exclusividad general.
-            option: Opción que entra en conflicto con otras.
-            incompatible_with: Opciones incompatibles con `option`.
+            options: Opciones mutuamente excluyentes.
         """
-        if options is not None:
-            opts_str = ", ".join(f"'{opt}'" for opt in options)
-            message = f"The following options are mutually exclusive: {opts_str}."
-        elif option is not None and incompatible_with is not None:
-            opts_str = ", ".join(f"'{opt}'" for opt in incompatible_with)
-            message = f"Option '{option}' cannot be used with: {opts_str}."
-        else:
-            message = "Incompatible command line options specified."
+        opts_str = ", ".join(f"'{opt}'" for opt in options)
+        message = f"The following options are mutually exclusive: {opts_str}."
 
         super().__init__(message)
 
@@ -233,18 +219,16 @@ class IncompatibleMediaError(PyMediaError):
     """Error cuando los medios de una lista no son compatibles entre sí."""
 
     def __init__(self, output: Path, incompatible_list: list[str]) -> None:
-        """Inicializa el error con el archivo de salida y la lista de
-        incompatibilidades.
+        """Inicializa el error con archivo de salida y lista de incompatibilidades.
 
         Args:
             output: Ruta del archivo de salida solicitado.
-            incompatible_list: Lista de descripciones de incompatibilidad
-                formateadas como texto.
+            incompatible_list: Lista de incompatibilidades formateadas en texto.
         """
         super().__init__(
             _(
-                "Incompatible media files for join output %(output)s. "
-                "Incompatibilities: %(incompatible_list)s"
+                "Incompatible media files for join output '%(output)s'.\n"
+                "Incompatibilities:\n%(incompatible_list)s"
             )
             % {
                 "output": output,
