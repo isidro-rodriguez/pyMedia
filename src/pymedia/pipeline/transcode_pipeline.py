@@ -1,4 +1,4 @@
-"""Subcomando `gif`: genera un GIF animado a partir de un vídeo."""
+"""Subcomando `transcode`: transcodifica un vídeo cambiando su códecs y compresión."""
 
 from pathlib import Path
 

@@ -7,12 +7,12 @@ from pymedia.errors import (
 )
 from pymedia.ffmpeg.gif_cmd import GifCmd
 from pymedia.locales import _  # noqa
-from pymedia.models.parameters import GifParameters
+from pymedia.models.parameters import AnimatedParameters
 from pymedia.pipeline.base_pipeline import BasePipeline
 from pymedia.types import OverwriteMode, RotateMode, ScaleMode
 
 
-class GifPipeline(BasePipeline[GifParameters]):
+class GifPipeline(BasePipeline[AnimatedParameters]):
     """Comando de CLI que genera un GIF animado desde el vídeo de entrada."""
 
     def process_parameters(
@@ -32,7 +32,7 @@ class GifPipeline(BasePipeline[GifParameters]):
         vflip: bool = False,
     ) -> None:
         """Valida y parsea los argumentos en parámetros procesados."""
-        params = GifParameters(
+        params = AnimatedParameters(
             overwrite=overwrite,
             fps=fps,
         )

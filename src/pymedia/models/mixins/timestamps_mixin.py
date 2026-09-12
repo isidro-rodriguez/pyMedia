@@ -32,7 +32,9 @@ class TimestampStartEndMixin(_TimestampsContext):
     timestamp_end: timedelta | None = None
 
     def create_timestamp_start_end(
-        self, timestamp_start: str | None, timestamp_end: str | None
+        self,
+        timestamp_start: str | None,
+        timestamp_end: str | None,
     ) -> None:
         """Crea el atributo de marca de tiempo indicando el punto inicial.
 
@@ -44,7 +46,6 @@ class TimestampStartEndMixin(_TimestampsContext):
             InvalidTimeFormatError: Si el formato de la marca no es válido.
             MissingPropertyError: Si no se pudo obtener la duración del vídeo.
             MissingParameterError: Si no se pudo obtener el parámetro.
-            TimeExceedsDurationError: Si marca de tiempo superior a la duración.
         """
         if timestamp_start is not None:
             self.timestamp_start = _process_time(

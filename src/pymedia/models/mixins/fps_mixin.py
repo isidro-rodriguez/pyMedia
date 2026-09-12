@@ -7,7 +7,7 @@ from pymedia.errors import MissingParameterError
 
 
 @dataclass(kw_only=True)
-class FpsGifMixin:
+class FpsAnimatedMixin:
     """Mixin para las imágenes por segundo de un Gif.
 
     Attributes:

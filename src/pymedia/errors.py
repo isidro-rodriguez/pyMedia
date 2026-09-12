@@ -76,7 +76,7 @@ class ExclusiveOptionsError(PyMediaError):
 
 
 class FfprobeError(PyMediaError):
-    """Errores relacionados con subtítulos."""
+    """Errores relacionados con ffprobe/obtención de metadatos."""
 
 
 class InvalidArgumentError(PyMediaError):

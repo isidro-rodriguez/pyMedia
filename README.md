@@ -65,23 +65,23 @@ $ pymedia --help
 $ pymedia <comando> --help     # ayuda detallada de cada comando
 ```
 
-| Comando      | Ejemplo                                                            |
-| ------------ | ------------------------------------------------------------------ |
-| `info`       | `pymedia info input.mp4`                                          |
-| `sheet`      | `pymedia sheet input.mp4 --preset fhd -o vcs.webp`                |
-| `join`       | `pymedia join part1.mp4 part2.mp4 -o movie.mp4`                   |
-| `remux`      | `pymedia remux input.mp4 -o output.mkv`                           |
-| `split`      | `pymedia split input.mp4 --at 10:05,40:30,1:20:00`                |
-| `transcode`  | `pymedia transcode source.mp4 --preset slow --video --audio 1`    |
-| `add-audio`  | `pymedia add-audio input.mp4 eng_audio.m4a --language eng`        |
-| `delete-audio`| `pymedia delete-audio input.mp4 --tracks 1,2`                    |
-| `extract-audio`| `pymedia extract-audio input.mp4 -o audio.m4a`                  |
-| `add-subs`   | `pymedia add-subs input.mp4 subs_es.srt --language spa --default` |
-| `extract-subs`| `pymedia extract-subs input.mp4 --tracks 3,5 -o subs.srt`        |
-| `animated`   | `pymedia animated input.mp4 --start 00:00:05 --end 00:00:12`      |
-| `thumb frames`| `pymedia frames input.mp4 --at 00:01:30,00:05:15`               |
-| `thumb interval`| `pymedia interval input.mp4 --every 5 --start 00:00:10`        |
-| `thumb scene`| `pymedia scene input.mp4 --scene 0.3`                            |
+| Comando          | Ejemplo                                                           |
+|------------------|-------------------------------------------------------------------|
+| `info`           | `pymedia info input.mp4`                                          |
+| `sheet`          | `pymedia sheet input.mp4 --preset fhd -o vcs.webp`                |
+| `join`           | `pymedia join part1.mp4 part2.mp4 -o movie.mp4`                   |
+| `remux`          | `pymedia remux input.mp4 -o output.mkv`                           |
+| `split`          | `pymedia split input.mp4 --at 10:05,40:30,1:20:00`                |
+| `transcode`      | `pymedia transcode source.mp4 --preset slow --video --audio 1`    |
+| `add-audio`      | `pymedia add-audio input.mp4 eng_audio.m4a --language eng`        |
+| `delete-audio`   | `pymedia delete-audio input.mp4 --tracks 1,2`                     |
+| `extract-audio`  | `pymedia extract-audio input.mp4 -o audio.m4a`                    |
+| `add-subs`       | `pymedia add-subs input.mp4 subs_es.srt --language spa --default` |
+| `extract-subs`   | `pymedia extract-subs input.mp4 --tracks 3,5 -o subs.srt`         |
+| `animated`       | `pymedia animated input.mp4 --start 00:00:05 --end 00:00:12`      |
+| `thumb frames`   | `pymedia frames input.mp4 --at 00:01:30,00:05:15`                 |
+| `thumb interval` | `pymedia interval input.mp4 --every 5 --start 00:00:10`           |
+| `thumb scene`    | `pymedia scene input.mp4 --scene 0.3`                             |
 
 ## Comandos
 
@@ -90,7 +90,7 @@ $ pymedia <comando> --help     # ayuda detallada de cada comando
 | Comando  | Acción                                                                 |
 | -------- | ---------------------------------------------------------------------- |
 | `info`   | Muestra los metadatos del fichero multimedia (códecs, pistas, tamaño…). |
-| `sheet`  | Genera una cuadrícula de fotogramas con cabecera de metadatos. Presets: `--preset fhd\|hd\|web`. |
+| `sheet`  | Genera una cuadrícula de fotogramas con cabecera de metadatos.  |
 
 ### Vídeo
 

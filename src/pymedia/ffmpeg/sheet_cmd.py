@@ -42,7 +42,6 @@ class SheetCmd:
                 comandos.
             MissingParameterError: Si falta algún parámetro requerido (preset,
                 media_input, output, pista de audio o subtítulo).
-            MissingMediaError: Si el objeto de metadatos del medio es None.
             MissingPropertyError: Si falta alguna propiedad técnica requerida
                 en el objeto media (duration, fps, size, video, codec, etc.).
         """
@@ -63,7 +62,6 @@ class SheetCmd:
                 comandos.
             MissingParameterError: Si falta algún parámetro requerido (preset,
                 media_input, output, pista de audio o subtítulo).
-            MissingMediaError: Si el objeto de metadatos del medio es None.
             MissingPropertyError: Si falta alguna propiedad técnica requerida
                 en el objeto media (duration, fps, size, video, codec, etc.).
         """
@@ -343,6 +341,8 @@ class SheetCmd:
 
         line_height = preset.fontsize + preset.line_gap
         header_height = preset.header_margin_top + line_height * len(lines)
+        fontfile = to_ffmpeg_path(preset.fontfile)
+        fontfile_quoted = f'"{fontfile}"' if "'" in fontfile else f"'{fontfile}'"
 
         filters = [
             f"pad=iw:ih+{header_height}:0:{header_height}:color={preset.background}"
@@ -350,7 +350,7 @@ class SheetCmd:
         for i, line in enumerate(lines):
             y = preset.header_margin_top + i * line_height
             filters.append(
-                f"drawtext=fontfile='{to_ffmpeg_path(preset.fontfile)}':"
+                f"drawtext=fontfile={fontfile_quoted}:"
                 f"text='{self._escape_drawtext(line)}':"
                 f"fontsize={preset.fontsize}:fontcolor={preset.text_color}:"
                 f"x={preset.header_margin_left}:y={y}"

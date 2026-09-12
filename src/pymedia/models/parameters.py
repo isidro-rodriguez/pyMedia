@@ -5,7 +5,7 @@ from dataclasses import dataclass
 
 from pymedia.models.mixins.audio_mixin import AudioInputMixin
 from pymedia.models.mixins.filters_mixin import FiltersMixin
-from pymedia.models.mixins.fps_mixin import FpsGifMixin, FpsImageMixin
+from pymedia.models.mixins.fps_mixin import FpsAnimatedMixin, FpsImageMixin
 from pymedia.models.mixins.image_mixin import ImageQualityMixin, SceneMixin
 from pymedia.models.mixins.media_mixin import MediaInputMixin, MediaListMixin
 from pymedia.models.mixins.outputs_mixin import (
@@ -47,21 +47,21 @@ class AudioParameters(
     AudioOutputMixin,
     StreamsMixin,
 ):
-    """Parámetros validados y parseados para la manipulación de pistas de audio."""
+    """Parámetros utilizados por la familia de comandos de audio."""
 
     audio_mode: AudioMode
 
 
 @dataclass(kw_only=True)
-class GifParameters(
+class AnimatedParameters(
     _BaseParameters,
     MediaInputMixin,
     AnimatedOutputMixin,
-    FpsGifMixin,
+    FpsAnimatedMixin,
     FiltersMixin,
     TimestampStartEndMixin,
 ):
-    """Parámetros utilizados por el comando GIF."""
+    """Parámetros utilizados por el comando Animated."""
 
 
 @dataclass(kw_only=True)
@@ -70,7 +70,7 @@ class JoinParameters(
     MediaListMixin,
     MediaOutputMixin,
 ):
-    """Parámetros utilizados por el comando GIF."""
+    """Parámetros utilizados por el comando Join."""
 
 
 @dataclass(kw_only=True)
@@ -89,7 +89,7 @@ class RemuxParameters(
     RegeneratePtsMixin,
     SortTracksMixin,
 ):
-    """Parámetros utilizados por el comando Sheet."""
+    """Parámetros utilizados por el comando Remux."""
 
 
 @dataclass(kw_only=True)
@@ -110,7 +110,7 @@ class SplitParameters(
     MediaOutputMixin,
     TimestampAtMixin,
 ):
-    """Parámetros validados y parseados para la división de contenedores."""
+    """Parámetros utilizados por el comando Split."""
 
 
 @dataclass(kw_only=True)
@@ -122,7 +122,7 @@ class SubtitlesParameters(
     SubtitlesOutputMixin,
     StreamsMixin,
 ):
-    """Parámetros validados y parseados para la manipulación de subtítulos."""
+    """Parámetros utilizados por la familia de comandos de subtítulos."""
 
     subtitles_mode: SubtitlesMode
 
@@ -139,7 +139,7 @@ class ThumbParameters(
     FpsImageMixin,
     FiltersMixin,
 ):
-    """Parámetros validados y parseados para generar capturas de vídeo."""
+    """Parámetros utilizados por la familia de comandos de imágenes."""
 
     thumbnails_mode: ThumbnailsMode
 
@@ -153,4 +153,4 @@ class TranscodeParameters(
     TranscodeMixin,
     FiltersMixin,
 ):
-    """Parámetros validados y parseados para la transcodificación de contenedores."""
+    """Parámetros utilizados por el comando Transcode."""

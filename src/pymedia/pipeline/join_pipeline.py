@@ -59,8 +59,13 @@ class JoinPipeline(BasePipeline[JoinParameters]):
 
             with list_txt.open(mode="w", encoding="utf-8", newline="\n") as file:
                 for media in self.params.media_list:
-                    path = str(media.path).replace("'", r"'\''")
-                    file.write(f"file '{path}'\n")
+                    raw_path = str(media.path)
+                    # Resolución de quoting potencialmente problemático.
+                    if "'" in raw_path:
+                        escaped_path = f'"{raw_path}"'
+                    else:
+                        escaped_path = f"'{raw_path}'"
+                    file.write(f"file {escaped_path}\n")
 
             cmd = JoinCmd(params=self.params).create(list_txt=list_txt)
 

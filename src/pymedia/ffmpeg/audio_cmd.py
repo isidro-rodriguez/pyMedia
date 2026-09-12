@@ -146,12 +146,7 @@ class AudioCmd:
         """Compone el comando de ffmpeg para extraer audio en contenedores."""
 
         def _build_streams_list() -> list[str]:
-            """Compone los mappings de las pistas de audio a extraer.
-
-            `stream_tracks` guarda índices locales de audio (a:N), no los
-            índices globales del contenedor, por lo que el selector ffmpeg usa
-            el especificador de tipo `a`.
-            """
+            """Compone los mappings de las pistas de audio a extraer."""
             if self.params.stream_tracks is None:
                 raise MissingParameterError(name="streams")
             if self.params.audio_output is None:
