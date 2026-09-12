@@ -1,19 +1,19 @@
-"""Subcomando `gif`: genera un GIF animado a partir de un vídeo."""
+"""Subcomando `animated`: genera una imagen animada a partir de un vídeo."""
 
 from pathlib import Path
 
 from pymedia.errors import (
     MissingParameterError,
 )
-from pymedia.ffmpeg.gif_cmd import GifCmd
+from pymedia.ffmpeg.animated_cmd import AnimatedCmd
 from pymedia.locales import _  # noqa
 from pymedia.models.parameters import AnimatedParameters
 from pymedia.pipeline.base_pipeline import BasePipeline
 from pymedia.types import OverwriteMode, RotateMode, ScaleMode
 
 
-class GifPipeline(BasePipeline[AnimatedParameters]):
-    """Comando de CLI que genera un GIF animado desde el vídeo de entrada."""
+class AnimatedPipeline(BasePipeline[AnimatedParameters]):
+    """Comando de CLI que genera una imagen animada desde el vídeo de entrada."""
 
     def process_parameters(
         self,
@@ -36,7 +36,7 @@ class GifPipeline(BasePipeline[AnimatedParameters]):
         Args:
             media_input: Ruta del fichero de vídeo a procesar.
             overwrite: Política ante conflicto de salida ya existente.
-            fps: Fotogramas por segundo del GIF generado.
+            fps: Fotogramas por segundo de la imagen animada generado.
             scale_mode: Política de escalado del vídeo o imagen.
             output: Ruta absoluta del fichero de salida procesado.
             timestamp_start: Marca de tiempo que indica el punto inicial.
@@ -82,7 +82,7 @@ class GifPipeline(BasePipeline[AnimatedParameters]):
         self.params = params
 
     def process_cmd(self) -> None:
-        """Construye el comando ffmpeg y ejecuta la generación del GIF.
+        """Construye el comando ffmpeg y ejecuta la generación de una imagen animada.
 
         Raises:
             MissingParameterError: Si no se obtuvo el medio o la salida animada.
@@ -95,17 +95,17 @@ class GifPipeline(BasePipeline[AnimatedParameters]):
         if not self.resolve_overwrite(output_list=[self.params.animated_output]):
             return
 
-        cmd = GifCmd(params=self.params).create()
+        cmd = AnimatedCmd(params=self.params).create()
 
         self.logger.debug(_("FFmpeg command: %(cmd)s"), cmd=cmd)
 
         self.run_ffmpeg(
             cmd=cmd,
-            description=_("Generating GIF"),
+            description=_("Generating animated image"),
             progress_time=self.params.get_range_time(),
         )
 
         self.logger.info(
-            msg=_("GIF generated successfully: %(output)s"),
+            msg=_("Animated image generated successfully: %(output)s"),
             output=self.params.animated_output,
         )

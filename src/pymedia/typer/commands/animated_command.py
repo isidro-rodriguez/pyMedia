@@ -2,7 +2,7 @@
 
 import typer
 
-from pymedia.pipeline.gif_pipeline import GifPipeline
+from pymedia.pipeline.animated_pipeline import AnimatedPipeline
 from pymedia.typer.help import ANIMATED_HELP
 from pymedia.typer.options import (
     CropOption,
@@ -23,16 +23,16 @@ from pymedia.typer.options import (
 )
 from pymedia.types import OverwriteMode, ScaleMode
 
-gif_typer = typer.Typer()
+animated_typer = typer.Typer()
 
 
-@gif_typer.command(
+@animated_typer.command(
     name="animated",
     help=ANIMATED_HELP,
     rich_help_panel="Image commands",
     no_args_is_help=True,
 )
-def gif(
+def animated(
     media_input: MediaInputArgument,
     output: OutputOption = None,
     overwrite: OverwriteOption = OverwriteMode.ASK,
@@ -57,7 +57,7 @@ def gif(
         overwrite: Política ante conflicto de salida ya existente.
         timestamp_start: Marca de tiempo que indica el punto inicial.
         timestamp_end: Marca de tiempo que indica el punto final.
-        fps: Imágenes por segundo del GIF.
+        fps: Imágenes por segundo de la imagen animada.
         crop: Área y coordenada de la zona a preservar de la imagen.
         rotate: Ángulo ortogonal con el que se va a rotar la imagen.
         scale_to: Dimensión objetivo en píxeles.
@@ -68,7 +68,7 @@ def gif(
         debug: Habilita el nivel de log DEBUG.
         help_: Helper para mostrar esta línea en distintos idiomas.
     """
-    pipeline = GifPipeline(debug=debug)
+    pipeline = AnimatedPipeline(debug=debug)
     pipeline.process_parameters(
         media_input=media_input,
         output=output,

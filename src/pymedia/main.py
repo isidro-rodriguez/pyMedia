@@ -16,8 +16,8 @@ locale_manager.set_language(locale_manager.detect_language())
 if sys.platform == "win32" and isinstance(sys.stdout, io.TextIOWrapper):
     sys.stdout.reconfigure(encoding="utf-8")
 
+from pymedia.typer.commands.animated_command import animated_typer
 from pymedia.typer.commands.audio_commands import audio_typer
-from pymedia.typer.commands.gif_command import gif_typer
 from pymedia.typer.commands.info_command import info_typer
 from pymedia.typer.commands.join_command import join_typer
 from pymedia.typer.commands.remux_command import remux_typer
@@ -37,7 +37,7 @@ app.add_typer(split_typer)
 app.add_typer(transcode_typer)
 app.add_typer(audio_typer)
 app.add_typer(subtitles_typer)
-app.add_typer(gif_typer)
+app.add_typer(animated_typer)
 app.add_typer(thumb_typer)
 
 

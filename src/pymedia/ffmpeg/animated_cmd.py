@@ -1,23 +1,23 @@
-"""Composición de comandos ffmpeg para el subcomando gif."""
+"""Composición de comandos ffmpeg para el subcomando `animated`."""
 
 from pymedia.errors import MissingParameterError
 from pymedia.models.parameters import AnimatedParameters
 from pymedia.types import OverwriteMode
 
 
-class GifCmd:
-    """Compone el comando de ffmpeg para generar animaciones en Gifs."""
+class AnimatedCmd:
+    """Compone el comando de ffmpeg para generar imágenes animadas."""
 
     def __init__(self, params: AnimatedParameters) -> None:
-        """Inicializa el generador con los parámetros validados del GIF.
+        """Inicializa el generador con los parámetros validados de animated.
 
         Args:
-            params: Parámetros procesados del subcomando gif.
+            params: Parámetros procesados del subcomando animated.
         """
         self.params = params
 
     def create(self) -> list[str]:
-        """Compone el comando de ffmpeg para generar animaciones en Gifs.
+        """Compone el comando de ffmpeg para generar imágenes animadas.
 
         Returns:
             Lista de str con el comando de ffmpeg.
@@ -57,7 +57,7 @@ class GifCmd:
         return cmd
 
     def _build_filters(self) -> str:
-        """Construye los filtros de ffmpeg para generar un Gif."""
+        """Construye los filtros de ffmpeg para generar una imagen animada."""
         output = self.params.animated_output
         if output is None:
             raise MissingParameterError(name="animated_output")
