@@ -41,6 +41,9 @@ def split(
         overwrite: Política ante conflicto de salida ya existente.
         debug: Habilita el nivel de log DEBUG.
         help_: Helper para mostrar esta línea en distintos idiomas.
+
+    Raises:
+        MissingArgumentError: Si no se indica la lista de marcas de tiempo.
     """
     if timestamp_at is None:
         raise MissingArgumentError(name="timestamp_at")

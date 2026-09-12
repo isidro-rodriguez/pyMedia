@@ -22,7 +22,16 @@ class AudioCmd:
         self.params = params
 
     def create_add_audio_cmd(self) -> list[str]:
-        """Compone el comando de ffmpeg para insertar audio en contenedores."""
+        """Compone el comando de ffmpeg para insertar audio en contenedores.
+
+        Returns:
+            Lista de cadenas con el comando ffmpeg listo para ejecutar.
+
+        Raises:
+            MissingParameterError: Si falta `media`, `media_output` o algún
+                campo requerido del modelo de audio (`codec`, `language`,
+                `path`, `track_index`, `title`).
+        """
         audio = self.params.audio
         if self.params.media is None:
             raise MissingParameterError(name="media")
@@ -70,7 +79,15 @@ class AudioCmd:
         return cmd
 
     def create_delete_audio_cmd(self) -> list[str]:
-        """Compone el comando de ffmpeg para eliminar audio en contenedores."""
+        """Compone el comando de ffmpeg para eliminar audio en contenedores.
+
+        Returns:
+            Lista de cadenas con el comando ffmpeg listo para ejecutar.
+
+        Raises:
+            MissingParameterError: Si falta `media`, `media_output` o el
+                listado de pistas `streams` a eliminar.
+        """
 
         def _build_streams_list() -> list[str]:
             """Compone los mappings negativos de las pistas de audio a eliminar.
@@ -113,7 +130,15 @@ class AudioCmd:
         return cmd
 
     def create_edit_audio_cmd(self) -> list[str]:
-        """Compone el comando de ffmpeg para editar audio en contenedores."""
+        """Compone el comando de ffmpeg para editar audio en contenedores.
+
+        Returns:
+            Lista de cadenas con el comando ffmpeg listo para ejecutar.
+
+        Raises:
+            MissingParameterError: Si falta `media`, `media_output` o el
+                modelo de audio a editar.
+        """
         if self.params.media is None:
             raise MissingParameterError(name="media")
         if self.params.media_output is None:
@@ -143,7 +168,16 @@ class AudioCmd:
         return cmd
 
     def create_extract_audio_cmd(self) -> tuple[list[str], list[Path]]:
-        """Compone el comando de ffmpeg para extraer audio en contenedores."""
+        """Compone el comando de ffmpeg para extraer audio en contenedores.
+
+        Returns:
+            Tupla con la lista de cadenas del comando ffmpeg y las rutas de
+            los ficheros de audio extraídos.
+
+        Raises:
+            MissingParameterError: Si falta `media`, el listado de pistas
+                `streams` o la ruta `audio_output`.
+        """
 
         def _build_streams_list() -> list[str]:
             """Compone los mappings de las pistas de audio a extraer."""

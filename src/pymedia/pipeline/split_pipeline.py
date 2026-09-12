@@ -22,7 +22,17 @@ class SplitPipeline(BasePipeline[SplitParameters]):
         timestamp_at: str,
         media_output: Path | None = None,
     ) -> None:
-        """Valida y parsea los argumentos en parámetros procesados."""
+        """Valida y parsea los argumentos en parámetros procesados.
+
+        Args:
+            media_input: Ruta del fichero de vídeo a procesar.
+            overwrite: Política ante conflicto de salida ya existente.
+            timestamp_at: Lista de marcas de tiempo para dividir el vídeo.
+            media_output: Ruta absoluta del fichero de salida procesado.
+
+        Raises:
+            MissingParameterError: Si la salida procesada no se pudo obtener.
+        """
         params = SplitParameters(
             overwrite=overwrite,
         )
@@ -47,7 +57,12 @@ class SplitPipeline(BasePipeline[SplitParameters]):
         self.params = params
 
     def process_cmd(self) -> None:
-        """Construye el comando ffmpeg y ejecuta la división de fichero multimedia."""
+        """Construye el comando ffmpeg y ejecuta la división de fichero multimedia.
+
+        Raises:
+            MissingParameterError: Si falta el medio o las rutas de salida
+                derivadas de las marcas de tiempo.
+        """
         if self.params.media is None:
             raise MissingParameterError(name="media")
 
@@ -70,6 +85,7 @@ class SplitPipeline(BasePipeline[SplitParameters]):
         )
 
     def _resolve_output_list(self) -> list[Path]:
+        """Resuelve las rutas numeradas de salida desde las marcas de tiempo."""
         if self.params.timestamp_at is None:
             raise MissingParameterError(name="timestamp_at")
 

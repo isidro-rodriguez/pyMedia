@@ -30,7 +30,28 @@ class AudioPipeline(BasePipeline[AudioParameters]):
         audio_stream_tracks: str | None = None,
         audio_output: Path | None = None,
     ) -> None:
-        """Valida y parsea los argumentos en parámetros procesados."""
+        """Valida y parsea los argumentos en parámetros procesados.
+
+        Args:
+            media_input: Ruta del fichero de vídeo a procesar.
+            overwrite: Política ante conflicto de salida ya existente.
+            audio_mode: Modo de manipulación de audio.
+            audio_input: Ruta del fichero de audio externo.
+            audio_language: Código ISO 639-2 del idioma de la pista.
+            media_output: Ruta absoluta del fichero de salida procesado.
+            audio_title: Título descriptivo de la pista.
+            audio_forced: Si es una pista forzada a mostrar.
+            audio_default: Si es la pista por defecto del vídeo.
+            audio_hearing_impaired: Si está adaptada a personas con problemas
+                auditivos.
+            audio_commentary: Si es una pista de comentarios.
+            audio_stream_tracks: Lista de índices de pistas en CSV.
+            audio_output: Ruta absoluta del fichero de audio extraído.
+
+        Raises:
+            MissingParameterError: Si falta la entrada o el listado de pistas
+                requerido según el modo.
+        """
         params = AudioParameters(
             overwrite=overwrite,
             audio_mode=audio_mode,
@@ -110,7 +131,11 @@ class AudioPipeline(BasePipeline[AudioParameters]):
         self.params = params
 
     def process_cmd(self) -> None:
-        """Construye el comando ffmpeg y ejecuta la manipulación de audio."""
+        """Construye el comando ffmpeg y ejecuta la manipulación de audio.
+
+        Raises:
+            MissingParameterError: Si falta el medio o la salida procesada.
+        """
         if self.params.media is None:
             raise MissingParameterError(name="media")
         if self.params.media_output is None:

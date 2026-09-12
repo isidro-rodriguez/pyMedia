@@ -27,7 +27,14 @@ class RotateMixin:
         self.rotate = rotate
 
     def to_rotate_cmd(self) -> str:
-        """Devuelve el filtro listo para consumo de ffmpeg."""
+        """Devuelve el filtro listo para consumo de ffmpeg.
+
+        Returns:
+            El filtro `transpose` correspondiente al ángulo de rotación.
+
+        Raises:
+            MissingParameterError: Si no se ha definido el ángulo `rotate`.
+        """
         if self.rotate is None:
             raise MissingParameterError(name="rotate")
         match self.rotate:

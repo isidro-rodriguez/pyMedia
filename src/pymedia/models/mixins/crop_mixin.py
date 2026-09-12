@@ -30,7 +30,9 @@ class CropMixin:
             crop_str: String con el valor de crop indicado por el usuario.
 
         Raises:
-            InvalidParameterError: Si el valor del parametro no es válido.
+            InvalidArgumentError: Si el formato del string de crop no es
+                válido.
+            InvalidParameterError: Si el valor del parámetro no es válido.
             MissingPropertyError: Si no se ha obtenido un parámetro importante.
         """
         if crop_str is None:
@@ -40,8 +42,11 @@ class CropMixin:
     def to_crop_cmd(self) -> str:
         """Devuelve el filtro listo para consumo de ffmpeg.
 
+        Returns:
+            El filtro `crop=W:H:X:Y` listo para ffmpeg.
+
         Raises:
-            MissingParameterError: Si no se ha obtenido un parámetro importante
+            MissingParameterError: Si no se ha obtenido un parámetro importante.
         """
         if self.crop_area is None:
             raise MissingParameterError(name="crop")

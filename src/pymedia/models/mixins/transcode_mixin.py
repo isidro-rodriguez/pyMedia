@@ -28,7 +28,12 @@ class TranscodeMixin(_TranscodeContext):
     transcode_video: bool
 
     def to_video_transcode_cmd(self) -> list[str]:
-        """Construye la secuencia de argumentos para la transcodificación de vídeo."""
+        """Construye la secuencia de argumentos para la transcodificación de vídeo.
+
+        Returns:
+            Argumentos `-c:v copy` si la transcodificación de vídeo está
+            desactivada, o los del perfil de transcodificación configurado.
+        """
         if not self.transcode_video:
             return ["-c:v", "copy"]
 
@@ -48,7 +53,15 @@ class TranscodeMixin(_TranscodeContext):
         return video_transcode
 
     def to_audio_transcode_cmd(self) -> list[str]:
-        """Construye la secuencia de argumentos para la transcodificación de audio."""
+        """Construye la secuencia de argumentos para la transcodificación de audio.
+
+        Returns:
+            Argumentos `-map` y `-c:a` para cada pista de audio, con `copy`
+            para las pistas fuera del listado a transcodificar.
+
+        Raises:
+            MissingParameterError: Si el medio no tiene pistas de audio.
+        """
         if self.media.audio is None:
             raise MissingParameterError(name="media.audio")
 

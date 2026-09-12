@@ -23,7 +23,13 @@ class JoinPipeline(BasePipeline[JoinParameters]):
         overwrite: OverwriteMode,
         media_output: Path | None = None,
     ) -> None:
-        """Valida y parsea los argumentos en parámetros procesados."""
+        """Valida y parsea los argumentos en parámetros procesados.
+
+        Args:
+            media_input_list: Lista de rutas de los ficheros de vídeo a unir.
+            overwrite: Política ante conflicto de salida ya existente.
+            media_output: Ruta absoluta del fichero de salida procesado.
+        """
         params = JoinParameters(
             overwrite=overwrite,
         )
@@ -43,7 +49,13 @@ class JoinPipeline(BasePipeline[JoinParameters]):
         self.params = params
 
     def process_cmd(self) -> None:
-        """Construye el comando ffmpeg y ejecuta la unión de los ficheros multimedia."""
+        """Construye el comando ffmpeg y ejecuta la unión de los ficheros multimedia.
+
+        Raises:
+            MissingParameterError: Si falta el listado o la salida del medio.
+            IncompatibleMediaError: Si algún medio de la lista no es
+                compatible con el primero.
+        """
         if self.params.media_list is None:
             raise MissingParameterError(name="media_list")
         if self.params.media_output is None:
@@ -82,12 +94,7 @@ class JoinPipeline(BasePipeline[JoinParameters]):
         )
 
     def _check_media_compatibility(self) -> None:
-        """Comprueba que todos los medios de la lista son compatibles con el primero.
-
-        Raises:
-            IncompatibleMediaError: Si alguno de los medios tiene propiedades
-                incompatibles con el primer medio de la lista.
-        """
+        """Comprueba que todos los medios de la lista son compatibles con el primero."""
         if self.params.media_output is None:
             raise MissingParameterError(name="media_output")
         if self.params.media_list is None or len(self.params.media_list) < 2:
@@ -97,6 +104,7 @@ class JoinPipeline(BasePipeline[JoinParameters]):
         incompatible: list[tuple[Path, list[str]]] = []
 
         def _prop(label: str, first_value: object, value: object) -> str | None:
+            """Devuelve el texto de diferencia si los valores no coinciden."""
             if first_value != value:
                 return f"{label} differs: {first_value} vs {value}"
             return None

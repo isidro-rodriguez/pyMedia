@@ -19,7 +19,14 @@ class FlipMixin:
     vflip: bool = False
 
     def to_flip_cmd(self) -> str:
-        """Devuelve el filtro listo para consumo de ffmpeg."""
+        """Devuelve el filtro listo para consumo de ffmpeg.
+
+        Returns:
+            El filtro `hflip`, `vflip` o su combinación, para consumo de ffmpeg.
+
+        Raises:
+            InvalidParameterError: Si no hay ningún eje de volteo activo.
+        """
         if self.hflip and self.vflip:
             return "hflip,vflip"
         if self.hflip:

@@ -30,7 +30,30 @@ class SubtitlesPipeline(BasePipeline[SubtitlesParameters]):
         subtitles_stream_tracks: str | None = None,
         subtitles_output: Path | None = None,
     ) -> None:
-        """Valida y parsea los argumentos en parámetros procesados."""
+        """Valida y parsea los argumentos en parámetros procesados.
+
+        Args:
+            media_input: Ruta del fichero de vídeo a procesar.
+            overwrite: Política ante conflicto de salida ya existente.
+            subtitles_mode: Modo de manipulación de subtítulos.
+            subtitles_input: Ruta del fichero de subtítulos externo.
+            subtitles_language: Código ISO 639-2 del idioma de la pista.
+            media_output: Ruta absoluta del fichero de salida procesado.
+            subtitles_title: Título descriptivo de la pista.
+            subtitles_forced: Si es una pista forzada a mostrar.
+            subtitles_default: Si es la pista por defecto del vídeo.
+            subtitles_hearing_impaired: Si está adaptada a personas con
+                problemas auditivos.
+            subtitles_visual_impaired: Si está adaptada a personas con
+                problemas visuales.
+            subtitles_stream_tracks: Lista de índices de pistas en CSV.
+            subtitles_output: Ruta absoluta del fichero de subtítulos extraído.
+
+        Raises:
+            MissingParameterError: Si falta la entrada o el listado de pistas
+                requerido según el modo.
+            SubtitlesError: Si el medio no tiene pistas de subtítulos.
+        """
         params = SubtitlesParameters(
             overwrite=overwrite,
             subtitles_mode=subtitles_mode,
@@ -110,7 +133,11 @@ class SubtitlesPipeline(BasePipeline[SubtitlesParameters]):
         self.params = params
 
     def process_cmd(self) -> None:
-        """Construye el comando ffmpeg y ejecuta la manipulación de subtítulos."""
+        """Construye el comando ffmpeg y ejecuta la manipulación de subtítulos.
+
+        Raises:
+            MissingParameterError: Si falta el medio o la salida procesada.
+        """
         if self.params.media is None:
             raise MissingParameterError(name="media")
         if self.params.media_output is None:

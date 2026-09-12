@@ -50,6 +50,9 @@ def build_subtitle_files(output_dir: Path) -> list[Path]:
 
     Args:
         output_dir: Directorio donde crear los ficheros de subtítulos.
+
+    Returns:
+        Las rutas de los ficheros `.ass` creados, en orden.
     """
     paths = []
     for filename, text in SUBTITLES.items():
@@ -65,6 +68,9 @@ def build_ffmpeg_command(sub_paths: list[Path], output: Path) -> list[str]:
     Args:
         sub_paths: Rutas de los ficheros `.ass` a incrustar.
         output: Ruta del fichero de salida.
+
+    Returns:
+        El comando ffmpeg completo como lista de cadenas.
     """
     cmd = [
         "ffmpeg",

@@ -48,6 +48,11 @@ def remux(
         sort_tracks: Ordena las pistas por tipo y luego alfabéticamente por idioma.
         debug: Habilita el nivel de log DEBUG.
         help_: Helper para mostrar esta línea en distintos idiomas.
+
+    Raises:
+        MissingArgumentError: Si no se indica la salida.
+        OptionError: Si se solicita `fast_start` con un contenedor distinto
+            de `.mp4`.
     """
     if media_output is None:
         raise MissingArgumentError(name="media_output")

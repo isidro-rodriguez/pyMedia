@@ -34,6 +34,9 @@ class SheetPipeline(BasePipeline[SheetParameters]):
             preset_sheet: Estilo de hoja preajustado.
             output: Ruta absoluta del fichero de salida procesado.
             output_directory: Directorio de salida para lotes de ficheros.
+
+        Raises:
+            MissingParameterError: Si el medio no se pudo obtener.
         """
         params = SheetParameters(overwrite=overwrite)
         params.create_media_input(media_input=media_input, logger=self.logger)
@@ -49,7 +52,15 @@ class SheetPipeline(BasePipeline[SheetParameters]):
         self.params = params
 
     def process_cmd(self) -> None:
-        """Construye y ejecuta los comandos ffmpeg de capturas y cabecera."""
+        """Construye y ejecuta los comandos ffmpeg de capturas y cabecera.
+
+        Raises:
+            MissingParameterError: Si el medio no se pudo obtener.
+            MissingPropertyError: Si falta la duración del medio o la ruta de
+                imagen de salida.
+            CommandGenerationError: Si no se pudo generar el comando de
+                capturas o el de cabecera.
+        """
         if self.params.media is None:
             raise MissingParameterError(name="media")
         if self.params.media.duration is None:

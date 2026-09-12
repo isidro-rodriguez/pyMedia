@@ -36,6 +36,12 @@ class MediaInputMixin:
         Args:
             media_input: Ruta del fichero de vídeo a procesar.
             logger: Sistema de registro de mensajes.
+
+        Raises:
+            InvalidContainerTypeError: Si la extensión del fichero no es un
+                contenedor de vídeo soportado.
+            MissingParameterError: Si los metadatos del fichero no se pudieron
+                mapear.
         """
         self.media = _create_media(media_input=media_input, logger=logger)
 
@@ -70,6 +76,12 @@ class MediaListMixin:
         Args:
             media_input_list: Lista de rutas de los ficheros de vídeo a procesar.
             logger: Sistema de registro de mensajes.
+
+        Raises:
+            InvalidContainerTypeError: Si la extensión de algún fichero no es
+                un contenedor de vídeo soportado.
+            MissingParameterError: Si los metadatos de algún fichero no se
+                pudieron mapear.
         """
         media_list: list[Media] = []
 

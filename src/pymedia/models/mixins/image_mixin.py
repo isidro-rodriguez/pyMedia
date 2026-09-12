@@ -18,7 +18,15 @@ class ImageQualityMixin(_ImageContext):
     """Mixin para optimizar calidad y pixel_fmt dependiendo del formato de imagen."""
 
     def to_image_quality_cmd(self) -> ImageQuality:
-        """Devuelve el filtro listo para consumo de ffmpeg."""
+        """Devuelve los parámetros de calidad según el formato de imagen.
+
+        Returns:
+            Datos de calidad (`format` y `compression`) para el formato de la
+            imagen de salida.
+
+        Raises:
+            InvalidParameterError: Si el formato de imagen no está soportado.
+        """
         match self.image_output.suffix:
             case ".jpg":
                 return ImageQuality(
@@ -60,7 +68,14 @@ class SceneMixin:
         self.scene = scene
 
     def to_scene_cmd(self) -> str:
-        """Devuelve el filtro listo para consumo de ffmpeg."""
+        """Devuelve el filtro listo para consumo de ffmpeg.
+
+        Returns:
+            El filtro `select='gt(scene,N)'` para cambios de escena.
+
+        Raises:
+            MissingParameterError: Si no se ha definido el umbral `scene`.
+        """
         if self.scene is None:
             raise MissingParameterError(name="scene")
         return f"select='gt(scene,{self.scene})'"

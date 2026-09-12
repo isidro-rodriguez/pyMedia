@@ -19,7 +19,11 @@ class FastStartMixin:
 
     @staticmethod
     def to_fast_start_cmd() -> list[str]:
-        """Devuelve los argumentos que habilitan el índice al inicio del fichero."""
+        """Devuelve los argumentos que habilitan el índice al inicio del fichero.
+
+        Returns:
+            Argumentos `-movflags +faststart` para el consumo de ffmpeg.
+        """
         return ["-movflags", "+faststart"]
 
 
@@ -31,7 +35,11 @@ class RegeneratePtsMixin:
 
     @staticmethod
     def to_regenerate_pts_cmd() -> list[str]:
-        """Devuelve los argumentos que fuerzan la regeneración de los PTS."""
+        """Devuelve los argumentos que fuerzan la regeneración de los PTS.
+
+        Returns:
+            Argumentos `-fflags +genpts` para el consumo de ffmpeg.
+        """
         return ["-fflags", "+genpts"]
 
 
@@ -57,14 +65,9 @@ class SortTracksMixin(_SortTracksContext):
     def _build_sorted_tracks_map(self) -> list[str]:
         """Construye los `-map` que ordenan las pistas de la salida.
 
-        El orden resultante es: primero vídeo, luego audio y por último
-        subtítulos. Dentro de audio y subtítulos, las pistas con idioma van
-        primero y se ordenan alfabéticamente por código de idioma; las pistas
-        sin idioma conservan su orden original. El vídeo múltiple no está
-        soportado todavía.
-
-        Returns:
-            Lista de argumentos `-map` lista para el consumo de ffmpeg.
+        Ordena primero vídeo, luego audio y por último subtítulos, colocando
+        las pistas con idioma al inicio y ordenadas alfabéticamente por
+        código; las pistas sin idioma conservan su orden original.
         """
         map_args: list[str] = []
 

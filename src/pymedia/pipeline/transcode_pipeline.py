@@ -38,7 +38,24 @@ class TranscodePipeline(BasePipeline[TranscodeParameters]):
         hflip: bool = False,
         vflip: bool = False,
     ) -> None:
-        """Valida y parsea los argumentos en parámetros procesados."""
+        """Valida y parsea los argumentos en parámetros procesados.
+
+        Args:
+            media_input: Ruta del fichero de vídeo a procesar.
+            overwrite: Política ante conflicto de salida ya existente.
+            preset_transcode: Perfil de transcodificación de config.toml.
+            scale_mode: Política de escalado del vídeo o imagen.
+            output: Ruta absoluta del fichero de salida procesado.
+            output_directory: Directorio de salida para lotes de ficheros.
+            transcode_audio: Lista de pistas de audio a transcodificar.
+            transcode_video: Transcodifica la pista de vídeo.
+            crop: Área y coordenada de la zona a preservar de la imagen.
+            scale_to: Dimensión objetivo en píxeles.
+            scale_upscale: Permite el incremento de dimensiones.
+            rotate: Ángulo ortogonal con el que se va a rotar la imagen.
+            hflip: Invierte la imagen horizontalmente.
+            vflip: Invierte la imagen verticalmente.
+        """
         if not all(
             [
                 crop is None,
@@ -87,7 +104,11 @@ class TranscodePipeline(BasePipeline[TranscodeParameters]):
         self.params = params
 
     def process_cmd(self) -> None:
-        """Construye el comando ffmpeg y ejecuta la transcodificación del contenedor."""
+        """Construye el comando ffmpeg y ejecuta la transcodificación del contenedor.
+
+        Raises:
+            MissingParameterError: Si falta el medio o la salida procesada.
+        """
         if self.params.media is None:
             raise MissingParameterError(name="media")
         if self.params.media_output is None:

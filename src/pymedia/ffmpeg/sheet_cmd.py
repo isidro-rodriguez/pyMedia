@@ -73,7 +73,14 @@ class SheetCmd:
 
     @property
     def capture_count(self) -> int:
-        """Número total de miniaturas (capturas) que compondrán la cuadrícula."""
+        """Número total de miniaturas (capturas) que compondrán la cuadrícula.
+
+        Returns:
+            El resultado de `columns * rows` del preset de hoja activo.
+
+        Raises:
+            MissingParameterError: Si no hay un preset de hoja definido.
+        """
         preset = self.params.preset_sheet
         if preset is None:
             raise MissingParameterError(name="preset")

@@ -17,5 +17,9 @@ typer_instance = typer.Typer(
 def main(
     help_: HelpOption = False,  # noqa
 ) -> None:
-    """Muestra la ayuda global de la aplicación cuando se invoca con `--help`."""
+    """Muestra la ayuda global de la aplicación cuando se invoca con `--help`.
+
+    Args:
+        help_: Solicitud explícita de ayuda del comando.
+    """
     pass

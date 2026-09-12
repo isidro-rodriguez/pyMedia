@@ -63,6 +63,8 @@ class SubtitlesInputMixin(_SubtitlesContext):
         Raises:
             InvalidArgumentError: Si el idioma indicado no sigue el estándar ISO 639-2.
             MissingArgumentError: Si no se recibió el argumento `language`.
+            SubtitlesError: Si el contenedor de salida no tiene un códec de
+                subtítulos soportado.
         """
         if language is None:
             raise MissingArgumentError(name=_("subtitles language"))
@@ -151,6 +153,15 @@ class SubtitlesInputMixin(_SubtitlesContext):
         por lo que se usa el índice local (`track_index`), no el global.
         La opción `-metadata` exige la forma completa `<tipo>:<tipo>:<índice>`
         (`s:s:N`); `-c` y `-disposition` sí aceptan `s:N`.
+
+        Args:
+            subtitles: Modelo de metadatos de la pista de subtítulos.
+
+        Returns:
+            Flags `-metadata` y `-disposition` para el consumo de ffmpeg.
+
+        Raises:
+            MissingParameterError: Si la pista no tiene `track_index`.
         """
         if subtitles.track_index is None:
             raise MissingParameterError(name="subtitles.track_index")
@@ -191,6 +202,10 @@ class SubtitlesInputMixin(_SubtitlesContext):
         Returns:
             Flags `-disposition` para las demás pistas marcadas como default,
             o una lista vacía si la pista editada no es default.
+
+        Raises:
+            MissingParameterError: Si la pista en edición no tiene
+                `track_index`.
         """
         subtitles = self.subtitles
         if subtitles is None or not subtitles.default:
@@ -214,6 +229,7 @@ class SubtitlesInputMixin(_SubtitlesContext):
         return flags
 
     def _process_codec(self) -> str:
+        """Devuelve el códec de subtítulos del contenedor de salida."""
         match self.media_output.suffix:
             case ".m2ts" | ".mov" | ".mp4" | ".ts":
                 return "mov_text"

@@ -22,7 +22,16 @@ class SubtitlesCmd:
         self.params = params
 
     def create_add_subtitles_cmd(self) -> list[str]:
-        """Compone el comando de ffmpeg para insertar subtítulos en contenedores."""
+        """Compone el comando de ffmpeg para insertar subtítulos en contenedores.
+
+        Returns:
+            Lista de cadenas con el comando ffmpeg listo para ejecutar.
+
+        Raises:
+            MissingParameterError: Si falta `media`, `media_output` o algún
+                campo requerido del modelo de subtítulos (`codec`, `language`,
+                `path`, `track_index`, `title`).
+        """
         subtitles = self.params.subtitles
         if self.params.media is None:
             raise MissingParameterError(name="media")
@@ -70,7 +79,15 @@ class SubtitlesCmd:
         return cmd
 
     def create_delete_subtitles_cmd(self) -> list[str]:
-        """Compone el comando de ffmpeg para eliminar subtítulos en contenedores."""
+        """Compone el comando de ffmpeg para eliminar subtítulos en contenedores.
+
+        Returns:
+            Lista de cadenas con el comando ffmpeg listo para ejecutar.
+
+        Raises:
+            MissingParameterError: Si falta `media`, `media_output` o el
+                listado de pistas `streams` a eliminar.
+        """
 
         def _build_streams_list() -> list[str]:
             """Compone los mappings negativos de las pistas de subtítulos a eliminar.
@@ -113,7 +130,15 @@ class SubtitlesCmd:
         return cmd
 
     def create_edit_subtitles_cmd(self) -> list[str]:
-        """Compone el comando de ffmpeg para editar subtítulos en contenedores."""
+        """Compone el comando de ffmpeg para editar subtítulos en contenedores.
+
+        Returns:
+            Lista de cadenas con el comando ffmpeg listo para ejecutar.
+
+        Raises:
+            MissingParameterError: Si falta `media`, `media_output` o el
+                modelo de subtítulos a editar.
+        """
         if self.params.media is None:
             raise MissingParameterError(name="media")
         if self.params.media_output is None:
@@ -143,7 +168,16 @@ class SubtitlesCmd:
         return cmd
 
     def create_extract_subtitles_cmd(self) -> tuple[list[str], list[Path]]:
-        """Compone el comando de ffmpeg para extraer subtítulos en contenedores."""
+        """Compone el comando de ffmpeg para extraer subtítulos en contenedores.
+
+        Returns:
+            Tupla con la lista de cadenas del comando ffmpeg y las rutas de
+            los ficheros de subtítulos extraídos.
+
+        Raises:
+            MissingParameterError: Si falta `media`, el listado de pistas
+                `streams` o la ruta `subtitles_output`.
+        """
 
         def _build_streams_list() -> list[str]:
             """Compone los mappings de las pistas de subtítulos a extraer.

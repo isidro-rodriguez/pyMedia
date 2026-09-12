@@ -19,7 +19,10 @@ def get_media_metadata(path: Path, logger: Logger) -> dict:
         logger: Servicio de registro de mensajes.
 
     Returns:
-        Metadatos del vídeo a procesar o errores si no es un vídeo válido.
+        Metadatos del vídeo a procesar.
+
+    Raises:
+        FfprobeError: Si ffprobe no puede leer el fichero indicado.
     """
     try:
         cmd = [
@@ -63,6 +66,9 @@ def validate_subtitles_file_codec(subtitles_input: Path, logger: Logger) -> str:
         FfprobeError: Si ffprobe no puede leer el archivo, no detecta un
             formato de subtítulos conocido, o el formato detectado no es
             compatible con la extensión del archivo.
+
+    Returns:
+        Nombre del códec de subtítulos detectado y validado.
     """
     try:
         cmd = [
@@ -126,6 +132,9 @@ def validate_audio_file_codec(audio_input: Path, logger: Logger) -> str:
         FfprobeError: Si ffprobe no puede leer el archivo, no detecta un
             formato de audio conocido, o el formato detectado no es
             compatible con la extensión del archivo.
+
+    Returns:
+        Nombre del códec de audio detectado y validado.
     """
     try:
         cmd = [

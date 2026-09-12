@@ -31,7 +31,23 @@ class GifPipeline(BasePipeline[AnimatedParameters]):
         hflip: bool = False,
         vflip: bool = False,
     ) -> None:
-        """Valida y parsea los argumentos en parámetros procesados."""
+        """Valida y parsea los argumentos en parámetros procesados.
+
+        Args:
+            media_input: Ruta del fichero de vídeo a procesar.
+            overwrite: Política ante conflicto de salida ya existente.
+            fps: Fotogramas por segundo del GIF generado.
+            scale_mode: Política de escalado del vídeo o imagen.
+            output: Ruta absoluta del fichero de salida procesado.
+            timestamp_start: Marca de tiempo que indica el punto inicial.
+            timestamp_end: Marca de tiempo que indica el punto final.
+            crop: Área y coordenada de la zona a preservar de la imagen.
+            scale_to: Dimensión objetivo en píxeles.
+            scale_upscale: Permite el incremento de dimensiones.
+            rotate: Ángulo ortogonal con el que se va a rotar la imagen.
+            hflip: Invierte la imagen horizontalmente.
+            vflip: Invierte la imagen verticalmente.
+        """
         params = AnimatedParameters(
             overwrite=overwrite,
             fps=fps,
@@ -66,7 +82,11 @@ class GifPipeline(BasePipeline[AnimatedParameters]):
         self.params = params
 
     def process_cmd(self) -> None:
-        """Construye el comando ffmpeg y ejecuta la generación del GIF."""
+        """Construye el comando ffmpeg y ejecuta la generación del GIF.
+
+        Raises:
+            MissingParameterError: Si no se obtuvo el medio o la salida animada.
+        """
         if self.params.media is None:
             raise MissingParameterError(name="media")
         if self.params.animated_output is None:

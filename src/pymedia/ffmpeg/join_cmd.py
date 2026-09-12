@@ -21,6 +21,9 @@ class JoinCmd:
     def create(self, list_txt: Path) -> list[str]:
         """Crea el comando de ffmpeg de unión de vídeos.
 
+        Args:
+            list_txt: Ruta del fichero de lista del demuxer concat.
+
         Raises:
             MissingParameterError: Si `media` no se pudo obtener.
 

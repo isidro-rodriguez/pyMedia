@@ -45,7 +45,7 @@ class _LocaleManager:
 
     @staticmethod
     def _default_localedir() -> Path:
-        # Directorio raíz de catálogos, sobreescribible para builds frozen.
+        """Devuelve el directorio raíz de catálogos, sobreescribible vía env."""
         override = os.environ.get("PYMEDIA_LOCALEDIR")
         if override:
             return Path(override)
@@ -61,7 +61,7 @@ class _LocaleManager:
         """
 
         def _read_config_language() -> str:
-            # Lee [app].language del config.toml sin validar.
+            """Lee [app].language del config.toml sin validar."""
             path = (
                 Path(
                     platformdirs.user_config_dir(
@@ -77,7 +77,7 @@ class _LocaleManager:
             return data.get("app", {}).get("language", "system")
 
         def _detect_system_language() -> str:
-            # Detecta el idioma del sistema (env vars POSIX, locale, fallback 'en').
+            """Detecta el idioma del sistema (POSIX, locale, fallback 'en')."""
             lang = os.environ.get("LANG") or os.environ.get("LC_ALL") or ""
 
             if not lang:

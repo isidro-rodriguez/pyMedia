@@ -53,7 +53,30 @@ def transcode(
     debug: DebugOption = False,
     help_: HelpOption = False,  # noqa
 ) -> None:
-    """Comando para componer la llamada ffmpeg de transcodificación de vídeos."""
+    """Comando para componer la llamada ffmpeg de transcodificación de vídeos.
+
+    Args:
+        media_input_list: Lista de rutas de los ficheros de vídeo a procesar.
+        media_output: Ruta absoluta del fichero de salida procesado.
+        output_directory: Directorio de salida para lotes de ficheros.
+        overwrite: Política ante conflicto de salida ya existente.
+        preset_transcode: Perfil de transcodificación de config.toml.
+        transcode_audio: Lista de pistas de audio a transcodificar.
+        transcode_video: Transcodifica la pista de vídeo.
+        crop: Área y coordenada de la zona a preservar de la imagen.
+        rotate: Ángulo ortogonal con el que se va a rotar la imagen.
+        scale_to: Dimensión objetivo en píxeles.
+        scale_mode: Política de escalado del vídeo o imagen.
+        scale_upscale: Permite el incremento de dimensiones.
+        hflip: Invierte la imagen horizontalmente.
+        vflip: Invierte la imagen verticalmente.
+        debug: Habilita el nivel de log DEBUG.
+        help_: Helper para mostrar esta línea en distintos idiomas.
+
+    Raises:
+        MissingRequiredOptionError: Si no se aporta ninguna opción de
+            transcodificación.
+    """
     if (
         transcode_audio is None
         and transcode_video is False

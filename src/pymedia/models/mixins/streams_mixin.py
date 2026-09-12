@@ -27,7 +27,7 @@ class StreamsMixin(_StreamsContext):
     presente dentro de la lista de streams del tipo indicado.
 
     Attributes:
-         stream_tracks: Lista de pistas de emisiones.
+        stream_tracks: Lista de pistas de emisiones.
     """
 
     stream_tracks: list[int] | None = None
@@ -35,7 +35,23 @@ class StreamsMixin(_StreamsContext):
     def create_streams(
         self, stream_tracks: str | None, streams_type: StreamsMode
     ) -> None:
-        """Añade la lista de streams como parámetro validado."""
+        """Añade la lista de streams como parámetro validado.
+
+        Args:
+            stream_tracks: Lista de índices de pistas en formato CSV, o
+                `None` para no declarar streams.
+            streams_type: Tipo de stream al que pertenecen los índices.
+
+        Raises:
+            InvalidArgumentError: Si el formato del listado o algún índice
+                no es válido.
+            MissingParameterError: Si falta `media` o las pistas del tipo
+                indicado.
+            AudioError: Si un índice de audio no está incluido en el medio.
+            SubtitlesError: Si un índice de subtítulos no está incluido en
+                el medio.
+            InvalidParameterError: Si el tipo de stream no está soportado.
+        """
         if stream_tracks is None:
             return
 

@@ -102,7 +102,14 @@ class SheetPresetsMixin:
 
     @property
     def thumb_width(self) -> int:
-        """Calcula el ancho dinámico de la captura respetando el canvas total."""
+        """Calcula el ancho dinámico de la captura respetando el canvas total.
+
+        Returns:
+            Ancho en píxeles de cada captura según el preset activo.
+
+        Raises:
+            MissingParameterError: Si no hay un preset de hoja definido.
+        """
         preset = self.preset_sheet
 
         if preset is None:

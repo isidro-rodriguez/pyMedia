@@ -44,6 +44,8 @@ class TimestampStartEndMixin(_TimestampsContext):
 
         Raises:
             InvalidTimeFormatError: Si el formato de la marca no es válido.
+            InvalidParameterError: Si la marca de inicio es posterior a la
+                de fin.
             MissingPropertyError: Si no se pudo obtener la duración del vídeo.
             MissingParameterError: Si no se pudo obtener el parámetro.
         """
@@ -67,13 +69,27 @@ class TimestampStartEndMixin(_TimestampsContext):
                 )
 
     def to_timestamp_start_cmd(self) -> list[str]:
-        """Devuelve el filtro listo para consumo de ffmpeg."""
+        """Devuelve el filtro listo para consumo de ffmpeg.
+
+        Returns:
+            Lista de argumentos `-ss <marca>`.
+
+        Raises:
+            MissingParameterError: Si no se ha definido `timestamp_start`.
+        """
         if self.timestamp_start is None:
             raise MissingParameterError(name="timestamp_start")
         return ["-ss", str(self.timestamp_start)]
 
     def to_timestamp_end_cmd(self) -> list[str]:
-        """Devuelve el filtro listo para consumo de ffmpeg."""
+        """Devuelve el filtro listo para consumo de ffmpeg.
+
+        Returns:
+            Lista de argumentos `-to <marca>`.
+
+        Raises:
+            MissingParameterError: Si no se ha definido `timestamp_end`.
+        """
         if self.timestamp_end is None:
             raise MissingParameterError(name="timestamp_end")
         return ["-to", str(self.timestamp_end)]
@@ -84,6 +100,12 @@ class TimestampStartEndMixin(_TimestampsContext):
         Calcula la duración del tramo de vídeo a procesar definido por los flags
         `--start`, `--end` y `media.duration` para que muestre correctamente el avance
         la barra de progreso de Rich.
+
+        Returns:
+            Duración del tramo de vídeo a procesar.
+
+        Raises:
+            MissingPropertyError: Si `media.duration` no se pudo obtener.
         """
         media_duration = self.media.duration
         start, end = self.timestamp_start, self.timestamp_end
@@ -117,6 +139,9 @@ class TimestampAtMixin(_TimestampsContext):
 
         Raises:
             InvalidArgumentError: Si el str no tiene un formato válido.
+            InvalidTimeFormatError: Si el formato de la marca no es válido.
+            InvalidParameterError: Si la marca supera la duración del vídeo.
+            MissingPropertyError: Si no se pudo obtener la duración del vídeo.
         """
         if times_str is None:
             return

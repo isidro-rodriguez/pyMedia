@@ -21,13 +21,22 @@ class InfoPipeline(BasePipeline[InfoParameters]):
     """Comando de CLI que imprime los metadatos de un vídeo de entrada."""
 
     def process_parameters(self, media_input: Path) -> None:
-        """Valida y parsea los argumentos en parámetros procesados."""
+        """Valida y parsea los argumentos en parámetros procesados.
+
+        Args:
+            media_input: Ruta del fichero de vídeo a procesar.
+        """
         params: InfoParameters = InfoParameters()
         params.create_media_input(media_input=media_input, logger=self.logger)
         self.params = params
 
     def process_cmd(self) -> None:
-        """Construye y muestra el panel Rich con los metadatos del vídeo."""
+        """Construye y muestra el panel Rich con los metadatos del vídeo.
+
+        Raises:
+            MissingParameterError: Si el medio no se obtuvo o falta alguna
+                propiedad técnica necesaria para pintar la tabla.
+        """
         if self.params.media is None:
             raise MissingParameterError(name="media")
 

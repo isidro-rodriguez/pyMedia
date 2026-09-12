@@ -153,9 +153,17 @@ class AudioInputMixin(_AudioContext):
 
         FFmpeg numera los streams del especificador `a:N` por tipo de pista,
         por lo que se usa el índice local (`track_index`), no el global.
-
         La opción `-metadata` exige la forma completa `<tipo>:<tipo>:<índice>`
         (`a:a:N`); `-disposition` sí acepta `a:N`.
+
+        Args:
+            audio: Modelo de metadatos de la pista de audio.
+
+        Returns:
+            Flags `-metadata` y `-disposition` para el consumo de ffmpeg.
+
+        Raises:
+            MissingParameterError: Si la pista no tiene `track_index`.
         """
         if audio.track_index is None:
             raise MissingParameterError(name="audio.track_index")
@@ -198,6 +206,10 @@ class AudioInputMixin(_AudioContext):
         Returns:
             Flags `-disposition` para las demás pistas marcadas como default,
             o una lista vacía si la pista editada no es default.
+
+        Raises:
+            MissingParameterError: Si la pista en edición no tiene
+                `track_index`.
         """
         audio = self.audio
 

@@ -24,7 +24,16 @@ class RemuxPipeline(BasePipeline[RemuxParameters]):
         regenerate_pts: bool,
         sort_tracks: bool,
     ) -> None:
-        """Valida y parsea los argumentos en parámetros procesados."""
+        """Valida y parsea los argumentos en parámetros procesados.
+
+        Args:
+            media_input: Ruta del fichero de vídeo a procesar.
+            media_output: Ruta absoluta del fichero de salida procesado.
+            overwrite: Política ante conflicto de salida ya existente.
+            fast_start: Mueve el índice al inicio acelerando la reproducción.
+            regenerate_pts: Regenera los marcadores de tiempo corruptos.
+            sort_tracks: Ordena las pistas por tipo e idioma.
+        """
         params = RemuxParameters(
             overwrite=overwrite,
             fast_start=fast_start,
@@ -46,7 +55,11 @@ class RemuxPipeline(BasePipeline[RemuxParameters]):
         self.params = params
 
     def process_cmd(self) -> None:
-        """Construye el comando ffmpeg para remux."""
+        """Construye el comando ffmpeg para remux.
+
+        Raises:
+            MissingParameterError: Si la salida procesada no se pudo obtener.
+        """
         if self.params.media_output is None:
             raise MissingParameterError(name="media_output")
 

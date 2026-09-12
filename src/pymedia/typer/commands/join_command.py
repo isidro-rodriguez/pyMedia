@@ -39,6 +39,9 @@ def join(
         overwrite: Política ante conflicto de salida ya existente.
         debug: Habilita el nivel de log DEBUG.
         help_: Helper para mostrar esta línea en distintos idiomas.
+
+    Raises:
+        OptionError: Si se aportan menos de dos vídeos para unir.
     """
     if len(media_input_list) < 2:
         raise OptionError(msg=_("It's required to provide at least 2 videos."))

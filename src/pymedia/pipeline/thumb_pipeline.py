@@ -42,8 +42,9 @@ class ThumbPipeline(BasePipeline[ThumbParameters]):
     ) -> None:
         """Valida y parsea los argumentos en parámetros procesados.
 
-        Attributes:
+        Args:
             media_input: Ruta del fichero de vídeo a procesar.
+            thumbnails_mode: Modo de generación de miniaturas.
             output: Ruta absoluta del fichero de salida procesado.
             overwrite: Política ante conflicto de salida ya existente.
             every: Periodo, en segundos, entre capturas generadas.
@@ -56,8 +57,8 @@ class ThumbPipeline(BasePipeline[ThumbParameters]):
             scale_to: Dimensión objetivo en píxeles.
             scale_mode: Política de escalado del vídeo o imagen.
             scale_upscale: Permite el incremento de dimensiones.
-            hflip: Invierte la imagen horizontalmente, intercambia izquierda y derecha.
-            vflip: Invierte la imagen verticalmente, intercambiando arriba y abajo.
+            hflip: Invierte la imagen horizontalmente.
+            vflip: Invierte la imagen verticalmente.
         """
         params = ThumbParameters(
             overwrite=overwrite,
@@ -106,7 +107,13 @@ class ThumbPipeline(BasePipeline[ThumbParameters]):
         self.params = params
 
     def process_cmd(self) -> None:
-        """Construye y ejecuta los comandos ffmpeg de las miniaturas."""
+        """Construye y ejecuta los comandos ffmpeg de las miniaturas.
+
+        Raises:
+            MissingParameterError: Si falta el medio, el listado de marcas o
+                la ruta de imagen de salida.
+            CommandGenerationError: Si el comando ffmpeg no se pudo generar.
+        """
         if self.params.media is None:
             raise MissingParameterError(name="media")
 

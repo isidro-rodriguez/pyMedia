@@ -45,6 +45,10 @@ class BasePipeline[ParamsT](ABC):
 
         Args:
             debug: Habilita el nivel de log DEBUG.
+
+        Raises:
+            InvalidParameterError: Si el nombre de la clase no termina en
+                `Pipeline`.
         """
         command_name = self.__class__.__name__
         if not command_name.endswith("Pipeline"):
@@ -54,7 +58,15 @@ class BasePipeline[ParamsT](ABC):
         self.logger = Logger.create(debug=debug)
 
     def resolve_overwrite(self, output_list: list[Path]) -> bool:
-        """Comprueba si algún fichero de salida existe y resuelve la sobrescritura."""
+        """Comprueba si algún fichero de salida existe y resuelve la sobrescritura.
+
+        Args:
+            output_list: Lista de ficheros de salida a comprobar.
+
+        Returns:
+            `True` si se puede sobrescribir o no hay conflicto, `False` si el
+            proceso debe omitirse.
+        """
         if self.params.overwrite == OverwriteMode.YES:
             return True
 
