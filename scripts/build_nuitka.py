@@ -1,7 +1,7 @@
 """Build a single-file pymedia.exe with Nuitka.
 
 Uso:
-    uv run python build.py
+    uv run python build_nuitka.py
 """
 
 import shutil

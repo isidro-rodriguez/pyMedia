@@ -28,7 +28,12 @@ from pymedia.models.mixins.timestamps_mixin import (
     TimestampStartEndMixin,
 )
 from pymedia.models.mixins.transcode_mixin import TranscodeMixin
-from pymedia.types import AudioMode, OverwriteMode, SubtitlesMode, ThumbnailsMode
+from pymedia.types import (
+    AudioMode,
+    OverwriteMode,
+    SubtitlesMode,
+    ThumbnailsMode,
+)
 
 
 @dataclass(kw_only=True)

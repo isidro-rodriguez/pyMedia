@@ -53,7 +53,7 @@ uv tool install .       # o: pip install .
 ### Ejecutable único (Windows)
 
 ```bash
-uv run python scripts/build.py
+uv run python scripts/build_nuitka.py
 ```
 
 Compila con Nuitka un único `build/pymedia.exe` con icono incluido.
@@ -279,7 +279,7 @@ uv run python scripts/audio_tracks.py    # pistas de audio en .local/fixtures/au
 
 ### Otros scripts
 
-- `scripts/build.py` — compila `build/pymedia.exe` (Nuitka onefile).
+- `scripts/build_nuitka.py` — compila `build/pymedia.exe` (Nuitka onefile).
 - `scripts/backup.py` — copia de seguridad de `src/`, `tests/` y `scripts/` en `.local/backup.zip`.
 
 ## Estructura del proyecto
