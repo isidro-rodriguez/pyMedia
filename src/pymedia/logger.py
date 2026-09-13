@@ -93,30 +93,15 @@ class Logger:
             cls.create(debug=debug)
         return cls(logging.getLogger(__name__))
 
-    def critical(self, msg: str, exc_info: bool = False) -> None:
-        """Muestra log de nivel crítico.
-
-        Args:
-            msg: Mensaje ya traducido a mostrar.
-            exc_info: Si `True`, añade la traza de la excepción activa.
-        """
-        self._logger.critical(msg=msg, exc_info=exc_info)
-
-    def error(self, msg: str, exc_info: bool = False) -> None:
+    def error(self, msg: str, exc_info: bool = False, **kwargs) -> None:
         """Muestra log de nivel error.
 
         Args:
             msg: Mensaje ya traducido a mostrar.
             exc_info: Si `True`, añade la traza de la excepción activa.
+            **kwargs: Valores para interpolar en `msg` vía `%`.
         """
-        self._logger.error(msg=msg, exc_info=exc_info)
-
-    @staticmethod
-    def _render(msg: str, kwargs: dict) -> str:
-        """Aplica `%(name)s` a `msg` si hay valores que sustituir."""
-        if kwargs:
-            return msg % kwargs
-        return msg
+        self._logger.error(self._render(msg, kwargs), exc_info=exc_info)
 
     def warning(self, msg: str, **kwargs) -> None:
         """Muestra log de nivel aviso (mensaje ya traducido).
@@ -160,3 +145,10 @@ class Logger:
             renderable: Objeto Rich a imprimir (Table, Panel, texto...).
         """
         self._console.print(renderable)
+
+    @staticmethod
+    def _render(msg: str, kwargs: dict) -> str:
+        """Aplica `%(name)s` a `msg` si hay valores que sustituir."""
+        if kwargs:
+            return msg % kwargs
+        return msg

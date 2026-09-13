@@ -1,4 +1,4 @@
-"""Mixins de imágenes por segundo (GIF y extracción de capturas)."""
+"""Mixins de la especificación de Friends per Second."""
 
 from dataclasses import dataclass
 from fractions import Fraction
@@ -8,10 +8,10 @@ from pymedia.errors import MissingParameterError
 
 @dataclass(kw_only=True)
 class FpsAnimatedMixin:
-    """Mixin para las imágenes por segundo de un Gif.
+    """Mixin para los fps de imágenes animadas.
 
     Attributes:
-        fps: Imágenes por segundo del GIF.
+        fps: Frames per second de la imagen animada.
     """
 
     fps: int | None = None
@@ -20,7 +20,7 @@ class FpsAnimatedMixin:
         """Crea el atributo fps.
 
         Args:
-            fps: Imágenes por segundo del GIF.
+            fps: Frames per second de la imagen animada.
         """
         self.fps = fps
 

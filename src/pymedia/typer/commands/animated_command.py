@@ -9,7 +9,7 @@ from pymedia.typer.options import (
     DebugOption,
     FlipHorizontalOption,
     FlipVerticalOption,
-    FpsGifOption,
+    FpsAnimatedOption,
     HelpOption,
     MediaInputArgument,
     OutputOption,
@@ -18,8 +18,8 @@ from pymedia.typer.options import (
     ScaleModeOption,
     ScaleToOption,
     ScaleUpscaleOption,
-    TimestampEndGifOption,
-    TimestampStartGifOption,
+    TimestampEndAnimatedOption,
+    TimestampStartAnimatedOption,
 )
 from pymedia.types import OverwriteMode, ScaleMode
 
@@ -36,9 +36,9 @@ def animated(
     media_input: MediaInputArgument,
     output: OutputOption = None,
     overwrite: OverwriteOption = OverwriteMode.ASK,
-    timestamp_start: TimestampStartGifOption = None,
-    timestamp_end: TimestampEndGifOption = None,
-    fps: FpsGifOption = 12,
+    timestamp_start: TimestampStartAnimatedOption = None,
+    timestamp_end: TimestampEndAnimatedOption = None,
+    fps: FpsAnimatedOption = 12,
     crop: CropOption = None,
     rotate: RotateOption = None,
     scale_to: ScaleToOption = "640x360",

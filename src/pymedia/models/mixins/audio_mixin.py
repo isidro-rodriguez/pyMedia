@@ -11,7 +11,7 @@ from pymedia.errors import (
     MissingArgumentError,
     MissingParameterError,
 )
-from pymedia.ffmpeg.probe import validate_audio_file_codec
+from pymedia.ffmpeg.probe import get_audio_codec
 from pymedia.locales import _  # noqa
 from pymedia.logger import Logger
 from pymedia.models.audio import Audio
@@ -73,7 +73,7 @@ class AudioInputMixin(_AudioContext):
             path=audio_input.absolute(),
             global_index=self._process_stream_index(media=self.media),
             track_index=self._process_audio_index(media=self.media),
-            codec=validate_audio_file_codec(audio_input=audio_input, logger=logger),
+            codec=get_audio_codec(audio_input=audio_input, logger=logger),
             language=language_code,
             title=self._process_audio_title(title=title, lang=language_code),
             default=default,

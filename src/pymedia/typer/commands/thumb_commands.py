@@ -24,8 +24,8 @@ from pymedia.typer.options import (
     ScaleUpscaleOption,
     SceneOption,
     TimestampAtThumbnailOption,
-    TimestampEndGifOption,
-    TimestampStartGifOption,
+    TimestampEndThumbnailOption,
+    TimestampStartThumbnailOption,
 )
 from pymedia.types import OverwriteMode, ScaleMode, ThumbnailsMode
 
@@ -108,8 +108,8 @@ def interval(
     output: OutputOption = None,
     overwrite: OverwriteOption = OverwriteMode.YES,
     every: EveryOption = None,
-    timestamp_start: TimestampStartGifOption = None,
-    timestamp_end: TimestampEndGifOption = None,
+    timestamp_start: TimestampStartThumbnailOption = None,
+    timestamp_end: TimestampEndThumbnailOption = None,
     crop: CropOption = None,
     rotate: RotateOption = None,
     scale_to: ScaleToOption = None,
@@ -175,8 +175,8 @@ def scene(
     output: OutputOption = None,
     overwrite: OverwriteOption = OverwriteMode.YES,
     scene: SceneOption = None,
-    timestamp_start: TimestampStartGifOption = None,
-    timestamp_end: TimestampEndGifOption = None,
+    timestamp_start: TimestampStartThumbnailOption = None,
+    timestamp_end: TimestampEndThumbnailOption = None,
     crop: CropOption = None,
     rotate: RotateOption = None,
     scale_to: ScaleToOption = None,

@@ -70,9 +70,11 @@ class ExclusiveOptionsError(PyMediaError):
             options: Opciones mutuamente excluyentes.
         """
         opts_str = ", ".join(f"'{opt}'" for opt in options)
-        message = f"The following options are mutually exclusive: {opts_str}."
 
-        super().__init__(message)
+        super().__init__(
+            _("The following options are mutually exclusive: %(opts_str)s.")
+            % {"opts_str": opts_str}
+        )
 
 
 class FfprobeError(PyMediaError):

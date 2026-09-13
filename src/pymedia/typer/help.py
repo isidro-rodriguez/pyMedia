@@ -62,14 +62,14 @@ ANIMATED_HELP = _(
 Generates an animated image from the specified video.
 
 [bold]Examples[/bold]:
-  Convert a video to GIF:
-    > pymedia gif input.mp4
+  Convert a video to an animated image:
+    > pymedia animated input.mp4
   Convert a time range:
-    > pymedia gif input.mp4 --start 00:00:05 --end 00:00:12
+    > pymedia animated input.mp4 --start 00:00:05 --end 00:00:12
   Set size and frame rate:
-    > pymedia gif input.mp4 --size 480x270 --fps 15
+    > pymedia animated input.mp4 --size 480x270 --fps 15
   Save to a specific file:
-    > pymedia gif input.mp4 --output output.gif
+    > pymedia animated input.mp4 --output output.gif
 """
 )
 

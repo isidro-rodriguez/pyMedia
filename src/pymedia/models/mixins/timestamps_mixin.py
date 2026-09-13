@@ -6,7 +6,6 @@ from datetime import timedelta
 from typing import Protocol
 
 from pymedia.errors import (
-    InvalidArgumentError,
     InvalidParameterError,
     InvalidTimeFormatError,
     MissingParameterError,
@@ -147,15 +146,7 @@ class TimestampAtMixin(_TimestampsContext):
             return
 
         times: list[timedelta] = []
-
-        try:
-            times_array = times_str.split(",")
-        except ValueError as e:
-            raise InvalidArgumentError(
-                msg=_("Invalidad timestamp list format. Expected hh:mm:ss,hh:mm:ss,...")
-            ) from e
-
-        for time_str in times_array:
+        for time_str in times_str.split(","):
             time = _process_time(time_str=time_str, media=self.media)
             times.append(time)
         times.sort()

@@ -201,13 +201,13 @@ TimestampAtThumbnailOption = Annotated[
     ),
 ]
 
-TimestampEndGifOption = Annotated[
+TimestampEndAnimatedOption = Annotated[
     str | None,
     typer.Option(
         default="--end",
         metavar="hh:mm:ss",
         rich_help_panel=_("Command options"),
-        help=_("Time point at which GIF generation ends."),
+        help=_("Time point at which the animated image generation ends."),
     ),
 ]
 
@@ -221,13 +221,13 @@ TimestampEndThumbnailOption = Annotated[
     ),
 ]
 
-TimestampStartGifOption = Annotated[
+TimestampStartAnimatedOption = Annotated[
     str | None,
     typer.Option(
         default="--start",
         metavar="hh:mm:ss",
         rich_help_panel=_("Command options"),
-        help=_("Time point at which GIF generation starts."),
+        help=_("Time point at which the animated image generation starts."),
     ),
 ]
 
@@ -448,14 +448,14 @@ FlipVerticalOption = Annotated[
     ),
 ]
 
-FpsGifOption = Annotated[
+FpsAnimatedOption = Annotated[
     int,
     typer.Option(
         default="--fps",
         min=4,
         max=20,
         rich_help_panel=_("Filter options"),
-        help=_("Set the GIF frame rate in frames per second."),
+        help=_("Set the animated image frame rate in frames per second."),
     ),
 ]
 
