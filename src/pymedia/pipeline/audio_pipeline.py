@@ -130,6 +130,19 @@ class AudioPipeline(BasePipeline[AudioParameters]):
 
         self.params = params
 
+    def _media_output(self) -> Path:
+        """Devuelve la salida de medios, abortando si no está definida.
+
+        Returns:
+            Ruta absoluta del fichero de medios de salida.
+
+        Raises:
+            MissingParameterError: Si la salida procesada no se pudo obtener.
+        """
+        if self.params.media_output is None:
+            raise MissingParameterError(name="media_output")
+        return self.params.media_output
+
     def process_cmd(self) -> None:
         """Construye el comando ffmpeg y ejecuta la manipulación de audio.
 
@@ -138,26 +151,24 @@ class AudioPipeline(BasePipeline[AudioParameters]):
         """
         if self.params.media is None:
             raise MissingParameterError(name="media")
-        if self.params.media_output is None:
-            raise MissingParameterError(name="media_output")
 
         audio_cmd = AudioCmd(params=self.params)
         match self.params.audio_mode:
             case AudioMode.ADD:
                 cmd = audio_cmd.create_add_audio_cmd()
-                if not self.resolve_overwrite(output_list=[self.params.media_output]):
+                if not self.resolve_overwrite(output_list=[self._media_output()]):
                     return
                 description = _("Adding audio")
                 success = _("Audio added successfully: %(output)s")
             case AudioMode.DELETE:
                 cmd = audio_cmd.create_delete_audio_cmd()
-                if not self.resolve_overwrite(output_list=[self.params.media_output]):
+                if not self.resolve_overwrite(output_list=[self._media_output()]):
                     return
                 description = _("Deleting audio")
                 success = _("Audio deleted successfully: %(output)s")
             case AudioMode.EDIT:
                 cmd = audio_cmd.create_edit_audio_cmd()
-                if not self.resolve_overwrite(output_list=[self.params.media_output]):
+                if not self.resolve_overwrite(output_list=[self._media_output()]):
                     return
                 description = _("Editing audio metadata")
                 success = _("Audio metadata edited successfully: %(output)s")

@@ -8,6 +8,7 @@ validación de la ruta en las funciones privadas compartidas del módulo.
 import re
 from dataclasses import dataclass
 from pathlib import Path
+from types import MappingProxyType
 
 from pymedia.data.audio_codecs import AUDIO_CODECS
 from pymedia.data.subtitles_formats import SUBTITLES_FORMATS
@@ -433,7 +434,10 @@ class SubtitlesOutputMixin:
         for subtitles_track in subtitles_tracks:
             if subtitles_track.codec is None:
                 raise MissingPropertyError(name="subtitles codec")
-            fmt_data = SUBTITLES_FORMATS[subtitles_track.codec]
+            codec = subtitles_track.codec
+            fmt_data = SUBTITLES_FORMATS[
+                MappingProxyType({"subrip": "srt"}).get(codec, codec)
+            ]
             _validate_remux(
                 suffix=output.suffix,
                 source_suffix=media.path.suffix,
