@@ -308,21 +308,19 @@ pyMedia/
 
 ```mermaid
 flowchart TD
-    CLI(["CLI"]) --> MAIN{"MAIN"} --> COMMAND
+    CLI(["CLI"]) --> MAIN{"MAIN"} 
     MAIN -.-> LOCALE
-    COMMAND --> P1
+    MAIN -.-> COMMAND
+    COMMAND --> P1["pipeline.process_parameters"]
 
     subgraph PIPELINE["PIPELINE"]
         direction TB
-        P1["pipeline.process_parameters"]
-        P2["pipeline.process_cmd"]
-        P3["pipeline.run_ffmpeg"]
-        P1 <-->|"params validados"| PARAMETERS
-        P1 --> P2
         P1 -.-> CONFIG
         P1 -.-> LOGGER
+        P1 <-->|"params validados"| PARAMETERS
+        P1 --> P2["pipeline.process_cmd"]
         P2 <-->|"cmd"| CMD
-        P2 --> P3
+        P2 --> P3["pipeline.run_ffmpeg"]
     end
 
     P3 --> FFMPEG[("FFMPEG")]

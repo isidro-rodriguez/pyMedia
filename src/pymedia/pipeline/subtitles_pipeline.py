@@ -132,6 +132,19 @@ class SubtitlesPipeline(BasePipeline[SubtitlesParameters]):
 
         self.params = params
 
+    def _media_output(self) -> Path:
+        """Devuelve la salida de medios, abortando si no está definida.
+
+        Returns:
+            Ruta absoluta del fichero de medios de salida.
+
+        Raises:
+            MissingParameterError: Si la salida procesada no se pudo obtener.
+        """
+        if self.params.media_output is None:
+            raise MissingParameterError(name="media_output")
+        return self.params.media_output
+
     def process_cmd(self) -> None:
         """Construye el comando ffmpeg y ejecuta la manipulación de subtítulos.
 
@@ -140,26 +153,24 @@ class SubtitlesPipeline(BasePipeline[SubtitlesParameters]):
         """
         if self.params.media is None:
             raise MissingParameterError(name="media")
-        if self.params.media_output is None:
-            raise MissingParameterError(name="media_output")
 
         sub_cmd = SubtitlesCmd(params=self.params)
         match self.params.subtitles_mode:
             case SubtitlesMode.ADD:
                 cmd = sub_cmd.create_add_subtitles_cmd()
-                if not self.resolve_overwrite(output_list=[self.params.media_output]):
+                if not self.resolve_overwrite(output_list=[self._media_output()]):
                     return
                 description = _("Adding subtitles")
                 success = _("Subtitles added successfully: %(output)s")
             case SubtitlesMode.DELETE:
                 cmd = sub_cmd.create_delete_subtitles_cmd()
-                if not self.resolve_overwrite(output_list=[self.params.media_output]):
+                if not self.resolve_overwrite(output_list=[self._media_output()]):
                     return
                 description = _("Deleting subtitles")
                 success = _("Subtitles deleted successfully: %(output)s")
             case SubtitlesMode.EDIT:
                 cmd = sub_cmd.create_edit_subtitles_cmd()
-                if not self.resolve_overwrite(output_list=[self.params.media_output]):
+                if not self.resolve_overwrite(output_list=[self._media_output()]):
                     return
                 description = _("Editing subtitles metadata")
                 success = _("Subtitles metadata edited successfully: %(output)s")
