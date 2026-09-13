@@ -98,10 +98,12 @@ MAIN_HELP = _(
 Easy CLI for ffmpeg.
 
 [bold]Examples[/bold]:
-  Generate an animated GIF from a video:   
-    > pymedia gif input.mp4
-  Print GIF's help:     
-    > pymedia gif --help
+  Show help and exit:
+    > pymedia --help
+    > pymedia
+  Show subcommand help and exit:
+    > pymedia transcode --help
+    > pymedia transcode
 """
 )
 

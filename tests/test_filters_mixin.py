@@ -8,7 +8,7 @@ import pytest
 from pymedia.models.media import Media, Video
 from pymedia.models.mixins.filters_mixin import FiltersMixin
 from pymedia.models.parameters import ThumbParameters
-from pymedia.types import OverwriteMode, RotateMode, ScaleMode
+from pymedia.types import OverwriteMode, RotateMode, ScaleMode, ThumbnailsMode
 
 
 def _mixin(video: Video | None = None) -> FiltersMixin:
@@ -181,7 +181,9 @@ class TestFiltersIntegration:
 
     def test_thumb_parameters(self):
         """Comprueba la creación de filtros sobre `ThumbParameters`."""
-        params = ThumbParameters(overwrite=OverwriteMode.NO)
+        params = ThumbParameters(
+            overwrite=OverwriteMode.NO, thumbnails_mode=ThumbnailsMode.FRAMES
+        )
         params.media = Media(
             path=Path("clip.mp4"),
             video=Video(path=Path("clip.mp4"), width=1920, height=1080),

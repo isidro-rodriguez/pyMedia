@@ -43,7 +43,7 @@ def test_delete_maps_by_subtitle_local_index() -> None:
         media_output=Path("/tmp/out.mkv"),
     )
 
-    cmd = SubtitlesCmd(params=params).create()
+    cmd = SubtitlesCmd(params=params).create_delete_subtitles_cmd()
 
     assert "-0:s:0" in cmd
     assert "-0:s:2" in cmd
@@ -58,7 +58,7 @@ def test_extract_maps_by_subtitle_local_index() -> None:
         subtitles_output=Path("/tmp/out.srt"),
     )
 
-    cmd = SubtitlesCmd(params=params).create()
+    cmd = SubtitlesCmd(params=params).create_extract_subtitles_cmd()[0]
 
     assert "0:s:0" in cmd
     assert "0:s:1" in cmd
@@ -81,7 +81,7 @@ def test_add_encodes_new_subtitle_with_local_index() -> None:
         ),
     )
 
-    cmd = SubtitlesCmd(params=params).create()
+    cmd = SubtitlesCmd(params=params).create_add_subtitles_cmd()
 
     assert "-c:s:2" in cmd
     assert "srt" in cmd
@@ -114,7 +114,7 @@ def test_edit_default_is_exclusive() -> None:
         ),
     )
 
-    cmd = SubtitlesCmd(params=params).create()
+    cmd = SubtitlesCmd(params=params).create_edit_subtitles_cmd()
 
     assert _disposition_value(cmd, "-disposition:s:2") == "default"
     # La pista 0 era `default+forced`: conserva `forced`, pierde `default`.
@@ -141,6 +141,6 @@ def test_edit_without_default_leaves_others_untouched() -> None:
         ),
     )
 
-    cmd = SubtitlesCmd(params=params).create()
+    cmd = SubtitlesCmd(params=params).create_edit_subtitles_cmd()
 
     assert "-disposition:s:0" not in cmd

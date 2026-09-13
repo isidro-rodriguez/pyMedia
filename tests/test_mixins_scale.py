@@ -25,7 +25,11 @@ def _mixin(
     mixin = ScaleMixin(scale_mode=scale_mode)
     mixin.media = Media(
         path=Path("clip.mp4"),
-        video=video if video is not None else Video(width=1920, height=1080),
+        video=(
+            video
+            if video is not None
+            else Video(path=Path("clip.mp4"), width=1920, height=1080)
+        ),
     )
     return mixin
 
@@ -62,8 +66,8 @@ class TestParseErrors:
             mixin.create_scale(logger=Mock(), scale_upscale=False, scale_to=value)
 
         assert (
-            exc_info.value.message
-            == f"Invalid dimensions {value}. Expected: WIDTHxHEIGHT"
+            exc_info.value.msg
+            == f"\nInvalid dimensions {value}. Expected: WIDTHxHEIGHT"
         )
 
     @pytest.mark.parametrize("value", ["641x480", "640x481", "641x481"])
@@ -74,7 +78,7 @@ class TestParseErrors:
         with pytest.raises(InvalidParameterError) as exc_info:
             mixin.create_scale(logger=Mock(), scale_upscale=False, scale_to=value)
 
-        assert exc_info.value.message == "Target dimensions must be even."
+        assert exc_info.value.msg == "\nTarget dimensions must be even."
 
     def test_video_missing_raises(self):
         """Comprueba que la ausencia de vídeo lanza un error."""
@@ -86,7 +90,7 @@ class TestParseErrors:
 
     def test_video_without_dimensions_raises(self):
         """Comprueba que un vídeo sin dimensiones lanza un error."""
-        mixin = _mixin(video=Video())
+        mixin = _mixin(video=Video(path=Path("clip.mp4")))
 
         with pytest.raises(MissingPropertyError, match="video dimensions"):
             mixin.create_scale(logger=Mock(), scale_upscale=False, scale_to="1280x720")
