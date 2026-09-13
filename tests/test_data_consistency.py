@@ -13,28 +13,28 @@ from pymedia.data.video_codecs import VIDEO_CODECS
 # ---------------------------------------------------------------- catálogo
 
 
-def test_container_extensions_are_unique():
+def test_container_extensions_are_unique() -> None:
     """Las extensiones de contenedor no se repiten."""
     extensions = [container.extension for container in CONTAINERS.values()]
 
     assert len(extensions) == len(set(extensions))
 
 
-def test_container_names_are_unique():
+def test_container_names_are_unique() -> None:
     """Los nombres de contenedor no se repiten."""
     names = [container.name for container in CONTAINERS.values()]
 
     assert len(names) == len(set(names))
 
 
-def test_extension_format():
+def test_extension_format() -> None:
     """Las extensiones llevan punto y están en minúsculas."""
     for container in CONTAINERS.values():
         assert container.extension.startswith("."), container.extension
         assert container.extension.islower(), container.extension
 
 
-def test_mime_type_is_present():
+def test_mime_type_is_present() -> None:
     """Todos los contenedores tienen tipo MIME."""
     for container in CONTAINERS.values():
         assert container.mime_type, f"{container.extension} sin mime_type"
@@ -43,7 +43,7 @@ def test_mime_type_is_present():
 # ------------------------------------------------- códecs conocidos
 
 
-def test_video_codecs_are_known():
+def test_video_codecs_are_known() -> None:
     """Los códecs de vídeo de cada contenedor existen en VIDEO_CODECS."""
     for container in CONTAINERS.values():
         unknown = set(container.video_codecs) - set(VIDEO_CODECS)
@@ -52,7 +52,7 @@ def test_video_codecs_are_known():
         assert not unknown, msg
 
 
-def test_audio_codecs_are_known():
+def test_audio_codecs_are_known() -> None:
     """Los códecs de audio de cada contenedor existen en AUDIO_CODECS."""
     for container in CONTAINERS.values():
         unknown = set(container.audio_codecs) - set(AUDIO_CODECS)
@@ -61,7 +61,7 @@ def test_audio_codecs_are_known():
         assert not unknown, msg
 
 
-def test_subtitles_codecs_are_known():
+def test_subtitles_codecs_are_known() -> None:
     """Los códecs de subtítulos de cada contenedor existen en SUBTITLES_FORMATS."""
     for container in CONTAINERS.values():
         unknown = set(container.subtitles_codecs) - set(SUBTITLES_FORMATS)
@@ -73,22 +73,22 @@ def test_subtitles_codecs_are_known():
 # ------------------------------------------------------- sin huérfanos
 
 
-def test_no_orphan_codec_containers():
+def test_no_orphan_codec_containers() -> None:
     """Toda extensión referenciada por un códec tiene contenedor."""
     referenced: set[str] = set()
-    for codec in VIDEO_CODECS.values():
-        referenced.update(codec.containers)
-    for codec in AUDIO_CODECS.values():
-        referenced.update(codec.containers)
-    for codec in SUBTITLES_FORMATS.values():
-        referenced.update(codec.containers)
+    for video_codec in VIDEO_CODECS.values():
+        referenced.update(video_codec.containers)
+    for audio_codec in AUDIO_CODECS.values():
+        referenced.update(audio_codec.containers)
+    for sub_codec in SUBTITLES_FORMATS.values():
+        referenced.update(sub_codec.containers)
 
     orphans = referenced - set(CONTAINERS)
 
     assert not orphans, f"Extensiones de códecs sin contenedor: {sorted(orphans)}"
 
 
-def test_all_codecs_have_containers():
+def test_all_codecs_have_containers() -> None:
     """Ningún códec del catálogo tiene la lista de contenedores vacía."""
     for catalog in (VIDEO_CODECS, AUDIO_CODECS, SUBTITLES_FORMATS):
         for name, codec in catalog.items():
@@ -98,7 +98,7 @@ def test_all_codecs_have_containers():
 # -------------------------------------------------- mapeo bidireccional
 
 
-def test_video_codec_mapping_is_bidirectional():
+def test_video_codec_mapping_is_bidirectional() -> None:
     """Cada códec de vídeo de un contenedor lo lista en sus containers."""
     for container in CONTAINERS.values():
         for codec_name in container.video_codecs:
@@ -107,7 +107,7 @@ def test_video_codec_mapping_is_bidirectional():
             )
 
 
-def test_audio_codec_mapping_is_bidirectional():
+def test_audio_codec_mapping_is_bidirectional() -> None:
     """Cada códec de audio de un contenedor lo lista en sus containers."""
     for container in CONTAINERS.values():
         for codec_name in container.audio_codecs:
@@ -116,7 +116,7 @@ def test_audio_codec_mapping_is_bidirectional():
             )
 
 
-def test_subtitles_mapping_is_bidirectional():
+def test_subtitles_mapping_is_bidirectional() -> None:
     """Cada códec de subtítulo de un contenedor lo lista en sus containers."""
     for container in CONTAINERS.values():
         for codec_name in container.subtitles_codecs:
@@ -125,7 +125,7 @@ def test_subtitles_mapping_is_bidirectional():
             )
 
 
-def test_remux_containers_subset_of_containers():
+def test_remux_containers_subset_of_containers() -> None:
     """Los destinos de remux seguro son subconjunto de los contenedores válidos."""
     catalogos = (VIDEO_CODECS, AUDIO_CODECS, SUBTITLES_FORMATS)
 
@@ -140,7 +140,7 @@ def test_remux_containers_subset_of_containers():
 # ------------------------------------------------ tuplas derivadas
 
 
-def test_derived_video_containers_match_catalog():
+def test_derived_video_containers_match_catalog() -> None:
     """VIDEO_CONTAINERS se deriva del catálogo de contenedores."""
     expected = tuple(
         container.extension
@@ -151,7 +151,7 @@ def test_derived_video_containers_match_catalog():
     assert VIDEO_CONTAINERS == expected
 
 
-def test_derived_audio_containers_match_catalog():
+def test_derived_audio_containers_match_catalog() -> None:
     """AUDIO_CONTAINERS se deriva del catálogo de contenedores."""
     expected = tuple(
         container.extension
@@ -162,7 +162,7 @@ def test_derived_audio_containers_match_catalog():
     assert AUDIO_CONTAINERS == expected
 
 
-def test_derived_subtitles_containers_match_catalog():
+def test_derived_subtitles_containers_match_catalog() -> None:
     """SUBTITLES_CONTAINERS se deriva del catálogo de contenedores."""
     expected = tuple(
         container.extension

@@ -93,7 +93,7 @@ class Logger:
             cls.create(debug=debug)
         return cls(logging.getLogger(__name__))
 
-    def error(self, msg: str, exc_info: bool = False, **kwargs) -> None:
+    def error(self, msg: str, exc_info: bool = False, **kwargs: object) -> None:
         """Muestra log de nivel error.
 
         Args:
@@ -103,7 +103,7 @@ class Logger:
         """
         self._logger.error(self._render(msg, kwargs), exc_info=exc_info)
 
-    def warning(self, msg: str, **kwargs) -> None:
+    def warning(self, msg: str, **kwargs: object) -> None:
         """Muestra log de nivel aviso (mensaje ya traducido).
 
         Args:
@@ -112,7 +112,7 @@ class Logger:
         """
         self._logger.warning(self._render(msg, kwargs))
 
-    def info(self, msg: str, **kwargs) -> None:
+    def info(self, msg: str, **kwargs: object) -> None:
         """Muestra log de nivel información (mensaje ya traducido).
 
         Args:
@@ -121,7 +121,7 @@ class Logger:
         """
         self._logger.info(self._render(msg, kwargs))
 
-    def debug(self, msg: str, **kwargs) -> None:
+    def debug(self, msg: str, **kwargs: object) -> None:
         """Muestra log de nivel depuración (mensaje ya traducido).
 
         Args:
@@ -147,7 +147,7 @@ class Logger:
         self._console.print(renderable)
 
     @staticmethod
-    def _render(msg: str, kwargs: dict) -> str:
+    def _render(msg: str, kwargs: dict[str, object]) -> str:
         """Aplica `%(name)s` a `msg` si hay valores que sustituir."""
         if kwargs:
             return msg % kwargs

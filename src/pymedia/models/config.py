@@ -4,6 +4,7 @@ import tomllib
 from dataclasses import dataclass
 from importlib.resources import files
 from pathlib import Path
+from typing import Any
 
 import platformdirs
 
@@ -153,7 +154,7 @@ class Config:
     # =========================================================================
 
     @staticmethod
-    def _validate(data: dict) -> None:
+    def _validate(data: dict[str, Any]) -> None:
         """Valida los valores del config.toml."""
         errors: list[str] = []
 

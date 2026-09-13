@@ -1,6 +1,8 @@
 """Tests para los mixins de entrada (pymedia.models.mixins.media_mixin)."""
 
+import logging
 from pathlib import Path
+from typing import Any
 
 import pytest
 
@@ -8,14 +10,21 @@ from pymedia.errors import (
     InvalidContainerTypeError,
     MissingParameterError,
 )
+from pymedia.logger import Logger
 from pymedia.models.media import Media
 from pymedia.models.mixins.media_mixin import MediaInputMixin, MediaListMixin
 
-_EMPTY_METADATA = {"streams": [], "format": {}}
+
+def _logger() -> Logger:
+    """Logger de prueba aislado, sin handlers de consola ni fichero."""
+    return Logger(logging.getLogger("pymedia.tests"))
+
+
+_EMPTY_METADATA: dict[str, Any] = {"streams": [], "format": {}}
 
 
 @pytest.fixture(autouse=True)
-def _fake_probe(monkeypatch):
+def _fake_probe(monkeypatch: pytest.MonkeyPatch) -> None:
     """Evita ejecutar ffprobe en todos los tests de este módulo."""
     monkeypatch.setattr(
         "pymedia.models.mixins.media_mixin.get_media_metadata",
@@ -31,35 +40,39 @@ def _media(path: Path) -> Media:
 class TestInputSingleCreate:
     """Pruebas de creación de la entrada individual."""
 
-    def test_sets_media_with_absolute_path(self, tmp_path, monkeypatch):
+    def test_sets_media_with_absolute_path(
+        self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
         """Comprueba que se guardan la ruta absoluta y los metadatos."""
         monkeypatch.chdir(tmp_path)
         mixin = MediaInputMixin()
         source = Path("clip.mp4")
 
-        mixin.create_media_input(media_input=source, logger=None)
+        mixin.create_media_input(media_input=source, logger=_logger())
 
         assert mixin.media == _media(source.absolute())
 
-    def test_invalid_extension_raises(self, tmp_path):
+    def test_invalid_extension_raises(self, tmp_path: Path) -> None:
         """Comprueba que una extensión no de vídeo lanza un error."""
         mixin = MediaInputMixin()
 
         with pytest.raises(InvalidContainerTypeError):
-            mixin.create_media_input(media_input=tmp_path / "clip.txt", logger=None)
+            mixin.create_media_input(
+                media_input=tmp_path / "clip.txt", logger=_logger()
+            )
 
 
 class TestInputSingleCmd:
     """Pruebas de generación del comando de entrada individual."""
 
-    def test_to_media_input_cmd(self):
+    def test_to_media_input_cmd(self) -> None:
         """Comprueba que se genera el argumento `-i` correctamente."""
         source = Path("clip.mp4")
         mixin = MediaInputMixin(media=_media(source))
 
         assert mixin.to_media_input_cmd() == ["-i", str(source)]
 
-    def test_to_media_input_cmd_missing_parameter(self):
+    def test_to_media_input_cmd_missing_parameter(self) -> None:
         """Comprueba que falta lanzar un error si no hay media."""
         mixin = MediaInputMixin()
 
@@ -70,32 +83,38 @@ class TestInputSingleCmd:
 class TestInputListCreate:
     """Pruebas de creación de la lista de entradas."""
 
-    def test_creates_media_list(self, tmp_path, monkeypatch):
+    def test_creates_media_list(
+        self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
         """Comprueba que se guardan rutas absolutas y sus metadatos."""
         monkeypatch.chdir(tmp_path)
         mixin = MediaListMixin()
         source_a = Path("a.mp4")
         source_b = Path("b.mp4")
 
-        mixin.create_media_list(media_input_list=[source_a, source_b], logger=None)
+        mixin.create_media_list(media_input_list=[source_a, source_b], logger=_logger())
 
         assert mixin.media_list == [
             Media(path=source_a.absolute()),
             Media(path=source_b.absolute()),
         ]
 
-    def test_invalid_extension_raises(self, tmp_path):
+    def test_invalid_extension_raises(self, tmp_path: Path) -> None:
         """Comprueba que una extensión no de vídeo lanza un error."""
         mixin = MediaListMixin()
 
         with pytest.raises(InvalidContainerTypeError):
-            mixin.create_media_list(media_input_list=[tmp_path / "x.txt"], logger=None)
+            mixin.create_media_list(
+                media_input_list=[tmp_path / "x.txt"], logger=_logger()
+            )
 
-    def test_load_failure_raises_missing_media(self, monkeypatch):
+    def test_load_failure_raises_missing_media(
+        self, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
         """Comprueba que un fallo de ffprobe lanza un error."""
         import subprocess
 
-        def _failing_probe(path, logger):
+        def _failing_probe(path: Path, logger: Logger) -> None:
             raise subprocess.CalledProcessError(1, ["ffprobe"])
 
         monkeypatch.setattr(
@@ -104,13 +123,13 @@ class TestInputListCreate:
         mixin = MediaListMixin()
 
         with pytest.raises(subprocess.CalledProcessError):
-            mixin.create_media_list(media_input_list=[Path("x.mp4")], logger=None)
+            mixin.create_media_list(media_input_list=[Path("x.mp4")], logger=_logger())
 
 
 class TestInputListCmd:
     """Pruebas de generación del comando de lista de entradas."""
 
-    def test_to_media_input_list_cmd(self):
+    def test_to_media_input_list_cmd(self) -> None:
         """Comprueba que se genera un `-i` por cada entrada."""
         mixin = MediaListMixin(
             media_list=[Media(path=Path("a.mp4")), Media(path=Path("b.mp4"))]
@@ -157,16 +176,20 @@ _SUBTITLE_METADATA = {
 class TestSubtitlesStreamParsing:
     """Regresión: ffprobe reporta `codec_type == "subtitle"` en singular."""
 
-    def _media_with_streams(self, tmp_path):
+    def _media_with_streams(self, tmp_path: Path) -> Media:
         """Media parseado con metadatos ffprobe simulados."""
         mixin = MediaInputMixin()
         source = tmp_path / "clip.mkv"
 
-        mixin.create_media_input(media_input=source, logger=None)
+        mixin.create_media_input(media_input=source, logger=_logger())
 
-        return mixin.media
+        media = mixin.media
+        assert media is not None
+        return media
 
-    def test_populates_subtitles_streams(self, tmp_path, monkeypatch):
+    def test_populates_subtitles_streams(
+        self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
         """Comprueba que las pistas `subtitle` se parsean y se indexan."""
         monkeypatch.setattr(
             "pymedia.models.mixins.media_mixin.get_media_metadata",
@@ -192,13 +215,18 @@ class TestSubtitlesStreamParsing:
         assert second.language == "ita"
         assert second.forced is True
 
-    def test_video_and_audio_coexist_with_subtitles(self, tmp_path, monkeypatch):
+    def test_video_and_audio_coexist_with_subtitles(
+        self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
         """Comprueba que video/audio siguen indexándose en presencia de subtítulos."""
         monkeypatch.setattr(
             "pymedia.models.mixins.media_mixin.get_media_metadata",
             lambda path, logger: _SUBTITLE_METADATA,
         )
         media = self._media_with_streams(tmp_path)
+
+        assert media.video is not None
+        assert media.audio is not None
 
         assert media.video.global_index == 0
         assert media.video.track_index == 0
@@ -207,7 +235,9 @@ class TestSubtitlesStreamParsing:
         assert media.audio[0].track_index == 0
         assert media.audio[0].language == "eng"
 
-    def test_singular_codec_type_is_required(self, tmp_path, monkeypatch):
+    def test_singular_codec_type_is_required(
+        self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
         """Comprueba que `subtitles` (plural) no se parsea: ffprobe usa `subtitle`."""
         metadata = {
             "streams": [
@@ -223,7 +253,7 @@ class TestSubtitlesStreamParsing:
 
         assert media.subtitles is None
 
-    def test_to_media_input_list_cmd_missing_parameter(self):
+    def test_to_media_input_list_cmd_missing_parameter(self) -> None:
         """Comprueba que falta lanzar un error si no hay lista."""
         mixin = MediaListMixin()
 

@@ -74,7 +74,7 @@ class _LocaleManager:
                 return "system"
             with path.open("rb") as f:
                 data = tomllib.load(f)
-            return data.get("app", {}).get("language", "system")
+            return str(data.get("app", {}).get("language", "system"))
 
         def _detect_system_language() -> str:
             """Detecta el idioma del sistema (POSIX, locale, fallback 'en')."""

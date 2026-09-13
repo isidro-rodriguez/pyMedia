@@ -2,7 +2,6 @@
 
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Protocol
 
 from pymedia.data.language_codes import LANGUAGES
 from pymedia.errors import (
@@ -18,20 +17,16 @@ from pymedia.models.audio import Audio
 from pymedia.models.media import Media
 
 
-class _AudioContext(Protocol):
-    media: Media
-    media_output: Path
-    stream_tracks: list[int]
-
-
 @dataclass(kw_only=True)
-class AudioInputMixin(_AudioContext):
+class AudioInputMixin:
     """Mixin para la recepción de ficheros de audio.
 
     Attributes:
         audio: Objeto de metadatos para la pista de audio.
     """
 
+    media: Media | None = None
+    stream_tracks: list[int] | None = None
     audio: Audio | None = None
 
     def create_add_audio(
@@ -69,10 +64,14 @@ class AudioInputMixin(_AudioContext):
 
         language_code = self._parse_language(raw=language)
 
+        media = self.media
+        if media is None:
+            raise MissingParameterError(name="media")
+
         self.audio = Audio(
             path=audio_input.absolute(),
-            global_index=self._process_stream_index(media=self.media),
-            track_index=self._process_audio_index(media=self.media),
+            global_index=self._process_stream_index(media=media),
+            track_index=self._process_audio_index(media=media),
             codec=get_audio_codec(audio_input=audio_input, logger=logger),
             language=language_code,
             title=self._process_audio_title(title=title, lang=language_code),
@@ -109,16 +108,15 @@ class AudioInputMixin(_AudioContext):
         """
         if self.stream_tracks is None:
             raise MissingParameterError(name=_("stream tracks"))
-        if self.media.audio is None:
+        media = self.media
+        if media is None:
+            raise MissingParameterError(name="media")
+        if media.audio is None:
             raise MissingParameterError(name=_("media audio"))
 
         track_index = self.stream_tracks[0]
         current = next(
-            (
-                stream
-                for stream in self.media.audio
-                if stream.track_index == track_index
-            ),
+            (stream for stream in media.audio if stream.track_index == track_index),
             None,
         )
 
@@ -137,7 +135,7 @@ class AudioInputMixin(_AudioContext):
             )
 
         self.audio = Audio(
-            path=self.media.path,
+            path=media.path,
             track_index=track_index,
             language=language_code,
             title=title,
@@ -219,12 +217,15 @@ class AudioInputMixin(_AudioContext):
         if audio.track_index is None:
             raise MissingParameterError(name="audio.track_index")
 
-        if self.media.audio is None:
+        media = self.media
+        if media is None:
+            raise MissingParameterError(name="media")
+        if media.audio is None:
             return []
 
         flags: list[str] = []
 
-        for track in self.media.audio:
+        for track in media.audio:
             if track.track_index is None:
                 continue
 

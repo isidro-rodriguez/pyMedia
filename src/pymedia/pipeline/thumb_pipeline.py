@@ -168,7 +168,10 @@ class ThumbPipeline(BasePipeline[ThumbParameters]):
         output: Path = params.image_output
         output_list: list[Path] = []
         duration_secs = params.media.duration.total_seconds()
-        frames = duration_secs * params.fps
+        fps = params.fps
+        if fps is None:
+            raise MissingParameterError(name="fps")
+        frames = duration_secs * float(fps)
         counter = math.floor(frames)
 
         for i in range(counter):

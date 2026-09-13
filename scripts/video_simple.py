@@ -3,11 +3,33 @@
 #!/usr/bin/env python3
 
 import subprocess
+from typing import TypedDict
+
+
+class _VideoConfig(TypedDict):
+    """Parámetros de generación del vídeo de prueba."""
+
+    output: str
+    width: int
+    height: int
+    fps: int
+    duration: int
+    video_codec: str
+    video_crf: int
+    video_preset: int
+    fractal_start: str
+    fractal_end: str
+    fractal_maxiter: int
+    audio_codec: str
+    audio_bitrate: str
+    audio_frequency: int
+    audio_sample_rate: int
+
 
 # ============================================================
 # CONFIGURACIÓN
 # ============================================================
-CONFIG = {
+CONFIG: _VideoConfig = {
     # Archivo de salida
     "output": "simple.mp4",
     # Vídeo
@@ -32,11 +54,11 @@ CONFIG = {
 }
 
 
-def build_ffmpeg_command(config):
+def build_ffmpeg_command(config: _VideoConfig) -> list[str]:
     """Construye el comando ffmpeg a partir de la configuración indicada.
 
     Args:
-        config: Diccionario con los parámetros de generación del vídeo.
+        config: Parámetros de generación del vídeo.
 
     Returns:
         Lista con el comando ffmpeg listo para ejecutar.
@@ -145,7 +167,7 @@ def build_ffmpeg_command(config):
     return command
 
 
-def main():
+def main() -> None:
     """Genera el vídeo de prueba ejecutando ffmpeg."""
     command = build_ffmpeg_command(CONFIG)
 

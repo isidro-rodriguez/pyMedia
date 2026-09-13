@@ -8,7 +8,6 @@ validación de la ruta en las funciones privadas compartidas del módulo.
 import re
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Protocol
 
 from pymedia.data.audio_codecs import AUDIO_CODECS
 from pymedia.data.subtitles_formats import SUBTITLES_FORMATS
@@ -19,6 +18,7 @@ from pymedia.errors import (
     InvalidContainerError,
     InvalidContainerTypeError,
     InvalidRemuxError,
+    MissingParameterError,
     MissingPropertyError,
     PermissionDeniedError,
 )
@@ -26,22 +26,15 @@ from pymedia.locales import _  # noqa
 from pymedia.models.media import Media
 
 
-class _HasMedia(Protocol):
-    media: Media
-
-
-class _HasStreamTracks(Protocol):
-    stream_tracks: list[int] | None
-
-
 @dataclass(kw_only=True)
-class AnimatedOutputMixin(_HasMedia):
+class AnimatedOutputMixin:
     """Mixin para la ruta de salida de imágenes animadas.
 
     Attributes:
         animated_output: Ruta de salida del fichero de imagen animada.
     """
 
+    media: Media | None = None
     animated_output: Path | None = None
     output_directory: Path | None = None
 
@@ -70,8 +63,12 @@ class AnimatedOutputMixin(_HasMedia):
         if output_directory is not None:
             self.output_directory = _process_output_directory(output_directory)
 
+        media = self.media
+        if media is None:
+            raise MissingParameterError(name="media")
+
         output = _process_output(
-            media=self.media,
+            media=media,
             affix=affix,
             extension=extension,
             output=output,
@@ -89,7 +86,7 @@ class AnimatedOutputMixin(_HasMedia):
 
 
 @dataclass(kw_only=True)
-class AudioOutputMixin(_HasMedia, _HasStreamTracks):
+class AudioOutputMixin:
     """Mixin para la ruta de salida de pistas de audio.
 
     Attributes:
@@ -97,6 +94,8 @@ class AudioOutputMixin(_HasMedia, _HasStreamTracks):
         output_directory: Directorio de salida para lotes de varias imágenes.
     """
 
+    media: Media | None = None
+    stream_tracks: list[int] | None = None
     audio_output: Path | None = None
     output_directory: Path | None = None
 
@@ -134,8 +133,12 @@ class AudioOutputMixin(_HasMedia, _HasStreamTracks):
         if output_directory is not None:
             self.output_directory = _process_output_directory(output_directory)
 
+        media = self.media
+        if media is None:
+            raise MissingParameterError(name="media")
+
         output = _process_output(
-            media=self.media,
+            media=media,
             affix=affix,
             extension=extension,
             output=output,
@@ -149,36 +152,34 @@ class AudioOutputMixin(_HasMedia, _HasStreamTracks):
                 supported=", ".join(SUPPORTED.AUDIO),
             )
 
-        if self.media is not None:
-            if self.media.audio is None:
-                raise MissingPropertyError(name="media.audio")
-            audio_tracks = self.media.audio
-            # stream_tracks lo aporta StreamsMixin en el contexto real (protocolo);
-            # en uso aislado del mixin no existe y se validan todas las pistas.
-            stream_tracks = getattr(self, "stream_tracks", None)
-            if stream_tracks is not None:
-                audio_tracks = [
-                    track
-                    for track in self.media.audio
-                    if track.track_index in stream_tracks
-                ]
-            for audio_track in audio_tracks:
-                if audio_track.codec is None:
-                    raise MissingPropertyError(name="audio codec")
-                codec_data = AUDIO_CODECS[audio_track.codec]
-                _validate_remux(
-                    suffix=output.suffix,
-                    source_suffix=self.media.path.suffix,
-                    codec_name=codec_data.name,
-                    containers=codec_data.containers,
-                    remux_containers=codec_data.remux_containers,
-                )
+        if media.audio is None:
+            raise MissingPropertyError(name="media.audio")
+        audio_tracks = media.audio
+        # Por defecto se validan todas las pistas; `stream_tracks` la aporta
+        # StreamsMixin en el contexto real de los parámetros del comando.
+        if self.stream_tracks is not None:
+            audio_tracks = [
+                track
+                for track in media.audio
+                if track.track_index in self.stream_tracks
+            ]
+        for audio_track in audio_tracks:
+            if audio_track.codec is None:
+                raise MissingPropertyError(name="audio codec")
+            codec_data = AUDIO_CODECS[audio_track.codec]
+            _validate_remux(
+                suffix=output.suffix,
+                source_suffix=media.path.suffix,
+                codec_name=codec_data.name,
+                containers=codec_data.containers,
+                remux_containers=codec_data.remux_containers,
+            )
 
         self.audio_output = output
 
 
 @dataclass(kw_only=True)
-class ImageOutputMixin(_HasMedia):
+class ImageOutputMixin:
     """Mixin para la ruta o directorio de salida de imágenes.
 
     Attributes:
@@ -187,6 +188,7 @@ class ImageOutputMixin(_HasMedia):
         output_directory: Directorio de salida para lotes de varias imágenes.
     """
 
+    media: Media | None = None
     image_output: Path | None = None
     output_directory: Path | None = None
 
@@ -215,8 +217,12 @@ class ImageOutputMixin(_HasMedia):
         if output_directory is not None:
             self.output_directory = _process_output_directory(output_directory)
 
+        media = self.media
+        if media is None:
+            raise MissingParameterError(name="media")
+
         output = _process_output(
-            media=self.media,
+            media=media,
             affix=affix,
             extension=extension,
             output=output,
@@ -234,7 +240,7 @@ class ImageOutputMixin(_HasMedia):
 
 
 @dataclass(kw_only=True)
-class MediaOutputMixin(_HasMedia):
+class MediaOutputMixin:
     """Mixin para la ruta de salida de contenedores multimedia.
 
     Attributes:
@@ -242,6 +248,7 @@ class MediaOutputMixin(_HasMedia):
         output_directory: Directorio de salida para lotes de varias imágenes.
     """
 
+    media: Media | None = None
     media_output: Path | None = None
     output_directory: Path | None = None
 
@@ -281,6 +288,8 @@ class MediaOutputMixin(_HasMedia):
             self.output_directory = _process_output_directory(output_directory)
 
         media = self.media if media_list is None else media_list[0]
+        if media is None:
+            raise MissingParameterError(name="media")
 
         output = _process_output(
             media=media,
@@ -343,7 +352,7 @@ class MediaOutputMixin(_HasMedia):
 
 
 @dataclass(kw_only=True)
-class SubtitlesOutputMixin(_HasMedia, _HasStreamTracks):
+class SubtitlesOutputMixin:
     """Mixin para la ruta de salida de subtítulos.
 
     Attributes:
@@ -352,6 +361,8 @@ class SubtitlesOutputMixin(_HasMedia, _HasStreamTracks):
         output_directory: Directorio de salida para lotes de varias imágenes.
     """
 
+    media: Media | None = None
+    stream_tracks: list[int] | None = None
     subtitles_output: Path | None = None
     output_directory: Path | None = None
 
@@ -389,8 +400,12 @@ class SubtitlesOutputMixin(_HasMedia, _HasStreamTracks):
         if output_directory is not None:
             self.output_directory = _process_output_directory(output_directory)
 
+        media = self.media
+        if media is None:
+            raise MissingParameterError(name="media")
+
         output = _process_output(
-            media=self.media,
+            media=media,
             affix=affix,
             extension=extension,
             output=output,
@@ -404,30 +419,28 @@ class SubtitlesOutputMixin(_HasMedia, _HasStreamTracks):
                 supported=", ".join(SUPPORTED.SUBTITLES),
             )
 
-        if self.media is not None:
-            if self.media.subtitles is None:
-                raise MissingPropertyError(name="media.subtitles")
-            subtitles_tracks = self.media.subtitles
-            # stream_tracks lo aporta StreamsMixin en el contexto real (protocolo);
-            # en uso aislado del mixin no existe y se validan todas las pistas.
-            stream_tracks = getattr(self, "stream_tracks", None)
-            if stream_tracks is not None:
-                subtitles_tracks = [
-                    track
-                    for track in self.media.subtitles
-                    if track.track_index in stream_tracks
-                ]
-            for subtitles_track in subtitles_tracks:
-                if subtitles_track.codec is None:
-                    raise MissingPropertyError(name="subtitles codec")
-                fmt_data = SUBTITLES_FORMATS[subtitles_track.codec]
-                _validate_remux(
-                    suffix=output.suffix,
-                    source_suffix=self.media.path.suffix,
-                    codec_name=fmt_data.codec_name,
-                    containers=fmt_data.containers,
-                    remux_containers=fmt_data.remux_containers,
-                )
+        if media.subtitles is None:
+            raise MissingPropertyError(name="media.subtitles")
+        subtitles_tracks = media.subtitles
+        # Por defecto se validan todas las pistas; `stream_tracks` la aporta
+        # StreamsMixin en el contexto real de los parámetros del comando.
+        if self.stream_tracks is not None:
+            subtitles_tracks = [
+                track
+                for track in media.subtitles
+                if track.track_index in self.stream_tracks
+            ]
+        for subtitles_track in subtitles_tracks:
+            if subtitles_track.codec is None:
+                raise MissingPropertyError(name="subtitles codec")
+            fmt_data = SUBTITLES_FORMATS[subtitles_track.codec]
+            _validate_remux(
+                suffix=output.suffix,
+                source_suffix=media.path.suffix,
+                codec_name=fmt_data.codec_name,
+                containers=fmt_data.containers,
+                remux_containers=fmt_data.remux_containers,
+            )
 
         self.subtitles_output = output
 

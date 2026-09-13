@@ -41,25 +41,25 @@ def _subtitle(language: str | None, track_index: int) -> Subtitles:
 class TestToSortTracksCmd:
     """Pruebas de `to_sort_tracks_cmd`."""
 
-    def test_disabled_returns_empty(self):
+    def test_disabled_returns_empty(self) -> None:
         """Comprueba que con la ordenación desactivada no se generan argumentos."""
         mixin = _mixin(media=_media(), sort_tracks=False)
 
         assert mixin.to_sort_tracks_cmd() == []
 
-    def test_empty_media_returns_empty(self):
+    def test_empty_media_returns_empty(self) -> None:
         """Comprueba que una media sin streams no genera argumentos."""
         mixin = _mixin(media=_media())
 
         assert mixin.to_sort_tracks_cmd() == []
 
-    def test_video_only(self):
+    def test_video_only(self) -> None:
         """Comprueba que se mapea la pista de vídeo única."""
         mixin = _mixin(media=_media(video=Video(path=Path("clip.mkv"), track_index=0)))
 
         assert mixin.to_sort_tracks_cmd() == ["-map", "0:v:0"]
 
-    def test_stream_order_video_audio_subtitles(self):
+    def test_stream_order_video_audio_subtitles(self) -> None:
         """Comprueba que el orden de salida es vídeo, audio y luego subtítulos."""
         media = _media(
             video=Video(path=Path("clip.mkv"), track_index=0),
@@ -80,7 +80,7 @@ class TestToSortTracksCmd:
 class TestSortByLanguage:
     """Pruebas del orden de los streams por idioma dentro de cada tipo."""
 
-    def test_audio_sorted_alphabetically(self):
+    def test_audio_sorted_alphabetically(self) -> None:
         """Comprueba que el audio se ordena alfabéticamente por idioma."""
         media = _media(
             audio=[
@@ -99,7 +99,7 @@ class TestSortByLanguage:
             "0:a:0",
         ]
 
-    def test_language_streams_first(self):
+    def test_language_streams_first(self) -> None:
         """Comprueba que los streams con idioma preceden a los que no lo tienen."""
         media = _media(
             audio=[
@@ -115,7 +115,7 @@ class TestSortByLanguage:
             "0:a:0",
         ]
 
-    def test_no_language_tracks_keep_order(self):
+    def test_no_language_tracks_keep_order(self) -> None:
         """Comprueba que las pistas sin idioma conservan su orden original."""
         media = _media(
             subtitles=[
@@ -134,7 +134,7 @@ class TestSortByLanguage:
             "0:s:2",
         ]
 
-    def test_mixed_language_and_no_language(self):
+    def test_mixed_language_and_no_language(self) -> None:
         """Comprueba que con idioma primero por orden alfabético y luego sin idioma."""
         media = _media(
             audio=[

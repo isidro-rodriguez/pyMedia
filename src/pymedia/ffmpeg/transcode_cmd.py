@@ -47,14 +47,14 @@ class TranscodeCmd:
             ]
         )
 
-        if filters is not None:
+        if filters != "":
             cmd.extend(["-filter_complex", f"{filters}[v]"])
 
         if self.params.media.audio is not None:
             cmd.extend([*self.params.to_audio_transcode_cmd()])
 
         if self.params.media.video is not None:
-            video_map = "[v]" if filters is not None else "0:v:0"
+            video_map = "[v]" if filters != "" else "0:v:0"
             cmd.extend(["-map", video_map])
 
         cmd.extend(

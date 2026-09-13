@@ -56,7 +56,7 @@ def get_audio_codec(audio_input: Path, logger: Logger) -> str:
     logger.debug(msg=_("ffprobe audio file data: %(data)s"), data=data)
 
     streams = data.get("streams", [])
-    codec_name = streams[0].get("codec_name") if streams else None
+    codec_name: str | None = streams[0].get("codec_name") if streams else None
     if codec_name not in AUDIO_CODECS:
         format_name = data.get("format", {}).get("format_name", "")
         detected_codecs: set[str] = {
@@ -125,7 +125,7 @@ def get_media_metadata(path: Path, logger: Logger) -> dict[str, Any]:
             % {"path": path, "err.stderr": err.stderr}
         ) from err
 
-    data = json.loads(result.stdout)
+    data: dict[str, Any] = json.loads(result.stdout)
     logger.debug(msg=_("ffprobe media data: %(data)s"), data=data)
 
     return data

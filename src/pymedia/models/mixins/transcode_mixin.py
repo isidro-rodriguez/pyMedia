@@ -1,7 +1,6 @@
 """Mixin de transcodificación."""
 
 from dataclasses import dataclass
-from typing import Protocol
 
 from pymedia.data.audio_codecs import AUDIO_CODECS
 from pymedia.data.video_codecs import VIDEO_CODECS
@@ -10,13 +9,8 @@ from pymedia.models.config import Transcode
 from pymedia.models.media import Media
 
 
-class _TranscodeContext(Protocol):
-    media: Media
-    stream_tracks: list[int] | None = None
-
-
 @dataclass(kw_only=True)
-class TranscodeMixin(_TranscodeContext):
+class TranscodeMixin:
     """Mixin para los parámetros de transcodificación.
 
     Attributes:
@@ -24,6 +18,8 @@ class TranscodeMixin(_TranscodeContext):
         transcode_video: Permite la transcodificación de la pista de video.
     """
 
+    media: Media | None = None
+    stream_tracks: list[int] | None = None
     transcode: Transcode
     transcode_video: bool
 
@@ -62,7 +58,10 @@ class TranscodeMixin(_TranscodeContext):
         Raises:
             MissingParameterError: Si el medio no tiene pistas de audio.
         """
-        if self.media.audio is None:
+        media = self.media
+        if media is None:
+            raise MissingParameterError(name="media")
+        if media.audio is None:
             raise MissingParameterError(name="media.audio")
 
         tracks_to_transcode: list[int] = (
@@ -70,7 +69,7 @@ class TranscodeMixin(_TranscodeContext):
         )
 
         audio_transcode: list[str] = []
-        for audio_track in self.media.audio:
+        for audio_track in media.audio:
             audio_transcode.extend(
                 [
                     "-map",

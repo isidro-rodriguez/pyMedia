@@ -80,9 +80,11 @@ class JoinParameters(
 
 @dataclass(kw_only=True)
 class InfoParameters(
+    _BaseParameters,
     MediaInputMixin,
 ):
     """Parámetros utilizados por el comando Info."""
+    overwrite: OverwriteMode = OverwriteMode.NO
 
 
 @dataclass(kw_only=True)

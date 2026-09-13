@@ -11,7 +11,7 @@ import threading
 from abc import ABC
 from datetime import timedelta
 from pathlib import Path
-from typing import TypeVar
+from typing import Protocol, TypeVar, cast
 
 import typer
 from rich.progress import Progress
@@ -24,6 +24,13 @@ from pymedia.locales import _  # noqa
 from pymedia.logger import Logger
 from pymedia.models.config import Config
 from pymedia.types import OverwriteMode
+
+
+class _OverwriteParams(Protocol):
+    """Parámetros capaces de resolver la sobrescritura de ficheros de salida."""
+
+    overwrite: OverwriteMode
+
 
 ParamsT = TypeVar("ParamsT")
 
@@ -67,18 +74,19 @@ class BasePipeline[ParamsT](ABC):
             `True` si se puede sobrescribir o no hay conflicto, `False` si el
             proceso debe omitirse.
         """
-        if self.params.overwrite == OverwriteMode.YES:
+        params = cast(_OverwriteParams, self.params)  # noqa
+        if params.overwrite == OverwriteMode.YES:
             return True
 
         process_skip_msg = _("Process skipped since output file already exists.")
         for output in output_list:
             if output.exists():
-                if self.params.overwrite == OverwriteMode.NO:
+                if params.overwrite == OverwriteMode.NO:
                     self.logger.warning(process_skip_msg)
                     return False
                 self.logger.warning(_(f"Output file already exists: {output.name}"))
                 if typer.confirm(_("Overwrite?")):
-                    self.params.overwrite = OverwriteMode.YES
+                    params.overwrite = OverwriteMode.YES
                     return True
                 self.logger.warning(process_skip_msg)
                 return False

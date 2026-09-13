@@ -2,7 +2,6 @@
 
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Protocol
 
 from pymedia.data.language_codes import LANGUAGES
 from pymedia.errors import (
@@ -18,20 +17,17 @@ from pymedia.models.media import Media
 from pymedia.models.subtitles import Subtitles
 
 
-class _SubtitlesContext(Protocol):
-    media: Media
-    media_output: Path
-    stream_tracks: list[int]
-
-
 @dataclass(kw_only=True)
-class SubtitlesInputMixin(_SubtitlesContext):
+class SubtitlesInputMixin:
     """Mixin para la recepción de ficheros de subtítulos.
 
     Attributes:
         subtitles: Objeto de metadatos para subtítulos.
     """
 
+    media: Media | None = None
+    media_output: Path | None = None
+    stream_tracks: list[int] | None = None
     subtitles: Subtitles | None = None
 
     def create_add_subtitles(
@@ -71,10 +67,13 @@ class SubtitlesInputMixin(_SubtitlesContext):
 
         validate_subtitles_file_codec(subtitles_input=subtitles_input, logger=logger)
         language_code = self._parse_language(raw=language)
+        media = self.media
+        if media is None:
+            raise MissingParameterError(name="media")
         self.subtitles = Subtitles(
             path=subtitles_input.absolute(),
-            global_index=self._process_stream_index(media=self.media),
-            track_index=self._process_subtitles_index(media=self.media),
+            global_index=self._process_stream_index(media=media),
+            track_index=self._process_subtitles_index(media=media),
             codec=self._process_codec(),
             language=language_code,
             title=self._process_subtitles_title(title=title, lang=language_code),
@@ -111,16 +110,15 @@ class SubtitlesInputMixin(_SubtitlesContext):
         """
         if self.stream_tracks is None:
             raise MissingParameterError(name=_("stream tracks"))
-        if self.media.subtitles is None:
+        media = self.media
+        if media is None:
+            raise MissingParameterError(name="media")
+        if media.subtitles is None:
             raise MissingParameterError(name=_("media subtitles"))
 
         track_index = self.stream_tracks[0]
         current = next(
-            (
-                stream
-                for stream in self.media.subtitles
-                if stream.track_index == track_index
-            ),
+            (stream for stream in media.subtitles if stream.track_index == track_index),
             None,
         )
         if current is None:
@@ -135,7 +133,7 @@ class SubtitlesInputMixin(_SubtitlesContext):
             title = self._process_subtitles_title(title=title, lang=language_code)
 
         self.subtitles = Subtitles(
-            path=self.media.path,
+            path=media.path,
             track_index=track_index,
             language=language_code,
             title=title,
@@ -212,11 +210,14 @@ class SubtitlesInputMixin(_SubtitlesContext):
             return []
         if subtitles.track_index is None:
             raise MissingParameterError(name="subtitles.track_index")
-        if self.media.subtitles is None:
+        media = self.media
+        if media is None:
+            raise MissingParameterError(name="media")
+        if media.subtitles is None:
             return []
 
         flags: list[str] = []
-        for track in self.media.subtitles:
+        for track in media.subtitles:
             if track.track_index is None:
                 continue
             if track.track_index == subtitles.track_index or not track.default:
@@ -230,6 +231,8 @@ class SubtitlesInputMixin(_SubtitlesContext):
 
     def _process_codec(self) -> str:
         """Devuelve el códec de subtítulos del contenedor de salida."""
+        if self.media_output is None:
+            raise MissingParameterError(name="media_output")
         match self.media_output.suffix:
             case ".m2ts" | ".mov" | ".mp4" | ".ts":
                 return "mov_text"

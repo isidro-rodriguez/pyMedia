@@ -110,7 +110,7 @@ def _subtitles_mixin(media: Media | None = None) -> SubtitlesOutputMixin:
 class TestAnimatedOutputMixin:
     """Pruebas del mixin de salida de imágenes animadas (GIF)."""
 
-    def test_sets_animated_output(self, tmp_path):
+    def test_sets_animated_output(self, tmp_path: Path) -> None:
         """Comprueba que se asigna la salida GIF al campo tipado."""
         mixin = _animated_mixin()
 
@@ -118,7 +118,7 @@ class TestAnimatedOutputMixin:
 
         assert mixin.animated_output == (tmp_path / "out.gif").absolute()
 
-    def test_invalid_extension_raises(self, tmp_path):
+    def test_invalid_extension_raises(self, tmp_path: Path) -> None:
         """Comprueba que una extensión no GIF lanza un error."""
         mixin = _animated_mixin()
 
@@ -127,7 +127,7 @@ class TestAnimatedOutputMixin:
 
         assert "gif" in exc_info.value.msg
 
-    def test_output_directory_created(self, tmp_path):
+    def test_output_directory_created(self, tmp_path: Path) -> None:
         """Comprueba que se crea y usa el directorio de salida."""
         target = tmp_path / "out"
         mixin = _animated_mixin(media=_media_with_path())
@@ -144,21 +144,21 @@ class TestAnimatedOutputMixin:
 class TestAudioOutputMixin:
     """Pruebas del mixin de salida de pistas de audio."""
 
-    def test_requires_audio_track(self, tmp_path):
+    def test_requires_audio_track(self, tmp_path: Path) -> None:
         """Comprueba que la salida de audio exige una pista de audio."""
         mixin = _audio_mixin(media=_media_with_path())
 
         with pytest.raises(MissingPropertyError, match="audio"):
             mixin.create_audio_output(extension=".m4a", output=tmp_path / "out.m4a")
 
-    def test_requires_codec(self, tmp_path):
+    def test_requires_codec(self, tmp_path: Path) -> None:
         """Comprueba que la salida de audio exige un códec en la pista."""
         mixin = _audio_mixin(media=_media_with_path(audio=_audio(None)))
 
         with pytest.raises(MissingPropertyError, match="audio codec"):
             mixin.create_audio_output(extension=".m4a", output=tmp_path / "out.m4a")
 
-    def test_sets_audio_output(self, tmp_path):
+    def test_sets_audio_output(self, tmp_path: Path) -> None:
         """Comprueba que se asigna la salida al campo tipado."""
         mixin = _audio_mixin(media=_media_with_path(audio=_audio("aac")))
 
@@ -166,7 +166,7 @@ class TestAudioOutputMixin:
 
         assert mixin.audio_output == (tmp_path / "out.m4a").absolute()
 
-    def test_extension_not_supported_by_codec(self, tmp_path):
+    def test_extension_not_supported_by_codec(self, tmp_path: Path) -> None:
         """Comprueba que un códec que no soporta la extensión lanza un error."""
         mixin = _audio_mixin(media=_media_with_path(audio=_audio("aac")))
 
@@ -176,14 +176,14 @@ class TestAudioOutputMixin:
 
         assert "aac" in exc_info.value.msg
 
-    def test_not_audio_extension(self, tmp_path):
+    def test_not_audio_extension(self, tmp_path: Path) -> None:
         """Comprueba que una extensión no de audio lanza un error."""
         mixin = _audio_mixin(media=_media_with_path(audio=_audio("aac")))
 
         with pytest.raises(InvalidContainerTypeError):
             mixin.create_audio_output(extension=".m4a", output=tmp_path / "out.txt")
 
-    def test_ignores_unselected_tracks(self, tmp_path):
+    def test_ignores_unselected_tracks(self, tmp_path: Path) -> None:
         """Comprueba que solo se validan las pistas seleccionadas en stream_tracks."""
         mixin = _audio_mixin(
             media=_media_tracks(_audio_track("aac", 0), _audio_track("ac3", 1))
@@ -194,7 +194,7 @@ class TestAudioOutputMixin:
 
         assert mixin.audio_output == (tmp_path / "out.m4a").absolute()
 
-    def test_selected_track_codec_still_checked(self, tmp_path):
+    def test_selected_track_codec_still_checked(self, tmp_path: Path) -> None:
         """Comprueba que el contenedor se valida contra la pista seleccionada."""
         mixin = _audio_mixin(
             media=_media_tracks(_audio_track("aac", 0), _audio_track("ac3", 1))
@@ -206,7 +206,7 @@ class TestAudioOutputMixin:
 
         assert "aac" in exc_info.value.msg
 
-    def test_all_tracks_checked_without_selection(self, tmp_path):
+    def test_all_tracks_checked_without_selection(self, tmp_path: Path) -> None:
         """Comprueba que sin selección se validan todas las pistas de la media."""
         mixin = _audio_mixin(
             media=_media_tracks(_audio_track("aac", 0), _audio_track("ac3", 1))
@@ -217,7 +217,7 @@ class TestAudioOutputMixin:
 
         assert "ac3" in exc_info.value.msg
 
-    def test_remux_to_safe_container(self, tmp_path):
+    def test_remux_to_safe_container(self, tmp_path: Path) -> None:
         """Comprueba que un cambio de contenedor seguro para el códec pasa."""
         mixin = _audio_mixin(media=_media_tracks(_audio_track("opus", 0)))
 
@@ -225,7 +225,7 @@ class TestAudioOutputMixin:
 
         assert mixin.audio_output == (tmp_path / "out.ogg").absolute()
 
-    def test_remux_to_unsafe_container_raises(self, tmp_path):
+    def test_remux_to_unsafe_container_raises(self, tmp_path: Path) -> None:
         """Comprueba que el remux a un contenedor no seguro lanza InvalidRemuxError."""
         mixin = _audio_mixin(media=_media_tracks(_audio_track("aac", 0)))
 
@@ -235,7 +235,7 @@ class TestAudioOutputMixin:
         assert "aac" in exc_info.value.msg
         assert ".m4a" in exc_info.value.msg
 
-    def test_remux_error_lists_safe_targets(self, tmp_path):
+    def test_remux_error_lists_safe_targets(self, tmp_path: Path) -> None:
         """Comprueba que el error de remux lista los destinos seguros del códec."""
         mixin = _audio_mixin(media=_media_tracks(_audio_track("ac3", 0)))
 
@@ -245,7 +245,7 @@ class TestAudioOutputMixin:
         assert "ac3" in exc_info.value.msg
         assert ".m2ts" in exc_info.value.msg
 
-    def test_remux_ignores_unselected_tracks(self, tmp_path):
+    def test_remux_ignores_unselected_tracks(self, tmp_path: Path) -> None:
         """Comprueba que el remux solo se valida contra las pistas seleccionadas."""
         mixin = _audio_mixin(
             media=_media_tracks(_audio_track("opus", 0), _audio_track("aac", 1))
@@ -260,7 +260,9 @@ class TestAudioOutputMixin:
 class TestImageOutputMixin:
     """Pruebas del mixin de salida de imágenes."""
 
-    def test_default_image_output_from_media(self, tmp_path, monkeypatch):
+    def test_default_image_output_from_media(
+        self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
         """Comprueba que el nombre por defecto deriva de la media."""
         monkeypatch.chdir(tmp_path)
         mixin = _image_mixin(media=_media_with_path())
@@ -269,7 +271,7 @@ class TestImageOutputMixin:
 
         assert mixin.image_output == (tmp_path / "clip.jpg").absolute()
 
-    def test_sets_image_output(self, tmp_path):
+    def test_sets_image_output(self, tmp_path: Path) -> None:
         """Comprueba que se asigna la salida al campo tipado."""
         mixin = _image_mixin()
 
@@ -277,7 +279,7 @@ class TestImageOutputMixin:
 
         assert mixin.image_output == (tmp_path / "out.png").absolute()
 
-    def test_invalid_extension_raises(self, tmp_path):
+    def test_invalid_extension_raises(self, tmp_path: Path) -> None:
         """Comprueba que una extensión no de imagen lanza un error."""
         mixin = _image_mixin()
 
@@ -286,7 +288,7 @@ class TestImageOutputMixin:
 
         assert ".xyz" in exc_info.value.msg
 
-    def test_output_directory_created(self, tmp_path):
+    def test_output_directory_created(self, tmp_path: Path) -> None:
         """Comprueba que se crea y usa el directorio de salida."""
         target = tmp_path / "out"
         mixin = _image_mixin(media=_media_with_path())
@@ -297,7 +299,7 @@ class TestImageOutputMixin:
         assert mixin.image_output == (target / "clip.jpg").absolute()
         assert target.is_dir()
 
-    def test_output_directory_invalid_name(self, tmp_path):
+    def test_output_directory_invalid_name(self, tmp_path: Path) -> None:
         """Comprueba que un nombre de directorio no válido lanza un error."""
         mixin = _image_mixin()
 
@@ -311,7 +313,7 @@ class TestImageOutputMixin:
 class TestSubtitlesOutputMixin:
     """Pruebas del mixin de salida de subtítulos."""
 
-    def test_sets_subtitles_output(self, tmp_path):
+    def test_sets_subtitles_output(self, tmp_path: Path) -> None:
         """Comprueba que se asigna la salida al campo tipado."""
         mixin = _subtitles_mixin()
 
@@ -319,7 +321,7 @@ class TestSubtitlesOutputMixin:
 
         assert mixin.subtitles_output == (tmp_path / "out.srt").absolute()
 
-    def test_invalid_extension_raises(self, tmp_path):
+    def test_invalid_extension_raises(self, tmp_path: Path) -> None:
         """Comprueba que una extensión no de subtítulo lanza un error."""
         mixin = _subtitles_mixin()
 
@@ -328,7 +330,7 @@ class TestSubtitlesOutputMixin:
 
         assert ".xyz" in str(exc_info.value)
 
-    def test_remux_to_safe_container(self, tmp_path):
+    def test_remux_to_safe_container(self, tmp_path: Path) -> None:
         """Comprueba que extraer srt a .srt desde un mkv pasa la validación."""
         mixin = _subtitles_mixin(media=_media_sub_tracks(_subtitles_track("srt", 0)))
 
@@ -336,7 +338,7 @@ class TestSubtitlesOutputMixin:
 
         assert mixin.subtitles_output == (tmp_path / "out.srt").absolute()
 
-    def test_remux_to_unsafe_container_raises(self, tmp_path):
+    def test_remux_to_unsafe_container_raises(self, tmp_path: Path) -> None:
         """Comprueba que cambiar srt a .ass lanza InvalidRemuxError."""
         mixin = _subtitles_mixin(media=_media_sub_tracks(_subtitles_track("srt", 0)))
 
@@ -345,7 +347,7 @@ class TestSubtitlesOutputMixin:
 
         assert "srt" in exc_info.value.msg
 
-    def test_remux_reverse_direction_rejected(self, tmp_path):
+    def test_remux_reverse_direction_rejected(self, tmp_path: Path) -> None:
         """Comprueba que cambiar ass a .srt también se rechaza."""
         mixin = _subtitles_mixin(media=_media_sub_tracks(_subtitles_track("ass", 0)))
 
@@ -354,7 +356,7 @@ class TestSubtitlesOutputMixin:
 
         assert "ass" in exc_info.value.msg
 
-    def test_remux_ignores_unselected_tracks(self, tmp_path):
+    def test_remux_ignores_unselected_tracks(self, tmp_path: Path) -> None:
         """Comprueba que el remux solo se valida contra las pistas seleccionadas."""
         mixin = _subtitles_mixin(
             media=_media_sub_tracks(
@@ -371,7 +373,9 @@ class TestSubtitlesOutputMixin:
 class TestProcessOutput:
     """Pruebas del procesamiento de la ruta de salida (función compartida)."""
 
-    def test_default_path_uses_media_name(self, tmp_path, monkeypatch):
+    def test_default_path_uses_media_name(
+        self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
         """Comprueba que la salida por defecto usa el nombre de la media."""
         monkeypatch.chdir(tmp_path)
 
@@ -382,7 +386,9 @@ class TestProcessOutput:
 
         assert output == (tmp_path / "clip.gif").absolute()
 
-    def test_affix_and_extension_applied(self, tmp_path, monkeypatch):
+    def test_affix_and_extension_applied(
+        self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
         """Comprueba que se aplican el sufijo y la extensión indicados."""
         monkeypatch.chdir(tmp_path)
 
@@ -394,7 +400,7 @@ class TestProcessOutput:
 
         assert output == (tmp_path / "clip_edit.gif").absolute()
 
-    def test_explicit_output_ignores_affix(self, tmp_path):
+    def test_explicit_output_ignores_affix(self, tmp_path: Path) -> None:
         """Comprueba que una ruta explícita ignora el sufijo."""
         explicit = tmp_path / "done.gif"
 
@@ -407,7 +413,7 @@ class TestProcessOutput:
 
         assert output == explicit.absolute()
 
-    def test_output_directory_used_as_parent(self, tmp_path):
+    def test_output_directory_used_as_parent(self, tmp_path: Path) -> None:
         """Comprueba que el directorio es el padre de la salida por defecto."""
         target = tmp_path / "out"
 
@@ -423,21 +429,21 @@ class TestProcessOutput:
 class TestMediaOutputMixin:
     """Pruebas del mixin de salida de contenedores multimedia."""
 
-    def test_requires_video_track(self, tmp_path):
+    def test_requires_video_track(self, tmp_path: Path) -> None:
         """Comprueba que la salida de vídeo exige una pista de vídeo."""
         mixin = _media_mixin(media=_media_with_path())
 
         with pytest.raises(MissingPropertyError, match="video"):
             mixin.create_media_output(extension=".mp4", output=tmp_path / "out.mp4")
 
-    def test_requires_codec(self, tmp_path):
+    def test_requires_codec(self, tmp_path: Path) -> None:
         """Comprueba que la salida de vídeo exige un códec en la pista."""
         mixin = _media_mixin(media=_media_with_path(video=_video(None)))
 
         with pytest.raises(MissingPropertyError, match="video codec"):
             mixin.create_media_output(extension=".mp4", output=tmp_path / "out.mp4")
 
-    def test_sets_media_output(self, tmp_path):
+    def test_sets_media_output(self, tmp_path: Path) -> None:
         """Comprueba que se asigna la salida al campo tipado."""
         mixin = _media_mixin(media=_media_with_path(video=_video("h264")))
 
@@ -445,7 +451,7 @@ class TestMediaOutputMixin:
 
         assert mixin.media_output == (tmp_path / "out.mp4").absolute()
 
-    def test_extension_not_supported_by_codec(self, tmp_path):
+    def test_extension_not_supported_by_codec(self, tmp_path: Path) -> None:
         """Comprueba que un códec que no soporta la extensión lanza un error."""
         mixin = _media_mixin(media=_media_with_path(video=_video("h264")))
 
@@ -455,14 +461,14 @@ class TestMediaOutputMixin:
 
         assert "h264" in exc_info.value.msg
 
-    def test_not_media_extension(self, tmp_path):
+    def test_not_media_extension(self, tmp_path: Path) -> None:
         """Comprueba el error cuando la extensión no es contenedor de vídeo."""
         mixin = _media_mixin(media=_media_with_path(video=_video("h264")))
 
         with pytest.raises(InvalidContainerTypeError):
             mixin.create_media_output(extension=".mp4", output=tmp_path / "out.txt")
 
-    def test_audio_codec_checked(self, tmp_path):
+    def test_audio_codec_checked(self, tmp_path: Path) -> None:
         """Comprueba que el contenedor de vídeo también soporta los códecs de audio."""
         mixin = _media_mixin(
             media=_media_with_path(video=_video("h264"), audio=_audio("vorbis"))
@@ -479,7 +485,7 @@ class TestValidateName:
     """Pruebas de validación de nombres de fichero."""
 
     @pytest.mark.parametrize("name", ["clip", "clip final", "Clip-01_v2", "vídeo ñ"])
-    def test_valid_names_do_not_raise(self, name):
+    def test_valid_names_do_not_raise(self, name: str) -> None:
         """Comprueba que los nombres válidos no lanzan errores."""
         _validate_name(name)
 
@@ -487,7 +493,7 @@ class TestValidateName:
         "name",
         ["a<b", "a>b", "a:b", 'a"b', "a/b", "a\\b", "a|b", "a?b", "a*b", "a\x00b"],
     )
-    def test_invalid_characters(self, name):
+    def test_invalid_characters(self, name: str) -> None:
         """Comprueba que los caracteres no permitidos lanzan un error."""
         with pytest.raises(InvalidArgumentError):
             _validate_name(name)
@@ -495,18 +501,18 @@ class TestValidateName:
     @pytest.mark.parametrize(
         "name", ["CON", "con", "PRN", "AUX", "NUL", "LPT1", "COM9"]
     )
-    def test_reserved_names(self, name):
+    def test_reserved_names(self, name: str) -> None:
         """Comprueba que los nombres reservados de Windows lanzan un error."""
         with pytest.raises(InvalidArgumentError):
             _validate_name(name)
 
     @pytest.mark.parametrize("name", ["clip ", "clip."])
-    def test_trailing_space_or_dot(self, name):
+    def test_trailing_space_or_dot(self, name: str) -> None:
         """Comprueba que un espacio o punto final lanzan un error."""
         with pytest.raises(InvalidArgumentError):
             _validate_name(name)
 
-    def test_empty_name(self):
+    def test_empty_name(self) -> None:
         """Comprueba que un nombre vacío lanza un error."""
         with pytest.raises(InvalidArgumentError):
             _validate_name("")

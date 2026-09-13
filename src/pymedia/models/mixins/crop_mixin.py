@@ -21,6 +21,7 @@ class CropMixin:
         crop_area: Área y coordenada de la zona a preservar de la imagen.
     """
 
+    media: Media | None = None
     crop_area: CropArea | None = None
 
     def create_crop(self, crop_str: str | None) -> None:
@@ -37,6 +38,8 @@ class CropMixin:
         """
         if crop_str is None:
             return
+        if self.media is None:
+            raise MissingParameterError(name="media")
         self.crop_area = self._process_crop_area(crop_str=crop_str, media=self.media)
 
     def to_crop_cmd(self) -> str:

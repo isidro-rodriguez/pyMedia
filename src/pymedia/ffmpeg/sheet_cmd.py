@@ -218,7 +218,7 @@ class SheetCmd:
             base_template = f"{prefix} [{', '.join(items)}]"
             if len(base_template) <= max_len:
                 return base_template
-            acc = []
+            acc: list[str] = []
             for item in items:
                 candidate = f"{prefix} [{', '.join(acc + [item])}, ...]"
                 if len(candidate) > max_len:
@@ -298,7 +298,7 @@ class SheetCmd:
             video_parts.append(f"{video.fps} fps")
 
         # Bitrate: Usar el explícito, o calcularlo aproximadamente por tamaño/duración
-        bit_rate_val = video.bit_rate
+        bit_rate_val: float | None = video.bit_rate
         if (
             bit_rate_val is None
             and media.size

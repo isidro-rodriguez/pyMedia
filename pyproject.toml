@@ -26,7 +26,7 @@ dependencies = [
 [dependency-groups]
 dev = [
     "babel>=2.16.0",
-    "nuitka>=4.1.3",
+    "mypy>=1.16",
     "pdoc>=16.0.0",
     "pyinstaller>=6.22.3",
     "pytest>=8.0.0",
@@ -78,3 +78,11 @@ convention = "google"
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 pythonpath = ["src"]
+
+# Configuración de Mypy
+[tool.mypy]
+python_version = "3.13"
+strict = true
+# Permite que tests y scripts inspeccionen el código fuente real de src/.
+mypy_path = ["src"]
+files = ["src", "tests", "scripts"]

@@ -2,20 +2,17 @@
 
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Protocol
 
 from pymedia.errors import InvalidParameterError, MissingParameterError
 from pymedia.locales import _  # noqa
 from pymedia.types import ImageQuality
 
 
-class _ImageContext(Protocol):
-    image_output: Path
-
-
 @dataclass(kw_only=True)
-class ImageQualityMixin(_ImageContext):
+class ImageQualityMixin:
     """Mixin para optimizar calidad y pixel_fmt dependiendo del formato de imagen."""
+
+    image_output: Path | None = None
 
     def to_image_quality_cmd(self) -> ImageQuality:
         """Devuelve los parámetros de calidad según el formato de imagen.
@@ -26,7 +23,10 @@ class ImageQualityMixin(_ImageContext):
 
         Raises:
             InvalidParameterError: Si el formato de imagen no está soportado.
+            MissingParameterError: Si no se ha definido `image_output`.
         """
+        if self.image_output is None:
+            raise MissingParameterError(name="image_output")
         match self.image_output.suffix:
             case ".jpg":
                 return ImageQuality(

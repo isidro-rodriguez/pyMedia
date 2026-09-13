@@ -187,12 +187,12 @@ class AudioCmd:
                 raise MissingParameterError(name="audio_output")
 
             output = self.params.audio_output
-            str_list = []
+            str_list: list[str] = []
             for stream in self.params.stream_tracks:
                 str_list.append("-map")
                 str_list.append(f"0:a:{stream}")
                 final_output = output.with_stem(f"{output.stem}_audio_track_{stream}")
-                str_list.append(final_output)
+                str_list.append(str(final_output))
                 output_list.append(final_output)
             return str_list
 

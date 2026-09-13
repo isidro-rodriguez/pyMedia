@@ -56,8 +56,16 @@ def _read_mo(path: Path) -> Catalog:
 
 
 def _entries(catalog: Catalog) -> dict[str, str]:
-    """Devuelve {msgid: msgstr}, descartando el header del catálogo."""
-    return {message.id: message.string for message in catalog if message.id}
+    """Devuelve {msgid: msgstr}, descartando el header y formas plurales."""
+    entries: dict[str, str] = {}
+    for message in catalog:
+        if (
+            isinstance(message.id, str)
+            and message.id
+            and isinstance(message.string, str)
+        ):
+            entries[message.id] = message.string
+    return entries
 
 
 def _available_languages() -> set[str]:
@@ -121,12 +129,13 @@ def test_msgids_unique_and_translated(lang: str) -> None:
 
     for message in catalog:
         msgid = message.id
-        if not msgid:
-            continue  # header del PO
+        if not isinstance(msgid, str) or not msgid:
+            continue  # header o formas plurales del PO
         if msgid in seen:
             errores.append(f"msgid duplicado: {msgid!r}")
         seen.add(msgid)
-        if not message.string:
+        msgstr = message.string
+        if not isinstance(msgstr, str) or not msgstr:
             errores.append(f"msgstr vacío: {msgid!r}")
 
     assert not errores, "\n".join(errores)
@@ -144,6 +153,8 @@ def test_placeholder_parity(lang: str) -> None:
     for message in catalog:
         msgid = message.id
         msgstr = message.string
+        if not isinstance(msgid, str) or not isinstance(msgstr, str):
+            continue
         if not msgid or not msgstr:
             continue
         if _placeholder_params(msgid) != _placeholder_params(msgstr):
@@ -208,5 +219,7 @@ def test_all_pot_msgids_used_in_src() -> None:
             continue
         extraido.add(message, locations=[(filename, lineno)])
 
-    faltan = [m.id for m in pot if m.id and m.id not in extraido]
+    faltan = [
+        m.id for m in pot if isinstance(m.id, str) and m.id and m.id not in extraido
+    ]
     assert not faltan, "msgids en POT no usados en src/:\n" + "\n".join(faltan)

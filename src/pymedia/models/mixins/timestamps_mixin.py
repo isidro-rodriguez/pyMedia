@@ -3,7 +3,6 @@
 import re
 from dataclasses import dataclass
 from datetime import timedelta
-from typing import Protocol
 
 from pymedia.errors import (
     InvalidParameterError,
@@ -15,18 +14,15 @@ from pymedia.locales import _  # noqa
 from pymedia.models.media import Media
 
 
-class _TimestampsContext(Protocol):
-    media: Media
-
-
 @dataclass(kw_only=True)
-class TimestampStartEndMixin(_TimestampsContext):
+class TimestampStartEndMixin:
     """Mixin para las marcas de tiempo que indican el punto inicial a procesar.
 
     Attributes:
         timestamp_start: Marca de tiempo que indica el punto inicial.
     """
 
+    media: Media | None = None
     timestamp_start: timedelta | None = None
     timestamp_end: timedelta | None = None
 
@@ -48,16 +44,20 @@ class TimestampStartEndMixin(_TimestampsContext):
             MissingPropertyError: Si no se pudo obtener la duración del vídeo.
             MissingParameterError: Si no se pudo obtener el parámetro.
         """
+        media = self.media
+        if media is None:
+            raise MissingParameterError(name="media")
+
         if timestamp_start is not None:
             self.timestamp_start = _process_time(
                 time_str=timestamp_start,
-                media=self.media,
+                media=media,
             )
 
         if timestamp_end is not None:
             self.timestamp_end = _process_time(
                 time_str=timestamp_end,
-                media=self.media,
+                media=media,
             )
 
         if self.timestamp_start is not None and self.timestamp_end is not None:
@@ -106,7 +106,10 @@ class TimestampStartEndMixin(_TimestampsContext):
         Raises:
             MissingPropertyError: Si `media.duration` no se pudo obtener.
         """
-        media_duration = self.media.duration
+        media = self.media
+        if media is None:
+            raise MissingParameterError(name="media")
+        media_duration = media.duration
         start, end = self.timestamp_start, self.timestamp_end
 
         if media_duration is None:
@@ -121,13 +124,14 @@ class TimestampStartEndMixin(_TimestampsContext):
 
 
 @dataclass(kw_only=True)
-class TimestampAtMixin(_TimestampsContext):
+class TimestampAtMixin:
     """Mixin para listas de marcas de tiempo.
 
     Attributes:
         timestamp_at: Lista de marcas de tiempo.
     """
 
+    media: Media | None = None
     timestamp_at: list[timedelta] | None = None
 
     def create_timestamp_at(self, times_str: str | None) -> None:
@@ -145,9 +149,13 @@ class TimestampAtMixin(_TimestampsContext):
         if times_str is None:
             return
 
+        media = self.media
+        if media is None:
+            raise MissingParameterError(name="media")
+
         times: list[timedelta] = []
         for time_str in times_str.split(","):
-            time = _process_time(time_str=time_str, media=self.media)
+            time = _process_time(time_str=time_str, media=media)
             times.append(time)
         times.sort()
 
@@ -168,12 +176,12 @@ def _process_time(time_str: str, media: Media) -> timedelta:
         if not re.fullmatch(r"\d+(?:\.\d+)?", seconds):
             raise InvalidTimeFormatError()
         match tuple(map(float, parts)):
-            case (hours, minutes, seconds):
-                return timedelta(hours=hours, minutes=minutes, seconds=seconds)
-            case (minutes, seconds):
-                return timedelta(minutes=minutes, seconds=seconds)
-            case (seconds,):
-                return timedelta(seconds=seconds)
+            case (hours, minutes, secs):
+                return timedelta(hours=hours, minutes=minutes, seconds=secs)
+            case (minutes, secs):
+                return timedelta(minutes=minutes, seconds=secs)
+            case (secs,):
+                return timedelta(seconds=secs)
             case _:
                 raise InvalidTimeFormatError()
 

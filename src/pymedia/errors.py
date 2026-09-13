@@ -63,7 +63,7 @@ class ConfigError(PyMediaError):
 class ExclusiveOptionsError(PyMediaError):
     """Excepción para opciones de CLI incompatibles entre sí."""
 
-    def __init__(self, options: list[str]):
+    def __init__(self, options: list[str]) -> None:
         """Inicializa el error con las opciones en conflicto.
 
         Args:

@@ -1,14 +1,10 @@
 """Mixin de opciones de remultiplexación."""
 
 from dataclasses import dataclass
-from typing import Protocol
 
+from pymedia.errors import MissingParameterError
 from pymedia.locales import _  # noqa
 from pymedia.models.media import Media
-
-
-class _SortTracksContext(Protocol):
-    media: Media
 
 
 @dataclass(kw_only=True)
@@ -44,13 +40,14 @@ class RegeneratePtsMixin:
 
 
 @dataclass(kw_only=True)
-class SortTracksMixin(_SortTracksContext):
+class SortTracksMixin:
     """Mixin para ordenar las pistas del contenedor de salida.
 
     Attributes:
         sort_tracks: Habilita la ordenación de las pistas por tipo e idioma.
     """
 
+    media: Media | None = None
     sort_tracks: bool
 
     def to_sort_tracks_cmd(self) -> list[str]:
@@ -70,21 +67,24 @@ class SortTracksMixin(_SortTracksContext):
         código; las pistas sin idioma conservan su orden original.
         """
         map_args: list[str] = []
+        media = self.media
+        if media is None:
+            raise MissingParameterError(name="media")
 
-        if self.media.video is not None:
+        if media.video is not None:
             # Solo se soporta una pista de vídeo por contenedor.
-            map_args.extend(["-map", f"0:v:{self.media.video.track_index}"])
+            map_args.extend(["-map", f"0:v:{media.video.track_index}"])
 
         for tracks, kind in (
-            (self.media.audio, "a"),
-            (self.media.subtitles, "s"),
+            (media.audio, "a"),
+            (media.subtitles, "s"),
         ):
             if tracks is None:
                 continue
 
             with_language = [track for track in tracks if track.language is not None]
             without_language = [track for track in tracks if track.language is None]
-            with_language.sort(key=lambda track: track.language.casefold())
+            with_language.sort(key=lambda track: (track.language or "").casefold())
 
             for track in with_language + without_language:
                 map_args.extend(["-map", f"0:{kind}:{track.track_index}"])

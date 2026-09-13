@@ -149,14 +149,15 @@ def cmd_check() -> None:
         seen: set[str] = set()
         for message in catalog:
             msgid = message.id
-            if not msgid:
-                continue  # header del PO
-            if not message.string:
+            msgstr = message.string if isinstance(message.string, str) else ""
+            if not isinstance(msgid, str) or not msgid:
+                continue  # header o formas plurales del PO
+            if not msgstr:
                 problems.append(f"{lang}: msgstr vacío para {msgid!r}")
             if msgid in seen:
                 problems.append(f"{lang}: msgid duplicado {msgid!r}")
             seen.add(msgid)
-            if not _same_placeholders(msgid, message.string):
+            if not _same_placeholders(msgid, msgstr):
                 problems.append(
                     f"{lang}: placeholders distintos msgid/msgstr: {msgid!r}"
                 )

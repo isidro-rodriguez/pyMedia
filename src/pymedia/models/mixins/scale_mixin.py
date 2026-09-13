@@ -2,11 +2,11 @@
 
 from dataclasses import dataclass
 from enum import Enum
-from typing import Protocol
 
 from pymedia.errors import (
     InvalidArgumentError,
     InvalidParameterError,
+    MissingParameterError,
     MissingPropertyError,
 )
 from pymedia.locales import _  # noqa
@@ -15,17 +15,13 @@ from pymedia.models.media import Media
 from pymedia.types import Dimensions, ScaleMode
 
 
-class _ScaleContext(Protocol):
-    media: Media
-
-
 class _Dimension(Enum):
     WIDTH = "width"
     HEIGHT = "height"
 
 
 @dataclass(kw_only=True)
-class ScaleMixin(_ScaleContext):
+class ScaleMixin:
     """Mixin para los valores de redimensionado.
 
     Attributes:
@@ -34,6 +30,7 @@ class ScaleMixin(_ScaleContext):
         scale_to: Dimensión objetivo, en píxeles, o `None` si no se cambia.
     """
 
+    media: Media | None = None
     scale_mode: ScaleMode = ScaleMode.FIT
     scale_upscale: bool = False
     scale_to: Dimensions | None = None
@@ -61,9 +58,12 @@ class ScaleMixin(_ScaleContext):
         """
         if scale_to is None:
             return
+        media = self.media
+        if media is None:
+            raise MissingParameterError(name="media")
         self.scale_upscale = scale_upscale
         self.scale_to = self._process_scale(
-            scale_str=scale_to, media=self.media, logger=logger
+            scale_str=scale_to, media=media, logger=logger
         )
 
     def to_scale_cmd(self) -> str | None:

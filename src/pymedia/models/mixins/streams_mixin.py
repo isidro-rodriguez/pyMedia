@@ -1,7 +1,6 @@
 """Mixin para listados de streams proporcionados por el usuario."""
 
 from dataclasses import dataclass
-from typing import Protocol
 
 from pymedia.errors import (
     AudioError,
@@ -15,12 +14,8 @@ from pymedia.models.media import Media
 from pymedia.types import StreamsMode
 
 
-class _StreamsContext(Protocol):
-    media: Media
-
-
 @dataclass(kw_only=True)
-class StreamsMixin(_StreamsContext):
+class StreamsMixin:
     """Mixin para listados de streams proporcionados por el usuario.
 
     Los índices de pistas de streams se validan que presentan enumeración correcta y
@@ -30,6 +25,7 @@ class StreamsMixin(_StreamsContext):
         stream_tracks: Lista de pistas de emisiones.
     """
 
+    media: Media | None = None
     stream_tracks: list[int] | None = None
 
     def create_streams(
