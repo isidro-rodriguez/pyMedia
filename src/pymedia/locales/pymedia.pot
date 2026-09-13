@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-09-13 01:54+0100\n"
+"POT-Creation-Date: 2026-09-13 21:57+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -22,52 +22,57 @@ msgstr ""
 msgid "FFmpeg command was not generated: %(command_name)s"
 msgstr ""
 
-#: pymedia/errors.py:99
+#: pymedia/errors.py:75
+#, python-format
+msgid "The following options are mutually exclusive: %(opts_str)s."
+msgstr ""
+
+#: pymedia/errors.py:101
 #, python-format
 msgid ""
 "Invalid extension %(extension)s. Codec %(codec)s requires one of: "
 "%(supported)s."
 msgstr ""
 
-#: pymedia/errors.py:120
+#: pymedia/errors.py:122
 #, python-format
 msgid ""
 "Cannot remux %(codec)s to %(extension)s. Safe remux targets: "
 "%(supported)s."
 msgstr ""
 
-#: pymedia/errors.py:140
+#: pymedia/errors.py:142
 #, python-format
 msgid ""
 "Invalid extension %(extension)s. %(media_type)s requires one of: "
 "%(supported)s."
 msgstr ""
 
-#: pymedia/errors.py:160
+#: pymedia/errors.py:162
 msgid "Invalid timestamp format. Expected: hh:mm:ss."
 msgstr ""
 
-#: pymedia/errors.py:172
+#: pymedia/errors.py:174
 #, python-format
 msgid "Missing argument: %(name)s"
 msgstr ""
 
-#: pymedia/errors.py:184
+#: pymedia/errors.py:186
 #, python-format
 msgid "Missing parameter: %(name)s"
 msgstr ""
 
-#: pymedia/errors.py:196
+#: pymedia/errors.py:198
 #, python-format
 msgid "Missing property: %(name)s"
 msgstr ""
 
-#: pymedia/errors.py:209
+#: pymedia/errors.py:211
 #, python-format
 msgid "One of the following options is required: %(options)s"
 msgstr ""
 
-#: pymedia/errors.py:230
+#: pymedia/errors.py:232
 #, python-format
 msgid ""
 "Incompatible media files for join output '%(output)s'.\n"
@@ -75,49 +80,49 @@ msgid ""
 "%(incompatible_list)s"
 msgstr ""
 
-#: pymedia/ffmpeg/probe.py:48 pymedia/ffmpeg/probe.py:91
-#: pymedia/ffmpeg/probe.py:160
+#: pymedia/ffmpeg/probe.py:51 pymedia/ffmpeg/probe.py:124
+#: pymedia/ffmpeg/probe.py:167
 #, python-format
 msgid "ffprobe couldn't read %(path)s: %(err.stderr)s"
 msgstr ""
 
-#: pymedia/ffmpeg/probe.py:53
-#, python-format
-msgid "ffprobe media data: %(data)s"
-msgstr ""
-
-#: pymedia/ffmpeg/probe.py:96
-#, python-format
-msgid "ffprobe subtitles file data: %(data)s"
-msgstr ""
-
-#: pymedia/ffmpeg/probe.py:109
-#, python-format
-msgid ""
-"\"%(path)s\" is not a recognized subtitles file (detected format: "
-"%(format_name)s)."
-msgstr ""
-
-#: pymedia/ffmpeg/probe.py:118
-#, python-format
-msgid "%(path.suffix)s extension doesn't support %(codec_name)s subtitles."
-msgstr ""
-
-#: pymedia/ffmpeg/probe.py:165
+#: pymedia/ffmpeg/probe.py:56
 #, python-format
 msgid "ffprobe audio file data: %(data)s"
 msgstr ""
 
-#: pymedia/ffmpeg/probe.py:181
+#: pymedia/ffmpeg/probe.py:72
 #, python-format
 msgid ""
 "\"%(path)s\" is not a recognized audio file (detected format: "
 "%(format_name)s)."
 msgstr ""
 
-#: pymedia/ffmpeg/probe.py:193
+#: pymedia/ffmpeg/probe.py:84
 #, python-format
 msgid "%(path.suffix)s extension doesn't support %(codec_name)s audio."
+msgstr ""
+
+#: pymedia/ffmpeg/probe.py:129
+#, python-format
+msgid "ffprobe media data: %(data)s"
+msgstr ""
+
+#: pymedia/ffmpeg/probe.py:172
+#, python-format
+msgid "ffprobe subtitles file data: %(data)s"
+msgstr ""
+
+#: pymedia/ffmpeg/probe.py:185
+#, python-format
+msgid ""
+"\"%(path)s\" is not a recognized subtitles file (detected format: "
+"%(format_name)s)."
+msgstr ""
+
+#: pymedia/ffmpeg/probe.py:194
+#, python-format
+msgid "%(path.suffix)s extension doesn't support %(codec_name)s subtitles."
 msgstr ""
 
 #: pymedia/ffmpeg/sheet_cmd.py:317 pymedia/pipeline/info_pipeline.py:61
@@ -377,16 +382,12 @@ msgstr ""
 msgid "Subtitles codec not supported."
 msgstr ""
 
-#: pymedia/models/mixins/timestamps_mixin.py:67
+#: pymedia/models/mixins/timestamps_mixin.py:66
 #, python-format
 msgid "Invalid timestamps. Start (%(start)s) => End (%(end)s.)"
 msgstr ""
 
-#: pymedia/models/mixins/timestamps_mixin.py:155
-msgid "Invalidad timestamp list format. Expected hh:mm:ss,hh:mm:ss,..."
-msgstr ""
-
-#: pymedia/models/mixins/timestamps_mixin.py:195
+#: pymedia/models/mixins/timestamps_mixin.py:186
 #, python-format
 msgid "Timestamp %(time)s exceeds video duration %(duration)s."
 msgstr ""
@@ -715,14 +716,14 @@ msgid ""
 "Generates an animated image from the specified video.\n"
 "\n"
 "[bold]Examples[/bold]:\n"
-"  Convert a video to GIF:\n"
-"    > pymedia gif input.mp4\n"
+"  Convert a video to an animated image:\n"
+"    > pymedia animated input.mp4\n"
 "  Convert a time range:\n"
-"    > pymedia gif input.mp4 --start 00:00:05 --end 00:00:12\n"
+"    > pymedia animated input.mp4 --start 00:00:05 --end 00:00:12\n"
 "  Set size and frame rate:\n"
-"    > pymedia gif input.mp4 --size 480x270 --fps 15\n"
+"    > pymedia animated input.mp4 --size 480x270 --fps 15\n"
 "  Save to a specific file:\n"
-"    > pymedia gif input.mp4 --output output.gif\n"
+"    > pymedia animated input.mp4 --output output.gif\n"
 msgstr ""
 
 #: pymedia/typer/help.py:77
@@ -992,7 +993,7 @@ msgid "Take a thumbnail at specific TIMESTAMP(s)."
 msgstr ""
 
 #: pymedia/typer/options.py:210
-msgid "Time point at which GIF generation ends."
+msgid "Time point at which the animated image generation ends."
 msgstr ""
 
 #: pymedia/typer/options.py:220
@@ -1000,7 +1001,7 @@ msgid "Time point at which thumbnails generation ends."
 msgstr ""
 
 #: pymedia/typer/options.py:230
-msgid "Time point at which GIF generation starts."
+msgid "Time point at which the animated image generation starts."
 msgstr ""
 
 #: pymedia/typer/options.py:240
@@ -1108,7 +1109,7 @@ msgid "Flip the image vertically, swapping top and bottom."
 msgstr ""
 
 #: pymedia/typer/options.py:458
-msgid "Set the GIF frame rate in frames per second."
+msgid "Set the animated image frame rate in frames per second."
 msgstr ""
 
 #: pymedia/typer/options.py:467
