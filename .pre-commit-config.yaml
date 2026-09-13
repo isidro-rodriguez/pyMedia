@@ -1,0 +1,37 @@
+# Hooks de pre-commit para pyMedia.
+# Instalación: uv run pre-commit install
+# Ejecución manual sobre todo el repo: uv run pre-commit run --all-files
+repos:
+  - repo: local
+    hooks:
+      - id: ruff-check-fix
+        name: Ruff check --fix (autocorrección)
+        entry: uv run ruff check --fix
+        language: system
+        types: [python]
+
+      - id: ruff-format
+        name: Ruff format
+        entry: uv run ruff format
+        language: system
+        types: [python]
+
+      - id: ruff-check
+        name: Ruff check (lint)
+        entry: uv run ruff check
+        language: system
+        types: [python]
+
+      - id: mypy
+        name: Mypy (tipado estático)
+        entry: uv run mypy
+        language: system
+        types: [python]
+        pass_filenames: false
+
+      - id: pytest
+        name: Pytest (tests)
+        entry: uv run pytest
+        language: system
+        types: [python]
+        pass_filenames: false

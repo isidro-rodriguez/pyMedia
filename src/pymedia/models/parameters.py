@@ -84,6 +84,7 @@ class InfoParameters(
     MediaInputMixin,
 ):
     """Parámetros utilizados por el comando Info."""
+
     overwrite: OverwriteMode = OverwriteMode.NO
 
 

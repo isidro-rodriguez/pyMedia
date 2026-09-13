@@ -112,7 +112,7 @@ class TestAnimatedOutputMixin:
 
     def test_sets_animated_output(self, tmp_path: Path) -> None:
         """Comprueba que se asigna la salida GIF al campo tipado."""
-        mixin = _animated_mixin()
+        mixin = _animated_mixin(media=_media_with_path())
 
         mixin.create_animated_output(extension=".gif", output=tmp_path / "out.gif")
 
@@ -120,7 +120,7 @@ class TestAnimatedOutputMixin:
 
     def test_invalid_extension_raises(self, tmp_path: Path) -> None:
         """Comprueba que una extensión no GIF lanza un error."""
-        mixin = _animated_mixin()
+        mixin = _animated_mixin(media=_media_with_path())
 
         with pytest.raises(InvalidContainerTypeError) as exc_info:
             mixin.create_animated_output(extension=".gif", output=tmp_path / "out.png")
@@ -273,7 +273,7 @@ class TestImageOutputMixin:
 
     def test_sets_image_output(self, tmp_path: Path) -> None:
         """Comprueba que se asigna la salida al campo tipado."""
-        mixin = _image_mixin()
+        mixin = _image_mixin(media=_media_with_path())
 
         mixin.create_image_output(extension=".png", output=tmp_path / "out.png")
 
@@ -281,7 +281,7 @@ class TestImageOutputMixin:
 
     def test_invalid_extension_raises(self, tmp_path: Path) -> None:
         """Comprueba que una extensión no de imagen lanza un error."""
-        mixin = _image_mixin()
+        mixin = _image_mixin(media=_media_with_path())
 
         with pytest.raises(InvalidContainerTypeError) as exc_info:
             mixin.create_image_output(extension=".png", output=tmp_path / "out.xyz")
@@ -301,7 +301,7 @@ class TestImageOutputMixin:
 
     def test_output_directory_invalid_name(self, tmp_path: Path) -> None:
         """Comprueba que un nombre de directorio no válido lanza un error."""
-        mixin = _image_mixin()
+        mixin = _image_mixin(media=_media_with_path())
 
         with pytest.raises(InvalidArgumentError):
             mixin.create_image_output(
@@ -315,7 +315,7 @@ class TestSubtitlesOutputMixin:
 
     def test_sets_subtitles_output(self, tmp_path: Path) -> None:
         """Comprueba que se asigna la salida al campo tipado."""
-        mixin = _subtitles_mixin()
+        mixin = _subtitles_mixin(media=_media_sub_tracks(_subtitles_track("srt", 0)))
 
         mixin.create_subtitles_output(extension=".srt", output=tmp_path / "out.srt")
 
@@ -323,7 +323,7 @@ class TestSubtitlesOutputMixin:
 
     def test_invalid_extension_raises(self, tmp_path: Path) -> None:
         """Comprueba que una extensión no de subtítulo lanza un error."""
-        mixin = _subtitles_mixin()
+        mixin = _subtitles_mixin(media=_media_sub_tracks(_subtitles_track("srt", 0)))
 
         with pytest.raises(InvalidContainerTypeError) as exc_info:
             mixin.create_subtitles_output(extension=".srt", output=tmp_path / "out.xyz")
