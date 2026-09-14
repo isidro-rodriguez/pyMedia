@@ -101,7 +101,7 @@ class Logger:
             exc_info: Si `True`, añade la traza de la excepción activa.
             **kwargs: Valores para interpolar en `msg` vía `%`.
         """
-        self._logger.error(self._render(msg, kwargs), exc_info=exc_info)
+        self._logger.error(msg=self._render(msg=msg, kwargs=kwargs), exc_info=exc_info)
 
     def warning(self, msg: str, **kwargs: object) -> None:
         """Muestra log de nivel aviso (mensaje ya traducido).
@@ -110,7 +110,7 @@ class Logger:
             msg: Mensaje ya traducido a mostrar.
             **kwargs: Valores para interpolar en `msg` vía `%`.
         """
-        self._logger.warning(self._render(msg, kwargs))
+        self._logger.warning(self._render(msg=msg, kwargs=kwargs))
 
     def info(self, msg: str, **kwargs: object) -> None:
         """Muestra log de nivel información (mensaje ya traducido).
@@ -119,7 +119,7 @@ class Logger:
             msg: Mensaje ya traducido a mostrar.
             **kwargs: Valores para interpolar en `msg` vía `%`.
         """
-        self._logger.info(self._render(msg, kwargs))
+        self._logger.info(self._render(msg=msg, kwargs=kwargs))
 
     def debug(self, msg: str, **kwargs: object) -> None:
         """Muestra log de nivel depuración (mensaje ya traducido).
@@ -132,11 +132,11 @@ class Logger:
         def _prettify(value: object) -> object:
             """Convierte dicts/lists/tuples/sets en texto multilínea legible."""
             if isinstance(value, (dict, list, tuple, set)):
-                return pretty_repr(value, indent_size=2, expand_all=True)
+                return pretty_repr(_object=value, indent_size=2, expand_all=True)
             return value
 
         kwargs = {name: _prettify(value) for name, value in kwargs.items()}
-        self._logger.debug(self._render(msg, kwargs))
+        self._logger.debug(self._render(msg=msg, kwargs=kwargs))
 
     def print(self, renderable: RenderableType) -> None:
         """Imprime un objeto Rich (Table, Panel, etc.) por consola.

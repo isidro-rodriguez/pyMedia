@@ -314,7 +314,7 @@ class SheetCmd:
             video_parts.append(f"{bit_rate_str} kb/s")
 
         # Ensamblado de líneas
-        lines = [f"{_('File')}: {media.path}"]
+        lines = [f"{_('File')}: {media.path.name}"]
 
         size_dur_parts = []
         if media.size:
