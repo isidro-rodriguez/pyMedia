@@ -181,7 +181,10 @@ class AudioPipeline(BasePipeline[AudioParameters]):
 
         self.logger.debug(_("FFmpeg command: %(cmd)s"), cmd=cmd)
 
-        self.run_ffmpeg(cmd=cmd, description=description)
+        self.run_ffmpeg(
+            cmd=cmd,
+            description=description,
+        )
 
         output = self.params.media_output or self.params.audio_output
         self.logger.info(msg=success, output=output)

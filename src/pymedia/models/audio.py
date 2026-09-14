@@ -1,6 +1,7 @@
 """Metadatos de una pista de audio."""
 
 from dataclasses import dataclass
+from datetime import timedelta
 from pathlib import Path
 
 
@@ -13,6 +14,7 @@ class Audio:
         global_index:  Número de emisión asignado en el contenedor.
         track_index: Índice en el listado de pistas de audio.
         codec: Nombre del códec de audio.
+        duration: Duración de la pista de vídeo.
         sample_rate: Frecuencia de muestreo en Hz.
         channels: Número de canales.
         channel_layout: Distribución de canales (p. ej. "stereo").
@@ -29,6 +31,7 @@ class Audio:
     global_index: int | None = None
     track_index: int | None = None
     codec: str | None = None
+    duration: timedelta | None = None
     sample_rate: int | None = None
     channels: int | None = None
     channel_layout: str | None = None
