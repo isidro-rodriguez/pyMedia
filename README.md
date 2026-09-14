@@ -310,13 +310,13 @@ pyMedia/
 flowchart TD
     CLI(["CLI"]) --> MAIN{"MAIN"} 
     MAIN -.-> LOCALE
-    MAIN -.-> COMMAND
-    COMMAND --> P1["pipeline.process_parameters"]
+    MAIN --> COMMAND
+    COMMAND --> P0["pipeline.__init__"]
 
     subgraph PIPELINE["PIPELINE"]
-        direction TB
-        P1 -.-> CONFIG
-        P1 -.-> LOGGER
+        P0 -.-> CONFIG
+        P0 -.-> LOGGER
+        P0 --> P1["pipeline.process_parameters"]
         P1 <-->|"params validados"| PARAMETERS
         P1 --> P2["pipeline.process_cmd"]
         P2 <-->|"cmd"| CMD
