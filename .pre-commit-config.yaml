@@ -35,3 +35,12 @@ repos:
         language: system
         types: [python]
         pass_filenames: false
+
+      - id: pytest-binary-e2e
+        name: Pytest binario PyInstaller (E2E)
+        entry: uv run pytest tests/test_binary_e2e.py -v
+        language: system
+        types: [python]
+        pass_filenames: false
+        env:
+          PYMEDIA_BINARY_E2E: "1"
