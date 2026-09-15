@@ -6,7 +6,6 @@ from unittest.mock import Mock
 import pytest
 
 from pymedia.errors import (
-    InvalidParameterError,
     MissingPropertyError,
     UserError,
 )
@@ -75,7 +74,7 @@ class TestParseErrors:
         """Comprueba que las dimensiones impares lanzan un error."""
         mixin = _mixin()
 
-        with pytest.raises(InvalidParameterError) as exc_info:
+        with pytest.raises(UserError) as exc_info:
             mixin.create_scale(logger=Mock(), scale_upscale=False, scale_to=value)
 
         assert exc_info.value.msg == "Target dimensions must be even."

@@ -5,7 +5,6 @@ from dataclasses import dataclass
 from datetime import timedelta
 
 from pymedia.errors import (
-    InvalidParameterError,
     MissingParameterError,
     MissingPropertyError,
     UserError,
@@ -62,7 +61,7 @@ class TimestampStartEndMixin:
 
         if self.timestamp_start is not None and self.timestamp_end is not None:
             if self.timestamp_start > self.timestamp_end:
-                raise InvalidParameterError(
+                raise UserError(
                     msg=_("Invalid timestamps. Start (%(start)s) => End (%(end)s.)")
                     % {"start": timestamp_start, "end": timestamp_end}
                 )
@@ -191,7 +190,7 @@ def _process_time(time_str: str, media: Media) -> timedelta:
         if media.duration is None:
             raise MissingPropertyError(name="video.duration")
         if time_delta > media.duration:
-            raise InvalidParameterError(
+            raise UserError(
                 _("Timestamp %(time)s exceeds video duration %(duration)s.")
                 % {"time": str(time_delta), "duration": str(media.duration)}
             )

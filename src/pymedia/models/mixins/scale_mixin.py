@@ -121,7 +121,7 @@ class ScaleMixin:
         target = _parse_dimensions(scale_str)
 
         if target.width % 2 != 0 or target.height % 2 != 0:
-            raise InvalidParameterError(msg=_("Target dimensions must be even."))
+            raise UserError(msg=_("Target dimensions must be even."))
 
         if video.width == target.width and video.height == target.height:
             return None

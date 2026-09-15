@@ -3,7 +3,6 @@
 from dataclasses import dataclass
 
 from pymedia.errors import (
-    InvalidParameterError,
     MissingParameterError,
     MissingPropertyError,
     UserError,
@@ -84,7 +83,7 @@ class CropMixin:
                 raise MissingPropertyError(name="video")
 
             if crop_area.width == 0 or crop_area.height == 0:
-                raise InvalidParameterError(
+                raise UserError(
                     msg=_(
                         "Invalid crop dimensions: width and height must be "
                         "greater than 0."
@@ -92,7 +91,7 @@ class CropMixin:
                 )
 
             if crop_area.width + crop_area.x >= video.width:
-                raise InvalidParameterError(
+                raise UserError(
                     msg=_(
                         "Invalid crop area. Area width (%(area_width)s) and coordinate "
                         "X (%(area_x)s) is bigger that video width (%(video_width)s) "
@@ -105,7 +104,7 @@ class CropMixin:
                 )
 
             if crop_area.height + crop_area.y > video.height:
-                raise InvalidParameterError(
+                raise UserError(
                     msg=_(
                         "Invalid crop area. Area height (%(area_height)s) and "
                         "coordinate Y (%(area_y)s) is bigger that video height "

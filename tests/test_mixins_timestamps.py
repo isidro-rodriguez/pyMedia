@@ -6,7 +6,6 @@ from pathlib import Path
 import pytest
 
 from pymedia.errors import (
-    InvalidParameterError,
     MissingParameterError,
     MissingPropertyError,
     UserError,
@@ -66,7 +65,7 @@ class TestCreateTimestampStart:
         mixin = TimestampStartEndMixin()
         mixin.media = _media(duration=timedelta(seconds=30))
 
-        with pytest.raises(InvalidParameterError):
+        with pytest.raises(UserError):
             mixin.create_timestamp_start_end(
                 timestamp_start="00:00:31", timestamp_end=None
             )
@@ -125,7 +124,7 @@ class TestCreateTimestampEnd:
         mixin = TimestampStartEndMixin()
         mixin.media = _media(duration=timedelta(minutes=5))
 
-        with pytest.raises(InvalidParameterError):
+        with pytest.raises(UserError):
             mixin.create_timestamp_start_end(
                 timestamp_start=None, timestamp_end="00:06:00"
             )
