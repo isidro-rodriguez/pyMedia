@@ -4,7 +4,7 @@ from pathlib import Path
 
 import typer
 
-from pymedia.errors import ExclusiveOptionsError, OptionError
+from pymedia.errors import UserError
 from pymedia.locales import _  # noqa
 
 
@@ -39,9 +39,13 @@ def validate_conflict_output_options(
         OptionError: Si se indica una salida única con varias entradas.
     """
     if output is not None and output_directory is not None:
-        raise ExclusiveOptionsError(options=["output", "output_directory"])
+        raise UserError(
+            msg=_(
+                "The following options are mutually exclusive: output, output_directory"
+            )
+        )
     if output is not None and len(media_input_list) > 1:
-        raise OptionError(
+        raise UserError(
             msg=_(
                 "It is not allowed to specify an output with multiple inputs, "
                 "use output directory instead."
@@ -59,10 +63,10 @@ def validate_path(path: Path) -> Path:
         La propia ruta si es un fichero.
 
     Raises:
-        typer.BadParameter: Si la ruta no es un fichero.
+        UserError: Si la ruta no es un fichero.
     """
     if not path.is_file():
-        raise typer.BadParameter(_("%(path)s is not a file.") % {"path": path})
+        raise UserError(_("%(path)s is not a file.") % {"path": path})
     return path
 
 
@@ -76,9 +80,9 @@ def validate_path_list(paths: list[Path]) -> list[Path]:
         El propio listado de rutas si todos son ficheros.
 
     Raises:
-        typer.BadParameter: Si alguna ruta no es un fichero.
+        UserError: Si alguna ruta no es un fichero.
     """
     for p in paths:
         if not p.is_file():
-            raise typer.BadParameter(_("%(path)s is not a file.") % {"path": p})
+            raise UserError(_("%(path)s is not a file.") % {"path": p})
     return paths

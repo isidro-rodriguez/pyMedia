@@ -3,11 +3,9 @@
 from dataclasses import dataclass
 
 from pymedia.errors import (
-    AudioError,
-    InvalidArgumentError,
     InvalidParameterError,
     MissingParameterError,
-    SubtitlesError,
+    UserError,
 )
 from pymedia.locales import _  # noqa
 from pymedia.models.media import Media
@@ -64,7 +62,7 @@ class StreamsMixin:
         try:
             stream_tracks: list[int] = [int(x) for x in stream_tracks_str.split(",")]
         except ValueError as err:
-            raise InvalidArgumentError(
+            raise UserError(
                 msg=_(
                     "Incorrect stream tracks format. Expected comma separated integers."
                 )
@@ -76,7 +74,7 @@ class StreamsMixin:
         if self.media is None:
             raise MissingParameterError(name="media")
         if track < 0:
-            raise InvalidArgumentError(msg=_("Stream index must be greater than 0."))
+            raise UserError(msg=_("Stream index must be greater than 0."))
 
         match streams_type:
             case StreamsMode.AUDIO:
@@ -86,7 +84,7 @@ class StreamsMixin:
                 for audio in self.media.audio:
                     if track == audio.track_index:
                         return
-                raise AudioError(msg=_("Audio index not included."))
+                raise UserError(msg=_("Audio index not included."))
             case StreamsMode.SUBTITLES:
                 if self.media.subtitles is None:
                     raise MissingParameterError(name="media.subtitles")
@@ -94,7 +92,7 @@ class StreamsMixin:
                 for subtitles in self.media.subtitles:
                     if track == subtitles.track_index:
                         return
-                raise SubtitlesError(msg=_("Subtitles index not included."))
+                raise UserError(msg=_("Subtitles index not included."))
             case StreamsMode.VIDEO:
                 # Manipulación de streams de vídeo todavía no soportadas.
                 pass

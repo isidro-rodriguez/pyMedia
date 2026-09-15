@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-09-13 21:57+0100\n"
+"POT-Creation-Date: 2026-09-15 17:28+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,67 +17,24 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.18.0\n"
 
-#: pymedia/errors.py:54
+#: pymedia/errors.py:49
 #, python-format
 msgid "FFmpeg command was not generated: %(command_name)s"
 msgstr ""
 
 #: pymedia/errors.py:75
 #, python-format
-msgid "The following options are mutually exclusive: %(opts_str)s."
-msgstr ""
-
-#: pymedia/errors.py:101
-#, python-format
-msgid ""
-"Invalid extension %(extension)s. Codec %(codec)s requires one of: "
-"%(supported)s."
-msgstr ""
-
-#: pymedia/errors.py:122
-#, python-format
-msgid ""
-"Cannot remux %(codec)s to %(extension)s. Safe remux targets: "
-"%(supported)s."
-msgstr ""
-
-#: pymedia/errors.py:142
-#, python-format
-msgid ""
-"Invalid extension %(extension)s. %(media_type)s requires one of: "
-"%(supported)s."
-msgstr ""
-
-#: pymedia/errors.py:162
-msgid "Invalid timestamp format. Expected: hh:mm:ss."
-msgstr ""
-
-#: pymedia/errors.py:174
-#, python-format
 msgid "Missing argument: %(name)s"
 msgstr ""
 
-#: pymedia/errors.py:186
+#: pymedia/errors.py:87
 #, python-format
 msgid "Missing parameter: %(name)s"
 msgstr ""
 
-#: pymedia/errors.py:198
+#: pymedia/errors.py:99
 #, python-format
 msgid "Missing property: %(name)s"
-msgstr ""
-
-#: pymedia/errors.py:211
-#, python-format
-msgid "One of the following options is required: %(options)s"
-msgstr ""
-
-#: pymedia/errors.py:232
-#, python-format
-msgid ""
-"Incompatible media files for join output '%(output)s'.\n"
-"Incompatibilities:\n"
-"%(incompatible_list)s"
 msgstr ""
 
 #: pymedia/ffmpeg/probe.py:51 pymedia/ffmpeg/probe.py:124
@@ -120,7 +77,7 @@ msgid ""
 "%(format_name)s)."
 msgstr ""
 
-#: pymedia/ffmpeg/probe.py:194
+#: pymedia/ffmpeg/probe.py:195
 #, python-format
 msgid "%(path.suffix)s extension doesn't support %(codec_name)s subtitles."
 msgstr ""
@@ -141,150 +98,150 @@ msgstr ""
 msgid "Video"
 msgstr ""
 
-#: pymedia/models/config.py:173
+#: pymedia/models/config.py:174
 #, python-format
 msgid ""
 "Invalid configuration setting: transcode presets are expected one of: "
 "%(expected)s."
 msgstr ""
 
-#: pymedia/models/config.py:189
+#: pymedia/models/config.py:190
 #, python-format
 msgid ""
 "Invalid configuration setting: transcode.%(preset)s is expected to be a "
 "table of encoding parameters."
 msgstr ""
 
-#: pymedia/models/config.py:205
+#: pymedia/models/config.py:206
 #, python-format
 msgid ""
 "Invalid configuration setting: transcode.%(preset)s.video_codec is "
 "expected one of: %(expected)s."
 msgstr ""
 
-#: pymedia/models/config.py:222
+#: pymedia/models/config.py:223
 #, python-format
 msgid ""
 "Invalid configuration setting: transcode.%(preset)s.video_preset is "
 "expected one of: %(expected)s."
 msgstr ""
 
-#: pymedia/models/config.py:241
+#: pymedia/models/config.py:242
 #, python-format
 msgid ""
 "Invalid configuration setting: transcode.%(preset)s.video_crf is expected"
 " between %(min)s and %(max)s."
 msgstr ""
 
-#: pymedia/models/config.py:254
+#: pymedia/models/config.py:255
 #, python-format
 msgid ""
 "Invalid configuration setting: transcode.%(preset)s.audio_codec is "
 "expected one of: %(expected)s."
 msgstr ""
 
-#: pymedia/models/config.py:271
+#: pymedia/models/config.py:272
 #, python-format
 msgid ""
 "Invalid configuration setting: transcode.%(preset)s.audio_bit_rate is "
 "expected one of: %(expected)s."
 msgstr ""
 
-#: pymedia/models/config.py:288
+#: pymedia/models/config.py:289
 #, python-format
 msgid ""
 "Invalid configuration setting: default_container.animated_image is "
 "expected one of: %(expected)s."
 msgstr ""
 
-#: pymedia/models/config.py:304
+#: pymedia/models/config.py:305
 #, python-format
 msgid ""
 "Invalid configuration setting: default_container.audio is expected one "
 "of: %(expected)s."
 msgstr ""
 
-#: pymedia/models/config.py:316
+#: pymedia/models/config.py:317
 #, python-format
 msgid ""
 "Invalid configuration setting: default_container.image is expected one "
 "of: %(expected)s."
 msgstr ""
 
-#: pymedia/models/config.py:336
+#: pymedia/models/config.py:337
 #, python-format
 msgid ""
 "Invalid configuration setting: default_container.media is expected one "
 "of: %(expected)s."
 msgstr ""
 
-#: pymedia/models/config.py:348
+#: pymedia/models/config.py:349
 #, python-format
 msgid ""
 "Invalid configuration setting: default_container.subtitles is expected "
 "one of: %(expected)s."
 msgstr ""
 
-#: pymedia/models/config.py:360
+#: pymedia/models/config.py:361
 #, python-format
 msgid ""
 "Invalid configuration setting: app.language is expected one of: "
 "%(expected)s."
 msgstr ""
 
-#: pymedia/models/config.py:374
+#: pymedia/models/config.py:375
 msgid ""
 "Invalid configuration setting: app.stall_timeout is expected to an "
 "integer between 30 to 600."
 msgstr ""
 
-#: pymedia/models/config.py:381
+#: pymedia/models/config.py:382
 #, python-format
 msgid "Invalid configuration: %(msg)s"
 msgstr ""
 
-#: pymedia/models/mixins/audio_mixin.py:68
+#: pymedia/models/mixins/audio_mixin.py:63
 msgid "audio language"
 msgstr ""
 
-#: pymedia/models/mixins/audio_mixin.py:111
-#: pymedia/models/mixins/subtitles_mixin.py:113
+#: pymedia/models/mixins/audio_mixin.py:110
+#: pymedia/models/mixins/subtitles_mixin.py:112
 msgid "stream tracks"
 msgstr ""
 
-#: pymedia/models/mixins/audio_mixin.py:113
+#: pymedia/models/mixins/audio_mixin.py:115
 msgid "media audio"
 msgstr ""
 
-#: pymedia/models/mixins/audio_mixin.py:126
-#: pymedia/models/mixins/streams_mixin.py:93
+#: pymedia/models/mixins/audio_mixin.py:124
+#: pymedia/models/mixins/streams_mixin.py:88
 msgid "Audio index not included."
 msgstr ""
 
-#: pymedia/models/mixins/audio_mixin.py:274
-#: pymedia/models/mixins/subtitles_mixin.py:271
+#: pymedia/models/mixins/audio_mixin.py:275
+#: pymedia/models/mixins/subtitles_mixin.py:274
 msgid ""
 "Value doesn't match with ISO 639-2: Codes for the Representation of Names"
 " of Languages.[https://www.loc.gov/standards/iso639-2/php/code_list.php]"
 msgstr ""
 
-#: pymedia/models/mixins/crop_mixin.py:72
+#: pymedia/models/mixins/crop_mixin.py:76
 #, python-format
 msgid "Invalid crop %(crop_str)s. Expected: WIDTH,HEIGHT,X,Y"
 msgstr ""
 
-#: pymedia/models/mixins/crop_mixin.py:86
+#: pymedia/models/mixins/crop_mixin.py:90
 msgid "Invalid crop dimensions: width and height must be greater than 0."
 msgstr ""
 
-#: pymedia/models/mixins/crop_mixin.py:94
+#: pymedia/models/mixins/crop_mixin.py:98
 #, python-format
 msgid ""
 "Invalid crop area. Area width (%(area_width)s) and coordinate X "
 "(%(area_x)s) is bigger that video width (%(video_width)s) "
 msgstr ""
 
-#: pymedia/models/mixins/crop_mixin.py:107
+#: pymedia/models/mixins/crop_mixin.py:111
 #, python-format
 msgid ""
 "Invalid crop area. Area height (%(area_height)s) and coordinate Y "
@@ -299,105 +256,133 @@ msgstr ""
 msgid "Image container not supported."
 msgstr ""
 
-#: pymedia/models/mixins/outputs_mixin.py:84
+#: pymedia/models/mixins/media_mixin.py:124
+#: pymedia/models/mixins/outputs_mixin.py:529
+#, python-format
+msgid ""
+"Invalid extension %(extension)s. %(media_type)s requires one of: "
+"%(supported)s."
+msgstr ""
+
+#: pymedia/models/mixins/outputs_mixin.py:80
 msgid "animated images"
 msgstr ""
 
-#: pymedia/models/mixins/outputs_mixin.py:148
-#: pymedia/pipeline/audio_pipeline.py:186
+#: pymedia/models/mixins/outputs_mixin.py:152
+#: pymedia/pipeline/audio_pipeline.py:200
 msgid "audio"
 msgstr ""
 
-#: pymedia/models/mixins/outputs_mixin.py:229
+#: pymedia/models/mixins/outputs_mixin.py:238
 msgid "image"
 msgstr ""
 
-#: pymedia/models/mixins/outputs_mixin.py:301
+#: pymedia/models/mixins/outputs_mixin.py:315
 msgid "media"
 msgstr ""
 
-#: pymedia/models/mixins/outputs_mixin.py:403
+#: pymedia/models/mixins/outputs_mixin.py:323
+#: pymedia/models/mixins/outputs_mixin.py:349
+#: pymedia/models/mixins/outputs_mixin.py:484
+#, python-format
+msgid ""
+"Invalid extension %(extension)s. Codec %(codec)s requires one of: "
+"%(supported)s."
+msgstr ""
+
+#: pymedia/models/mixins/outputs_mixin.py:438
 msgid "subtitles files"
 msgstr ""
 
-#: pymedia/models/mixins/outputs_mixin.py:471
+#: pymedia/models/mixins/outputs_mixin.py:496
+#, python-format
+msgid ""
+"Cannot remux %(codec)s to %(extension)s. Safe remux targets: "
+"%(supported)s."
+msgstr ""
+
+#: pymedia/models/mixins/outputs_mixin.py:520
 #, python-format
 msgid "%(name)s contains invalid characters: < > : \" / \\ | ? *"
 msgstr ""
 
-#: pymedia/models/mixins/outputs_mixin.py:483
+#: pymedia/models/mixins/outputs_mixin.py:545
 #, python-format
 msgid "Could not create directory: %(path)s"
 msgstr ""
 
-#: pymedia/models/mixins/scale_mixin.py:95
+#: pymedia/models/mixins/scale_mixin.py:96
 #, python-format
 msgid "Invalid dimensions %(value)s. Expected: WIDTHxHEIGHT"
 msgstr ""
 
-#: pymedia/models/mixins/scale_mixin.py:103
-#: pymedia/models/mixins/scale_mixin.py:119
+#: pymedia/models/mixins/scale_mixin.py:104
+#: pymedia/models/mixins/scale_mixin.py:120
 #: pymedia/pipeline/info_pipeline.py:78
 msgid "video dimensions"
 msgstr ""
 
-#: pymedia/models/mixins/scale_mixin.py:115
+#: pymedia/models/mixins/scale_mixin.py:116
 msgid "Scale mode not supported."
 msgstr ""
 
-#: pymedia/models/mixins/scale_mixin.py:124
+#: pymedia/models/mixins/scale_mixin.py:125
 msgid "Target dimensions must be even."
 msgstr ""
 
-#: pymedia/models/mixins/scale_mixin.py:129
+#: pymedia/models/mixins/scale_mixin.py:130
 msgid "Ignored scale. Target scale > video resolution, it requires upscale."
 msgstr ""
 
-#: pymedia/models/mixins/streams_mixin.py:73
+#: pymedia/models/mixins/streams_mixin.py:68
 msgid "Incorrect stream tracks format. Expected comma separated integers."
 msgstr ""
 
-#: pymedia/models/mixins/streams_mixin.py:83
+#: pymedia/models/mixins/streams_mixin.py:78
 msgid "Stream index must be greater than 0."
 msgstr ""
 
-#: pymedia/models/mixins/streams_mixin.py:101
-#: pymedia/models/mixins/subtitles_mixin.py:127
+#: pymedia/models/mixins/streams_mixin.py:96
+#: pymedia/models/mixins/subtitles_mixin.py:125
 msgid "Subtitles index not included."
 msgstr ""
 
-#: pymedia/models/mixins/streams_mixin.py:106
+#: pymedia/models/mixins/streams_mixin.py:101
 msgid "Incorrect stream type."
 msgstr ""
 
-#: pymedia/models/mixins/subtitles_mixin.py:70
+#: pymedia/models/mixins/subtitles_mixin.py:66
 msgid "subtitles language"
 msgstr ""
 
-#: pymedia/models/mixins/subtitles_mixin.py:115
+#: pymedia/models/mixins/subtitles_mixin.py:117
 msgid "media subtitles"
 msgstr ""
 
-#: pymedia/models/mixins/subtitles_mixin.py:241
+#: pymedia/models/mixins/subtitles_mixin.py:244
 msgid "Subtitles codec not supported."
 msgstr ""
 
-#: pymedia/models/mixins/timestamps_mixin.py:66
+#: pymedia/models/mixins/timestamps_mixin.py:67
 #, python-format
 msgid "Invalid timestamps. Start (%(start)s) => End (%(end)s.)"
 msgstr ""
 
-#: pymedia/models/mixins/timestamps_mixin.py:186
+#: pymedia/models/mixins/timestamps_mixin.py:172
+msgid "Invalid timestamp format. Expected: hh:mm:ss."
+msgstr ""
+
+#: pymedia/models/mixins/timestamps_mixin.py:196
 #, python-format
 msgid "Timestamp %(time)s exceeds video duration %(duration)s."
 msgstr ""
 
 #: pymedia/pipeline/animated_pipeline.py:100
-#: pymedia/pipeline/audio_pipeline.py:171 pymedia/pipeline/join_pipeline.py:84
+#: pymedia/pipeline/audio_pipeline.py:182 pymedia/pipeline/join_pipeline.py:85
 #: pymedia/pipeline/remux_pipeline.py:71 pymedia/pipeline/sheet_pipeline.py:83
 #: pymedia/pipeline/sheet_pipeline.py:87 pymedia/pipeline/split_pipeline.py:74
-#: pymedia/pipeline/subtitles_pipeline.py:173
-#: pymedia/pipeline/thumb_pipeline.py:235
+#: pymedia/pipeline/subtitles_pipeline.py:186
+#: pymedia/pipeline/thumb_pipeline.py:238
 #: pymedia/pipeline/transcode_pipeline.py:122
 #, python-format
 msgid "FFmpeg command: %(cmd)s"
@@ -412,61 +397,61 @@ msgstr ""
 msgid "Animated image generated successfully: %(output)s"
 msgstr ""
 
-#: pymedia/pipeline/audio_pipeline.py:150
+#: pymedia/pipeline/audio_pipeline.py:161
 msgid "Adding audio"
 msgstr ""
 
-#: pymedia/pipeline/audio_pipeline.py:151
+#: pymedia/pipeline/audio_pipeline.py:162
 #, python-format
 msgid "Audio added successfully: %(output)s"
 msgstr ""
 
-#: pymedia/pipeline/audio_pipeline.py:156
+#: pymedia/pipeline/audio_pipeline.py:167
 msgid "Deleting audio"
 msgstr ""
 
-#: pymedia/pipeline/audio_pipeline.py:157
+#: pymedia/pipeline/audio_pipeline.py:168
 #, python-format
 msgid "Audio deleted successfully: %(output)s"
 msgstr ""
 
-#: pymedia/pipeline/audio_pipeline.py:162
+#: pymedia/pipeline/audio_pipeline.py:173
 msgid "Editing audio metadata"
 msgstr ""
 
-#: pymedia/pipeline/audio_pipeline.py:163
+#: pymedia/pipeline/audio_pipeline.py:174
 #, python-format
 msgid "Audio metadata edited successfully: %(output)s"
 msgstr ""
 
-#: pymedia/pipeline/audio_pipeline.py:168
+#: pymedia/pipeline/audio_pipeline.py:179
 msgid "Extracting audio"
 msgstr ""
 
-#: pymedia/pipeline/audio_pipeline.py:169
+#: pymedia/pipeline/audio_pipeline.py:180
 #, python-format
 msgid "Audio extracted successfully: %(output)s"
 msgstr ""
 
-#: pymedia/pipeline/base_pipeline.py:55
+#: pymedia/pipeline/base_pipeline.py:62
 msgid "Invalid class name format!"
 msgstr ""
 
-#: pymedia/pipeline/base_pipeline.py:73 pymedia/pipeline/thumb_pipeline.py:187
+#: pymedia/pipeline/base_pipeline.py:81 pymedia/pipeline/thumb_pipeline.py:190
 msgid "Process skipped since output file already exists."
 msgstr ""
 
-#: pymedia/pipeline/base_pipeline.py:80 pymedia/pipeline/thumb_pipeline.py:185
-#: pymedia/pipeline/thumb_pipeline.py:221
+#: pymedia/pipeline/base_pipeline.py:88 pymedia/pipeline/thumb_pipeline.py:188
+#: pymedia/pipeline/thumb_pipeline.py:224
 msgid "Overwrite?"
 msgstr ""
 
-#: pymedia/pipeline/base_pipeline.py:132
+#: pymedia/pipeline/base_pipeline.py:140
 #, python-format
 msgid "FFmpeg command timed out: %(command_name)s"
 msgstr ""
 
-#: pymedia/pipeline/base_pipeline.py:194
+#: pymedia/pipeline/base_pipeline.py:202
 msgid "FFmpeg command failed during execution."
 msgstr ""
 
@@ -552,13 +537,21 @@ msgstr ""
 msgid "Metadata"
 msgstr ""
 
-#: pymedia/pipeline/join_pipeline.py:88
+#: pymedia/pipeline/join_pipeline.py:89
 msgid "Joining media files"
 msgstr ""
 
-#: pymedia/pipeline/join_pipeline.py:92
+#: pymedia/pipeline/join_pipeline.py:93
 #, python-format
 msgid "Containers joined successfully: %(output)s"
+msgstr ""
+
+#: pymedia/pipeline/join_pipeline.py:217
+#, python-format
+msgid ""
+"Incompatible media files for join output %(output)s.\n"
+"Incompatibilities:\n"
+"%(incompatible_list)s"
 msgstr ""
 
 #: pymedia/pipeline/remux_pipeline.py:75
@@ -592,64 +585,64 @@ msgstr ""
 msgid "Container split successfully: %(output)s"
 msgstr ""
 
-#: pymedia/pipeline/subtitles_pipeline.py:152
+#: pymedia/pipeline/subtitles_pipeline.py:165
 msgid "Adding subtitles"
 msgstr ""
 
-#: pymedia/pipeline/subtitles_pipeline.py:153
+#: pymedia/pipeline/subtitles_pipeline.py:166
 #, python-format
 msgid "Subtitles added successfully: %(output)s"
 msgstr ""
 
-#: pymedia/pipeline/subtitles_pipeline.py:158
+#: pymedia/pipeline/subtitles_pipeline.py:171
 msgid "Deleting subtitles"
 msgstr ""
 
-#: pymedia/pipeline/subtitles_pipeline.py:159
+#: pymedia/pipeline/subtitles_pipeline.py:172
 #, python-format
 msgid "Subtitles deleted successfully: %(output)s"
 msgstr ""
 
-#: pymedia/pipeline/subtitles_pipeline.py:164
+#: pymedia/pipeline/subtitles_pipeline.py:177
 msgid "Editing subtitles metadata"
 msgstr ""
 
-#: pymedia/pipeline/subtitles_pipeline.py:165
+#: pymedia/pipeline/subtitles_pipeline.py:178
 #, python-format
 msgid "Subtitles metadata edited successfully: %(output)s"
 msgstr ""
 
-#: pymedia/pipeline/subtitles_pipeline.py:170
+#: pymedia/pipeline/subtitles_pipeline.py:183
 msgid "Extracting subtitles"
 msgstr ""
 
-#: pymedia/pipeline/subtitles_pipeline.py:171
+#: pymedia/pipeline/subtitles_pipeline.py:184
 #, python-format
 msgid "Subtitles extracted successfully: %(output)s"
 msgstr ""
 
-#: pymedia/pipeline/subtitles_pipeline.py:189
+#: pymedia/pipeline/subtitles_pipeline.py:202
 msgid "The media file does not contain subtitles streams."
 msgstr ""
 
-#: pymedia/pipeline/thumb_pipeline.py:201
+#: pymedia/pipeline/thumb_pipeline.py:204
 msgid "Cannot resolve scene output pattern from template."
 msgstr ""
 
-#: pymedia/pipeline/thumb_pipeline.py:218
+#: pymedia/pipeline/thumb_pipeline.py:221
 #, python-format
 msgid "Found existing scene thumbnail files: %(files)s"
 msgstr ""
 
-#: pymedia/pipeline/thumb_pipeline.py:223
+#: pymedia/pipeline/thumb_pipeline.py:226
 msgid "Process skipped since output files already exist."
 msgstr ""
 
-#: pymedia/pipeline/thumb_pipeline.py:240
+#: pymedia/pipeline/thumb_pipeline.py:243
 msgid "Generating thumbnail"
 msgstr ""
 
-#: pymedia/pipeline/thumb_pipeline.py:244
+#: pymedia/pipeline/thumb_pipeline.py:247
 #, python-format
 msgid "Thumbnail(s) generated successfully: %(output)s"
 msgstr ""
@@ -925,7 +918,7 @@ msgid "Log level DEBUG"
 msgstr ""
 
 #: pymedia/typer/options.py:74
-msgid "Show this message and exit."
+msgid "Show this msg and exit."
 msgstr ""
 
 #: pymedia/typer/options.py:90 pymedia/typer/options.py:100
@@ -1133,13 +1126,17 @@ msgstr ""
 msgid "Allows upscaling beyond the source dimensions."
 msgstr ""
 
-#: pymedia/typer/service.py:46
+#: pymedia/typer/service.py:43
+msgid "The following options are mutually exclusive: output, output_directory"
+msgstr ""
+
+#: pymedia/typer/service.py:49
 msgid ""
 "It is not allowed to specify an output with multiple inputs, use output "
 "directory instead."
 msgstr ""
 
-#: pymedia/typer/service.py:65 pymedia/typer/service.py:83
+#: pymedia/typer/service.py:68 pymedia/typer/service.py:86
 #, python-format
 msgid "%(path)s is not a file."
 msgstr ""
@@ -1150,5 +1147,11 @@ msgstr ""
 
 #: pymedia/typer/commands/remux_command.py:60
 msgid "Fast start only works for '.mp4' remux."
+msgstr ""
+
+#: pymedia/typer/commands/transcode_command.py:91
+msgid ""
+"One of the following options is required: transcode_audio, "
+"transcode_video, crop, rotate, scale_to, hflip, vflip."
 msgstr ""
 

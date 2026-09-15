@@ -4,10 +4,10 @@ from dataclasses import dataclass
 from enum import Enum
 
 from pymedia.errors import (
-    InvalidArgumentError,
     InvalidParameterError,
     MissingParameterError,
     MissingPropertyError,
+    UserError,
 )
 from pymedia.locales import _  # noqa
 from pymedia.logger import Logger
@@ -91,7 +91,7 @@ class ScaleMixin:
                 width_str, height_str = value.split("x")
                 width_int, height_int = int(width_str), int(height_str)
             except (ValueError, TypeError) as err:
-                raise InvalidArgumentError(
+                raise UserError(
                     msg=_("Invalid dimensions %(value)s. Expected: WIDTHxHEIGHT")
                     % {"value": value}
                 ) from err

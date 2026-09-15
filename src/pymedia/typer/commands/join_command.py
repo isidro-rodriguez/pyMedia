@@ -2,7 +2,7 @@
 
 import typer
 
-from pymedia.errors import OptionError
+from pymedia.errors import UserError
 from pymedia.locales import _  # noqa
 from pymedia.pipeline.join_pipeline import JoinPipeline
 from pymedia.typer.help import JOIN_HELP
@@ -44,7 +44,7 @@ def join(
         OptionError: Si se aportan menos de dos vídeos para unir.
     """
     if len(media_input_list) < 2:
-        raise OptionError(msg=_("It's required to provide at least 2 videos."))
+        raise UserError(msg=_("It's required to provide at least 2 videos."))
 
     pipeline = JoinPipeline(debug=debug)
     pipeline.process_parameters(

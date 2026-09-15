@@ -22,14 +22,14 @@ SUBTITLES: dict[str, list[str]] = {
     "eng": [
         "Hello, this is a subtitle test.",
         "We are testing FFmpeg with different languages.",
-        "This message appears for a few seconds.",
+        "This msg appears for a few seconds.",
         "The complete file lasts exactly thirty seconds.",
         "End of the English test.",
     ],
     "fra": [
         "Bonjour, ceci est un test de sous-titres.",
         "Nous testons FFmpeg avec différentes langues.",
-        "Ce message apparaît pendant quelques secondes.",
+        "Ce msg apparaît pendant quelques secondes.",
         "Le fichier complet dure exactement trente secondes.",
         "Fin du test en français.",
     ],

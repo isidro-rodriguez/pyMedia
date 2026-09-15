@@ -8,10 +8,11 @@ from pathlib import Path
 
 from pymedia.data.containers import VIDEO_CONTAINERS
 from pymedia.errors import (
-    InvalidContainerTypeError,
+    InvalidContainerError,
     MissingParameterError,
 )
 from pymedia.ffmpeg.probe import get_media_metadata
+from pymedia.locales import _  # noqa
 from pymedia.logger import Logger
 from pymedia.models.audio import Audio
 from pymedia.models.media import Media
@@ -117,10 +118,10 @@ def _create_media(media_input: Path, logger: Logger) -> "Media":
     def _validate_media_extension() -> None:
         """Valida que la lista de ficheros tengan extensiones de vídeos."""
         if media_input.suffix not in VIDEO_CONTAINERS:
-            raise InvalidContainerTypeError(
+            raise InvalidContainerError(
                 extension=media_input.suffix,
                 media_type="video",
-                supported=", ".join(VIDEO_CONTAINERS),
+                supported=VIDEO_CONTAINERS,
             )
 
     _validate_media_extension()

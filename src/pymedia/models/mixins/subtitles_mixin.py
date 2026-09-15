@@ -5,10 +5,9 @@ from pathlib import Path
 
 from pymedia.data.language_codes import LANGUAGES
 from pymedia.errors import (
-    InvalidArgumentError,
     MissingArgumentError,
     MissingParameterError,
-    SubtitlesError,
+    UserError,
 )
 from pymedia.ffmpeg.probe import validate_subtitles_file_codec
 from pymedia.locales import _  # noqa
@@ -122,7 +121,7 @@ class SubtitlesInputMixin:
             None,
         )
         if current is None:
-            raise SubtitlesError(msg=_("Subtitles index not included."))
+            raise UserError(msg=_("Subtitles index not included."))
 
         language_code: str | None = None
 
@@ -241,7 +240,7 @@ class SubtitlesInputMixin:
             case ".webm":
                 return "webvtt"
 
-        raise SubtitlesError(msg=_("Subtitles codec not supported."))
+        raise UserError(msg=_("Subtitles codec not supported."))
 
     @staticmethod
     def _process_stream_index(media: Media) -> int:
@@ -269,7 +268,7 @@ class SubtitlesInputMixin:
             )
             if normalized in candidates:
                 return language.code
-        raise InvalidArgumentError(
+        raise UserError(
             msg=_(
                 "Value doesn't match with ISO 639-2: "
                 "Codes for the Representation of Names of Languages."

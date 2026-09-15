@@ -6,15 +6,20 @@ automáticamente el mensaje en el log.
 """
 
 import logging
-from pathlib import Path
+
+from typer import BadParameter, TyperException
 
 from pymedia.locales import _  # noqa
 from pymedia.logger import Logger
 
 logger = Logger(logging.getLogger("pymedia.logger"))
 
+# =============================================================================
+#  Errores de aplicación
+# =============================================================================
 
-class PyMediaError(Exception):
+
+class PyMediaError(TyperException):
     """Base de todos los errores de pyMedia.
 
     Cada subclase construye su mensaje con `_("msgid") % kwargs` en el
@@ -28,13 +33,9 @@ class PyMediaError(Exception):
         Args:
             msg: Mensaje de error ya formateado.
         """
-        self.msg = f"\n{msg}"
+        self.msg = f"{msg}"
         super().__init__(self.msg)
-        logger.error(self.msg)
-
-
-class AudioError(PyMediaError):
-    """Error relacionado con la manipulación de pistas de audio."""
+        logger.error(msg=self.msg, exc_info=True)
 
 
 class CommandError(PyMediaError):
@@ -60,106 +61,12 @@ class ConfigError(PyMediaError):
     """Error de validación de la configuración de la aplicación."""
 
 
-class ExclusiveOptionsError(PyMediaError):
-    """Excepción para opciones de CLI incompatibles entre sí."""
-
-    def __init__(self, options: list[str]) -> None:
-        """Inicializa el error con las opciones en conflicto.
-
-        Args:
-            options: Opciones mutuamente excluyentes.
-        """
-        opts_str = ", ".join(f"'{opt}'" for opt in options)
-
-        super().__init__(
-            _("The following options are mutually exclusive: %(opts_str)s.")
-            % {"opts_str": opts_str}
-        )
-
-
 class FfprobeError(PyMediaError):
     """Errores relacionados con ffprobe/obtención de metadatos."""
 
 
-class InvalidArgumentError(PyMediaError):
-    """Error por un argumento de CLI con valor no válido."""
-
-
-class InvalidContainerError(PyMediaError):
-    """Error cuando la extensión no es compatible con el códec usado."""
-
-    def __init__(self, extension: str, codec: str, supported: str) -> None:
-        """Inicializa el error con la extensión, el códec y las válidas.
-
-        Args:
-            extension: Extensión del fichero de salida.
-            codec: Códec usado en la salida.
-            supported: Extensiones de contenedor soportadas por el códec.
-        """
-        super().__init__(
-            _(
-                "Invalid extension %(extension)s. Codec %(codec)s requires one of: "
-                "%(supported)s."
-            )
-            % {"extension": extension, "codec": codec, "supported": supported}
-        )
-
-
-class InvalidRemuxError(InvalidContainerError):
-    """Error cuando el códec no admite remux seguro al contenedor indicado."""
-
-    def __init__(self, extension: str, codec: str, supported: str) -> None:
-        """Inicializa el error con la extensión, el códec y los destinos.
-
-        Args:
-            extension: Extensión de remux solicitada.
-            codec: Códec de la pista a remuxar.
-            supported: Contenedores seguros de remux para el códec.
-        """
-        PyMediaError.__init__(
-            self,
-            _(
-                "Cannot remux %(codec)s to %(extension)s. Safe remux targets: "
-                "%(supported)s."
-            )
-            % {"codec": codec, "extension": extension, "supported": supported},
-        )
-
-
-class InvalidContainerTypeError(PyMediaError):
-    """Error cuando la extensión no corresponde al tipo de medio esperado."""
-
-    def __init__(self, extension: str, media_type: str, supported: str) -> None:
-        """Inicializa el error con la extensión, el tipo de medio y los válidos.
-
-        Args:
-            extension: Extensión del fichero de salida.
-            media_type: Tipo de medio de salida esperado.
-            supported: Extensiones de contenedor soportadas para ese tipo.
-        """
-        super().__init__(
-            _(
-                "Invalid extension %(extension)s. %(media_type)s requires one of: "
-                "%(supported)s."
-            )
-            % {
-                "extension": extension,
-                "media_type": media_type.capitalize(),
-                "supported": supported,
-            }
-        )
-
-
 class InvalidParameterError(PyMediaError):
     """Error por un parámetro procesado con un valor no válido."""
-
-
-class InvalidTimeFormatError(PyMediaError):
-    """Error por una marca de tiempo con un formato no soportado."""
-
-    def __init__(self) -> None:
-        """Inicializa el error con el formato esperado `hh:mm:ss`."""
-        super().__init__(_("Invalid timestamp format. Expected: hh:mm:ss."))
 
 
 class MissingArgumentError(PyMediaError):
@@ -198,50 +105,74 @@ class MissingPropertyError(PyMediaError):
         super().__init__(_("Missing property: %(name)s") % {"name": name})
 
 
-class MissingRequiredOptionError(PyMediaError):
-    """Error cuando no se aporta ninguna de las opciones requeridas."""
+# =============================================================================
+#  Errores de usuario
+# =============================================================================
 
-    def __init__(self, options: list[str]) -> None:
-        """Inicializa el error con las opciones que son necesarias.
+
+class UserError(BadParameter):
+    """Errores de los argumentos introducidos por el usuario.
+
+    Extiende `BadParameter` para no mostrar traceback y que el usuario tenga
+    un feedback claro y simple.
+    """
+
+    def __init__(self, msg: str) -> None:
+        """Inicializa el error y registra el mensaje solo en el fichero de log.
 
         Args:
-            options: Opciones de CLI de las que al menos una es obligatoria.
+            msg: Mensaje de error ya formateado.
         """
-        super().__init__(
-            _("One of the following options is required: %(options)s")
-            % {"options": ", ".join(options)}
-        )
+        self.msg = f"{msg}"
+        super().__init__(message=self.msg)
+        logger.error(msg=self.msg, console=False)
 
 
-class OptionError(PyMediaError):
-    """Error de uso de una opción de CLI."""
+class InvalidCodecContainerError(UserError):
+    """Si el usuario ha indicado un contenedor de salida incompatible con sus códecs."""
 
-
-class IncompatibleMediaError(PyMediaError):
-    """Error cuando los medios de una lista no son compatibles entre sí."""
-
-    def __init__(self, output: Path, incompatible_list: list[str]) -> None:
-        """Inicializa el error con archivo de salida y lista de incompatibilidades.
+    def __init__(self, extension: str, codec: str, supported: tuple[str, ...]) -> None:
+        """Inicialización del error.
 
         Args:
-            output: Ruta del archivo de salida solicitado.
-            incompatible_list: Lista de incompatibilidades formateadas en texto.
+            extension: Nombre del contenedor de salida.
+            codec: Nombre del códec.
+            supported: Lista de contenedores soportados por el códec.
         """
         super().__init__(
             _(
-                "Incompatible media files for join output '%(output)s'.\n"
-                "Incompatibilities:\n%(incompatible_list)s"
+                "Invalid extension %(extension)s. "
+                "Codec %(codec)s requires one of: %(supported)s."
             )
             % {
-                "output": output,
-                "incompatible_list": "\n".join(incompatible_list),
+                "extension": extension,
+                "codec": codec,
+                "supported": ", ".join(supported),
             }
         )
 
 
-class PermissionDeniedError(PyMediaError):
-    """Error cuando no se tienen permisos para crear un fichero o directorio."""
+class InvalidContainerError(UserError):
+    """Si indicado contenedor de salida incompatible con el tipo de contenido."""
 
+    def __init__(
+        self, extension: str, media_type: str, supported: tuple[str, ...]
+    ) -> None:
+        """Inicialización del error.
 
-class SubtitlesError(PyMediaError):
-    """Errores relacionados con subtítulos."""
+        Args:
+            extension: Nombre del contenedor de salida.
+            media_type: Tipo de contenido multimedia.
+            supported: Lista de contenedores soportados por el códec.
+        """
+        super().__init__(
+            _(
+                "Invalid extension %(extension)s. %(media_type)s requires one of: "
+                "%(supported)s."
+            )
+            % {
+                "extension": extension,
+                "media_type": media_type.capitalize(),
+                "supported": ", ".join(supported),
+            }
+        )

@@ -2,7 +2,8 @@
 
 import typer
 
-from pymedia.errors import MissingRequiredOptionError
+from pymedia.errors import UserError
+from pymedia.locales import _  # noqa
 from pymedia.pipeline.transcode_pipeline import TranscodePipeline
 from pymedia.typer.help import TRANSCODE_HELP
 from pymedia.typer.options import (
@@ -86,16 +87,11 @@ def transcode(
         and hflip is False
         and vflip is False
     ):
-        raise MissingRequiredOptionError(
-            options=[
-                "transcode_audio",
-                "transcode_video",
-                "crop",
-                "rotate",
-                "scale_to",
-                "hflip",
-                "vflip",
-            ]
+        raise UserError(
+            msg=_(
+                "One of the following options is required: transcode_audio, "
+                "transcode_video, crop, rotate, scale_to, hflip, vflip."
+            )
         )
 
     validate_conflict_output_options(

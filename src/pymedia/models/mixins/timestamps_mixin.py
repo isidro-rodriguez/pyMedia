@@ -6,9 +6,9 @@ from datetime import timedelta
 
 from pymedia.errors import (
     InvalidParameterError,
-    InvalidTimeFormatError,
     MissingParameterError,
     MissingPropertyError,
+    UserError,
 )
 from pymedia.locales import _  # noqa
 from pymedia.models.media import Media
@@ -168,13 +168,14 @@ def _process_time(time_str: str, media: Media) -> timedelta:
     def _parse_to_timedelta() -> timedelta:
         """Convierte str ('hh:mm:ss', 'mm:ss', 'ss') a timedelta."""
         parts = time_str.split(":")
+        message = _("Invalid timestamp format. Expected: hh:mm:ss.")
         if not parts:
-            raise InvalidTimeFormatError()
+            raise UserError(msg=message)
         *measured, seconds = parts
         if not all(re.fullmatch(r"\d+", p) for p in measured):
-            raise InvalidTimeFormatError()
+            raise UserError(msg=message)
         if not re.fullmatch(r"\d+(?:\.\d+)?", seconds):
-            raise InvalidTimeFormatError()
+            raise UserError(msg=message)
         match tuple(map(float, parts)):
             case (hours, minutes, secs):
                 return timedelta(hours=hours, minutes=minutes, seconds=secs)
@@ -183,7 +184,7 @@ def _process_time(time_str: str, media: Media) -> timedelta:
             case (secs,):
                 return timedelta(seconds=secs)
             case _:
-                raise InvalidTimeFormatError()
+                raise UserError(msg=message)
 
     def _validate_time() -> None:
         """Valida que la marca de tiempo no supere la duración del vídeo."""

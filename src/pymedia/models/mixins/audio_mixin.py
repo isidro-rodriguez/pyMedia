@@ -5,10 +5,9 @@ from pathlib import Path
 
 from pymedia.data.language_codes import LANGUAGES
 from pymedia.errors import (
-    AudioError,
-    InvalidArgumentError,
     MissingArgumentError,
     MissingParameterError,
+    UserError,
 )
 from pymedia.ffmpeg.probe import get_audio_codec
 from pymedia.locales import _  # noqa
@@ -121,7 +120,7 @@ class AudioInputMixin:
         )
 
         if current is None:
-            raise AudioError(msg=_("Audio index not included."))
+            raise UserError(msg=_("Audio index not included."))
 
         language_code: str | None = None
 
@@ -270,7 +269,7 @@ class AudioInputMixin:
             if normalized in candidates:
                 return language.code
 
-        raise InvalidArgumentError(
+        raise UserError(
             msg=_(
                 "Value doesn't match with ISO 639-2: "
                 "Codes for the Representation of Names of Languages."

@@ -6,10 +6,7 @@ from typing import Any
 
 import pytest
 
-from pymedia.errors import (
-    InvalidContainerTypeError,
-    MissingParameterError,
-)
+from pymedia.errors import MissingParameterError, UserError
 from pymedia.logger import Logger
 from pymedia.models.media import Media
 from pymedia.models.mixins.media_mixin import MediaInputMixin, MediaListMixin
@@ -56,7 +53,7 @@ class TestInputSingleCreate:
         """Comprueba que una extensión no de vídeo lanza un error."""
         mixin = MediaInputMixin()
 
-        with pytest.raises(InvalidContainerTypeError):
+        with pytest.raises(UserError):
             mixin.create_media_input(
                 media_input=tmp_path / "clip.txt", logger=_logger()
             )
@@ -103,7 +100,7 @@ class TestInputListCreate:
         """Comprueba que una extensión no de vídeo lanza un error."""
         mixin = MediaListMixin()
 
-        with pytest.raises(InvalidContainerTypeError):
+        with pytest.raises(UserError):
             mixin.create_media_list(
                 media_input_list=[tmp_path / "x.txt"], logger=_logger()
             )

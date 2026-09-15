@@ -4,13 +4,7 @@ from pathlib import Path
 
 import pytest
 
-from pymedia.errors import (
-    InvalidArgumentError,
-    InvalidContainerError,
-    InvalidContainerTypeError,
-    InvalidRemuxError,
-    MissingPropertyError,
-)
+from pymedia.errors import MissingPropertyError, UserError
 from pymedia.models.media import Audio, Media, Subtitles, Video
 from pymedia.models.mixins.outputs_mixin import (
     AnimatedOutputMixin,
@@ -122,10 +116,10 @@ class TestAnimatedOutputMixin:
         """Comprueba que una extensión no GIF lanza un error."""
         mixin = _animated_mixin(media=_media_with_path())
 
-        with pytest.raises(InvalidContainerTypeError) as exc_info:
+        with pytest.raises(UserError) as exc_info:
             mixin.create_animated_output(extension=".gif", output=tmp_path / "out.png")
 
-        assert "gif" in exc_info.value.msg
+        assert "gif" in str(exc_info.value)
 
     def test_output_directory_created(self, tmp_path: Path) -> None:
         """Comprueba que se crea y usa el directorio de salida."""
@@ -171,16 +165,16 @@ class TestAudioOutputMixin:
         mixin = _audio_mixin(media=_media_with_path(audio=_audio("aac")))
 
         # .ogg es un destino de audio soportado, pero no admite aac
-        with pytest.raises(InvalidContainerError) as exc_info:
+        with pytest.raises(UserError) as exc_info:
             mixin.create_audio_output(extension=".ogg", output=tmp_path / "out.ogg")
 
-        assert "aac" in exc_info.value.msg
+        assert "aac" in str(exc_info.value)
 
     def test_not_audio_extension(self, tmp_path: Path) -> None:
         """Comprueba que una extensión no de audio lanza un error."""
         mixin = _audio_mixin(media=_media_with_path(audio=_audio("aac")))
 
-        with pytest.raises(InvalidContainerTypeError):
+        with pytest.raises(UserError):
             mixin.create_audio_output(extension=".m4a", output=tmp_path / "out.txt")
 
     def test_ignores_unselected_tracks(self, tmp_path: Path) -> None:
@@ -201,10 +195,10 @@ class TestAudioOutputMixin:
         )
         mixin.stream_tracks = [0]
 
-        with pytest.raises(InvalidContainerError) as exc_info:
+        with pytest.raises(UserError) as exc_info:
             mixin.create_audio_output(extension=".ogg", output=tmp_path / "out.ogg")
 
-        assert "aac" in exc_info.value.msg
+        assert "aac" in str(exc_info.value)
 
     def test_all_tracks_checked_without_selection(self, tmp_path: Path) -> None:
         """Comprueba que sin selección se validan todas las pistas de la media."""
@@ -212,10 +206,10 @@ class TestAudioOutputMixin:
             media=_media_tracks(_audio_track("aac", 0), _audio_track("ac3", 1))
         )
 
-        with pytest.raises(InvalidContainerError) as exc_info:
+        with pytest.raises(UserError) as exc_info:
             mixin.create_audio_output(extension=".m4a", output=tmp_path / "out.m4a")
 
-        assert "ac3" in exc_info.value.msg
+        assert "ac3" in str(exc_info.value)
 
     def test_remux_to_safe_container(self, tmp_path: Path) -> None:
         """Comprueba que un cambio de contenedor seguro para el códec pasa."""
@@ -226,24 +220,24 @@ class TestAudioOutputMixin:
         assert mixin.audio_output == (tmp_path / "out.ogg").absolute()
 
     def test_remux_to_unsafe_container_raises(self, tmp_path: Path) -> None:
-        """Comprueba que el remux a un contenedor no seguro lanza InvalidRemuxError."""
+        """Comprueba que el remux a un contenedor no seguro lanza un error."""
         mixin = _audio_mixin(media=_media_tracks(_audio_track("aac", 0)))
 
-        with pytest.raises(InvalidRemuxError) as exc_info:
+        with pytest.raises(UserError) as exc_info:
             mixin.create_audio_output(extension=".ogg", output=tmp_path / "out.ogg")
 
-        assert "aac" in exc_info.value.msg
-        assert ".m4a" in exc_info.value.msg
+        assert "aac" in str(exc_info.value)
+        assert ".m4a" in str(exc_info.value)
 
     def test_remux_error_lists_safe_targets(self, tmp_path: Path) -> None:
         """Comprueba que el error de remux lista los destinos seguros del códec."""
         mixin = _audio_mixin(media=_media_tracks(_audio_track("ac3", 0)))
 
-        with pytest.raises(InvalidRemuxError) as exc_info:
+        with pytest.raises(UserError) as exc_info:
             mixin.create_audio_output(extension=".m4a", output=tmp_path / "out.m4a")
 
-        assert "ac3" in exc_info.value.msg
-        assert ".m2ts" in exc_info.value.msg
+        assert "ac3" in str(exc_info.value)
+        assert ".m2ts" in str(exc_info.value)
 
     def test_remux_ignores_unselected_tracks(self, tmp_path: Path) -> None:
         """Comprueba que el remux solo se valida contra las pistas seleccionadas."""
@@ -283,10 +277,10 @@ class TestImageOutputMixin:
         """Comprueba que una extensión no de imagen lanza un error."""
         mixin = _image_mixin(media=_media_with_path())
 
-        with pytest.raises(InvalidContainerTypeError) as exc_info:
+        with pytest.raises(UserError) as exc_info:
             mixin.create_image_output(extension=".png", output=tmp_path / "out.xyz")
 
-        assert ".xyz" in exc_info.value.msg
+        assert ".xyz" in str(exc_info.value)
 
     def test_output_directory_created(self, tmp_path: Path) -> None:
         """Comprueba que se crea y usa el directorio de salida."""
@@ -303,7 +297,7 @@ class TestImageOutputMixin:
         """Comprueba que un nombre de directorio no válido lanza un error."""
         mixin = _image_mixin(media=_media_with_path())
 
-        with pytest.raises(InvalidArgumentError):
+        with pytest.raises(UserError):
             mixin.create_image_output(
                 extension=".jpg", output_directory=tmp_path / "out<bad>"
             )
@@ -325,7 +319,7 @@ class TestSubtitlesOutputMixin:
         """Comprueba que una extensión no de subtítulo lanza un error."""
         mixin = _subtitles_mixin(media=_media_sub_tracks(_subtitles_track("srt", 0)))
 
-        with pytest.raises(InvalidContainerTypeError) as exc_info:
+        with pytest.raises(UserError) as exc_info:
             mixin.create_subtitles_output(extension=".srt", output=tmp_path / "out.xyz")
 
         assert ".xyz" in str(exc_info.value)
@@ -339,22 +333,22 @@ class TestSubtitlesOutputMixin:
         assert mixin.subtitles_output == (tmp_path / "out.srt").absolute()
 
     def test_remux_to_unsafe_container_raises(self, tmp_path: Path) -> None:
-        """Comprueba que cambiar srt a .ass lanza InvalidRemuxError."""
+        """Comprueba que cambiar srt a .ass lanza un error."""
         mixin = _subtitles_mixin(media=_media_sub_tracks(_subtitles_track("srt", 0)))
 
-        with pytest.raises(InvalidRemuxError) as exc_info:
+        with pytest.raises(UserError) as exc_info:
             mixin.create_subtitles_output(extension=".ass", output=tmp_path / "out.ass")
 
-        assert "srt" in exc_info.value.msg
+        assert "srt" in str(exc_info.value)
 
     def test_remux_reverse_direction_rejected(self, tmp_path: Path) -> None:
         """Comprueba que cambiar ass a .srt también se rechaza."""
         mixin = _subtitles_mixin(media=_media_sub_tracks(_subtitles_track("ass", 0)))
 
-        with pytest.raises(InvalidRemuxError) as exc_info:
+        with pytest.raises(UserError) as exc_info:
             mixin.create_subtitles_output(extension=".srt", output=tmp_path / "out.srt")
 
-        assert "ass" in exc_info.value.msg
+        assert "ass" in str(exc_info.value)
 
     def test_remux_ignores_unselected_tracks(self, tmp_path: Path) -> None:
         """Comprueba que el remux solo se valida contra las pistas seleccionadas."""
@@ -456,16 +450,16 @@ class TestMediaOutputMixin:
         mixin = _media_mixin(media=_media_with_path(video=_video("h264")))
 
         # .webm es un destino de vídeo soportado, pero no admite h264
-        with pytest.raises(InvalidContainerError) as exc_info:
+        with pytest.raises(UserError) as exc_info:
             mixin.create_media_output(extension=".webm", output=tmp_path / "out.webm")
 
-        assert "h264" in exc_info.value.msg
+        assert "h264" in str(exc_info.value)
 
     def test_not_media_extension(self, tmp_path: Path) -> None:
         """Comprueba el error cuando la extensión no es contenedor de vídeo."""
         mixin = _media_mixin(media=_media_with_path(video=_video("h264")))
 
-        with pytest.raises(InvalidContainerTypeError):
+        with pytest.raises(UserError):
             mixin.create_media_output(extension=".mp4", output=tmp_path / "out.txt")
 
     def test_audio_codec_checked(self, tmp_path: Path) -> None:
@@ -475,10 +469,10 @@ class TestMediaOutputMixin:
         )
 
         # .mp4 es válido para h264 pero no para vorbis
-        with pytest.raises(InvalidContainerError) as exc_info:
+        with pytest.raises(UserError) as exc_info:
             mixin.create_media_output(extension=".mp4", output=tmp_path / "out.mp4")
 
-        assert "vorbis" in exc_info.value.msg
+        assert "vorbis" in str(exc_info.value)
 
 
 class TestValidateName:
@@ -495,7 +489,7 @@ class TestValidateName:
     )
     def test_invalid_characters(self, name: str) -> None:
         """Comprueba que los caracteres no permitidos lanzan un error."""
-        with pytest.raises(InvalidArgumentError):
+        with pytest.raises(UserError):
             _validate_name(name)
 
     @pytest.mark.parametrize(
@@ -503,16 +497,16 @@ class TestValidateName:
     )
     def test_reserved_names(self, name: str) -> None:
         """Comprueba que los nombres reservados de Windows lanzan un error."""
-        with pytest.raises(InvalidArgumentError):
+        with pytest.raises(UserError):
             _validate_name(name)
 
     @pytest.mark.parametrize("name", ["clip ", "clip."])
     def test_trailing_space_or_dot(self, name: str) -> None:
         """Comprueba que un espacio o punto final lanzan un error."""
-        with pytest.raises(InvalidArgumentError):
+        with pytest.raises(UserError):
             _validate_name(name)
 
     def test_empty_name(self) -> None:
         """Comprueba que un nombre vacío lanza un error."""
-        with pytest.raises(InvalidArgumentError):
+        with pytest.raises(UserError):
             _validate_name("")

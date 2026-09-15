@@ -2,7 +2,7 @@
 
 import typer
 
-from pymedia.errors import MissingArgumentError, OptionError
+from pymedia.errors import MissingArgumentError, UserError
 from pymedia.locales import _  # noqa
 from pymedia.pipeline.remux_pipeline import RemuxPipeline
 from pymedia.typer.help import REMUX_HELP
@@ -57,7 +57,7 @@ def remux(
     if media_output is None:
         raise MissingArgumentError(name="media_output")
     if fast_start and media_output.suffix != ".mp4":
-        raise OptionError(msg=_("Fast start only works for '.mp4' remux."))
+        raise UserError(msg=_("Fast start only works for '.mp4' remux."))
 
     pipeline = RemuxPipeline(debug=debug)
     pipeline.process_parameters(

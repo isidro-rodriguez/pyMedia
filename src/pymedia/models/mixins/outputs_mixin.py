@@ -15,13 +15,11 @@ from pymedia.data.subtitles_formats import SUBTITLES_FORMATS
 from pymedia.data.supported import SUPPORTED
 from pymedia.data.video_codecs import VIDEO_CODECS
 from pymedia.errors import (
-    InvalidArgumentError,
+    InvalidCodecContainerError,
     InvalidContainerError,
-    InvalidContainerTypeError,
-    InvalidRemuxError,
     MissingParameterError,
     MissingPropertyError,
-    PermissionDeniedError,
+    UserError,
 )
 from pymedia.locales import _  # noqa
 from pymedia.models.media import Media
@@ -77,10 +75,10 @@ class AnimatedOutputMixin:
         )
 
         if output.suffix not in SUPPORTED.ANIMATED:
-            raise InvalidContainerTypeError(
+            raise InvalidContainerError(
                 extension=output.suffix,
                 media_type=_("animated images"),
-                supported=", ".join(SUPPORTED.ANIMATED),
+                supported=SUPPORTED.ANIMATED,
             )
 
         self.animated_output = output
@@ -147,10 +145,10 @@ class AudioOutputMixin:
         )
 
         if output.suffix not in SUPPORTED.AUDIO:
-            raise InvalidContainerTypeError(
+            raise InvalidContainerError(
                 extension=output.suffix,
                 media_type=_("audio"),
-                supported=", ".join(SUPPORTED.AUDIO),
+                supported=SUPPORTED.AUDIO,
             )
 
         if media.audio is None:
@@ -231,10 +229,10 @@ class ImageOutputMixin:
         )
 
         if output.suffix not in SUPPORTED.IMAGES:
-            raise InvalidContainerTypeError(
+            raise InvalidContainerError(
                 extension=output.suffix,
                 media_type=_("image"),
-                supported=", ".join(SUPPORTED.IMAGES),
+                supported=SUPPORTED.IMAGES,
             )
 
         self.image_output = output
@@ -306,19 +304,18 @@ class MediaOutputMixin:
             raise MissingPropertyError(name="video codec")
 
         if output.suffix not in SUPPORTED.CONTAINERS:
-            raise InvalidContainerTypeError(
+            raise InvalidContainerError(
                 extension=output.suffix,
                 media_type=_("media"),
-                supported=", ".join(SUPPORTED.CONTAINERS),
+                supported=SUPPORTED.CONTAINERS,
             )
 
         if output.suffix not in VIDEO_CODECS[media.video.codec].containers:
-            raise InvalidContainerError(
+            raise InvalidCodecContainerError(
                 extension=output.suffix,
                 codec=VIDEO_CODECS[media.video.codec].name,
-                supported=", ".join(VIDEO_CODECS[media.video.codec].containers),
+                supported=VIDEO_CODECS[media.video.codec].containers,
             )
-
         if remux:
             codec = media.video.codec
             _validate_remux(
@@ -334,10 +331,10 @@ class MediaOutputMixin:
                 if audio_track.codec is None:
                     raise MissingPropertyError(name="audio codec")
                 if output.suffix not in AUDIO_CODECS[audio_track.codec].containers:
-                    raise InvalidContainerError(
+                    raise InvalidCodecContainerError(
                         extension=output.suffix,
                         codec=AUDIO_CODECS[audio_track.codec].name,
-                        supported=", ".join(AUDIO_CODECS[audio_track.codec].containers),
+                        supported=AUDIO_CODECS[audio_track.codec].containers,
                     )
                 if remux:
                     codec = audio_track.codec
@@ -414,10 +411,10 @@ class SubtitlesOutputMixin:
         )
 
         if output.suffix not in SUPPORTED.SUBTITLES:
-            raise InvalidContainerTypeError(
+            raise InvalidContainerError(
                 extension=output.suffix,
                 media_type=_("subtitles files"),
-                supported=", ".join(SUPPORTED.SUBTITLES),
+                supported=SUPPORTED.SUBTITLES,
             )
 
         if media.subtitles is None:
@@ -459,16 +456,22 @@ def _validate_remux(
     """Valida el contenedor de salida para una pista sin recodificar."""
     if suffix == source_suffix:
         if suffix not in containers:
-            raise InvalidContainerError(
+            raise InvalidCodecContainerError(
                 extension=suffix,
                 codec=codec_name,
-                supported=", ".join(containers),
+                supported=containers,
             )
     elif suffix not in remux_containers:
-        raise InvalidRemuxError(
-            extension=suffix,
-            codec=codec_name,
-            supported=", ".join(remux_containers),
+        raise UserError(
+            msg=_(
+                "Cannot remux %(codec)s to %(extension)s. Safe remux targets: "
+                "%(supported)s."
+            )
+            % {
+                "codec": codec_name,
+                "extension": suffix,
+                "supported": ", ".join(remux_containers),
+            },
         )
 
 
@@ -484,7 +487,7 @@ def _validate_name(name: str) -> None:
         and not name.endswith((" ", "."))
         and name.upper().split(".")[0] not in reserved_names
     ):
-        raise InvalidArgumentError(
+        raise UserError(
             _(r'%(name)s contains invalid characters: < > : " / \ | ? *')
             % {"name": name}
         )
@@ -496,7 +499,7 @@ def _process_output_directory(directory: Path) -> Path:
     try:
         directory.mkdir(parents=True, exist_ok=True)
     except OSError as e:
-        raise PermissionDeniedError(
+        raise UserError(
             msg=_("Could not create directory: %(path)s") % {"path": directory}
         ) from e
     return directory

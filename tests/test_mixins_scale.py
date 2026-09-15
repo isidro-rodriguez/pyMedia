@@ -6,9 +6,9 @@ from unittest.mock import Mock
 import pytest
 
 from pymedia.errors import (
-    InvalidArgumentError,
     InvalidParameterError,
     MissingPropertyError,
+    UserError,
 )
 from pymedia.models.media import Media, Video
 from pymedia.models.mixins.scale_mixin import ScaleMixin
@@ -62,12 +62,12 @@ class TestParseErrors:
         """Comprueba que las dimensiones mal formadas lanzan un error."""
         mixin = _mixin()
 
-        with pytest.raises(InvalidArgumentError) as exc_info:
+        with pytest.raises(UserError) as exc_info:
             mixin.create_scale(logger=Mock(), scale_upscale=False, scale_to=value)
 
         assert (
-            exc_info.value.msg
-            == f"\nInvalid dimensions {value}. Expected: WIDTHxHEIGHT"
+            exc_info.value.message
+            == f"Invalid dimensions {value}. Expected: WIDTHxHEIGHT"
         )
 
     @pytest.mark.parametrize("value", ["641x480", "640x481", "641x481"])
@@ -78,7 +78,7 @@ class TestParseErrors:
         with pytest.raises(InvalidParameterError) as exc_info:
             mixin.create_scale(logger=Mock(), scale_upscale=False, scale_to=value)
 
-        assert exc_info.value.msg == "\nTarget dimensions must be even."
+        assert exc_info.value.msg == "Target dimensions must be even."
 
     def test_video_missing_raises(self) -> None:
         """Comprueba que la ausencia de vídeo lanza un error."""

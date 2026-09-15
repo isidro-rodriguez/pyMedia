@@ -3,10 +3,10 @@
 from dataclasses import dataclass
 
 from pymedia.errors import (
-    InvalidArgumentError,
     InvalidParameterError,
     MissingParameterError,
     MissingPropertyError,
+    UserError,
 )
 from pymedia.locales import _  # noqa
 from pymedia.models.media import Media
@@ -71,7 +71,7 @@ class CropMixin:
                     int(y_str),
                 )
             except ValueError as err:
-                raise InvalidArgumentError(
+                raise UserError(
                     msg=_("Invalid crop %(crop_str)s. Expected: WIDTH,HEIGHT,X,Y")
                     % {"crop_str": crop_str}
                 ) from err

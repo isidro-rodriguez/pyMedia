@@ -58,6 +58,7 @@ class Logger:
             tracebacks_show_locals=debug,
         )
         console.setFormatter(logging.Formatter("%(msg)s"))
+        console.addFilter(_DestinationFilter("to_console"))
         root.addHandler(console)
 
         log_path = (
@@ -73,6 +74,7 @@ class Logger:
         file_handler.setFormatter(
             logging.Formatter("%(asctime)s %(levelname)-8s %(msg)s")
         )
+        file_handler.addFilter(_DestinationFilter("to_file"))
         root.addHandler(file_handler)
 
         cls._configured = True
@@ -93,39 +95,83 @@ class Logger:
             cls.create(debug=debug)
         return cls(logging.getLogger(__name__))
 
-    def error(self, msg: str, exc_info: bool = False, **kwargs: object) -> None:
+    def error(
+        self,
+        msg: str,
+        exc_info: bool = False,
+        console: bool = True,
+        file: bool = True,
+        **kwargs: object,
+    ) -> None:
         """Muestra log de nivel error.
 
         Args:
             msg: Mensaje ya traducido a mostrar.
             exc_info: Si `True`, añade la traza de la excepción activa.
+            console: Si `True`, se muestra por consola.
+            file: Si `True`, se escribe en el fichero de log.
             **kwargs: Valores para interpolar en `msg` vía `%`.
         """
-        self._logger.error(msg=self._render(msg=msg, kwargs=kwargs), exc_info=exc_info)
+        self._log(
+            level=logging.ERROR,
+            msg=msg,
+            console=console,
+            file=file,
+            exc_info=exc_info,
+            values=kwargs,
+        )
 
-    def warning(self, msg: str, **kwargs: object) -> None:
+    def warning(
+        self,
+        msg: str,
+        console: bool = True,
+        file: bool = True,
+        **kwargs: object,
+    ) -> None:
         """Muestra log de nivel aviso (mensaje ya traducido).
 
         Args:
             msg: Mensaje ya traducido a mostrar.
+            console: Si `True`, se muestra por consola.
+            file: Si `True`, se escribe en el fichero de log.
             **kwargs: Valores para interpolar en `msg` vía `%`.
         """
-        self._logger.warning(self._render(msg=msg, kwargs=kwargs))
+        self._log(
+            level=logging.WARNING, msg=msg, console=console, file=file, values=kwargs
+        )
 
-    def info(self, msg: str, **kwargs: object) -> None:
+    def info(
+        self,
+        msg: str,
+        console: bool = True,
+        file: bool = True,
+        **kwargs: object,
+    ) -> None:
         """Muestra log de nivel información (mensaje ya traducido).
 
         Args:
             msg: Mensaje ya traducido a mostrar.
+            console: Si `True`, se muestra por consola.
+            file: Si `True`, se escribe en el fichero de log.
             **kwargs: Valores para interpolar en `msg` vía `%`.
         """
-        self._logger.info(self._render(msg=msg, kwargs=kwargs))
+        self._log(
+            level=logging.INFO, msg=msg, console=console, file=file, values=kwargs
+        )
 
-    def debug(self, msg: str, **kwargs: object) -> None:
+    def debug(
+        self,
+        msg: str,
+        console: bool = True,
+        file: bool = True,
+        **kwargs: object,
+    ) -> None:
         """Muestra log de nivel depuración (mensaje ya traducido).
 
         Args:
             msg: Mensaje ya traducido a mostrar.
+            console: Si `True`, se muestra por consola.
+            file: Si `True`, se escribe en el fichero de log.
             **kwargs: Valores para interpolar en `msg` vía `%`.
         """
 
@@ -136,7 +182,9 @@ class Logger:
             return value
 
         kwargs = {name: _prettify(value) for name, value in kwargs.items()}
-        self._logger.debug(self._render(msg=msg, kwargs=kwargs))
+        self._log(
+            level=logging.DEBUG, msg=msg, console=console, file=file, values=kwargs
+        )
 
     def print(self, renderable: RenderableType) -> None:
         """Imprime un objeto Rich (Table, Panel, etc.) por consola.
@@ -146,9 +194,39 @@ class Logger:
         """
         self._console.print(renderable)
 
+    def _log(
+        self,
+        level: int,
+        msg: str,
+        console: bool,
+        file: bool,
+        *,
+        exc_info: bool = False,
+        values: dict[str, object] | None = None,
+    ) -> None:
+        """Envía el registro al logger interno filtrado por destino."""
+        self._logger.log(
+            level=level,
+            msg=self._render(msg=msg, kwargs=values or {}),
+            exc_info=exc_info,
+            extra={"to_console": console, "to_file": file},
+        )
+
     @staticmethod
     def _render(msg: str, kwargs: dict[str, object]) -> str:
         """Aplica `%(name)s` a `msg` si hay valores que sustituir."""
         if kwargs:
             return msg % kwargs
         return msg
+
+
+class _DestinationFilter(logging.Filter):
+    """Filtra registros según el destino solicitado (consola o fichero)."""
+
+    def __init__(self, key: str) -> None:
+        super().__init__()
+        self._key = key
+
+    def filter(self, record: logging.LogRecord) -> bool:
+        # Si el registro no lleva el flag, se deja pasar por defecto.
+        return getattr(record, self._key, True)

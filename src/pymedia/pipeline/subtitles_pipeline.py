@@ -2,7 +2,7 @@
 
 from pathlib import Path
 
-from pymedia.errors import MissingParameterError, SubtitlesError
+from pymedia.errors import MissingParameterError, UserError
 from pymedia.ffmpeg.subtitles_cmd import SubtitlesCmd
 from pymedia.locales import _  # noqa
 from pymedia.models.media import Media
@@ -196,7 +196,5 @@ class SubtitlesPipeline(BasePipeline[SubtitlesParameters]):
         if media is None:
             raise MissingParameterError(name="media")
         if not media.subtitles:
-            raise SubtitlesError(
-                msg=_("The media file does not contain subtitles streams.")
-            )
+            raise UserError(msg=_("The media file does not contain subtitles streams."))
         return ",".join(str(track.track_index) for track in media.subtitles)

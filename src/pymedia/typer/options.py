@@ -71,7 +71,7 @@ HelpOption = Annotated[
     bool,
     typer.Option(
         default="--help",
-        help=_("Show this message and exit."),
+        help=_("Show this msg and exit."),
         callback=show_help,
         is_eager=True,
         expose_value=False,

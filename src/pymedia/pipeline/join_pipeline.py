@@ -4,8 +4,8 @@ import tempfile
 from pathlib import Path
 
 from pymedia.errors import (
-    IncompatibleMediaError,
     MissingParameterError,
+    UserError,
 )
 from pymedia.ffmpeg.join_cmd import JoinCmd
 from pymedia.locales import _  # noqa
@@ -211,6 +211,13 @@ class JoinPipeline(BasePipeline[JoinParameters]):
             lines.append(f"{path}:")
             lines.extend(f"  - {issue}" for issue in issues)
 
-        raise IncompatibleMediaError(
-            output=self.params.media_output, incompatible_list=lines
+        raise UserError(
+            msg=_(
+                "Incompatible media files for join output %(output)s.\n"
+                "Incompatibilities:\n%(incompatible_list)s"
+            )
+            % {
+                "output": self.params.media_output,
+                "incompatible_list": "\n".join(lines),
+            }
         )
