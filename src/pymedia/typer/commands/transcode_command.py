@@ -22,6 +22,7 @@ from pymedia.typer.options import (
     ScaleToOption,
     ScaleUpscaleOption,
     TranscodeAudioOption,
+    TranscodeBurnSubtitlesOption,
     TranscodeVideoOption,
 )
 from pymedia.typer.service import validate_conflict_output_options
@@ -43,6 +44,7 @@ def transcode(
     overwrite: OverwriteOption = OverwriteMode.ASK,
     preset_transcode: PresetsTranscodeOption = PresetsTranscodeMode.EVEN,
     transcode_audio: TranscodeAudioOption = None,
+    subtitles_input: TranscodeBurnSubtitlesOption = None,
     transcode_video: TranscodeVideoOption = False,
     crop: CropOption = None,
     rotate: RotateOption = None,
@@ -63,6 +65,7 @@ def transcode(
         overwrite: Política ante conflicto de salida ya existente.
         preset_transcode: Perfil de transcodificación de config.toml.
         transcode_audio: Lista de pistas de audio a transcodificar.
+        subtitles_input: Subtítulos a quemar en la pista de vídeo.
         transcode_video: Transcodifica la pista de vídeo.
         crop: Área y coordenada de la zona a preservar de la imagen.
         rotate: Ángulo ortogonal con el que se va a rotar la imagen.
@@ -81,6 +84,7 @@ def transcode(
     if (
         transcode_audio is None
         and transcode_video is False
+        and subtitles_input is None
         and crop is None
         and rotate is None
         and scale_to is None
@@ -89,8 +93,8 @@ def transcode(
     ):
         raise UserError(
             msg=_(
-                "One of the following options is required: transcode_audio, "
-                "transcode_video, crop, rotate, scale_to, hflip, vflip."
+                "One of the following options is required: audio, "
+                "video, burn-subtitles, crop, rotate, scale_to, hflip, vflip."
             )
         )
 
@@ -104,6 +108,7 @@ def transcode(
         pipeline = TranscodePipeline(debug=debug)
         pipeline.process_parameters(
             media_input=media_input,
+            subtitles_input=subtitles_input,
             overwrite=overwrite,
             preset_transcode=preset_transcode,
             scale_mode=scale_mode,

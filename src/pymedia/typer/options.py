@@ -251,6 +251,15 @@ TranscodeAudioOption = Annotated[
     ),
 ]
 
+TranscodeBurnSubtitlesOption = Annotated[
+    Path | None,
+    typer.Option(
+        default="--burn-subtitles",
+        rich_help_panel=_("Command options"),
+        help=_("Burn subtitles file in video track."),
+    ),
+]
+
 TranscodeVideoOption = Annotated[
     bool,
     typer.Option(

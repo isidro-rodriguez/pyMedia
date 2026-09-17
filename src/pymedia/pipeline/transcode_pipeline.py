@@ -5,6 +5,7 @@ from pathlib import Path
 from pymedia.errors import (
     MissingParameterError,
 )
+from pymedia.ffmpeg.probe import validate_subtitles_file_codec
 from pymedia.ffmpeg.transcode_cmd import TranscodeCmd
 from pymedia.locales import _  # noqa
 from pymedia.models.parameters import TranscodeParameters
@@ -27,6 +28,7 @@ class TranscodePipeline(BasePipeline[TranscodeParameters]):
         overwrite: OverwriteMode,
         preset_transcode: PresetsTranscodeMode,
         scale_mode: ScaleMode,
+        subtitles_input: Path | None = None,
         output: Path | None = None,
         output_directory: Path | None = None,
         transcode_audio: str | None = None,
@@ -45,6 +47,7 @@ class TranscodePipeline(BasePipeline[TranscodeParameters]):
             overwrite: Política ante conflicto de salida ya existente.
             preset_transcode: Perfil de transcodificación de config.toml.
             scale_mode: Política de escalado del vídeo o imagen.
+            subtitles_input: Fichero de subtítulos a quemar en la pista de vídeo.
             output: Ruta absoluta del fichero de salida procesado.
             output_directory: Directorio de salida para lotes de ficheros.
             transcode_audio: Lista de pistas de audio a transcodificar.
@@ -56,8 +59,15 @@ class TranscodePipeline(BasePipeline[TranscodeParameters]):
             hflip: Invierte la imagen horizontalmente.
             vflip: Invierte la imagen verticalmente.
         """
+        if subtitles_input is not None:
+            validate_subtitles_file_codec(
+                subtitles_input=subtitles_input,
+                logger=self.logger,
+            )
+
         if not all(
             [
+                subtitles_input is None,
                 crop is None,
                 scale_to is None,
                 rotate is None,
@@ -71,6 +81,7 @@ class TranscodePipeline(BasePipeline[TranscodeParameters]):
             overwrite=overwrite,
             transcode=getattr(self.config.transcode, preset_transcode.value),
             transcode_video=transcode_video,
+            subtitles_input=subtitles_input,
         )
 
         params.create_media_input(

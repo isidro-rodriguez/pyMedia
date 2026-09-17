@@ -33,7 +33,15 @@ class TranscodeCmd:
         if self.params.media is None:
             raise MissingParameterError(name="media")
 
-        filters = self.params.to_filters_cmd()
+        subtitles_filter = ""
+        if self.params.subtitles_input is not None:
+            subtitles_filter = self.params.to_burn_subtitles_cmd()
+
+        # Los subtítulos y los filtros de imagen viajan en un único grafo: el
+        # filtro `-vf` no puede alimentarse de la salida de `-filter_complex`.
+        filter_chain = ",".join(
+            part for part in (subtitles_filter, self.params.to_filters_cmd()) if part
+        )
 
         cmd = ["ffmpeg"]
 
@@ -47,14 +55,14 @@ class TranscodeCmd:
             ]
         )
 
-        if filters != "":
-            cmd.extend(["-filter_complex", f"{filters}[v]"])
+        if filter_chain != "":
+            cmd.extend(["-filter_complex", f"{filter_chain}[v]"])
 
         if self.params.media.audio is not None:
             cmd.extend([*self.params.to_audio_transcode_cmd()])
 
         if self.params.media.video is not None:
-            video_map = "[v]" if filters != "" else "0:v:0"
+            video_map = "[v]" if filter_chain != "" else "0:v:0"
             cmd.extend(["-map", video_map])
 
         cmd.extend(

@@ -340,6 +340,36 @@ def test_transcode_success_transcodes_video(
     assert stream_codec_names(output, "video") == ["hevc"]
 
 
+def test_transcode_success_burns_subtitles(
+    runner: CliRunner,
+    video_mp4_a: Path,
+    tmp_path: Path,
+) -> None:
+    """`transcode --burn-subtitles` quema el fichero srt indicado en el vídeo."""
+    subtitle = tmp_path / "eng_subs.srt"
+    subtitle.write_text(
+        "1\n00:00:00,000 --> 00:00:02,000\nHello test\n", encoding="utf-8"
+    )
+    output = tmp_path / "burned.mp4"
+
+    result = runner.invoke(
+        app,
+        [
+            "transcode",
+            str(video_mp4_a),
+            "--burn-subtitles",
+            str(subtitle),
+            "-o",
+            str(output),
+            "-ov",
+            "yes",
+        ],
+    )
+
+    assert result.exit_code == 0
+    assert output.exists()
+
+
 def test_transcode_error_missing_action(
     runner: CliRunner,
     video_mp4_a: Path,

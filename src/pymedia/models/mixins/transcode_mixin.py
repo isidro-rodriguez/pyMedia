@@ -1,12 +1,14 @@
 """Mixin de transcodificación."""
 
 from dataclasses import dataclass
+from pathlib import Path
 
 from pymedia.data.audio_codecs import AUDIO_CODECS
 from pymedia.data.video_codecs import VIDEO_CODECS
 from pymedia.errors import MissingParameterError
 from pymedia.models.config import Transcode
 from pymedia.models.media import Media
+from pymedia.utils import to_ffmpeg_path
 
 
 @dataclass(kw_only=True)
@@ -20,6 +22,7 @@ class TranscodeMixin:
 
     media: Media | None = None
     stream_tracks: list[int] | None = None
+    subtitles_input: Path | None = None
     transcode: Transcode
     transcode_video: bool
 
@@ -91,3 +94,20 @@ class TranscodeMixin:
             else:
                 audio_transcode.append("copy")
         return audio_transcode
+
+    def to_burn_subtitles_cmd(self) -> str:
+        """Construye el filtro que quema los subtítulos en la pista de vídeo.
+
+        Returns:
+            Filtro `subtitles` con la ruta del fichero escapada para la sintaxis
+            de filtros y entre comillas simples, ya que el comando no se ejecuta
+            en un shell.
+
+        Raises:
+            MissingParameterError: Si no se indicó el fichero de subtítulos.
+        """
+        if self.subtitles_input is None:
+            raise MissingParameterError(name="subtitles")
+
+        path = to_ffmpeg_path(self.subtitles_input.absolute())
+        return f"subtitles='{path}'"
