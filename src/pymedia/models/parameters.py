@@ -70,6 +70,17 @@ class AnimatedParameters(
 
 
 @dataclass(kw_only=True)
+class CutParameters(
+    _BaseParameters,
+    MediaInputMixin,
+    MediaOutputMixin,
+    TimestampAtMixin,
+    TimestampStartEndMixin,
+):
+    """Parámetros utilizados por el comando Split."""
+
+
+@dataclass(kw_only=True)
 class JoinParameters(
     _BaseParameters,
     MediaListMixin,
@@ -109,16 +120,6 @@ class SheetParameters(
     SheetPresetsMixin,
 ):
     """Parámetros utilizados por el comando Sheet."""
-
-
-@dataclass(kw_only=True)
-class SplitParameters(
-    _BaseParameters,
-    MediaInputMixin,
-    MediaOutputMixin,
-    TimestampAtMixin,
-):
-    """Parámetros utilizados por el comando Split."""
 
 
 @dataclass(kw_only=True)

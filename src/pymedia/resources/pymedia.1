@@ -52,8 +52,12 @@ regenerates broken timestamps and
 .B --sort-tracks
 orders the stream tracks by type and language.
 .TP
-.B split
-Split a media file into segments at the timestamps given with
+.B cut
+Cut a section of a media file with
+.B --start
+and
+.B --end
+, or split it into segments at the timestamps given with
 .B --at
 (comma-separated,
 .I hh:mm:ss
@@ -272,7 +276,7 @@ Change the container without transcoding.
 .B pymedia join part1.mp4 part2.mp4 -o movie.mp4
 Concatenate two media files.
 .TP
-.B pymedia split input.mp4 --at 10:05,40:30
+.B pymedia cut input.mp4 --at 10:05,40:30
 Split a media file into three segments.
 .TP
 .B pymedia transcode source.mp4 --preset slow --video --audio 1

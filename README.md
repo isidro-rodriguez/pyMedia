@@ -1,17 +1,17 @@
 # pyMedia
 
 Aplicación CLI que actúa como handler sencillo de comandos `ffmpeg` para tareas
-habituales de procesamiento de vídeo: análisis de metadatos, capturas, unión y
-división de contenedores, remux sin transcodificar, transcodificación por
-perfiles y edición de pistas de audio y subtítulos.
+habituales de procesamiento de vídeo: análisis de metadatos, capturas, unión,
+corte y división de contenedores, remux sin transcodificar, transcodificación
+por perfiles y edición de pistas de audio y subtítulos.
 
-> **Versión:** Beta 0.14.0
+> **Versión:** Beta 0.16.0
 
 ## Características
 
 - **Información** de metadatos de vídeo (`info`) y hojas de capturas (`sheet`).
 - **Grandes operaciones sin pérdida**: remux de contenedor (`remux`), unión
-  (`join`) y división (`split`) con `-c copy`.
+  (`join`) y corte/división (`cut`) con `-c copy`.
 - **Transcodificación** (`transcode`) con perfiles editables en `config.toml`,
   códecs H.264/H.265/AV1 y AAC/E-AC-3/Opus, y filtros de escalado, recorte,
   rotación y volteo.
@@ -71,7 +71,7 @@ $ pymedia <comando> --help     # ayuda detallada de cada comando
 | `sheet`         | `pymedia sheet input.mp4 --preset fhd -o vcs.webp`                |
 | `join`          | `pymedia join part1.mp4 part2.mp4 -o movie.mp4`                   |
 | `remux`         | `pymedia remux input.mp4 -o output.mkv`                           |
-| `split`         | `pymedia split input.mp4 --at 10:05,40:30,1:20:00`                |
+| `cut`           | `pymedia cut input.mp4 --at 10:05,40:30,1:20:00`                  |
 | `transcode`     | `pymedia transcode source.mp4 --preset slow --video --audio 1`    |
 | `add-audio`     | `pymedia add-audio input.mp4 eng_audio.m4a --language eng`        |
 | `delete-audio`  | `pymedia delete-audio input.mp4 --tracks 1,2`                     |
@@ -95,11 +95,12 @@ $ pymedia <comando> --help     # ayuda detallada de cada comando
 ### Vídeo
 
 | Comando     | Acción                                                                                                                                                   |
-| ----------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `join`      | Une varios vídeos consecutivamente en un único contenedor (_mínimo 2_).                                                                                  |
-| `remux`     | Cambia de contenedor sin transcodificar. Opciones: `--fast-start` (solo `.mp4`), `--genpts` (regenera marcas corruptas), `--sort-tracks`.                |
-| `split`     | Divide el vídeo por marcas de tiempo `--at hh:mm:ss[,hh:mm:ss,...]`.                                                                                     |
+|-------------|----------------------------------------------------------------------------------------------------------------------------------------------------------|
 | `transcode` | Transcodifica audio (`--audio 1,2`) y/o vídeo (`--video`) con un perfil de `config.toml` (`--preset fast\|even\|slow`), aplicando los filtros indicados. |
+| `remux`     | Cambia de contenedor sin transcodificar. Opciones: `--fast-start` (solo `.mp4`), `--genpts` (regenera marcas corruptas), `--sort-tracks`.                |
+| `join`      | Une varios vídeos consecutivamente en un único contenedor (_mínimo 2_).                                                                                  |
+| `cut`       | Recorta una sección con `--start`/`--end` o divide el vídeo por marcas de tiempo `--at hh:mm:ss[,hh:mm:ss,...]`.                                         |
+
 
 ### Audio
 
@@ -329,7 +330,3 @@ flowchart TD
     style FFMPEG fill:#d4edda,stroke:#28a745,stroke-width:2px,color:#155724;
     style MAIN   fill:#fff3e0,stroke:#c28525,stroke-width:2px,color:#a86e13;
 ```
-
-## Licencia
-
-MIT. Autor: [Isidro Rodríguez](mailto:rodriguez.gon.isidro@gmail.com).

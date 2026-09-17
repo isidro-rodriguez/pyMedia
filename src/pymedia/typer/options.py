@@ -191,6 +191,26 @@ TimestampAtMediaOption = Annotated[
     ),
 ]
 
+TimestampEndMediaOption = Annotated[
+    str | None,
+    typer.Option(
+        default="--end",
+        metavar="hh:mm:ss",
+        rich_help_panel=_("Command options"),
+        help=_("Timestamp where the output media file ends."),
+    ),
+]
+
+TimestampStartMediaOption = Annotated[
+    str | None,
+    typer.Option(
+        default="--start",
+        metavar="hh:mm:ss",
+        rich_help_panel=_("Command options"),
+        help=_("Timestamp where the output media file starts."),
+    ),
+]
+
 TimestampAtThumbnailOption = Annotated[
     str | None,
     typer.Option(

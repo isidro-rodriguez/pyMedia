@@ -326,23 +326,23 @@ def test_remux_error_fast_start_non_mp4(
 
 
 # =============================================================================
-#  split
+#  cut
 # =============================================================================
 
 
-def test_split_success_cuts_at_timestamp(
+def test_cut_success_cuts_at_timestamp(
     built_binary: Path,
     empty_localedir: Path,
     video_mp4_a: Path,
     tmp_path: Path,
 ) -> None:
-    """`split --at` divide el vídeo en un segmento por cada marca."""
+    """`cut --at` divide el vídeo en un segmento por cada marca."""
     output = tmp_path / "part.mp4"
 
     result = run_binary(
         built_binary,
         empty_localedir,
-        "split",
+        "cut",
         str(video_mp4_a),
         "--at",
         "00:00:01",
@@ -358,24 +358,24 @@ def test_split_success_cuts_at_timestamp(
     assert all(ffprobe_duration(part) < 1.9 for part in parts)
 
 
-def test_split_error_missing_at(
+def test_cut_error_missing_options(
     built_binary: Path,
     empty_localedir: Path,
     video_mp4_a: Path,
     tmp_path: Path,
 ) -> None:
-    """`split` exige la opción `--at` con las marcas de tiempo."""
+    """`cut` exige una de `--at`, `--start` o `--end`."""
     result = run_binary(
         built_binary,
         empty_localedir,
-        "split",
+        "cut",
         str(video_mp4_a),
         "-o",
         str(tmp_path / "part.mp4"),
     )
 
     assert result.returncode != 0
-    assert "Missing option '--at'" in process_output(result)
+    assert "Missing required options: at, start, end" in process_output(result)
 
 
 # =============================================================================
@@ -417,7 +417,19 @@ def test_transcode_error_missing_action(
     result = run_binary(built_binary, empty_localedir, "transcode", str(video_mp4_a))
 
     assert result.returncode != 0
-    assert "One of the following options is required" in process_output(result)
+    normalized = " ".join(process_output(result).split())
+    assert "Missing required options:" in normalized
+    for option in (
+        "audio",
+        "video",
+        "burn-subtitles",
+        "crop",
+        "rotate",
+        "scale_to",
+        "hflip",
+        "vflip",
+    ):
+        assert option in normalized
 
 
 # =============================================================================

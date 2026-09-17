@@ -1,14 +1,14 @@
-"""Compone el comando ffmpeg para dividir un vídeo."""
+"""Compone el comando ffmpeg para cortar un vídeo."""
 
 from pymedia.errors import MissingParameterError
-from pymedia.models.parameters import SplitParameters
+from pymedia.models.parameters import CutParameters
 from pymedia.types import OverwriteMode
 
 
-class SplitCmd:
-    """Compone el comando ffmpeg para dividir un vídeo."""
+class CutCmd:
+    """Compone el comando ffmpeg para cortar un vídeo."""
 
-    def __init__(self, params: SplitParameters) -> None:
+    def __init__(self, params: CutParameters) -> None:
         """Inicializa el constructor de comando.
 
         Args:
@@ -27,15 +27,17 @@ class SplitCmd:
         """
         if self.params.media is None:
             raise MissingParameterError(name="media")
-        if self.params.timestamp_at is None:
-            raise MissingParameterError(name="timestamp_at")
-
-        times_str = ",".join(str(t) for t in self.params.timestamp_at)
 
         cmd = ["ffmpeg"]
 
         if self.params.overwrite == OverwriteMode.YES:
             cmd.extend(["-y"])
+
+        if self.params.timestamp_start is not None:
+            cmd.extend(self.params.to_timestamp_start_cmd())
+
+        if self.params.timestamp_end is not None:
+            cmd.extend(self.params.to_timestamp_end_cmd())
 
         cmd.extend(
             [
@@ -45,12 +47,14 @@ class SplitCmd:
                 "0",
                 "-c",
                 "copy",
-                "-f",
-                "segment",
-                "-segment_times",
-                times_str,
-                "-reset_timestamps",
-                "1",
+            ]
+        )
+
+        if self.params.timestamp_at is not None:
+            cmd.extend(self.params.to_timestamp_at_cmd())
+
+        cmd.extend(
+            [
                 "-progress",
                 "pipe:1",
                 "-nostats",

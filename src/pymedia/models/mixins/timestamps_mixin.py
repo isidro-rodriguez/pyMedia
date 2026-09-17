@@ -160,6 +160,15 @@ class TimestampAtMixin:
 
         self.timestamp_at = times
 
+    def to_timestamp_at_cmd(self) -> list[str]:
+        """Devuelve la lista de argumentos ffmpeg necesarias para indicar los cortes."""
+        if self.timestamp_at is None:
+            raise MissingParameterError(name="timestamp_at")
+
+        times_str = ",".join(str(t) for t in self.timestamp_at)
+
+        return ["-f", "segment", "-segment_times", times_str, "-reset_timestamps", "1"]
+
 
 def _process_time(time_str: str, media: Media) -> timedelta:
     """Valida y procesa la marca de tiempo."""

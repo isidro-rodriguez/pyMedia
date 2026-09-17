@@ -395,7 +395,7 @@ class TestProcessOutput:
         assert output == (tmp_path / "clip_edit.gif").absolute()
 
     def test_explicit_output_ignores_affix(self, tmp_path: Path) -> None:
-        """Comprueba que una ruta explícita ignora el sufijo."""
+        """Comprueba que una ruta explícita no aplica el sufijo."""
         explicit = tmp_path / "done.gif"
 
         output = _process_output(
@@ -405,7 +405,7 @@ class TestProcessOutput:
             output=explicit,
         )
 
-        assert output == explicit.absolute()
+        assert output == (tmp_path / "done.gif").absolute()
 
     def test_output_directory_used_as_parent(self, tmp_path: Path) -> None:
         """Comprueba que el directorio es el padre de la salida por defecto."""

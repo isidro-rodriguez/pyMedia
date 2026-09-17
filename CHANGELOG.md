@@ -6,7 +6,27 @@ Las versiones se han reconstruido a partir del histórico de
 Las versiones intermedias no registradas (0.2–0.4, 0.6–0.8) se agrupan
 con la sección anterior.
 
-## [0.14.0-beta.0] - 2026-09-11 → presente
+## [0.16.0-beta.0] - 2026-09-17 → presente
+
+### Añadido
+- Comando `cut`: corte por rango de tiempo (`--start`/`--end`) y división por
+  marcas (`--at`), con validación de opciones excluyentes
+- Error `MissingRequiredOptionsError` para `cut` y `transcode`
+
+### Cambiado
+- Comando `split` renombrado a `cut` (CLI, pipeline, ayuda, man page y tests)
+- Locales `es` regenerados y compilados (`pymedia.pot`/`.po`/`.mo`)
+- README actualizado al comando `cut`
+
+## [0.15.0-beta.0] - 2026-09-17
+
+### Añadido
+- Opción `--burn-subtitles` en `transcode`: quema un fichero de subtítulos en
+  la pista de vídeo (filtro `subtitles` integrado en el grafo `filter_complex`)
+- Validación del fichero de subtítulos (`validate_subtitles_file_codec`)
+- Tests de `to_burn_subtitles_cmd` y del flujo `transcode --burn-subtitles`
+
+## [0.14.0-beta.0] - 2026-09-11 → 2026-09-17
 
 ### Añadido
 - Tests E2E del binario PyInstaller (`tests/test_binary_e2e.py`)

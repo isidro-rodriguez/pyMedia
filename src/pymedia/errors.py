@@ -176,3 +176,17 @@ class InvalidContainerError(UserError):
                 "supported": ", ".join(supported),
             }
         )
+
+
+class MissingRequiredOptionsError(UserError):
+    """Si el usuario no ha indicado una de las opciones requeridas."""
+
+    def __init__(self, options: list[str]) -> None:
+        """Inicialización del error.
+
+        Args:
+            options: Lista de opciones requeridas.
+        """
+        super().__init__(
+            _("Missing required options: %(options)s") % {"options": ", ".join(options)}
+        )

@@ -73,6 +73,20 @@ Generates an animated image from the specified video.
 """
 )
 
+CUT_HELP = _(
+    """\
+Cut off a video container's section or split it between different media files.
+
+[bold]Examples[/bold]:
+  Cut a section the start of a media file at specific timestamp:
+    > pymedia cut input.mp4 --start 00:30
+  Cut a section the start and the end of a media file at specifics timestamps:
+    > pymedia cut input.mp4 --start 01:00 --end 1:30:00
+  Split a media file at specific timestamps:
+    > pymedia cut input.mp4 --at 10:05,40:30,1:20:00
+"""  # noqa
+)
+
 INFO_HELP = _(
     """\
 Shows information about a video.
@@ -133,18 +147,6 @@ Generates a thumbnail grid sheet with media info header.
   Generates a vcs with different preset and specified output:
     > pymedia sheet input.mp4 --preset fhd -o vcs.webp
 """
-)
-
-SPLIT_HELP = _(
-    """\
-Split a video container in different media files.
-
-[bold]Examples[/bold]:
-  Split a media file at specific timestamps:
-    > pymedia split input.mp4 --at 10:05,40:30,1:20:00
-  Split a media file and remux container:
-    > pymedia split input.mp4 --at 5:00 -o output.mkv
-"""  # noqa
 )
 
 SUBTITLES_ADD_HELP = _(
