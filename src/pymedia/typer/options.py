@@ -10,7 +10,12 @@ from typing import Annotated
 import typer
 
 from pymedia.locales import _  # noqa
-from pymedia.typer.service import show_help, validate_path, validate_path_list
+from pymedia.typer.service import (
+    show_help,
+    show_version,
+    validate_path,
+    validate_path_list,
+)
 from pymedia.types import (
     OverwriteMode,
     PresetsSheetMode,
@@ -75,6 +80,16 @@ HelpOption = Annotated[
         callback=show_help,
         is_eager=True,
         expose_value=False,
+    ),
+]
+
+VersionOption = Annotated[
+    bool,
+    typer.Option(
+        default="--version",
+        help=_("Show version and exit."),
+        callback=show_version,
+        is_eager=True,
     ),
 ]
 

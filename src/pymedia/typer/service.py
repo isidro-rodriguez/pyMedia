@@ -1,9 +1,15 @@
 """Módulo para servicios auxiliares de Typer."""
 
+import platform
 from pathlib import Path
 
 import typer
+from rich import print
+from rich.panel import Panel
+from rich.style import Style
+from typer import colors
 
+from pymedia import version
 from pymedia.errors import UserError
 from pymedia.locales import _  # noqa
 
@@ -20,6 +26,36 @@ def show_help(ctx: typer.Context, value: bool) -> None:
     """
     if value:
         typer.echo(ctx.get_help())
+        raise typer.Exit()
+
+
+def show_version(value: bool) -> None:
+    """Muestra la versión de la aplicación.
+
+    Args:
+        value: Si se solicitó explícitamente la versión.
+
+    Raises:
+        typer.Exit: Siempre que `value` es verdadero, tras mostrar la versión.
+    """
+    if value:
+        version_text = _("Version")
+        platform_text = _("Platform")
+        subtitle_text = _("Ffmpeg CLI handler")
+
+        print(
+            Panel.fit(
+                renderable=(
+                    f"[dim]{version_text}:[/]   [bold]{version}[/]\n"
+                    f"[dim]Python:[/]    {platform.python_version()}\n"
+                    f"[dim]{platform_text}:[/]  {platform.platform()}"
+                ),
+                title="[bold][red]pyMedia[/][/]",
+                subtitle=f"[red]{subtitle_text}[/]",
+                style=Style(color=colors.CYAN),
+                padding=(1, 4),
+            )
+        )
         raise typer.Exit()
 
 

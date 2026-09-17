@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-09-17 17:09+0100\n"
+"POT-Creation-Date: 2026-09-17 18:58+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -908,259 +908,275 @@ msgid ""
 "\n"
 msgstr ""
 
-#: pymedia/typer/options.py:29
+#: pymedia/typer/options.py:34
 msgid "Audio track to insert in a media container."
 msgstr ""
 
-#: pymedia/typer/options.py:37
+#: pymedia/typer/options.py:42
 msgid "Video to process."
 msgstr ""
 
-#: pymedia/typer/options.py:45
+#: pymedia/typer/options.py:50
 msgid "Video list to process."
 msgstr ""
 
-#: pymedia/typer/options.py:53
+#: pymedia/typer/options.py:58
 msgid "Subtitles to insert in a media container."
 msgstr ""
 
-#: pymedia/typer/options.py:66
+#: pymedia/typer/options.py:71
 msgid "Log level DEBUG"
 msgstr ""
 
-#: pymedia/typer/options.py:74
+#: pymedia/typer/options.py:79
 msgid "Show this msg and exit."
 msgstr ""
 
-#: pymedia/typer/options.py:90 pymedia/typer/options.py:100
-#: pymedia/typer/options.py:110
+#: pymedia/typer/options.py:90
+msgid "Show version and exit."
+msgstr ""
+
+#: pymedia/typer/options.py:105 pymedia/typer/options.py:115
+#: pymedia/typer/options.py:125
 msgid "Output options"
 msgstr ""
 
-#: pymedia/typer/options.py:91
+#: pymedia/typer/options.py:106
 msgid "Output directory for multiple output files."
 msgstr ""
 
-#: pymedia/typer/options.py:101
+#: pymedia/typer/options.py:116
 msgid "Output file name."
 msgstr ""
 
-#: pymedia/typer/options.py:111
+#: pymedia/typer/options.py:126
 msgid "Action to use if output file already exists."
 msgstr ""
 
-#: pymedia/typer/options.py:123 pymedia/typer/options.py:132
-#: pymedia/typer/options.py:141 pymedia/typer/options.py:150
-#: pymedia/typer/options.py:159 pymedia/typer/options.py:170
-#: pymedia/typer/options.py:179 pymedia/typer/options.py:189
-#: pymedia/typer/options.py:199 pymedia/typer/options.py:209
-#: pymedia/typer/options.py:219 pymedia/typer/options.py:229
-#: pymedia/typer/options.py:239 pymedia/typer/options.py:249
-#: pymedia/typer/options.py:259 pymedia/typer/options.py:269
-#: pymedia/typer/options.py:278 pymedia/typer/options.py:287
+#: pymedia/typer/options.py:138 pymedia/typer/options.py:147
+#: pymedia/typer/options.py:156 pymedia/typer/options.py:165
+#: pymedia/typer/options.py:174 pymedia/typer/options.py:185
+#: pymedia/typer/options.py:194 pymedia/typer/options.py:204
+#: pymedia/typer/options.py:214 pymedia/typer/options.py:224
+#: pymedia/typer/options.py:234 pymedia/typer/options.py:244
+#: pymedia/typer/options.py:254 pymedia/typer/options.py:264
+#: pymedia/typer/options.py:274 pymedia/typer/options.py:284
+#: pymedia/typer/options.py:293 pymedia/typer/options.py:302
 msgid "Command options"
 msgstr ""
 
-#: pymedia/typer/options.py:124
+#: pymedia/typer/options.py:139
 msgid "Interval between thumbnails, in seconds."
 msgstr ""
 
-#: pymedia/typer/options.py:133
+#: pymedia/typer/options.py:148
 msgid "Move metadata index at the start, quickening web streaming."
 msgstr ""
 
-#: pymedia/typer/options.py:142
+#: pymedia/typer/options.py:157
 msgid "Regenerates broken timestamps."
 msgstr ""
 
-#: pymedia/typer/options.py:151
+#: pymedia/typer/options.py:166
 msgid "Preset sheet style."
 msgstr ""
 
-#: pymedia/typer/options.py:160
+#: pymedia/typer/options.py:175
 msgid "TranscodePreset preset from config.toml."
 msgstr ""
 
-#: pymedia/typer/options.py:171
+#: pymedia/typer/options.py:186
 msgid "Scene-change sensitivity for thumbnail detection."
 msgstr ""
 
-#: pymedia/typer/options.py:180
+#: pymedia/typer/options.py:195
 msgid "Sort stream track by type and alphabetically by language."
 msgstr ""
 
-#: pymedia/typer/options.py:190
+#: pymedia/typer/options.py:205
 msgid "Timestamps list to split a media container."
 msgstr ""
 
-#: pymedia/typer/options.py:200
+#: pymedia/typer/options.py:215
 msgid "Timestamp where the output media file ends."
 msgstr ""
 
-#: pymedia/typer/options.py:210
+#: pymedia/typer/options.py:225
 msgid "Timestamp where the output media file starts."
 msgstr ""
 
-#: pymedia/typer/options.py:220
+#: pymedia/typer/options.py:235
 msgid "Take a thumbnail at specific TIMESTAMP(s)."
 msgstr ""
 
-#: pymedia/typer/options.py:230
+#: pymedia/typer/options.py:245
 msgid "Time point at which the animated image generation ends."
 msgstr ""
 
-#: pymedia/typer/options.py:240
+#: pymedia/typer/options.py:255
 msgid "Time point at which thumbnails generation ends."
 msgstr ""
 
-#: pymedia/typer/options.py:250
+#: pymedia/typer/options.py:265
 msgid "Time point at which the animated image generation starts."
 msgstr ""
 
-#: pymedia/typer/options.py:260
+#: pymedia/typer/options.py:275
 msgid "Time point at which thumbnails generation starts."
 msgstr ""
 
-#: pymedia/typer/options.py:270
+#: pymedia/typer/options.py:285
 msgid "Set to transcode an audio track."
 msgstr ""
 
-#: pymedia/typer/options.py:279
+#: pymedia/typer/options.py:294
 msgid "Burn subtitles file in video track."
 msgstr ""
 
-#: pymedia/typer/options.py:288
+#: pymedia/typer/options.py:303
 msgid "Set to transcode the video track."
 msgstr ""
 
-#: pymedia/typer/options.py:300 pymedia/typer/options.py:309
-#: pymedia/typer/options.py:318 pymedia/typer/options.py:327
-#: pymedia/typer/options.py:336 pymedia/typer/options.py:346
-#: pymedia/typer/options.py:356 pymedia/typer/options.py:365
+#: pymedia/typer/options.py:315 pymedia/typer/options.py:324
+#: pymedia/typer/options.py:333 pymedia/typer/options.py:342
+#: pymedia/typer/options.py:351 pymedia/typer/options.py:361
+#: pymedia/typer/options.py:371 pymedia/typer/options.py:380
 msgid "Audio options"
 msgstr ""
 
-#: pymedia/typer/options.py:301
+#: pymedia/typer/options.py:316
 msgid "Set as commentary audio track."
 msgstr ""
 
-#: pymedia/typer/options.py:310
+#: pymedia/typer/options.py:325
 msgid "Set as default audio track of the container."
 msgstr ""
 
-#: pymedia/typer/options.py:319 pymedia/typer/options.py:388
+#: pymedia/typer/options.py:334 pymedia/typer/options.py:403
 msgid "Set as forced to be displayed."
 msgstr ""
 
-#: pymedia/typer/options.py:328
+#: pymedia/typer/options.py:343
 msgid "Set audio track as targeted for hearing impaired people."
 msgstr ""
 
-#: pymedia/typer/options.py:337
+#: pymedia/typer/options.py:352
 msgid "Set audio language, formatted as ISO 639-2 code."
 msgstr ""
 
-#: pymedia/typer/options.py:347
+#: pymedia/typer/options.py:362
 msgid "List of audio tracks to delete."
 msgstr ""
 
-#: pymedia/typer/options.py:357
+#: pymedia/typer/options.py:372
 msgid "Audio track to edit."
 msgstr ""
 
-#: pymedia/typer/options.py:366
+#: pymedia/typer/options.py:381
 msgid "Set a custom audio track title for video player."
 msgstr ""
 
-#: pymedia/typer/options.py:378 pymedia/typer/options.py:387
-#: pymedia/typer/options.py:396 pymedia/typer/options.py:405
-#: pymedia/typer/options.py:415 pymedia/typer/options.py:425
-#: pymedia/typer/options.py:434 pymedia/typer/options.py:443
+#: pymedia/typer/options.py:393 pymedia/typer/options.py:402
+#: pymedia/typer/options.py:411 pymedia/typer/options.py:420
+#: pymedia/typer/options.py:430 pymedia/typer/options.py:440
+#: pymedia/typer/options.py:449 pymedia/typer/options.py:458
 msgid "Subtitles options"
 msgstr ""
 
-#: pymedia/typer/options.py:379
+#: pymedia/typer/options.py:394
 msgid "Set as default subtitles of the container."
 msgstr ""
 
-#: pymedia/typer/options.py:397
+#: pymedia/typer/options.py:412
 msgid "Set as targeted for hearing impaired people."
 msgstr ""
 
-#: pymedia/typer/options.py:406
+#: pymedia/typer/options.py:421
 msgid "Set subtitles language, formatted as ISO 639-2 code."
 msgstr ""
 
-#: pymedia/typer/options.py:416
+#: pymedia/typer/options.py:431
 msgid "List subtitles tracks to delete."
 msgstr ""
 
-#: pymedia/typer/options.py:426
+#: pymedia/typer/options.py:441
 msgid "Subtitles track to edit."
 msgstr ""
 
-#: pymedia/typer/options.py:435
+#: pymedia/typer/options.py:450
 msgid "Set a custom title for video player."
 msgstr ""
 
-#: pymedia/typer/options.py:444
+#: pymedia/typer/options.py:459
 msgid "Set as targeted for visual impaired people."
 msgstr ""
 
-#: pymedia/typer/options.py:457 pymedia/typer/options.py:466
-#: pymedia/typer/options.py:475 pymedia/typer/options.py:486
-#: pymedia/typer/options.py:495
+#: pymedia/typer/options.py:472 pymedia/typer/options.py:481
+#: pymedia/typer/options.py:490 pymedia/typer/options.py:501
+#: pymedia/typer/options.py:510
 msgid "Filter options"
 msgstr ""
 
-#: pymedia/typer/options.py:458
+#: pymedia/typer/options.py:473
 msgid "Crop to WIDTH×HEIGHT at offset X,Y (from top-left)."
 msgstr ""
 
-#: pymedia/typer/options.py:467
+#: pymedia/typer/options.py:482
 msgid "Flip the image horizontally, swapping left and right."
 msgstr ""
 
-#: pymedia/typer/options.py:476
+#: pymedia/typer/options.py:491
 msgid "Flip the image vertically, swapping top and bottom."
 msgstr ""
 
-#: pymedia/typer/options.py:487
+#: pymedia/typer/options.py:502
 msgid "Set the animated image frame rate in frames per second."
 msgstr ""
 
-#: pymedia/typer/options.py:496
+#: pymedia/typer/options.py:511
 msgid "Specify an orthogonal arc degree to rotate the image."
 msgstr ""
 
-#: pymedia/typer/options.py:508 pymedia/typer/options.py:518
-#: pymedia/typer/options.py:527
+#: pymedia/typer/options.py:523 pymedia/typer/options.py:533
+#: pymedia/typer/options.py:542
 msgid "Scale filter options"
 msgstr ""
 
-#: pymedia/typer/options.py:509
+#: pymedia/typer/options.py:524
 msgid "Specify different ways to scale the video."
 msgstr ""
 
-#: pymedia/typer/options.py:519
+#: pymedia/typer/options.py:534
 msgid "Target resolution, in pixels, to resize the video."
 msgstr ""
 
-#: pymedia/typer/options.py:528
+#: pymedia/typer/options.py:543
 msgid "Allows upscaling beyond the source dimensions."
 msgstr ""
 
+#: pymedia/typer/service.py:42
+msgid "Version"
+msgstr ""
+
+#: pymedia/typer/service.py:43
+msgid "Platform"
+msgstr ""
+
 #: pymedia/typer/service.py:44
+msgid "Ffmpeg CLI handler"
+msgstr ""
+
+#: pymedia/typer/service.py:80
 msgid "The following options are mutually exclusive: output, output_directory"
 msgstr ""
 
-#: pymedia/typer/service.py:50
+#: pymedia/typer/service.py:86
 msgid ""
 "It is not allowed to specify an output with multiple inputs, use output "
 "directory instead."
 msgstr ""
 
-#: pymedia/typer/service.py:69 pymedia/typer/service.py:87
+#: pymedia/typer/service.py:105 pymedia/typer/service.py:123
 #, python-format
 msgid "%(path)s is not a file."
 msgstr ""

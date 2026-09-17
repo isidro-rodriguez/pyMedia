@@ -9,6 +9,7 @@ con la sección anterior.
 ## [0.16.0-beta.0] - 2026-09-17 → presente
 
 ### Añadido
+- Opción global `--version`: panel Rich con versión, Python y plataforma
 - Comando `cut`: corte por rango de tiempo (`--start`/`--end`) y división por
   marcas (`--at`), con validación de opciones excluyentes
 - Error `MissingRequiredOptionsError` para `cut` y `transcode`

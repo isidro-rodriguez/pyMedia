@@ -5,7 +5,7 @@ Código simple, legible, stdlib antes que dependencias nuevas.
 ## Style (PEP8 + Ruff)
 - Orden imports: stdlib > third-party > local
 - Sin mutable default args
-- Funciones: responsabilidad única, ~20 líneas máx
+- Funciones: responsabilidad única, ~20 líneas máximo
 
 ## Types & Docs
 - Type hints estrictos (MyPy)
@@ -34,5 +34,6 @@ Código simple, legible, stdlib antes que dependencias nuevas.
 3. `ruff check`
 4. `mypy --strict`
 5. `pytest`
-6. VERSION actualizado si aplica
+6. VERSION actualizada si aplica
 7. CHANGELOG actualizado si aplica
+8. README actualizado si aplica

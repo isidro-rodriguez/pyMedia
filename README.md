@@ -62,6 +62,7 @@ Compila con pyInstaller un único `build/pymedia.exe` con icono incluido.
 
 ```console
 $ pymedia --help
+$ pymedia --version    # muestra versión, Python y plataforma y sale
 $ pymedia <comando> --help     # ayuda detallada de cada comando
 ```
 
@@ -141,6 +142,7 @@ La ayuda de cada comando está localizada y se muestra con `--help`.
 | `-d`, `--directory` | Directorio de salida para procesar lotes de ficheros (con `output` son excluyentes).  |
 | `--overwrite`       | Política ante un fichero de salida existente: `yes`, `no`, `ask` (por defecto `ask`). |
 | `--debug`           | Activa el nivel de log DEBUG.                                                         |
+| `--version`         | Muestra la versión, Python y plataforma en un panel Rich y sale.                      |
 
 ### Filtros disponibles
 
