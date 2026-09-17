@@ -11,10 +11,22 @@ from pymedia.utils import (
     parse_quantity,
     parse_size,
     parse_timedelta,
-    to_ffmpeg_path,
+    to_ffmpeg_value,
     to_float,
     to_int,
 )
+
+
+def _unescape_filter_value(value: str) -> str:
+    r"""Revierte un nivel de escape de ffmpeg: `\X` se lee como `X`."""
+    out: list[str] = []
+    index = 0
+    while index < len(value):
+        if value[index] == "\\":
+            index += 1
+        out.append(value[index])
+        index += 1
+    return "".join(out)
 
 
 class TestParseFraction:
@@ -123,20 +135,43 @@ class TestParseTimedelta:
         assert parse_timedelta(time) == expected
 
 
-class TestToFfmpegPath:
-    """Pruebas de `to_ffmpeg_path`."""
+class TestToFfmpegValue:
+    """Pruebas de `to_ffmpeg_value`."""
 
-    def test_posix_path_unchanged(self) -> None:
-        """Comprueba que las rutas POSIX no se modifican."""
+    def test_path_without_metacharacters_unchanged(self) -> None:
+        """Comprueba que una ruta sin metacaracteres no se modifica."""
         assert (
-            to_ffmpeg_path(Path("src/resources/font.ttf")) == "src/resources/font.ttf"
+            to_ffmpeg_value(Path("src/resources/font.ttf")) == "src/resources/font.ttf"
         )
 
-    def test_windows_drive_colon_escaped(self) -> None:
-        """Comprueba que los dos puntos de una unidad Windows se escapan."""
-        assert (
-            to_ffmpeg_path(Path("C:/Users/test/data.ttf")) == "C\\:/Users/test/data.ttf"
-        )
+    @pytest.mark.parametrize(
+        ("path", "expected"),
+        [
+            ("C:/Users/test/data.ttf", r"C\\\:/Users/test/data.ttf"),
+            ("mi fichero.mp4", r"mi\\\ fichero.mp4"),
+            (
+                "Joan's first bycicle, [2].srt",
+                r"Joan\\\'s\\\ first\\\ bycicle\\\,\\\ \\\[2\\\].srt",
+            ),
+        ],
+    )
+    def test_metacharacters_escaped(self, path: str, expected: str) -> None:
+        """Comprueba que los metacaracteres se escapan en los dos niveles."""
+        assert to_ffmpeg_value(Path(path)) == expected
+
+    @pytest.mark.parametrize(
+        "path",
+        ["subs/eng_subs.srt", "mi fichero.mp4", "Joan's first bycicle, [2].srt"],
+    )
+    def test_round_trip_decodes_to_the_original_path(self, path: str) -> None:
+        """Comprueba que tras desescapar dos veces se obtiene la ruta original."""
+        escaped = to_ffmpeg_value(Path(path))
+
+        assert _unescape_filter_value(_unescape_filter_value(escaped)) == path
+
+    def test_value_is_not_quoted(self) -> None:
+        """Comprueba que el valor no se entrecomilla: ffmpeg no anida comillas."""
+        assert '"' not in to_ffmpeg_value(Path("Joan's first bycicle.mp4"))
 
 
 class TestToFloat:

@@ -7,10 +7,12 @@ de mixins y pipelines ya está cubierta por el resto de suites.
 """
 
 import json
+import shutil
 import subprocess
 from pathlib import Path
 from typing import Any, cast
 
+import pytest
 from typer.testing import CliRunner
 
 from pymedia.main import app
@@ -164,6 +166,25 @@ def test_sheet_success_generates_jpg(
     assert result.exit_code == 0
     assert output.exists()
     assert stream_codec_names(output, "video") == ["mjpeg"]
+
+
+def test_sheet_success_with_conflicting_name(
+    runner: CliRunner,
+    video_mp4_a: Path,
+    tmp_path: Path,
+) -> None:
+    """`sheet` dibuja el nombre aunque tenga `%`, comillas, comas o corchetes."""
+    source = tmp_path / "100% real's, [2].mp4"
+    shutil.copy(video_mp4_a, source)
+    output = tmp_path / "sheet.jpg"
+
+    result = runner.invoke(
+        app,
+        ["sheet", str(source), "-o", str(output), "--preset", "web"],
+    )
+
+    assert result.exit_code == 0
+    assert output.exists()
 
 
 def test_sheet_error_exclusive_output_options(
@@ -359,6 +380,40 @@ def test_transcode_success_burns_subtitles(
             str(video_mp4_a),
             "--burn-subtitles",
             str(subtitle),
+            "-o",
+            str(output),
+            "-ov",
+            "yes",
+        ],
+    )
+
+    assert result.exit_code == 0
+    assert output.exists()
+
+
+@pytest.mark.parametrize("name", ["Joan's first bycicle, [2].srt", "mi fichero.srt"])
+def test_transcode_burns_subtitles_with_conflicting_name(
+    runner: CliRunner,
+    video_mp4_a: Path,
+    tmp_path: Path,
+    name: str,
+) -> None:
+    """`transcode --burn-subtitles` admite nombres con comillas, comas y espacios."""
+    subtitle = tmp_path / name
+    subtitle.write_text(
+        "1\n00:00:00,000 --> 00:00:02,000\nHello test\n", encoding="utf-8"
+    )
+    output = tmp_path / "burned.mp4"
+
+    result = runner.invoke(
+        app,
+        [
+            "transcode",
+            str(video_mp4_a),
+            "--burn-subtitles",
+            str(subtitle),
+            "--size",
+            "64x36",
             "-o",
             str(output),
             "-ov",

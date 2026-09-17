@@ -8,7 +8,7 @@ from pymedia.data.video_codecs import VIDEO_CODECS
 from pymedia.errors import MissingParameterError
 from pymedia.models.config import Transcode
 from pymedia.models.media import Media
-from pymedia.utils import to_ffmpeg_path
+from pymedia.utils import to_ffmpeg_value
 
 
 @dataclass(kw_only=True)
@@ -99,9 +99,9 @@ class TranscodeMixin:
         """Construye el filtro que quema los subtítulos en la pista de vídeo.
 
         Returns:
-            Filtro `subtitles` con la ruta del fichero escapada para la sintaxis
-            de filtros y entre comillas simples, ya que el comando no se ejecuta
-            en un shell.
+            Filtro `subtitles` con la ruta escapada para el parser de filtergraph,
+            sin comillas: el comando no pasa por un shell y ffmpeg no admite
+            comillas simples anidadas.
 
         Raises:
             MissingParameterError: Si no se indicó el fichero de subtítulos.
@@ -109,5 +109,4 @@ class TranscodeMixin:
         if self.subtitles_input is None:
             raise MissingParameterError(name="subtitles")
 
-        path = to_ffmpeg_path(self.subtitles_input.absolute())
-        return f"subtitles='{path}'"
+        return f"subtitles={to_ffmpeg_value(self.subtitles_input.absolute())}"

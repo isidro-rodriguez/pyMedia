@@ -7,7 +7,7 @@ import pytest
 from pymedia.errors import MissingParameterError
 from pymedia.models.config import Transcode
 from pymedia.models.mixins.transcode_mixin import TranscodeMixin
-from pymedia.utils import to_ffmpeg_path
+from pymedia.utils import to_ffmpeg_value
 
 
 def _transcode() -> Transcode:
@@ -39,32 +39,31 @@ class TestToBurnSubtitlesCmd:
         mixin = _mixin(subtitles_input=subtitle)
 
         assert mixin.to_burn_subtitles_cmd() == (
-            f"subtitles='{to_ffmpeg_path(subtitle.absolute())}'"
+            f"subtitles={to_ffmpeg_value(subtitle.absolute())}"
         )
 
-    def test_value_has_no_shell_quoting(self) -> None:
-        """Comprueba que el valor va entre comillas simples y sin comillas dobles."""
+    def test_value_is_not_quoted(self) -> None:
+        """Comprueba que el valor no se entrecomilla: no hay shell que las quite."""
         mixin = _mixin(subtitles_input=Path("subs") / "eng_subs.srt")
 
         value = mixin.to_burn_subtitles_cmd()
 
-        assert value.startswith("subtitles='")
-        assert value.endswith("'")
+        assert value.startswith("subtitles=")
+        assert "'" not in value
         assert '"' not in value
 
     def test_colon_of_the_path_is_escaped(self) -> None:
-        """Comprueba que los dos puntos de la ruta se escapan para ffmpeg."""
+        """Comprueba que los dos puntos de la unidad Windows se escapan."""
         mixin = _mixin(subtitles_input=Path("C:/subs/eng_subs.srt"))
 
-        assert r"C\:" in mixin.to_burn_subtitles_cmd()
+        assert r"C\\\:" in mixin.to_burn_subtitles_cmd()
 
-    def test_no_backslash_without_escaped_colon(self) -> None:
-        """Comprueba que la única barra invertida es la del escape de `:`."""
-        mixin = _mixin(subtitles_input=Path("subs") / "eng_subs.srt")
+    def test_quote_of_the_path_is_escaped(self) -> None:
+        """Comprueba que una comilla del nombre se escapa en vez de entrecomillar."""
+        subtitle = Path("subs") / "Joan's first bycicle.srt"
+        mixin = _mixin(subtitles_input=subtitle)
 
-        value = mixin.to_burn_subtitles_cmd()
-
-        assert value.count("\\") == value.count("\\:")
+        assert r"Joan\\\'s\\\ first\\\ bycicle.srt" in mixin.to_burn_subtitles_cmd()
 
     def test_without_subtitles_input_raises(self) -> None:
         """Comprueba que sin fichero de subtítulos se lanza un error."""

@@ -13,7 +13,7 @@ from pymedia.locale_manager import locale_manager
 from pymedia.locales import _  # noqa
 from pymedia.models.media import Audio, Subtitles
 from pymedia.models.parameters import SheetParameters
-from pymedia.utils import parse_quantity, parse_size, parse_timedelta, to_ffmpeg_path
+from pymedia.utils import parse_quantity, parse_size, parse_timedelta, to_ffmpeg_value
 
 
 class SheetCmd:
@@ -86,15 +86,6 @@ class SheetCmd:
             raise MissingParameterError(name="preset")
         return preset.columns * preset.rows
 
-    @staticmethod
-    def _escape_drawtext(text: str) -> str:
-        """Escapa caracteres especiales para el filtro drawtext de FFmpeg."""
-        text = text.replace("\\", "\\\\")
-        text = text.replace(":", "\\:")
-        text = text.replace("%", "\\%")
-        text = text.replace("'", r"'\''")
-        return text
-
     def _generate_snapshots(self) -> list[str]:
         """Comando para capturar frames y componer la cuadrícula de miniaturas."""
 
@@ -126,8 +117,8 @@ class SheetCmd:
                 raise MissingParameterError(name="preset")
             ts_margin = 4
             return (
-                f"drawtext=fontfile='{to_ffmpeg_path(preset.fontfile)}':"
-                f"text='{self._escape_drawtext(timestamp_str)}':"
+                f"drawtext=fontfile={to_ffmpeg_value(preset.fontfile)}:"
+                f"text={to_ffmpeg_value(timestamp_str)}:expansion=none:"
                 f"fontsize={preset.timestamp_fontsize}:"
                 f"fontcolor={preset.timestamp_color}:"
                 f"bordercolor={preset.timestamp_border_color}:"
@@ -348,8 +339,7 @@ class SheetCmd:
 
         line_height = preset.fontsize + preset.line_gap
         header_height = preset.header_margin_top + line_height * len(lines)
-        fontfile = to_ffmpeg_path(preset.fontfile)
-        fontfile_quoted = f'"{fontfile}"' if "'" in fontfile else f"'{fontfile}'"
+        fontfile = to_ffmpeg_value(preset.fontfile)
 
         filters = [
             f"pad=iw:ih+{header_height}:0:{header_height}:color={preset.background}"
@@ -357,8 +347,8 @@ class SheetCmd:
         for i, line in enumerate(lines):
             y = preset.header_margin_top + i * line_height
             filters.append(
-                f"drawtext=fontfile={fontfile_quoted}:"
-                f"text='{self._escape_drawtext(line)}':"
+                f"drawtext=fontfile={fontfile}:"
+                f"text={to_ffmpeg_value(line)}:expansion=none:"
                 f"fontsize={preset.fontsize}:fontcolor={preset.text_color}:"
                 f"x={preset.header_margin_left}:y={y}"
             )

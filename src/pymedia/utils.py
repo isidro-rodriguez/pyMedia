@@ -87,17 +87,30 @@ def parse_timedelta(time: timedelta) -> str:
     return f"{minutes}:{secs:02d}"
 
 
-def to_ffmpeg_path(path: Path) -> str:
-    """Convierte una ruta a formato seguro para filtros ffmpeg (drawtext, etc.).
+def to_ffmpeg_value(value: str | Path) -> str:
+    """Escapa una ruta o un texto para incrustarlo como valor de un filtro ffmpeg.
+
+    El valor se entrega como token de filtergraph: los metacaracteres (separadores
+    de filtro y de etiquetas, separadores de opciones, comillas y espacios) se
+    escapan con barra invertida. No se entrecomilla porque ffmpeg no admite
+    comillas simples anidadas ni escapes dentro de ellas, de modo que un texto con
+    `'` no es representable entrecomillado.
 
     Args:
-        path: Ruta del fichero de vídeo a procesar.
+        value: Ruta o texto a usar como valor de un filtro.
 
     Returns:
-        Ruta posix con `:` escapado para su uso en filtros.
+        Valor posix (si es `Path`) con los metacaracteres escapados.
     """
-    posix = path.as_posix()  # normaliza \ a / (no-op en Linux/Mac)
-    return posix.replace(":", r"\:")
+    text = value.as_posix() if isinstance(value, Path) else value  # \ a / en rutas
+    meta_chars = "\\':,;[]= "  # el espacio va incluido: ffmpeg recorta los extremos
+
+    # ffmpeg desescapa el valor dos veces (token del filtergraph y valor de la
+    # opción), así que el escape se aplica una vez por nivel.
+    for _ in range(2):
+        text = "".join(f"\\{char}" if char in meta_chars else char for char in text)
+
+    return text
 
 
 def to_float(value: str | float | None) -> float | None:
