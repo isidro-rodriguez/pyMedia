@@ -53,7 +53,7 @@ uv tool install .       # o: pip install .
 ### Ejecutable único (Windows)
 
 ```bash
-uv run python scripts/build_pyinstaller.py
+uv run python scripts/build_windows.py
 ```
 
 Compila con pyInstaller un único `build/pymedia.exe` con icono incluido.
@@ -281,7 +281,7 @@ uv run python scripts/audio_tracks.py    # pistas de audio en .local/fixtures/au
 
 ### Otros scripts
 
-- `scripts/build_pyinstaller.py` — compila `build/pymedia.exe` (pyinstaller onefile).
+- `scripts/build_windows.py` — compila `build/pymedia.exe` (pyinstaller onefile).
 - `scripts/backup.py` — copia de seguridad de `src/`, `tests/` y `scripts/` en `.local/backup.zip`.
 
 ## Estructura del proyecto

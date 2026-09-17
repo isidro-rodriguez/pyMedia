@@ -1,6 +1,6 @@
 """Tests end-to-end del binario PyInstaller de pyMedia.
 
-Compila `build/pymedia.exe` con `scripts/build_pyinstaller.py` una única vez
+Compila `build/pymedia.exe` con `scripts/build_windows.py` una única vez
 por sesión y a continuación ejecuta el binario tal como lo haría un usuario
 final, comprobando el código de salida, los mensajes visibles y las
 propiedades de los ficheros generados (vía ffprobe). La superficie Typer
@@ -27,7 +27,7 @@ from test_cli import (
 )
 
 ROOT = Path(__file__).resolve().parents[1]
-BUILD_SCRIPT = ROOT / "scripts" / "build_pyinstaller.py"
+BUILD_SCRIPT = ROOT / "scripts" / "build_windows.py"
 BINARY_PATH = ROOT / "build" / "pymedia.exe"
 
 pytestmark = [
@@ -105,7 +105,7 @@ def built_binary() -> Path:
     )
     if result.returncode != 0:
         pytest.fail(
-            f"build_pyinstaller.py falló (exit {result.returncode}):\n"
+            f"build_windows.py falló (exit {result.returncode}):\n"
             f"{result.stdout}\n{result.stderr}"
         )
     assert BINARY_PATH.is_file(), f"No se generó {BINARY_PATH}"
@@ -119,7 +119,7 @@ def built_binary() -> Path:
 
 
 def test_build_pyinstaller_produces_executable(built_binary: Path) -> None:
-    """`scripts/build_pyinstaller.py` genera un ejecutable utilizable."""
+    """`scripts/build_windows.py` genera un ejecutable utilizable."""
     assert built_binary.is_file()
     assert built_binary.stat().st_size > 1_000_000
 

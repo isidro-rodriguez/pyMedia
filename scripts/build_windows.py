@@ -1,7 +1,7 @@
 """Build a single-file pymedia.exe with PyInstaller.
 
 Uso:
-    uv run python scripts/build_pyinstaller.py
+    uv run python scripts/build_windows.py
 
 Genera `build/pymedia.exe` (onefile) incluyendo icono y los datos
 de `pymedia.locales`/`pymedia.resources`.

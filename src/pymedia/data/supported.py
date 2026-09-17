@@ -7,7 +7,7 @@ class SUPPORTED:
     ANIMATED: tuple[str, ...] = (
         ".apng",
         ".gif",
-        ".webp",  # TODO: pendiente de implementar
+        ".webp",
     )
 
     AUDIO: tuple[str, ...] = (
