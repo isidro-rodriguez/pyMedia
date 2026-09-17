@@ -18,7 +18,7 @@ classifiers = [
     "Programming Language :: Python :: 3.13",
 ]
 dependencies = [
-    "platformdirs==4.11.8",
+    "platformdirs==4.11.9",
     "rich>=15.0.0",
     "typer==0.27.2",
 ]
@@ -68,7 +68,7 @@ select = ["E", "F", "I", "UP", "B", "D"]
 [tool.ruff.lint.pydocstyle]
 convention = "google"
 
-# .local: documento interno de copy/paste (glosario), sin reglas de estilo
+# .local: documentos internos
 [tool.ruff.lint.per-file-ignores]
 ".local/**" = ["D", "E501"]
 
