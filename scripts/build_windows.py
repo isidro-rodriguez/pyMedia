@@ -34,6 +34,8 @@ def main() -> None:
         "--console",
         f"--icon={ICON}",
         "--collect-all=pymedia",
+        "--collect-all=shellingham",
+        "--collect-all=typer",
         f"--paths={SRC}",
         f"--distpath={OUTPUT_DIR / 'dist'}",
         f"--workpath={OUTPUT_DIR / 'work'}",
