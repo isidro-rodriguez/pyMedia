@@ -2,11 +2,7 @@
 
 import typer
 
-from pymedia.commands.extract_audio.parameters import ExtractAudioParameters
-from pymedia.commands.extract_audio.service import ExtractAudioService
-from pymedia.locales import _  # noqa
-from pymedia.logger import Logger
-from pymedia.typer.options import (
+from pymedia.commands.base_cli_options import (
     AudioStreamTrackListOption,
     DebugOption,
     HelpOption,
@@ -14,6 +10,10 @@ from pymedia.typer.options import (
     OutputOption,
     OverwriteOption,
 )
+from pymedia.commands.extract_audio.parameters import ExtractAudioParameters
+from pymedia.commands.extract_audio.service import ExtractAudioService
+from pymedia.locales import _  # noqa
+from pymedia.logger import Logger
 from pymedia.types import OverwriteMode
 
 extract_audio_cli = typer.Typer()
@@ -22,9 +22,9 @@ EXTRACT_AUDIO_HELP = _(
     """\
 Extract audio tracks from a media file.
 
+You can consult what audio tracks have a container with `info` command.
+
 [bold]Examples[/bold]:
-  Extract all audio tracks from a media file:
-    > pymedia extract-audio input.mp4
   Extract a list of audio tracks from a media file: 
     > pymedia extract-audio input.mp4 --tracks 1,2
   Extract audio tracks with custom output:
@@ -36,18 +36,18 @@ Extract audio tracks from a media file.
 @extract_audio_cli.command(
     name="extract-audio",
     help=EXTRACT_AUDIO_HELP,
-    rich_help_panel="Audio commands",
+    rich_help_panel=_("Audio commands"),
     no_args_is_help=True,
 )
 def extract_audio(
     media_input: MediaInputArgument,
-    audio_stream_tracks: AudioStreamTrackListOption = None,
+    audio_stream_tracks: AudioStreamTrackListOption,
     audio_output: OutputOption = None,
     overwrite: OverwriteOption = OverwriteMode.ASK,
     debug: DebugOption = False,
     help_: HelpOption = False,  # noqa
 ) -> None:
-    """Punto de entrada del comando que extrae pistas de audio.
+    """Punto de entrada del comando ``extract-audio``.
 
     Args:
         media_input: Ruta del fichero de vídeo a procesar.
@@ -67,8 +67,6 @@ def extract_audio(
         UserError: Si el formato del listado, algún índice o el nombre de
             salida no son válidos.
     """
-    # Logger.create configura el logger raíz (nivel DEBUG) de forma idempotente;
-    # params y service lo recuperan después con Logger.load().
     Logger.create(debug=debug)
     params = ExtractAudioParameters.load(
         overwrite=overwrite,

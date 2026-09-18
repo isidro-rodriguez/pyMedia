@@ -2,12 +2,7 @@
 
 import typer
 
-from pymedia.commands.remux.parameters import RemuxParameters
-from pymedia.commands.remux.service import RemuxService
-from pymedia.errors import MissingArgumentError, UserError
-from pymedia.locales import _  # noqa
-from pymedia.logger import Logger
-from pymedia.typer.options import (
+from pymedia.commands.base_cli_options import (
     DebugOption,
     FastStartOption,
     HelpOption,
@@ -17,6 +12,11 @@ from pymedia.typer.options import (
     RegeneratePtsOption,
     SortTracksOption,
 )
+from pymedia.commands.remux.parameters import RemuxParameters
+from pymedia.commands.remux.service import RemuxService
+from pymedia.errors import MissingArgumentError, UserError
+from pymedia.locales import _  # noqa
+from pymedia.logger import Logger
 from pymedia.types import OverwriteMode
 
 remux_cli = typer.Typer()
@@ -42,7 +42,7 @@ Change container and metadata without transcoding.
 @remux_cli.command(
     name="remux",
     help=REMUX_HELP,
-    rich_help_panel="Video commands",
+    rich_help_panel=_("Video commands"),
     no_args_is_help=True,
 )
 def remux(
@@ -55,7 +55,7 @@ def remux(
     debug: DebugOption = False,
     help_: HelpOption = False,  # noqa
 ) -> None:
-    """Punto de entrada y desarrollo del pipeline de `remux`.
+    """Punto de entrada del comando ``remux``.
 
     Args:
         media_input: Ruta del fichero de vídeo a procesar.
@@ -76,8 +76,6 @@ def remux(
     if fast_start and media_output.suffix != ".mp4":
         raise UserError(msg=_("Fast start only works for '.mp4' remux."))
 
-    # Logger.create configura el logger raíz (nivel DEBUG) de forma idempotente;
-    # params y service lo recuperan después con Logger.load().
     Logger.create(debug=debug)
     params = RemuxParameters.load(
         overwrite=overwrite,

@@ -1,6 +1,6 @@
 """Comando ``add-subs``: compositor de comandos ffmpeg."""
 
-from pymedia.commands.add_subs.parameters import AddSubtitlesParameters
+from pymedia.commands.add_subtitles.parameters import AddSubtitlesParameters
 from pymedia.errors import MissingParameterError
 from pymedia.types import OverwriteMode
 

@@ -79,8 +79,7 @@ class TranscodeParameters(
                 externo o no detecta un formato compatible.
             MissingParameterError: Si el medio no se pudo obtener.
         """
-        # Los filtros de imagen y los subtítulos obligan a recomprimir la pista
-        # de vídeo: con `-c:v copy` ffmpeg los ignoraría.
+        # Filtros de imagen y quemado de subtítulos obligan a transcodificar el vídeo.
         if not all(
             [
                 subtitles_input is None,

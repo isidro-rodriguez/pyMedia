@@ -3,6 +3,7 @@
 import sys
 import tempfile
 from pathlib import Path
+from typing import Any
 
 from pymedia.commands.base_service import BaseService
 from pymedia.commands.join.cmd import JoinCmd
@@ -37,16 +38,18 @@ class JoinService(BaseService[JoinParameters]):
 
             with list_txt.open(mode="w", encoding="utf-8", newline="\n") as file:
                 for media in self.params.media_list:
-                    raw_path = str(media.path)
-                    # Resolución de quoting potencialmente problemático.
-                    if "'" in raw_path:
-                        escaped_path = f'"{raw_path}"'
+                    path_str = media.path.as_posix()
+                    # Escapa la inscripción del fichero, ya que tiene que ir entre ''.
+                    if " " in path_str or "'" in path_str:
+                        escaped = path_str.replace("'", "'\\''")
+                        file.write(f"file '{escaped}'\n")
                     else:
-                        escaped_path = f"'{raw_path}'"
-                    file.write(f"file {escaped_path}\n")
-
+                        file.write(f"file {path_str}\n")
             cmd = JoinCmd(params=self.params).create(list_txt=list_txt)
 
+            self.logger.debug(
+                _("List file:\n%(list_txt)s"), list_txt=list_txt.read_text()
+            )
             self.logger.debug(_("FFmpeg command: %(cmd)s"), cmd=cmd)
 
             self.run_ffmpeg(
@@ -61,12 +64,7 @@ class JoinService(BaseService[JoinParameters]):
         )
 
     def _check_media_compatibility(self) -> None:
-        """Comprueba que todos los medios de la lista son compatibles con el primero.
-
-        Raises:
-            MissingParameterError: Si falta la ruta de salida procesada.
-            UserError: Si algún medio difiere en formato, pistas o propiedades.
-        """
+        """Comprueba que todos los vídeos de la lista son compatibles con el primero."""
         if self.params.media_output is None:
             raise MissingParameterError(name="media_output")
         if self.params.media_list is None or len(self.params.media_list) < 2:
@@ -75,7 +73,7 @@ class JoinService(BaseService[JoinParameters]):
         first = self.params.media_list[0]
         incompatible: list[tuple[Path, list[str]]] = []
 
-        def _prop(label: str, first_value: object, value: object) -> str | None:
+        def _prop(label: str, first_value: Any, value: Any) -> str | None:
             """Devuelve el texto de diferencia si los valores no coinciden."""
             if first_value != value:
                 return f"{label} differs: {first_value} vs {value}"

@@ -2,11 +2,7 @@
 
 import typer
 
-from pymedia.commands.edit_audio.parameters import EditAudioParameters
-from pymedia.commands.edit_audio.service import EditAudioService
-from pymedia.locales import _  # noqa
-from pymedia.logger import Logger
-from pymedia.typer.options import (
+from pymedia.commands.base_cli_options import (
     AudioCommentaryOption,
     AudioDefaultOption,
     AudioForcedOption,
@@ -20,6 +16,10 @@ from pymedia.typer.options import (
     OutputOption,
     OverwriteOption,
 )
+from pymedia.commands.edit_audio.parameters import EditAudioParameters
+from pymedia.commands.edit_audio.service import EditAudioService
+from pymedia.locales import _  # noqa
+from pymedia.logger import Logger
 from pymedia.types import OverwriteMode
 
 edit_audio_cli = typer.Typer()
@@ -27,6 +27,8 @@ edit_audio_cli = typer.Typer()
 EDIT_AUDIO_HELP = _(
     """\
 Edit audio track metadata from a media file.
+
+You can consult what audio tracks have a container with `info` command.
 
 [bold]Examples[/bold]:
   Edit language metadata of audio stream track 1 from a media container:
@@ -40,7 +42,7 @@ Edit audio track metadata from a media file.
 @edit_audio_cli.command(
     name="edit-audio",
     help=EDIT_AUDIO_HELP,
-    rich_help_panel="Audio commands",
+    rich_help_panel=_("Audio commands"),
     no_args_is_help=True,
 )
 def edit_audio(
@@ -57,7 +59,7 @@ def edit_audio(
     debug: DebugOption = False,
     help_: HelpOption = False,  # noqa
 ) -> None:
-    """Punto de entrada del comando que edita metadatos de una pista de audio.
+    """Punto de entrada del comando ``edit-audio``.
 
     Args:
         media_input: Ruta del fichero de vídeo a procesar.
@@ -79,8 +81,6 @@ def edit_audio(
         UserError: Si el idioma no sigue el estándar ISO 639-2 o la pista
             indicada no existe en el contenedor.
     """
-    # Logger.create configura el logger raíz (nivel DEBUG) de forma idempotente;
-    # params y service lo recuperan después con Logger.load().
     Logger.create(debug=debug)
     params = EditAudioParameters.load(
         overwrite=overwrite,

@@ -1,1 +1,0 @@
-"""Comando ``delete-subs``."""

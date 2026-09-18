@@ -1,17 +1,17 @@
-"""Comando ``edit-subs``: service."""
+"""Comando ``delete-subs``: service."""
 
 from pymedia.commands.base_service import BaseService
-from pymedia.commands.edit_subs.cmd import EditSubtitlesCmd
-from pymedia.commands.edit_subs.parameters import EditSubtitlesParameters
+from pymedia.commands.delete_subtitles.cmd import DeleteSubtitlesCmd
+from pymedia.commands.delete_subtitles.parameters import DeleteSubtitlesParameters
 from pymedia.errors import MissingParameterError
 from pymedia.locales import _  # noqa
 
 
-class EditSubtitlesService(BaseService[EditSubtitlesParameters]):
-    """Comando de CLI que edita los metadatos de una pista de subtítulos."""
+class DeleteSubtitlesService(BaseService[DeleteSubtitlesParameters]):
+    """Comando de CLI que elimina pistas de subtítulos de un contenedor."""
 
     def start(self) -> None:
-        """Construye el comando ffmpeg y ejecuta la edición de metadatos.
+        """Construye el comando ffmpeg y ejecuta la eliminación de las pistas.
 
         Raises:
             MissingParameterError: Si falta el medio o la salida procesada.
@@ -24,17 +24,17 @@ class EditSubtitlesService(BaseService[EditSubtitlesParameters]):
         if not self.resolve_overwrite(output_list=[self.params.media_output]):
             return
 
-        cmd = EditSubtitlesCmd(params=self.params).create()
+        cmd = DeleteSubtitlesCmd(params=self.params).create()
 
         self.logger.debug(_("FFmpeg command: %(cmd)s"), cmd=cmd)
 
         self.run_ffmpeg(
             cmd=cmd,
-            description=_("Editing subtitles metadata"),
+            description=_("Deleting subtitles"),
             output_list=[self.params.media_output],
         )
 
         self.logger.info(
-            msg=_("Subtitles metadata edited successfully: %(output)s"),
+            msg=_("Subtitles deleted successfully: %(output)s"),
             output=self.params.media_output,
         )

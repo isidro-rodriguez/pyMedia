@@ -11,7 +11,7 @@ Código simple, legible, stdlib antes que dependencias nuevas.
 - Type hints estrictos (MyPy)
 - Docstrings Google-style: completos en público, una línea en privado/anidado
 - Docstring público hereda `Raises` de las funciones privadas que llama
-- Comentarios explican el *por qué*, no el *qué*; nada de código comentado, prints de debug, o contexto de prompt/tarea filtrado
+- Comentarios explican el *porqué*, no el *qué*.
 
 ## Errors
 - Nunca silenciar errores — log o comentario mínimo
@@ -23,6 +23,7 @@ Código simple, legible, stdlib antes que dependencias nuevas.
 ## Testing
 - pytest, Arrange-Act-Assert
 - Testear parsers/calculadoras/edge cases; UI no
+- Crear directorio `temp/` para scripts, tests o ficheros temporales. BORRARLO AL FINALIZAR.
 
 ## Tooling
 - `uv` para paquetes
@@ -35,5 +36,5 @@ Código simple, legible, stdlib antes que dependencias nuevas.
 4. `mypy --strict`
 5. `pytest`
 6. VERSION actualizada si aplica
-7. CHANGELOG actualizado si aplica
+7. Si VERSION cambiada, actualiza CHANGELOG
 8. README actualizado si aplica

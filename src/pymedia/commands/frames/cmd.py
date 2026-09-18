@@ -53,8 +53,6 @@ class FramesCmd:
 
         if params.overwrite == OverwriteMode.YES:
             cmd.append("-y")
-        else:
-            cmd.append("-n")
 
         cmd.extend(["-ss", str(timestamp)])
 

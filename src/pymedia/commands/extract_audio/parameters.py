@@ -5,12 +5,10 @@ from pathlib import Path
 from typing import Self
 
 from pymedia.commands.base_parameters import BaseParameters
-from pymedia.errors import MissingParameterError
 from pymedia.locales import _  # noqa
 from pymedia.mixins.media_mixin import MediaInputMixin
 from pymedia.mixins.outputs_mixin import AudioOutputMixin
 from pymedia.mixins.streams_mixin import StreamsMixin
-from pymedia.models.media import Media
 from pymedia.types import OverwriteMode, StreamsMode
 
 
@@ -63,10 +61,7 @@ class ExtractAudioParameters(
         )
 
         params.create_streams(
-            stream_tracks=_resolve_tracks(
-                media=params.media,
-                stream_tracks=audio_stream_tracks,
-            ),
+            stream_tracks=audio_stream_tracks,
             streams_type=StreamsMode.AUDIO,
         )
 
@@ -77,14 +72,3 @@ class ExtractAudioParameters(
         )
 
         return params
-
-
-def _resolve_tracks(media: Media | None, stream_tracks: str | None) -> str:
-    """Resuelve el listado de pistas; sin listado, selecciona todas."""
-    if stream_tracks is not None:
-        return stream_tracks
-    if media is None:
-        raise MissingParameterError(name="media")
-    if not media.audio:
-        raise MissingParameterError(name=_("audio"))
-    return ",".join(str(track.track_index) for track in media.audio)

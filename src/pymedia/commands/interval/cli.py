@@ -2,11 +2,7 @@
 
 import typer
 
-from pymedia.commands.interval.parameters import IntervalParameters
-from pymedia.commands.interval.service import IntervalService
-from pymedia.locales import _  # noqa
-from pymedia.logger import Logger
-from pymedia.typer.options import (
+from pymedia.commands.base_cli_options import (
     CropOption,
     DebugOption,
     EveryOption,
@@ -23,17 +19,21 @@ from pymedia.typer.options import (
     TimestampEndThumbnailOption,
     TimestampStartThumbnailOption,
 )
+from pymedia.commands.interval.parameters import IntervalParameters
+from pymedia.commands.interval.service import IntervalService
+from pymedia.locales import _  # noqa
+from pymedia.logger import Logger
 from pymedia.types import OverwriteMode, ScaleMode
 
 interval_cli = typer.Typer()
 
 INTERVAL_HELP = _(
     """\
-Captures thumbnails at regular intervals of the video.
+Captures video frames at regular intervals.
 
 [bold]Examples[/bold]:
-  Capture a thumbnail every second:
-    > pymedia interval input.mp4 --every 1
+  Capture a thumbnail every minute:
+    > pymedia interval input.mp4 --every 60
   Capture a thumbnail every 5 seconds within a time range:
     > pymedia interval input.mp4 --every 5 --start 00:00:10 --end 00:01:00
   Save to a specific file:
@@ -45,7 +45,7 @@ Captures thumbnails at regular intervals of the video.
 @interval_cli.command(
     name="interval",
     help=INTERVAL_HELP,
-    rich_help_panel="Image commands",
+    rich_help_panel=_("Image commands"),
     no_args_is_help=True,
 )
 def interval(
@@ -65,7 +65,7 @@ def interval(
     debug: DebugOption = False,
     help_: HelpOption = False,  # noqa
 ) -> None:
-    """Punto de entrada del comando que captura miniaturas a intervalos.
+    """Punto de entrada del comando ``interval``.
 
     Args:
         media_input: Ruta del fichero de vídeo a procesar.
@@ -96,8 +96,6 @@ def interval(
         UserError: Si una marca supera la duración del vídeo o el nombre de
             salida contiene caracteres no permitidos.
     """
-    # Logger.create configura el logger raíz (nivel DEBUG) de forma idempotente;
-    # params y service lo recuperan después con Logger.load().
     Logger.create(debug=debug)
     params = IntervalParameters.load(
         overwrite=overwrite,

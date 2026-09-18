@@ -2,11 +2,15 @@
 
 import typer
 
+from pymedia.commands.base_cli_options import (
+    DebugOption,
+    HelpOption,
+    MediaInputArgument,
+)
 from pymedia.commands.info.parameters import InfoParameters
 from pymedia.commands.info.service import InfoService
 from pymedia.locales import _  # noqa
 from pymedia.logger import Logger
-from pymedia.typer.options import DebugOption, HelpOption, MediaInputArgument
 
 info_cli = typer.Typer()
 
@@ -25,7 +29,7 @@ Shows information about a video.
 @info_cli.command(
     name="info",
     help=INFO_HELP,
-    rich_help_panel="Analysis commands",
+    rich_help_panel=_("Analysis commands"),
     no_args_is_help=True,
 )
 def info(
@@ -33,7 +37,7 @@ def info(
     debug: DebugOption = False,
     help_: HelpOption = False,  # noqa
 ) -> None:
-    """Punto de entrada y desarrollo del pipeline.
+    """Punto de entrada del comando ``info``.
 
     Args:
         media_input: Ruta del fichero de vídeo a procesar.

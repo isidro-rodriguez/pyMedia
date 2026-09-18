@@ -2,11 +2,7 @@
 
 import typer
 
-from pymedia.commands.frames.parameters import FramesParameters
-from pymedia.commands.frames.service import FramesService
-from pymedia.locales import _  # noqa
-from pymedia.logger import Logger
-from pymedia.typer.options import (
+from pymedia.commands.base_cli_options import (
     CropOption,
     DebugOption,
     FlipHorizontalOption,
@@ -21,13 +17,17 @@ from pymedia.typer.options import (
     ScaleUpscaleOption,
     TimestampAtThumbnailOption,
 )
+from pymedia.commands.frames.parameters import FramesParameters
+from pymedia.commands.frames.service import FramesService
+from pymedia.locales import _  # noqa
+from pymedia.logger import Logger
 from pymedia.types import OverwriteMode, ScaleMode
 
 frames_cli = typer.Typer()
 
 FRAMES_HELP = _(
     """\
-Captures thumbnails at the specified timestamps.
+Captures video frames at the specified timestamps.
 
 [bold]Examples[/bold]:
   Capture a single thumbnail at a given time:
@@ -43,7 +43,7 @@ Captures thumbnails at the specified timestamps.
 @frames_cli.command(
     name="frames",
     help=FRAMES_HELP,
-    rich_help_panel="Image commands",
+    rich_help_panel=_("Image commands"),
     no_args_is_help=True,
 )
 def frames(
@@ -61,7 +61,7 @@ def frames(
     debug: DebugOption = False,
     help_: HelpOption = False,  # noqa
 ) -> None:
-    """Punto de entrada del comando que captura miniaturas en marcas de tiempo.
+    """Punto de entrada del comando ``frames``.
 
     Args:
         media_input: Ruta del fichero de vídeo a procesar.
@@ -90,8 +90,6 @@ def frames(
         UserError: Si una marca supera la duración del vídeo o el nombre de
             salida contiene caracteres no permitidos.
     """
-    # Logger.create configura el logger raíz (nivel DEBUG) de forma idempotente;
-    # params y service lo recuperan después con Logger.load().
     Logger.create(debug=debug)
     params = FramesParameters.load(
         overwrite=overwrite,

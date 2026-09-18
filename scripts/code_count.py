@@ -1,13 +1,15 @@
-"""Conteo de líneas de código de pyMedia.
+"""Conteo de líneas de código y docstrings de pyMedia.
 
-Cuenta las líneas efectivas (sin líneas en blanco ni comentarios) y las
-agrupa por categoría: scripts, tests, data, locales y lógica (el resto
-de `src/pymedia`).
+Cuenta las líneas efectivas separando el código fuente de los docstrings,
+excluyendo líneas en blanco y comentarios ordinarios (#).
 
 Uso:
     uv run python scripts/code_count.py
 """
 
+from __future__ import annotations
+
+import ast
 from collections.abc import Iterator
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -15,52 +17,122 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 SRC = ROOT / "src" / "pymedia"
 
-# Extensiones que cuentan como código: Python y catálogos gettext.
 CODE_EXTENSIONS = {".py", ".po", ".pot"}
 
 
 @dataclass
-class Category:
-    """Grupo de ficheros con su total de líneas de código."""
+class LineStats:
+    """Métricas de código y docstrings para un fichero o categoría."""
 
-    name: str
-    files: list[tuple[Path, int]] = field(default_factory=list)
+    code: int = 0
+    docstrings: int = 0
 
     @property
     def total(self) -> int:
-        """Suma de líneas de código de todos sus ficheros."""
-        return sum(count for _, count in self.files)
+        """Suma total de líneas efectivas (código + docstrings)."""
+        return self.code + self.docstrings
+
+    def __add__(self, other: LineStats) -> LineStats:
+        """Añade."""
+        return LineStats(
+            code=self.code + other.code,
+            docstrings=self.docstrings + other.docstrings,
+        )
 
 
-def _is_blank_or_comment(line: str) -> bool:
-    """Indica si la línea está vacía o es solo un comentario."""
-    stripped = line.strip()
-    return not stripped or stripped.startswith("#")
+@dataclass
+class Category:
+    """Grupo de ficheros con sus métricas de código y docstrings."""
+
+    name: str
+    files: list[tuple[Path, LineStats]] = field(default_factory=list)
+
+    @property
+    def totals(self) -> LineStats:
+        """Suma acumulada de todas las métricas de la categoría."""
+        stats = LineStats()
+        for _, file_stats in self.files:
+            stats += file_stats
+        return stats
 
 
-def count_code_lines(path: Path) -> int:
-    """Cuenta las líneas de código de un fichero.
+def _extract_docstring_range(node: ast.AST) -> range | None:
+    """Extrae el rango de líneas (1-indexed) de un docstring si el nodo lo posee."""
+    if not isinstance(
+        node, (ast.Module, ast.ClassDef, ast.FunctionDef, ast.AsyncFunctionDef)
+    ):
+        return None
+
+    if not node.body:
+        return None
+
+    first_stmt = node.body[0]
+    if not isinstance(first_stmt, ast.Expr):
+        return None
+
+    # Comprobación estricta para satisfaces el type-checker de Mypy
+    if isinstance(first_stmt.value, ast.Constant) and isinstance(
+        first_stmt.value.value, str
+    ):
+        start = first_stmt.lineno
+        end = getattr(first_stmt, "end_lineno", start)
+        return range(start, end + 1)
+
+    return None
+
+
+def _get_docstring_lines(content: str) -> set[int]:
+    """Obtiene los números de línea (1-indexed) pertenecientes a docstrings."""
+    doc_lines: set[int] = set()
+    try:
+        tree = ast.parse(content)
+    except SyntaxError:
+        return doc_lines
+
+    for node in ast.walk(tree):
+        line_range = _extract_docstring_range(node)
+        if line_range:
+            doc_lines.update(line_range)
+
+    return doc_lines
+
+
+def count_file_lines(path: Path) -> LineStats:
+    """Cuenta por separado las líneas de código y de docstrings.
 
     Args:
-        path: Fichero de texto (Python, `.po`, `.pot`...).
+        path: Fichero a analizar.
 
     Returns:
-        Número de líneas no vacías y sin comentarios.
+        Estructura LineStats con las métricas obtenidas.
     """
-    with path.open("r", encoding="utf-8", errors="replace") as f:
-        return sum(1 for line in f if not _is_blank_or_comment(line))
+    try:
+        content = path.read_text(encoding="utf-8", errors="replace")
+    except OSError:
+        return LineStats()
+
+    doc_line_numbers = (
+        _get_docstring_lines(content) if path.suffix.lower() == ".py" else set()
+    )
+
+    code_lines = 0
+    docstring_lines = 0
+
+    for line_no, line in enumerate(content.splitlines(), start=1):
+        stripped = line.strip()
+
+        if not stripped or stripped.startswith("#"):
+            continue
+
+        if line_no in doc_line_numbers:
+            docstring_lines += 1
+        else:
+            code_lines += 1
+
+    return LineStats(code=code_lines, docstrings=docstring_lines)
 
 
 def _files_with_exts(base: Path, extensions: set[str]) -> Iterator[Path]:
-    """Genera los ficheros de `base` con extensión en `extensions`.
-
-    Args:
-        base: Directorio raíz del que buscar (recursivo).
-        extensions: Extensiones permitidas, con punto y en minúsculas.
-
-    Yields:
-        Rutas de ficheros ordenadas por ruta relativa.
-    """
     if not base.is_dir():
         return
     for path in sorted(base.rglob("*")):
@@ -69,41 +141,27 @@ def _files_with_exts(base: Path, extensions: set[str]) -> Iterator[Path]:
 
 
 def _py_files(base: Path) -> Iterator[Path]:
-    """Genera los ficheros Python de `base` (recursivo)."""
     return _files_with_exts(base, {".py"})
 
 
 def _all_py_under_src() -> list[Path]:
-    """Lista todos los `.py` de `src/pymedia` ordenados."""
     return sorted(_py_files(SRC))
 
 
 def _in_dir(path: Path, directory: Path) -> bool:
-    """Indica si `path` cuelga de `directory` (o es el propio directorio)."""
     return directory in path.parents
 
 
 def build_categories() -> list[Category]:
-    """Construye las categorías de conteo y sus ficheros.
-
-    Returns:
-        Lista de categorías en orden de presentación, cada una con sus
-        ficheros y líneas de código ya contadas.
-    """
+    """Construye las categorías de conteo con métricas desglosadas."""
     data_dir = SRC / "data"
     locales_dir = SRC / "locales"
 
-    definitions = [
+    definitions: list[tuple[str, list[Path]]] = [
         ("scripts", list(_py_files(ROOT / "scripts"))),
         ("tests", list(_py_files(ROOT / "tests"))),
-        (
-            "data",
-            list(_py_files(data_dir)),
-        ),
-        (
-            "locales",
-            list(_files_with_exts(locales_dir, CODE_EXTENSIONS)),
-        ),
+        ("data", list(_py_files(data_dir))),
+        ("locales", list(_files_with_exts(locales_dir, CODE_EXTENSIONS))),
         (
             "lógica (src)",
             [
@@ -114,38 +172,62 @@ def build_categories() -> list[Category]:
         ),
     ]
 
-    categories = []
+    categories: list[Category] = []
     for name, files in definitions:
-        counted = [(path, count_code_lines(path)) for path in files]
+        counted = [(path, count_file_lines(path)) for path in files]
         categories.append(Category(name=name, files=counted))
     return categories
 
 
 def _print_category(category: Category) -> None:
-    """Imprime el detalle de ficheros y el total de una categoría."""
+    """Imprime el detalle de ficheros mostrando código y docstrings."""
     print(f"\n## {category.name} ({len(category.files)} ficheros)")
-    for path, count in sorted(category.files, key=lambda item: -item[1]):
+    print(f"  {'Código':>8} {'Docstr':>8} {'Total':>8}  Ruta")
+    print(f"  {'-' * 30}")
+
+    sorted_files = sorted(category.files, key=lambda item: -item[1].total)
+    for path, stats in sorted_files:
         relative = path.relative_to(ROOT)
-        print(f"  {count:>6}  {relative}")
-    print(f"  {'-' * 6}")
-    print(f"  {category.total:>6}  total {category.name}")
+        print(f"  {stats.code:>8} {stats.docstrings:>8} {stats.total:>8}  {relative}")
+
+    cat_totals = category.totals
+    print(f"  {'-' * 30}")
+    print(
+        f"  {cat_totals.code:>8} {cat_totals.docstrings:>8} "
+        f"{cat_totals.total:>8}  TOTAL {category.name}"
+    )
 
 
 def main() -> None:
-    """Cuenta las líneas de código y muestra el informe por categorías."""
+    """Muestra el informe comparativo por categorías."""
     categories = build_categories()
     for category in categories:
         _print_category(category)
 
-    grand_total = sum(category.total for category in categories)
-    total_files = sum(len(category.files) for category in categories)
+    grand_totals = LineStats()
+    total_files = 0
+
+    for category in categories:
+        grand_totals += category.totals
+        total_files += len(category.files)
 
     print(f"\n{'=' * 60}")
+    print(f"  {'Categoría':<16} {'Código':>8} {'Docstr':>8} {'Total':>8}")
+    print(f"  {'-' * 44}")
     for category in categories:
-        print(f"  {category.name:<14} {category.total:>6}")
-    print(f"  {'-' * 14}")
-    print(f"  {'TOTAL':<14} {grand_total:>6}")
-    print(f"\n  {total_files} ficheros, {grand_total} líneas de código")
+        t = category.totals
+        print(f"  {category.name:<16} {t.code:>8} {t.docstrings:>8} {t.total:>8}")
+    print(f"  {'-' * 44}")
+    print(
+        f"  {'TOTAL':<16} {grand_totals.code:>8} {grand_totals.docstrings:>8} "
+        f"{grand_totals.total:>8}"
+    )
+
+    print(
+        f"\n  {total_files} ficheros procesados: {grand_totals.code} líneas de código, "
+        f"{grand_totals.docstrings} líneas de docstrings "
+        f"({grand_totals.total} líneas totales)."
+    )
 
 
 if __name__ == "__main__":

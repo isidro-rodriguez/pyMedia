@@ -6,6 +6,32 @@ Las versiones se han reconstruido a partir del histórico de
 Las versiones intermedias no registradas (0.2–0.4, 0.6–0.8) se agrupan
 con la sección anterior.
 
+## [0.17.0-beta.7] - 2026-09-18
+
+### Cambiado
+
+- Estructura de la CLI: el módulo `typer/` se disuelve en
+  `commands/base_cli.py` (instancia y validadores),
+  `commands/base_cli_options.py` (opciones) y `commands/main/cli.py`
+  (callback principal); el punto de entrada pasa a `main_cli`
+- Paquetes de subtítulos renombrados a nombres explícitos
+  (`add_subs`→`add_subtitles`, `delete_subs`→`delete_subtitles`,
+  `edit_subs`→`edit_subtitles`, `extract_subs`→`extract_subtitles`); los
+  nombres de comando CLI no cambian
+- `delete-audio`, `extract-audio`, `delete-subs` y `extract-subs` exigen
+  indicar las pistas a manipular: eliminado el fallback "sin listado se
+  aplica a todas las pistas" (`_resolve_tracks`)
+- Ayudas de comandos actualizadas (consulta de pistas con `info`) y
+  locales `es` regenerados y compilados (`pymedia.pot`/`.po`/`.mo`)
+- Tests adaptados al nuevo comportamiento (`--tracks 0` + `Missing
+  parameter: media.audio`/`media.subtitles`)
+- Dependencia `platformdirs` 4.11.9 → 4.11.10
+
+### Interno
+
+- README: diagrama de arquitectura actualizado al flujo
+  CLI → parámetros → servicio
+
 ## [0.16.1-beta.6] - 2026-09-18
 
 ### Cambiado

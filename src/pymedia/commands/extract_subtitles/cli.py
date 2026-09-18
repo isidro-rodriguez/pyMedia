@@ -2,11 +2,7 @@
 
 import typer
 
-from pymedia.commands.extract_subs.parameters import ExtractSubtitlesParameters
-from pymedia.commands.extract_subs.service import ExtractSubtitlesService
-from pymedia.locales import _  # noqa
-from pymedia.logger import Logger
-from pymedia.typer.options import (
+from pymedia.commands.base_cli_options import (
     DebugOption,
     HelpOption,
     MediaInputArgument,
@@ -14,6 +10,10 @@ from pymedia.typer.options import (
     OverwriteOption,
     SubtitlesStreamTrackListOption,
 )
+from pymedia.commands.extract_subtitles.parameters import ExtractSubtitlesParameters
+from pymedia.commands.extract_subtitles.service import ExtractSubtitlesService
+from pymedia.locales import _  # noqa
+from pymedia.logger import Logger
 from pymedia.types import OverwriteMode
 
 extract_subs_cli = typer.Typer()
@@ -22,9 +22,9 @@ EXTRACT_SUBS_HELP = _(
     """\
 Extract subtitles from a media file.
 
+You can consult what subtitles tracks have a container with `info` command.
+
 [bold]Examples[/bold]:
-  Extract all subtitles from a media file:
-    > pymedia extract-subs input.mp4
   Extract a list of subtitles tracks from a media file: 
     > pymedia extract-subs input.mp4 --tracks 3,4,5
   Extract subtitles tracks with custom output:
@@ -36,18 +36,18 @@ Extract subtitles from a media file.
 @extract_subs_cli.command(
     name="extract-subs",
     help=EXTRACT_SUBS_HELP,
-    rich_help_panel="Subtitles commands",
+    rich_help_panel=_("Subtitles commands"),
     no_args_is_help=True,
 )
 def extract_subs(
     media_input: MediaInputArgument,
-    subtitles_stream_tracks: SubtitlesStreamTrackListOption = None,
+    subtitles_stream_tracks: SubtitlesStreamTrackListOption,
     subtitles_output: OutputOption = None,
     overwrite: OverwriteOption = OverwriteMode.ASK,
     debug: DebugOption = False,
     help_: HelpOption = False,  # noqa
 ) -> None:
-    """Punto de entrada del comando que extrae pistas de subtítulos.
+    """Punto de entrada del comando ``extract-subs``.
 
     Args:
         media_input: Ruta del fichero de vídeo a procesar.
@@ -67,8 +67,6 @@ def extract_subs(
         UserError: Si el medio no tiene pistas de subtítulos, el formato del
             listado, algún índice o el nombre de salida no son válidos.
     """
-    # Logger.create configura el logger raíz (nivel DEBUG) de forma idempotente;
-    # params y service lo recuperan después con Logger.load().
     Logger.create(debug=debug)
     params = ExtractSubtitlesParameters.load(
         overwrite=overwrite,

@@ -2,11 +2,7 @@
 
 import typer
 
-from pymedia.commands.delete_audio.parameters import DeleteAudioParameters
-from pymedia.commands.delete_audio.service import DeleteAudioService
-from pymedia.locales import _  # noqa
-from pymedia.logger import Logger
-from pymedia.typer.options import (
+from pymedia.commands.base_cli_options import (
     AudioStreamTrackListOption,
     DebugOption,
     HelpOption,
@@ -14,6 +10,10 @@ from pymedia.typer.options import (
     OutputOption,
     OverwriteOption,
 )
+from pymedia.commands.delete_audio.parameters import DeleteAudioParameters
+from pymedia.commands.delete_audio.service import DeleteAudioService
+from pymedia.locales import _  # noqa
+from pymedia.logger import Logger
 from pymedia.types import OverwriteMode
 
 delete_audio_cli = typer.Typer()
@@ -22,9 +22,9 @@ DELETE_AUDIO_HELP = _(
     """\
 Delete audio tracks from a media file.
 
+You can consult what audio tracks have a container with `info` command.
+
 [bold]Examples[/bold]:
-  Delete all audio tracks from a media file:
-    > pymedia delete-audio input.mp4
   Delete a list of audio tracks from a media file: 
     > pymedia delete-audio input.mp4 --tracks 1,2
 """  # noqa
@@ -34,18 +34,18 @@ Delete audio tracks from a media file.
 @delete_audio_cli.command(
     name="delete-audio",
     help=DELETE_AUDIO_HELP,
-    rich_help_panel="Audio commands",
+    rich_help_panel=_("Audio commands"),
     no_args_is_help=True,
 )
 def delete_audio(
     media_input: MediaInputArgument,
-    audio_stream_tracks: AudioStreamTrackListOption = None,
+    audio_stream_tracks: AudioStreamTrackListOption,
     media_output: OutputOption = None,
     overwrite: OverwriteOption = OverwriteMode.ASK,
     debug: DebugOption = False,
     help_: HelpOption = False,  # noqa
 ) -> None:
-    """Punto de entrada del comando que elimina pistas de audio.
+    """Punto de entrada del comando ``delete-audio``.
 
     Args:
         media_input: Ruta del fichero de vídeo a procesar.
@@ -60,8 +60,6 @@ def delete_audio(
             medio o la salida procesada.
         UserError: Si el formato del listado o algún índice no es válido.
     """
-    # Logger.create configura el logger raíz (nivel DEBUG) de forma idempotente;
-    # params y service lo recuperan después con Logger.load().
     Logger.create(debug=debug)
     params = DeleteAudioParameters.load(
         overwrite=overwrite,

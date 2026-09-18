@@ -1,4 +1,4 @@
-"""Tests de los servicios auxiliares de Typer (`pymedia.typer.service`).
+"""Tests de los servicios auxiliares de Typer.
 
 Cubre la validación de opciones de salida en conflicto que se realizaba
 antes en `OutputBatchMixin` y ahora vive en la capa de servicio.
@@ -8,8 +8,8 @@ from pathlib import Path
 
 import pytest
 
+from pymedia.commands.base_cli import validate_conflict_output_options
 from pymedia.errors import UserError
-from pymedia.typer.service import validate_conflict_output_options
 
 
 def test_output_and_directory_are_exclusive(tmp_path: Path) -> None:

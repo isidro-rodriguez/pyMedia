@@ -295,6 +295,7 @@ pyMedia/
 │   ├── typer/            # CLI Typer: punto de entrada, opciones y textos de ayuda
 │   ├── locales/          # Catálogos gettext (pymedia.pot, es/)
 │   ├── resources/        # config.toml, iconos, man page y .desktop
+│   ├── ffprobe.py        # Herramienta Ffprobe para consulta de metadatos
 │   ├── locale_manager.py # Detección/carga del idioma gettext
 │   ├── logger.py         # Logging: consola Rich + fichero
 │   ├── errors.py         # Jerarquía de excepciones localizadas
@@ -310,24 +311,16 @@ pyMedia/
 
 ```mermaid
 flowchart TD
-    CLI(["CLI"]) --> MAIN{"MAIN"} 
+    USER(["USER"]) --> MAIN{"MAIN"} 
     MAIN -.-> LOCALE
-    MAIN --> COMMAND
-    COMMAND --> P0["pipeline.__init__"]
-
-    subgraph PIPELINE["PIPELINE"]
-        P0 -.-> CONFIG
-        P0 -.-> LOGGER
-        P0 --> P1["pipeline.process_parameters"]
-        P1 <-->|"params validados"| PARAMETERS
-        P1 --> P2["pipeline.process_cmd"]
-        P2 <-->|"cmd"| CMD
-        P2 --> P3["pipeline.run_ffmpeg"]
-    end
-
-    P3 --> FFMPEG[("FFMPEG")]
-
-    style CLI    fill:#d4edda,stroke:#28a745,stroke-width:2px,color:#155724;
+    MAIN --> CLI
+    CLI -.-> CONFIG
+    CLI -.-> LOGGER
+    CLI --> PARAMETERS --> SERVICE
+    SERVICE <--> CMD
+    SERVICE --> FFMPEG
+    
+    style USER   fill:#d4edda,stroke:#28a745,stroke-width:2px,color:#155724;
     style FFMPEG fill:#d4edda,stroke:#28a745,stroke-width:2px,color:#155724;
     style MAIN   fill:#fff3e0,stroke:#c28525,stroke-width:2px,color:#a86e13;
 ```

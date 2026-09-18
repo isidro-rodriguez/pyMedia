@@ -1,7 +1,7 @@
 """Tipos `Annotated` reutilizables para las opciones y argumentos de Typer.
 
-Agrupa los callbacks de validación y las definiciones de argumentos/opciones
-compartidas por los subcomandos, con textos de ayuda localizados.
+Agrupa las definiciones de argumentos y opciones compartidas por los subcomandos,
+con textos de ayuda localizados.
 """
 
 from pathlib import Path
@@ -9,13 +9,13 @@ from typing import Annotated
 
 import typer
 
-from pymedia.locales import _  # noqa
-from pymedia.typer.service import (
+from pymedia.commands.base_cli import (
     show_help,
     show_version,
     validate_path,
     validate_path_list,
 )
+from pymedia.locales import _  # noqa
 from pymedia.types import (
     OverwriteMode,
     PresetsSheetMode,
@@ -90,6 +90,7 @@ VersionOption = Annotated[
         help=_("Show version and exit."),
         callback=show_version,
         is_eager=True,
+        expose_value=False,
     ),
 ]
 

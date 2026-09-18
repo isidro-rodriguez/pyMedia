@@ -553,6 +553,8 @@ def test_delete_audio_error_without_audio_tracks(
         [
             "delete-audio",
             str(video_no_audio),
+            "--tracks",
+            "0",
             "-o",
             str(tmp_path / "out.mp4"),
             "-ov",
@@ -561,7 +563,7 @@ def test_delete_audio_error_without_audio_tracks(
     )
 
     assert result.exit_code != 0
-    assert "Missing parameter: audio" in result.output
+    assert "Missing parameter: media.audio" in result.output
 
 
 # =============================================================================
@@ -652,10 +654,13 @@ def test_extract_audio_error_without_audio_tracks(
     video_no_audio: Path,
 ) -> None:
     """`extract-audio` avisa cuando el medio no tiene pistas de audio."""
-    result = runner.invoke(app, ["extract-audio", str(video_no_audio)])
+    result = runner.invoke(
+        app,
+        ["extract-audio", str(video_no_audio), "--tracks", "0"],
+    )
 
     assert result.exit_code != 0
-    assert "Missing parameter: audio" in result.output
+    assert "Missing parameter: media.audio" in result.output
 
 
 # =============================================================================
@@ -767,11 +772,20 @@ def test_delete_subs_error_without_subtitles(
     """`delete-subs` avisa cuando el medio no tiene pistas de subtítulos."""
     result = runner.invoke(
         app,
-        ["delete-subs", str(video_mkv), "-o", str(tmp_path / "out.mkv"), "-ov", "yes"],
+        [
+            "delete-subs",
+            str(video_mkv),
+            "--tracks",
+            "0",
+            "-o",
+            str(tmp_path / "out.mkv"),
+            "-ov",
+            "yes",
+        ],
     )
 
     assert result.exit_code != 0
-    assert "does not contain subtitles streams" in result.output
+    assert "Missing parameter: media.subtitles" in result.output
 
 
 # =============================================================================

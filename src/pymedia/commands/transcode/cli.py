@@ -2,12 +2,8 @@
 
 import typer
 
-from pymedia.commands.transcode.parameters import TranscodeParameters
-from pymedia.commands.transcode.service import TranscodeService
-from pymedia.errors import MissingRequiredOptionsError
-from pymedia.locales import _  # noqa
-from pymedia.logger import Logger
-from pymedia.typer.options import (
+from pymedia.commands.base_cli import validate_conflict_output_options
+from pymedia.commands.base_cli_options import (
     CropOption,
     DebugOption,
     FlipHorizontalOption,
@@ -26,7 +22,11 @@ from pymedia.typer.options import (
     TranscodeBurnSubtitlesOption,
     TranscodeVideoOption,
 )
-from pymedia.typer.service import validate_conflict_output_options
+from pymedia.commands.transcode.parameters import TranscodeParameters
+from pymedia.commands.transcode.service import TranscodeService
+from pymedia.errors import MissingRequiredOptionsError
+from pymedia.locales import _  # noqa
+from pymedia.logger import Logger
 from pymedia.types import OverwriteMode, PresetsTranscodeMode, ScaleMode
 
 transcode_cli = typer.Typer()
@@ -35,15 +35,16 @@ TRANSCODE_HELP = _(
     """\
 Transcode video container changing its codecs and compression.
 
-You can edit preset profiles in config.toml.
+It also allows video operations that requires transcoding.
+NOTE: You can edit preset profiles in config.toml.
 
 [bold]Examples[/bold]:
     Transcode only video track changing with a configurated profile:
     > pymedia transcode source.mp4 --profile balanced --video -o target.mp4
-    Transcode video and audio track 1 changing its codecs with a configurated profile:
-    > pymedia transcode source.mp4 --profile slow --video --audio 1 -o target.mp4
     Transcode video track meanwhile its applied multiple filters: 
     > pymedia transcode source.mp4 --profile fast --size 1280x720 --hflip
+    Burn subtitles in video track.
+    > pymedia transcode source.mpt --burn-subtitles eng-subs.srt 
 """
 )
 
@@ -51,7 +52,7 @@ You can edit preset profiles in config.toml.
 @transcode_cli.command(
     name="transcode",
     help=TRANSCODE_HELP,
-    rich_help_panel="Video commands",
+    rich_help_panel=_("Video commands"),
     no_args_is_help=True,
 )
 def transcode(
@@ -73,7 +74,7 @@ def transcode(
     debug: DebugOption = False,
     help_: HelpOption = False,  # noqa
 ) -> None:
-    """Punto de entrada y desarrollo del pipeline de transcodificación.
+    """Punto de entrada del comando ``transcode``.
 
     Args:
         media_input_list: Lista de rutas de los ficheros de vídeo a procesar.
@@ -127,8 +128,6 @@ def transcode(
         output_directory=output_directory,
     )
 
-    # Logger.create configura el logger raíz (nivel DEBUG) de forma idempotente;
-    # params y service lo recuperan después con Logger.load().
     Logger.create(debug=debug)
     for media_input in media_input_list:
         params = TranscodeParameters.load(

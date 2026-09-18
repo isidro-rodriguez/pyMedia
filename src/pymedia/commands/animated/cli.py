@@ -4,9 +4,7 @@ import typer
 
 from pymedia.commands.animated.parameters import AnimatedParameters
 from pymedia.commands.animated.service import AnimatedService
-from pymedia.locales import _  # noqa
-from pymedia.logger import Logger
-from pymedia.typer.options import (
+from pymedia.commands.base_cli_options import (
     CropOption,
     DebugOption,
     FlipHorizontalOption,
@@ -23,6 +21,8 @@ from pymedia.typer.options import (
     TimestampEndAnimatedOption,
     TimestampStartAnimatedOption,
 )
+from pymedia.locales import _  # noqa
+from pymedia.logger import Logger
 from pymedia.types import OverwriteMode, ScaleMode
 
 animated_cli = typer.Typer()
@@ -47,7 +47,7 @@ Generates an animated image from the specified video.
 @animated_cli.command(
     name="animated",
     help=ANIMATED_HELP,
-    rich_help_panel="Image commands",
+    rich_help_panel=_("Image commands"),
     no_args_is_help=True,
 )
 def animated(
@@ -67,7 +67,7 @@ def animated(
     debug: DebugOption = False,
     help_: HelpOption = False,  # noqa
 ) -> None:
-    """Punto de entrada y desarrollo del pipeline.
+    """Punto de entrada del comando ``animated``.
 
     Args:
         media_input: Ruta del fichero de vídeo a procesar.

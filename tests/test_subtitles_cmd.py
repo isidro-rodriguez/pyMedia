@@ -2,14 +2,14 @@
 
 from pathlib import Path
 
-from pymedia.commands.add_subs.cmd import AddSubtitlesCmd
-from pymedia.commands.add_subs.parameters import AddSubtitlesParameters
-from pymedia.commands.delete_subs.cmd import DeleteSubtitlesCmd
-from pymedia.commands.delete_subs.parameters import DeleteSubtitlesParameters
-from pymedia.commands.edit_subs.cmd import EditSubtitlesCmd
-from pymedia.commands.edit_subs.parameters import EditSubtitlesParameters
-from pymedia.commands.extract_subs.cmd import ExtractSubtitlesCmd
-from pymedia.commands.extract_subs.parameters import ExtractSubtitlesParameters
+from pymedia.commands.add_subtitles.cmd import AddSubtitlesCmd
+from pymedia.commands.add_subtitles.parameters import AddSubtitlesParameters
+from pymedia.commands.delete_subtitles.cmd import DeleteSubtitlesCmd
+from pymedia.commands.delete_subtitles.parameters import DeleteSubtitlesParameters
+from pymedia.commands.edit_subtitles.cmd import EditSubtitlesCmd
+from pymedia.commands.edit_subtitles.parameters import EditSubtitlesParameters
+from pymedia.commands.extract_subtitles.cmd import ExtractSubtitlesCmd
+from pymedia.commands.extract_subtitles.parameters import ExtractSubtitlesParameters
 from pymedia.models.media import Media
 from pymedia.models.subtitles import Subtitles
 from pymedia.types import OverwriteMode

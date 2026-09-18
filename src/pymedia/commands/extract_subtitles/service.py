@@ -1,8 +1,8 @@
 """Comando ``extract-subs``: service."""
 
 from pymedia.commands.base_service import BaseService
-from pymedia.commands.extract_subs.cmd import ExtractSubtitlesCmd
-from pymedia.commands.extract_subs.parameters import ExtractSubtitlesParameters
+from pymedia.commands.extract_subtitles.cmd import ExtractSubtitlesCmd
+from pymedia.commands.extract_subtitles.parameters import ExtractSubtitlesParameters
 from pymedia.errors import MissingParameterError
 from pymedia.locales import _  # noqa
 

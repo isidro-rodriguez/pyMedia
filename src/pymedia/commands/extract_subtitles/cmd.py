@@ -2,7 +2,7 @@
 
 from pathlib import Path
 
-from pymedia.commands.extract_subs.parameters import ExtractSubtitlesParameters
+from pymedia.commands.extract_subtitles.parameters import ExtractSubtitlesParameters
 from pymedia.errors import MissingParameterError
 from pymedia.types import OverwriteMode
 

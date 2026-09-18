@@ -2,11 +2,7 @@
 
 import typer
 
-from pymedia.commands.scene.parameters import SceneParameters
-from pymedia.commands.scene.service import SceneService
-from pymedia.locales import _  # noqa
-from pymedia.logger import Logger
-from pymedia.typer.options import (
+from pymedia.commands.base_cli_options import (
     CropOption,
     DebugOption,
     FlipHorizontalOption,
@@ -23,13 +19,20 @@ from pymedia.typer.options import (
     TimestampEndThumbnailOption,
     TimestampStartThumbnailOption,
 )
+from pymedia.commands.scene.parameters import SceneParameters
+from pymedia.commands.scene.service import SceneService
+from pymedia.locales import _  # noqa
+from pymedia.logger import Logger
 from pymedia.types import OverwriteMode, ScaleMode
 
 scene_cli = typer.Typer()
 
 SCENE_HELP = _(
     """\
-Captures thumbnails at the scene changes detected in the video.
+Captures video frames when the image changes significantly following a shot transition.
+
+Captures images when a change in framing causes the image to change by more 
+than the user-defined threshold, expressed as a value between 0 and 1.
 
 [bold]Examples[/bold]:
   Detect scene changes with default sensitivity:
@@ -47,7 +50,7 @@ Captures thumbnails at the scene changes detected in the video.
 @scene_cli.command(
     name="scene",
     help=SCENE_HELP,
-    rich_help_panel="Image commands",
+    rich_help_panel=_("Image commands"),
     no_args_is_help=True,
 )
 def scene(
@@ -67,7 +70,7 @@ def scene(
     debug: DebugOption = False,
     help_: HelpOption = False,  # noqa
 ) -> None:
-    """Punto de entrada del comando que captura miniaturas por cambio de escena.
+    """Punto de entrada del comando ``scene``.
 
     Args:
         media_input: Ruta del fichero de vídeo a procesar.
@@ -98,8 +101,6 @@ def scene(
         UserError: Si una marca supera la duración del vídeo o el nombre de
             salida contiene caracteres no permitidos.
     """
-    # Logger.create configura el logger raíz (nivel DEBUG) de forma idempotente;
-    # params y service lo recuperan después con Logger.load().
     Logger.create(debug=debug)
     params = SceneParameters.load(
         overwrite=overwrite,

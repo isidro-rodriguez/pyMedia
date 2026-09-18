@@ -4,9 +4,7 @@ import typer
 
 from pymedia.commands.add_audio.parameters import AddAudioParameters
 from pymedia.commands.add_audio.service import AddAudioService
-from pymedia.locales import _  # noqa
-from pymedia.logger import Logger
-from pymedia.typer.options import (
+from pymedia.commands.base_cli_options import (
     AudioArgument,
     AudioCommentaryOption,
     AudioDefaultOption,
@@ -20,6 +18,8 @@ from pymedia.typer.options import (
     OutputOption,
     OverwriteOption,
 )
+from pymedia.locales import _  # noqa
+from pymedia.logger import Logger
 from pymedia.types import OverwriteMode
 
 add_audio_cli = typer.Typer()
@@ -27,6 +27,8 @@ add_audio_cli = typer.Typer()
 ADD_AUDIO_HELP = _(
     """\
 Add an audio track to a media file.
+
+You can consult what audio tracks have a container with `info` command.
 
 [bold]Examples[/bold]:
   Add english audio to a media container:
@@ -40,7 +42,7 @@ Add an audio track to a media file.
 @add_audio_cli.command(
     name="add-audio",
     help=ADD_AUDIO_HELP,
-    rich_help_panel="Audio commands",
+    rich_help_panel=_("Audio commands"),
     no_args_is_help=True,
 )
 def add_audio(
@@ -57,7 +59,7 @@ def add_audio(
     debug: DebugOption = False,
     help_: HelpOption = False,  # noqa
 ) -> None:
-    """Punto de entrada del comando que inserta una pista de audio.
+    """Punto de entrada del comando ``add-audio``.
 
     Args:
         media_input: Ruta del fichero de vídeo a procesar.
@@ -79,8 +81,6 @@ def add_audio(
         MissingParameterError: Si falta el medio o el fichero de audio.
         UserError: Si el idioma no sigue el estándar ISO 639-2.
     """
-    # Logger.create configura el logger raíz (nivel DEBUG) de forma idempotente;
-    # params y service lo recuperan después con Logger.load().
     Logger.create(debug=debug)
     params = AddAudioParameters.load(
         overwrite=overwrite,

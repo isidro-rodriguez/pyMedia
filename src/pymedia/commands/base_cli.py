@@ -1,4 +1,4 @@
-"""Módulo para servicios auxiliares de Typer."""
+"""Instancia de Typer y sus comandos."""
 
 import platform
 from pathlib import Path
@@ -6,12 +6,25 @@ from pathlib import Path
 import typer
 from rich import print
 from rich.panel import Panel
-from rich.style import Style
-from typer import colors
 
 from pymedia import version
 from pymedia.errors import UserError
 from pymedia.locales import _  # noqa
+
+# =============================================================================
+#  Instancia base
+# =============================================================================
+
+base_cli = typer.Typer(
+    name="pyMedia",
+    rich_markup_mode="rich",
+    no_args_is_help=True,
+)
+
+
+# =============================================================================
+#  Callbacks y funciones auxiliares de CLI
+# =============================================================================
 
 
 def show_help(ctx: typer.Context, value: bool) -> None:
@@ -50,9 +63,9 @@ def show_version(value: bool) -> None:
                     f"[dim]Python:[/]    {platform.python_version()}\n"
                     f"[dim]{platform_text}:[/]  {platform.platform()}"
                 ),
-                title="[bold][red]pyMedia[/][/]",
-                subtitle=f"[red]{subtitle_text}[/]",
-                style=Style(color=colors.CYAN),
+                title=" 🐍 [bold]pyMedia[/] 🎬 ",
+                subtitle=f" {subtitle_text} ",
+                border_style="cyan",
                 padding=(1, 4),
             )
         )

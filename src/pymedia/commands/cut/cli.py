@@ -2,12 +2,7 @@
 
 import typer
 
-from pymedia.commands.cut.parameters import CutParameters
-from pymedia.commands.cut.service import CutService
-from pymedia.errors import MissingRequiredOptionsError, UserError
-from pymedia.locales import _  # noqa
-from pymedia.logger import Logger
-from pymedia.typer.options import (
+from pymedia.commands.base_cli_options import (
     DebugOption,
     HelpOption,
     MediaInputArgument,
@@ -17,6 +12,11 @@ from pymedia.typer.options import (
     TimestampEndMediaOption,
     TimestampStartMediaOption,
 )
+from pymedia.commands.cut.parameters import CutParameters
+from pymedia.commands.cut.service import CutService
+from pymedia.errors import MissingRequiredOptionsError, UserError
+from pymedia.locales import _  # noqa
+from pymedia.logger import Logger
 from pymedia.types import OverwriteMode
 
 cut_cli = typer.Typer()
@@ -40,7 +40,7 @@ Cut off a video container's section or split it between different media files.
 @cut_cli.command(
     name="cut",
     help=CUT_HELP,
-    rich_help_panel="Video commands",
+    rich_help_panel=_("Video commands"),
     no_args_is_help=True,
 )
 def cut(
@@ -53,7 +53,7 @@ def cut(
     debug: DebugOption = False,
     help_: HelpOption = False,  # noqa
 ) -> None:
-    """Punto de entrada y desarrollo del pipeline.
+    """Punto de entrada del comando ``cut``.
 
     Args:
         media_input: Ruta del fichero de vídeo a procesar.

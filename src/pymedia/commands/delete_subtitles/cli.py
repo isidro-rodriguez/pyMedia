@@ -2,11 +2,7 @@
 
 import typer
 
-from pymedia.commands.delete_subs.parameters import DeleteSubtitlesParameters
-from pymedia.commands.delete_subs.service import DeleteSubtitlesService
-from pymedia.locales import _  # noqa
-from pymedia.logger import Logger
-from pymedia.typer.options import (
+from pymedia.commands.base_cli_options import (
     DebugOption,
     HelpOption,
     MediaInputArgument,
@@ -14,6 +10,10 @@ from pymedia.typer.options import (
     OverwriteOption,
     SubtitlesStreamTrackListOption,
 )
+from pymedia.commands.delete_subtitles.parameters import DeleteSubtitlesParameters
+from pymedia.commands.delete_subtitles.service import DeleteSubtitlesService
+from pymedia.locales import _  # noqa
+from pymedia.logger import Logger
 from pymedia.types import OverwriteMode
 
 delete_subs_cli = typer.Typer()
@@ -22,9 +22,9 @@ DELETE_SUBS_HELP = _(
     """\
 Delete subtitles from a media file.
 
+You can consult what subtitles tracks have a container with `info` command.
+
 [bold]Examples[/bold]:
-  Delete all subtitles from a media file:
-    > pymedia delete-subs input.mp4
   Delete a list of subtitles tracks from a media file: 
     > pymedia delete-subs input.mp4 --tracks 3,4,5
 """  # noqa
@@ -34,18 +34,18 @@ Delete subtitles from a media file.
 @delete_subs_cli.command(
     name="delete-subs",
     help=DELETE_SUBS_HELP,
-    rich_help_panel="Subtitles commands",
+    rich_help_panel=_("Subtitles commands"),
     no_args_is_help=True,
 )
 def delete_subs(
     media_input: MediaInputArgument,
-    subtitles_stream_tracks: SubtitlesStreamTrackListOption = None,
+    subtitles_stream_tracks: SubtitlesStreamTrackListOption,
     media_output: OutputOption = None,
     overwrite: OverwriteOption = OverwriteMode.ASK,
     debug: DebugOption = False,
     help_: HelpOption = False,  # noqa
 ) -> None:
-    """Punto de entrada del comando que elimina pistas de subtítulos.
+    """Punto de entrada del comando ``delete-subs``.
 
     Args:
         media_input: Ruta del fichero de vídeo a procesar.
@@ -61,8 +61,6 @@ def delete_subs(
         UserError: Si el medio no tiene pistas de subtítulos, el formato del
             listado o algún índice no es válido.
     """
-    # Logger.create configura el logger raíz (nivel DEBUG) de forma idempotente;
-    # params y service lo recuperan después con Logger.load().
     Logger.create(debug=debug)
     params = DeleteSubtitlesParameters.load(
         overwrite=overwrite,

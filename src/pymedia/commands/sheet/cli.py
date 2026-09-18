@@ -2,11 +2,8 @@
 
 import typer
 
-from pymedia.commands.sheet.parameters import SheetParameters
-from pymedia.commands.sheet.service import SheetService
-from pymedia.locales import _  # noqa
-from pymedia.logger import Logger
-from pymedia.typer.options import (
+from pymedia.commands.base_cli import validate_conflict_output_options
+from pymedia.commands.base_cli_options import (
     DebugOption,
     HelpOption,
     MediaInputListArgument,
@@ -15,7 +12,10 @@ from pymedia.typer.options import (
     OverwriteOption,
     PresetSheetOption,
 )
-from pymedia.typer.service import validate_conflict_output_options
+from pymedia.commands.sheet.parameters import SheetParameters
+from pymedia.commands.sheet.service import SheetService
+from pymedia.locales import _  # noqa
+from pymedia.logger import Logger
 from pymedia.types import OverwriteMode, PresetsSheetMode
 
 sheet_cli = typer.Typer()
@@ -23,7 +23,7 @@ sheet_cli = typer.Typer()
 
 SHEET_HELP = _(
     """\
-Generates a thumbnail grid sheet with media info header.
+Generates a thumbnail grid sheet with metadata information.
 
 [bold]Examples[/bold]:
   Generate a vcs with default HD preset:
@@ -37,7 +37,7 @@ Generates a thumbnail grid sheet with media info header.
 @sheet_cli.command(
     name="sheet",
     help=SHEET_HELP,
-    rich_help_panel="Analysis commands",
+    rich_help_panel=_("Analysis commands"),
     no_args_is_help=True,
 )
 def sheet(
@@ -49,7 +49,7 @@ def sheet(
     debug: DebugOption = False,
     help_: HelpOption = False,  # noqa
 ) -> None:
-    """Punto de entrada y desarrollo del pipeline.
+    """Punto de entrada del comando ``sheet``.
 
     Args:
         media_input_list: Lista de rutas de los ficheros de vídeo a procesar.

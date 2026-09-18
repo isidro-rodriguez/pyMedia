@@ -536,6 +536,8 @@ def test_delete_audio_error_without_audio_tracks(
         empty_localedir,
         "delete-audio",
         str(video_no_audio),
+        "--tracks",
+        "0",
         "-o",
         str(tmp_path / "out.mp4"),
         "-ov",
@@ -543,7 +545,7 @@ def test_delete_audio_error_without_audio_tracks(
     )
 
     assert result.returncode != 0
-    assert "Missing parameter: audio" in process_output(result)
+    assert "Missing parameter: media.audio" in process_output(result)
 
 
 # =============================================================================
@@ -641,11 +643,16 @@ def test_extract_audio_error_without_audio_tracks(
 ) -> None:
     """`extract-audio` avisa cuando el medio no tiene pistas de audio."""
     result = run_binary(
-        built_binary, empty_localedir, "extract-audio", str(video_no_audio)
+        built_binary,
+        empty_localedir,
+        "extract-audio",
+        str(video_no_audio),
+        "--tracks",
+        "0",
     )
 
     assert result.returncode != 0
-    assert "Missing parameter: audio" in process_output(result)
+    assert "Missing parameter: media.audio" in process_output(result)
 
 
 # =============================================================================
@@ -761,6 +768,8 @@ def test_delete_subs_error_without_subtitles(
         empty_localedir,
         "delete-subs",
         str(video_mkv),
+        "--tracks",
+        "0",
         "-o",
         str(tmp_path / "out.mkv"),
         "-ov",
@@ -768,7 +777,7 @@ def test_delete_subs_error_without_subtitles(
     )
 
     assert result.returncode != 0
-    assert "does not contain subtitles streams" in process_output(result)
+    assert "Missing parameter: media.subtitles" in process_output(result)
 
 
 # =============================================================================

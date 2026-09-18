@@ -1,1 +1,1 @@
-"""Comando ``info``."""
+"""Comando ``info``: Muestra información de un contenedor multimedia."""

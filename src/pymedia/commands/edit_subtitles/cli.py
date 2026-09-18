@@ -1,52 +1,54 @@
-"""Comando ``add-subs``: cli."""
+"""Comando ``edit-subs``: cli."""
 
 import typer
 
-from pymedia.commands.add_subs.parameters import AddSubtitlesParameters
-from pymedia.commands.add_subs.service import AddSubtitlesService
-from pymedia.locales import _  # noqa
-from pymedia.logger import Logger
-from pymedia.typer.options import (
+from pymedia.commands.base_cli_options import (
     DebugOption,
     HelpOption,
     MediaInputArgument,
     OutputOption,
     OverwriteOption,
-    SubtitlesArgument,
     SubtitlesDefaultOption,
     SubtitlesForcedOption,
     SubtitlesHearingImpairedOption,
     SubtitlesLanguageOption,
+    SubtitlesStreamTrackOption,
     SubtitlesTitleOption,
     SubtitlesVisualImpairedOption,
 )
+from pymedia.commands.edit_subtitles.parameters import EditSubtitlesParameters
+from pymedia.commands.edit_subtitles.service import EditSubtitlesService
+from pymedia.locales import _  # noqa
+from pymedia.logger import Logger
 from pymedia.types import OverwriteMode
 
-add_subs_cli = typer.Typer()
+edit_subs_cli = typer.Typer()
 
-ADD_SUBS_HELP = _(
+EDIT_SUBS_HELP = _(
     """\
-Add subtitles to a media file.
+Edit subtitles metadata from a media file.
+
+You can consult what subtitles tracks have a container with `info` command.
 
 [bold]Examples[/bold]:
-  Add english subtitles to a media container:
-    > pymedia add-subs input.mp4 eng_subs.srt --language eng
-  Add default forced spanish subtitles with custom title: 
-    > pymedia add-subs input.mp4 eng_subs.srt --language spa --title "Español (forced)" --default --forced
+  Edit language metadata to subtitles stream track 2 from a media container:
+    > pymedia edit-subs input.mp4 --track 2 --language eng
+  Edit multiple tags in a single call: 
+    > pymedia edit-subs input.mp4 --track 2 --language spa --title "Español (forced)" --default --forced
 """  # noqa
 )
 
 
-@add_subs_cli.command(
-    name="add-subs",
-    help=ADD_SUBS_HELP,
-    rich_help_panel="Subtitles commands",
+@edit_subs_cli.command(
+    name="edit-subs",
+    help=EDIT_SUBS_HELP,
+    rich_help_panel=_("Subtitles commands"),
     no_args_is_help=True,
 )
-def add_subs(
+def edit_subs(
     media_input: MediaInputArgument,
-    subtitles_input: SubtitlesArgument,
-    language: SubtitlesLanguageOption,
+    subtitles_stream_tracks: SubtitlesStreamTrackOption,
+    language: SubtitlesLanguageOption = None,
     media_output: OutputOption = None,
     overwrite: OverwriteOption = OverwriteMode.ASK,
     title: SubtitlesTitleOption = None,
@@ -57,11 +59,11 @@ def add_subs(
     debug: DebugOption = False,
     help_: HelpOption = False,  # noqa
 ) -> None:
-    """Punto de entrada del comando que inserta una pista de subtítulos.
+    """Punto de entrada del comando ``edit-subs``.
 
     Args:
         media_input: Ruta del fichero de vídeo a procesar.
-        subtitles_input: Ruta del fichero de subtítulos a insertar.
+        subtitles_stream_tracks: Índice de la pista de subtítulos a editar.
         language: Código de idioma de la pista de subtítulos.
         media_output: Ruta absoluta del fichero de salida procesado.
         overwrite: Política ante conflicto de salida ya existente.
@@ -74,19 +76,16 @@ def add_subs(
         help_: Helper para mostrar esta línea en distintos idiomas.
 
     Raises:
-        FfprobeError: Si ffprobe no puede leer el fichero de subtítulos.
-        MissingArgumentError: Si no se indica el idioma de la pista.
-        MissingParameterError: Si falta el medio o la salida procesada.
-        UserError: Si el idioma no sigue el estándar ISO 639-2 o el contenedor
-            de salida no soporta ningún códec de subtítulos.
+        MissingParameterError: Si falta la pista a editar, el medio, las pistas
+            de subtítulos del medio o la salida procesada.
+        UserError: Si el idioma no sigue el estándar ISO 639-2 o la pista
+            indicada no existe en el contenedor.
     """
-    # Logger.create configura el logger raíz (nivel DEBUG) de forma idempotente;
-    # params y service lo recuperan después con Logger.load().
     Logger.create(debug=debug)
-    params = AddSubtitlesParameters.load(
+    params = EditSubtitlesParameters.load(
         overwrite=overwrite,
         media_input=media_input,
-        subtitles_input=subtitles_input,
+        subtitles_stream_tracks=subtitles_stream_tracks,
         language=language,
         media_output=media_output,
         title=title,
@@ -95,4 +94,4 @@ def add_subs(
         hearing_impaired=hearing_impaired,
         visual_impaired=visual_impaired,
     )
-    AddSubtitlesService(debug=debug, params=params).start()
+    EditSubtitlesService(debug=debug, params=params).start()

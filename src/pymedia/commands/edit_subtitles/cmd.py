@@ -1,6 +1,6 @@
 """Comando ``edit-subs``: compositor de comandos ffmpeg."""
 
-from pymedia.commands.edit_subs.parameters import EditSubtitlesParameters
+from pymedia.commands.edit_subtitles.parameters import EditSubtitlesParameters
 from pymedia.errors import MissingParameterError
 from pymedia.types import OverwriteMode
 

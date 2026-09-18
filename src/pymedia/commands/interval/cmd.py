@@ -54,8 +54,6 @@ class IntervalCmd:
 
         if params.overwrite == OverwriteMode.YES:
             cmd.append("-y")
-        else:
-            cmd.append("-n")
 
         if params.timestamp_start is not None:
             cmd.extend(params.to_timestamp_start_cmd())

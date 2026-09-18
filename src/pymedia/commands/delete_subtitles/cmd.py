@@ -1,6 +1,6 @@
 """Comando ``delete-subs``: compositor de comandos ffmpeg."""
 
-from pymedia.commands.delete_subs.parameters import DeleteSubtitlesParameters
+from pymedia.commands.delete_subtitles.parameters import DeleteSubtitlesParameters
 from pymedia.errors import MissingParameterError
 from pymedia.types import OverwriteMode
 

@@ -37,8 +37,6 @@ class JoinCmd:
 
         if self.params.overwrite == OverwriteMode.YES:
             cmd.append("-y")
-        else:
-            cmd.append("-n")
 
         cmd.extend(
             [

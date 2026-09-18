@@ -17,26 +17,26 @@ if sys.platform == "win32" and isinstance(sys.stdout, io.TextIOWrapper):
     sys.stdout.reconfigure(encoding="utf-8")
 
 from pymedia.commands.add_audio.cli import add_audio_cli
-from pymedia.commands.add_subs.cli import add_subs_cli
+from pymedia.commands.add_subtitles.cli import add_subs_cli
 from pymedia.commands.animated.cli import animated_cli
 from pymedia.commands.cut.cli import cut_cli
 from pymedia.commands.delete_audio.cli import delete_audio_cli
-from pymedia.commands.delete_subs.cli import delete_subs_cli
+from pymedia.commands.delete_subtitles.cli import delete_subs_cli
 from pymedia.commands.edit_audio.cli import edit_audio_cli
-from pymedia.commands.edit_subs.cli import edit_subs_cli
+from pymedia.commands.edit_subtitles.cli import edit_subs_cli
 from pymedia.commands.extract_audio.cli import extract_audio_cli
-from pymedia.commands.extract_subs.cli import extract_subs_cli
+from pymedia.commands.extract_subtitles.cli import extract_subs_cli
 from pymedia.commands.frames.cli import frames_cli
 from pymedia.commands.info.cli import info_cli
 from pymedia.commands.interval.cli import interval_cli
 from pymedia.commands.join.cli import join_cli
+from pymedia.commands.main.cli import main_cli
 from pymedia.commands.remux.cli import remux_cli
 from pymedia.commands.scene.cli import scene_cli
 from pymedia.commands.sheet.cli import sheet_cli
 from pymedia.commands.transcode.cli import transcode_cli
-from pymedia.typer.instance import typer_instance
 
-app = typer_instance
+app = main_cli
 app.add_typer(info_cli)
 app.add_typer(sheet_cli)
 app.add_typer(transcode_cli)

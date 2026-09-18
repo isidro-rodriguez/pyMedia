@@ -2,18 +2,18 @@
 
 import typer
 
-from pymedia.commands.join.parameters import JoinParameters
-from pymedia.commands.join.service import JoinService
-from pymedia.errors import UserError
-from pymedia.locales import _  # noqa
-from pymedia.logger import Logger
-from pymedia.typer.options import (
+from pymedia.commands.base_cli_options import (
     DebugOption,
     HelpOption,
     MediaInputListArgument,
     OutputOption,
     OverwriteOption,
 )
+from pymedia.commands.join.parameters import JoinParameters
+from pymedia.commands.join.service import JoinService
+from pymedia.errors import UserError
+from pymedia.locales import _  # noqa
+from pymedia.logger import Logger
 from pymedia.types import OverwriteMode
 
 join_cli = typer.Typer()
@@ -21,7 +21,9 @@ join_cli = typer.Typer()
 
 JOIN_HELP = _(
     """\
-Concatenate different videos into a single media container.
+Concatenate different compatible videos into a single media container.
+
+Compatible videos must have same codecs, dimensions, tracks, ...
 
 [bold]Example[/bold]:
   Join videos in the specified order:
@@ -33,7 +35,7 @@ Concatenate different videos into a single media container.
 @join_cli.command(
     name="join",
     help=JOIN_HELP,
-    rich_help_panel="Video commands",
+    rich_help_panel=_("Video commands"),
     no_args_is_help=True,
 )
 def join(
@@ -43,7 +45,7 @@ def join(
     debug: DebugOption = False,
     help_: HelpOption = False,  # noqa
 ) -> None:
-    """Punto de entrada y desarrollo del pipeline de unión de contenedores.
+    """Punto de entrada del comando ``join``.
 
     Args:
         media_input_list: Lista de rutas de los ficheros de vídeo a procesar.
