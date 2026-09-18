@@ -1,14 +1,14 @@
-"""Tests para el mixin de filtros (pymedia.models.mixins.filters_mixin)."""
+"""Tests para el mixin de filtros (pymedia.mixins.filters_mixin)."""
 
 from pathlib import Path
 from unittest.mock import Mock
 
 import pytest
 
+from pymedia.commands.frames.parameters import FramesParameters
+from pymedia.mixins.filters_mixin import FiltersMixin
 from pymedia.models.media import Media, Video
-from pymedia.models.mixins.filters_mixin import FiltersMixin
-from pymedia.models.parameters import ThumbParameters
-from pymedia.types import OverwriteMode, RotateMode, ScaleMode, ThumbnailsMode
+from pymedia.types import OverwriteMode, RotateMode, ScaleMode
 
 
 def _mixin(video: Video | None = None) -> FiltersMixin:
@@ -28,7 +28,7 @@ def _mixin(video: Video | None = None) -> FiltersMixin:
 @pytest.fixture(autouse=True)
 def _fake_translate(monkeypatch: pytest.MonkeyPatch) -> None:
     """Fija `_` como identidad para que los mensajes no dependan del idioma."""
-    monkeypatch.setattr("pymedia.models.mixins.scale_mixin._", lambda msgid: msgid)
+    monkeypatch.setattr("pymedia.mixins.scale_mixin._", lambda msgid: msgid)
 
 
 class TestCreateFilters:
@@ -179,11 +179,9 @@ class TestToFiltersCmd:
 class TestFiltersIntegration:
     """Prueba de integración de `create_filters` en parámetros reales."""
 
-    def test_thumb_parameters(self) -> None:
-        """Comprueba la creación de filtros sobre `ThumbParameters`."""
-        params = ThumbParameters(
-            overwrite=OverwriteMode.NO, thumbnails_mode=ThumbnailsMode.FRAMES
-        )
+    def test_frames_parameters(self) -> None:
+        """Comprueba la creación de filtros sobre `FramesParameters`."""
+        params = FramesParameters(overwrite=OverwriteMode.NO)
         params.media = Media(
             path=Path("clip.mp4"),
             video=Video(path=Path("clip.mp4"), width=1920, height=1080),

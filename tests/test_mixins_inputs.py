@@ -1,4 +1,4 @@
-"""Tests para los mixins de entrada (pymedia.models.mixins.media_mixin)."""
+"""Tests para los mixins de entrada (pymedia.mixins.media_mixin)."""
 
 import logging
 from pathlib import Path
@@ -8,8 +8,8 @@ import pytest
 
 from pymedia.errors import MissingParameterError, UserError
 from pymedia.logger import Logger
+from pymedia.mixins.media_mixin import MediaInputMixin, MediaListMixin
 from pymedia.models.media import Media
-from pymedia.models.mixins.media_mixin import MediaInputMixin, MediaListMixin
 
 
 def _logger() -> Logger:
@@ -24,7 +24,7 @@ _EMPTY_METADATA: dict[str, Any] = {"streams": [], "format": {}}
 def _fake_probe(monkeypatch: pytest.MonkeyPatch) -> None:
     """Evita ejecutar ffprobe en todos los tests de este módulo."""
     monkeypatch.setattr(
-        "pymedia.models.mixins.media_mixin.get_media_metadata",
+        "pymedia.mixins.media_mixin.get_media_metadata",
         lambda path, logger: _EMPTY_METADATA,
     )
 
@@ -115,7 +115,7 @@ class TestInputListCreate:
             raise subprocess.CalledProcessError(1, ["ffprobe"])
 
         monkeypatch.setattr(
-            "pymedia.models.mixins.media_mixin.get_media_metadata", _failing_probe
+            "pymedia.mixins.media_mixin.get_media_metadata", _failing_probe
         )
         mixin = MediaListMixin()
 
@@ -189,7 +189,7 @@ class TestSubtitlesStreamParsing:
     ) -> None:
         """Comprueba que las pistas `subtitle` se parsean y se indexan."""
         monkeypatch.setattr(
-            "pymedia.models.mixins.media_mixin.get_media_metadata",
+            "pymedia.mixins.media_mixin.get_media_metadata",
             lambda path, logger: _SUBTITLE_METADATA,
         )
         media = self._media_with_streams(tmp_path)
@@ -217,7 +217,7 @@ class TestSubtitlesStreamParsing:
     ) -> None:
         """Comprueba que video/audio siguen indexándose en presencia de subtítulos."""
         monkeypatch.setattr(
-            "pymedia.models.mixins.media_mixin.get_media_metadata",
+            "pymedia.mixins.media_mixin.get_media_metadata",
             lambda path, logger: _SUBTITLE_METADATA,
         )
         media = self._media_with_streams(tmp_path)
@@ -243,7 +243,7 @@ class TestSubtitlesStreamParsing:
             "format": {},
         }
         monkeypatch.setattr(
-            "pymedia.models.mixins.media_mixin.get_media_metadata",
+            "pymedia.mixins.media_mixin.get_media_metadata",
             lambda path, logger: metadata,
         )
         media = self._media_with_streams(tmp_path)

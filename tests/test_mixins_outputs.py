@@ -1,12 +1,11 @@
-"""Tests para los mixins de salida por tipo (pymedia.models.mixins.outputs_mixin)."""
+"""Tests para los mixins de salida por tipo (pymedia.mixins.outputs_mixin)."""
 
 from pathlib import Path
 
 import pytest
 
 from pymedia.errors import MissingPropertyError, UserError
-from pymedia.models.media import Audio, Media, Subtitles, Video
-from pymedia.models.mixins.outputs_mixin import (
+from pymedia.mixins.outputs_mixin import (
     AnimatedOutputMixin,
     AudioOutputMixin,
     ImageOutputMixin,
@@ -15,6 +14,7 @@ from pymedia.models.mixins.outputs_mixin import (
     _process_output,
     _validate_name,
 )
+from pymedia.models.media import Audio, Media, Subtitles, Video
 
 
 def _video(codec: str | None = "h264") -> Video:

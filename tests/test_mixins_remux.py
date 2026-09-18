@@ -1,10 +1,10 @@
-"""Tests para los mixins de remultiplexado (pymedia.models.mixins.remux_mixin)."""
+"""Tests para los mixins de remultiplexado (pymedia.mixins.remux_mixin)."""
 
 from pathlib import Path
 
+from pymedia.mixins.remux_mixin import SortTracksMixin
 from pymedia.models.audio import Audio
 from pymedia.models.media import Media
-from pymedia.models.mixins.remux_mixin import SortTracksMixin
 from pymedia.models.subtitles import Subtitles
 from pymedia.models.video import Video
 

@@ -6,6 +6,30 @@ Las versiones se han reconstruido a partir del histórico de
 Las versiones intermedias no registradas (0.2–0.4, 0.6–0.8) se agrupan
 con la sección anterior.
 
+## [0.16.1-beta.6] - 2026-09-18
+
+### Cambiado
+
+- Arquitectura de comandos: `audio`, `subtitles` y `thumb` pasan de ser un
+  pipeline fragmentado con subcomandos anidados a **comandos independientes**
+  (uno por paquete `commands/<cmd>`), siguiendo el mismo patrón que
+  `cut`/`join`/`remux`/`transcode`/`animated`/`sheet`
+- Eliminados los directorios legacy `pipeline/`, `typer/commands/` y
+  `ffmpeg/` de comandos que ya no se usan (`audio_pipeline.py`,
+  `subtitles_pipeline.py`, `thumb_pipeline.py`, `audio_commands.py`,
+  `subtitles_commands.py`, `thumb_commands.py`, `audio_cmd.py`,
+  `subtitles_cmd.py`, `thumb_cmd.py`, `AudioParameters`/`SubtitlesParameters`)
+- Estructura del proyecto actualizada en README: `pipeline/` y
+  `typer/commands/` ya no son módulos del proyecto
+
+### Interno
+
+- `types.py`: eliminados los enums `AudioMode` y `SubtitlesMode` (sin uso)
+- `base_parameters.py`: eliminadas `AudioParameters` y `SubtitlesParameters`
+  (solo `BaseParameters` y `ThumbParameters`)
+- Los pipelines migraron a un servicio por comando con `Parameters.load()`,
+  `Cmd.create()` y `Service.start()` siguiendo la misma convención
+
 ## [0.16.0-beta.0] - 2026-09-17 → presente
 
 ### Añadido

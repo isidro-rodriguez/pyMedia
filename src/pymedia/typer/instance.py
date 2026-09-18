@@ -2,13 +2,27 @@
 
 import typer
 
-from pymedia.typer.help import MAIN_HELP
+from pymedia.locales import _  # noqa
 from pymedia.typer.options import DebugOption, HelpOption, VersionOption
 
 typer_instance = typer.Typer(
     name="pyMedia",
     rich_markup_mode="rich",
     no_args_is_help=True,
+)
+
+MAIN_HELP = _(
+    """\
+Easy CLI for ffmpeg.
+
+[bold]Examples[/bold]:
+  Show help and exit:
+    > pymedia --help
+    > pymedia
+  Show subcommand help and exit:
+    > pymedia transcode --help
+    > pymedia transcode
+"""
 )
 
 

@@ -1,0 +1,1 @@
+"""Comando ``extract-audio``."""

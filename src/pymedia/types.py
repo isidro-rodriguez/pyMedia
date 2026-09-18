@@ -16,15 +16,6 @@ class AudioCodecMode(Enum):
     OPUS = "opus"
 
 
-class AudioMode(Enum):
-    """Modos de comandos de audio."""
-
-    ADD = "add"
-    DELETE = "delete"
-    EDIT = "edit"
-    EXTRACT = "extract"
-
-
 class Channels(Enum):
     """Refiere al uso de canales de audio en uniones conflictivas."""
 
@@ -87,23 +78,6 @@ class StreamsMode(Enum):
     AUDIO = "audio"
     SUBTITLES = "subtitles"
     VIDEO = "video"
-
-
-class SubtitlesMode(Enum):
-    """Modelo de comando de subtítulos."""
-
-    ADD = "add"
-    DELETE = "delete"
-    EDIT = "edit"
-    EXTRACT = "extract"
-
-
-class ThumbnailsMode(Enum):
-    """Modos de comando de thumbnails."""
-
-    FRAMES = "frames"
-    INTERVAL = "interval"
-    SCENE = "scene"
 
 
 class VideoCodecMode(Enum):

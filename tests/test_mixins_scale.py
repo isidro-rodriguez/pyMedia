@@ -1,4 +1,4 @@
-"""Tests para el mixin de escalado (pymedia.models.mixins.scale_mixin)."""
+"""Tests para el mixin de escalado (pymedia.mixins.scale_mixin)."""
 
 from pathlib import Path
 from unittest.mock import Mock
@@ -9,8 +9,8 @@ from pymedia.errors import (
     MissingPropertyError,
     UserError,
 )
+from pymedia.mixins.scale_mixin import ScaleMixin
 from pymedia.models.media import Media, Video
-from pymedia.models.mixins.scale_mixin import ScaleMixin
 from pymedia.types import Dimensions, ScaleMode
 
 _IGNORED_MSG = "Ignored scale. Target scale > video resolution, it requires upscale."
@@ -36,7 +36,7 @@ def _mixin(
 @pytest.fixture(autouse=True)
 def _fake_translate(monkeypatch: pytest.MonkeyPatch) -> None:
     """Fija `_` como identidad para que los mensajes no dependan del idioma."""
-    monkeypatch.setattr("pymedia.models.mixins.scale_mixin._", lambda msgid: msgid)
+    monkeypatch.setattr("pymedia.mixins.scale_mixin._", lambda msgid: msgid)
 
 
 class TestCreateScale:

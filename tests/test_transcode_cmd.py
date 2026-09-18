@@ -5,10 +5,10 @@ from unittest.mock import patch
 
 import pytest
 
-from pymedia.ffmpeg.transcode_cmd import TranscodeCmd
+from pymedia.commands.transcode.cmd import TranscodeCmd
+from pymedia.commands.transcode.parameters import TranscodeParameters
 from pymedia.models.config import Config, Transcode
 from pymedia.models.media import Audio, Media, Video
-from pymedia.models.parameters import TranscodeParameters
 from pymedia.types import OverwriteMode
 from pymedia.utils import to_ffmpeg_value
 

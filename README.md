@@ -290,10 +290,9 @@ uv run python scripts/audio_tracks.py    # pistas de audio en .local/fixtures/au
 pyMedia/
 ├── src/pymedia/
 │   ├── data/             # Catálogos de códecs, contenedores, formatos y lenguas
-│   ├── ffmpeg/           # Constructores de comandos ffmpeg (cmd)
 │   ├── models/           # Dataclasses de parámetros y mixins de validación
-│   ├── pipeline/         # Flujo de ejecución de cada subcomando
-│   ├── typer/            # CLI Typer: comandos, opciones y textos de ayuda
+│   ├── commands/         # Cada comando CLI: cli, parameters, cmd, service
+│   ├── typer/            # CLI Typer: punto de entrada, opciones y textos de ayuda
 │   ├── locales/          # Catálogos gettext (pymedia.pot, es/)
 │   ├── resources/        # config.toml, iconos, man page y .desktop
 │   ├── locale_manager.py # Detección/carga del idioma gettext

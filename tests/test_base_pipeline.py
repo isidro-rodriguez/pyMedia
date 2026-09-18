@@ -1,4 +1,4 @@
-"""Pruebas del ciclo de vida de los procesos de BasePipeline."""
+"""Pruebas del ciclo de vida de los procesos de BaseService."""
 
 import _thread
 import io
@@ -11,19 +11,19 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
+from pymedia.commands.base_service import BaseService
 from pymedia.errors import CommandError, OsError, UserError
 from pymedia.models.config import App, Config
-from pymedia.pipeline.base_pipeline import BasePipeline
 
 
-class _TestPipeline(BasePipeline[object]):
+class _TestService(BaseService[object]):
     """Tipo concreto para probar la ejecución sin cargar configuración de usuario."""
 
 
 def test_manual_interrupt_stops_real_process(tmp_path: Path) -> None:
     """Ctrl+C detiene un hijo activo, cierra los pipes y elimina su salida."""
     output = tmp_path / "partial.mp4"
-    pipeline = object.__new__(_TestPipeline)
+    pipeline = object.__new__(_TestService)
     pipeline.debug = False
     pipeline.command_name = "Test"
     pipeline.config = object.__new__(Config)
@@ -67,7 +67,7 @@ def test_manual_interrupt_stops_real_process(tmp_path: Path) -> None:
     interrupter = threading.Thread(target=interrupt)
     interrupter.start()
     try:
-        with patch("pymedia.pipeline.base_pipeline.subprocess.Popen", launch):
+        with patch("pymedia.commands.base_service.subprocess.Popen", launch):
             try:
                 pipeline.run_ffmpeg(command, "Test", [output])
             except UserError as error:
@@ -96,7 +96,7 @@ def test_manual_interrupt_stops_real_process(tmp_path: Path) -> None:
 @pytest.mark.parametrize("phase", ["queue", "first_start", "second_start", "wait"])
 def test_interrupt_cleans_initialized_resources(tmp_path: Path, phase: str) -> None:
     """La interrupción limpia también un arranque parcial y la espera final."""
-    pipeline = object.__new__(_TestPipeline)
+    pipeline = object.__new__(_TestService)
     pipeline.debug = False
     pipeline.command_name = "Test"
     pipeline.config = MagicMock()
@@ -119,10 +119,10 @@ def test_interrupt_cleans_initialized_resources(tmp_path: Path, phase: str) -> N
             proc.wait.side_effect = [KeyboardInterrupt, 0]
 
     with (
-        patch("pymedia.pipeline.base_pipeline.subprocess.Popen", return_value=proc),
-        patch("pymedia.pipeline.base_pipeline.threading.Thread", side_effect=readers),
-        patch("pymedia.pipeline.base_pipeline.queue.Queue", return_value=events),
-        patch("pymedia.pipeline.base_pipeline.Progress"),
+        patch("pymedia.commands.base_service.subprocess.Popen", return_value=proc),
+        patch("pymedia.commands.base_service.threading.Thread", side_effect=readers),
+        patch("pymedia.commands.base_service.queue.Queue", return_value=events),
+        patch("pymedia.commands.base_service.Progress"),
         pytest.raises(UserError, match="interrupted manually"),
     ):
         pipeline.run_ffmpeg(["ffmpeg"], "Test", [output])
@@ -140,7 +140,7 @@ def test_interrupt_cleans_initialized_resources(tmp_path: Path, phase: str) -> N
 @pytest.mark.parametrize("scenario", ["timeout", "ffmpeg", "success", "unlink"])
 def test_abort_preserves_error_kind(tmp_path: Path, scenario: str) -> None:
     """Los fallos del proceso y del borrado no se convierten en aborto manual."""
-    pipeline = object.__new__(_TestPipeline)
+    pipeline = object.__new__(_TestService)
     pipeline.debug = False
     pipeline.command_name = "Test"
     pipeline.config = MagicMock()
@@ -156,10 +156,10 @@ def test_abort_preserves_error_kind(tmp_path: Path, scenario: str) -> None:
     if scenario in ("timeout", "unlink"):
         events.get.side_effect = queue.Empty
     with (
-        patch("pymedia.pipeline.base_pipeline.subprocess.Popen", return_value=proc),
-        patch("pymedia.pipeline.base_pipeline.threading.Thread"),
-        patch("pymedia.pipeline.base_pipeline.queue.Queue", return_value=events),
-        patch("pymedia.pipeline.base_pipeline.Progress"),
+        patch("pymedia.commands.base_service.subprocess.Popen", return_value=proc),
+        patch("pymedia.commands.base_service.threading.Thread"),
+        patch("pymedia.commands.base_service.queue.Queue", return_value=events),
+        patch("pymedia.commands.base_service.Progress"),
     ):
         if scenario == "success":
             pipeline.run_ffmpeg(["ffmpeg"], "Test", [output])

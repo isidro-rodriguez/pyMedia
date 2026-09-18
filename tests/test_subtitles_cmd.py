@@ -2,32 +2,22 @@
 
 from pathlib import Path
 
-from pymedia.ffmpeg.subtitles_cmd import SubtitlesCmd
+from pymedia.commands.add_subs.cmd import AddSubtitlesCmd
+from pymedia.commands.add_subs.parameters import AddSubtitlesParameters
+from pymedia.commands.delete_subs.cmd import DeleteSubtitlesCmd
+from pymedia.commands.delete_subs.parameters import DeleteSubtitlesParameters
+from pymedia.commands.edit_subs.cmd import EditSubtitlesCmd
+from pymedia.commands.edit_subs.parameters import EditSubtitlesParameters
+from pymedia.commands.extract_subs.cmd import ExtractSubtitlesCmd
+from pymedia.commands.extract_subs.parameters import ExtractSubtitlesParameters
 from pymedia.models.media import Media
-from pymedia.models.parameters import SubtitlesParameters
 from pymedia.models.subtitles import Subtitles
-from pymedia.types import OverwriteMode, SubtitlesMode
+from pymedia.types import OverwriteMode
 
 
-def _params(
-    mode: SubtitlesMode,
-    *,
-    stream_tracks: list[int] | None = None,
-    media_output: Path | None = None,
-    subtitles_output: Path | None = None,
-    subtitles: Subtitles | None = None,
-    media_subtitles: list[Subtitles] | None = None,
-) -> SubtitlesParameters:
-    """Construye unos parámetros mínimos con el modo y los campos indicados."""
-    return SubtitlesParameters(
-        overwrite=OverwriteMode.NO,
-        subtitles_mode=mode,
-        media=Media(path=Path("/tmp/input.mkv"), subtitles=media_subtitles),
-        media_output=media_output,
-        subtitles_output=subtitles_output,
-        stream_tracks=stream_tracks,
-        subtitles=subtitles,
-    )
+def _media(subtitles: list[Subtitles] | None = None) -> Media:
+    """Medio mínimo con las pistas de subtítulos indicadas."""
+    return Media(path=Path("/tmp/input.mkv"), subtitles=subtitles)
 
 
 def _disposition_value(cmd: list[str], flag: str) -> str:
@@ -37,13 +27,14 @@ def _disposition_value(cmd: list[str], flag: str) -> str:
 
 def test_delete_maps_by_subtitle_local_index() -> None:
     """Delete renderiza `-0:s:N` (índice local), no `-0:N` (global)."""
-    params = _params(
-        SubtitlesMode.DELETE,
-        stream_tracks=[0, 2],
+    params = DeleteSubtitlesParameters(
+        overwrite=OverwriteMode.NO,
+        media=_media(),
         media_output=Path("/tmp/out.mkv"),
+        stream_tracks=[0, 2],
     )
 
-    cmd = SubtitlesCmd(params=params).create_delete_subtitles_cmd()
+    cmd = DeleteSubtitlesCmd(params=params).create()
 
     assert "-0:s:0" in cmd
     assert "-0:s:2" in cmd
@@ -52,13 +43,14 @@ def test_delete_maps_by_subtitle_local_index() -> None:
 
 def test_extract_maps_by_subtitle_local_index() -> None:
     """Extract renderiza `0:s:N` (índice local) dentro de la entrada 0."""
-    params = _params(
-        SubtitlesMode.EXTRACT,
-        stream_tracks=[0, 1],
+    params = ExtractSubtitlesParameters(
+        overwrite=OverwriteMode.NO,
+        media=_media(),
         subtitles_output=Path("/tmp/out.srt"),
+        stream_tracks=[0, 1],
     )
 
-    cmd = SubtitlesCmd(params=params).create_extract_subtitles_cmd()[0]
+    cmd = ExtractSubtitlesCmd(params=params).create()[0]
 
     assert "0:s:0" in cmd
     assert "0:s:1" in cmd
@@ -67,8 +59,9 @@ def test_extract_maps_by_subtitle_local_index() -> None:
 
 def test_add_encodes_new_subtitle_with_local_index() -> None:
     """Add codifica el nuevo subtítulo con `-c:s:N` (índice local)."""
-    params = _params(
-        SubtitlesMode.ADD,
+    params = AddSubtitlesParameters(
+        overwrite=OverwriteMode.NO,
+        media=_media(),
         media_output=Path("/tmp/out.mkv"),
         subtitles=Subtitles(
             path=Path("/tmp/subs.srt"),
@@ -81,7 +74,7 @@ def test_add_encodes_new_subtitle_with_local_index() -> None:
         ),
     )
 
-    cmd = SubtitlesCmd(params=params).create_add_subtitles_cmd()
+    cmd = AddSubtitlesCmd(params=params).create()
 
     assert "-c:s:2" in cmd
     assert "srt" in cmd
@@ -102,11 +95,11 @@ def test_edit_default_is_exclusive() -> None:
         Subtitles(path=Path("/tmp/input.mkv"), track_index=1),
         Subtitles(path=Path("/tmp/input.mkv"), track_index=2, default=True),
     ]
-    params = _params(
-        SubtitlesMode.EDIT,
-        stream_tracks=[2],
+    params = EditSubtitlesParameters(
+        overwrite=OverwriteMode.NO,
+        media=_media(media_subtitles),
         media_output=Path("/tmp/out.mkv"),
-        media_subtitles=media_subtitles,
+        stream_tracks=[2],
         subtitles=Subtitles(
             path=Path("/tmp/input.mkv"),
             track_index=2,
@@ -114,7 +107,7 @@ def test_edit_default_is_exclusive() -> None:
         ),
     )
 
-    cmd = SubtitlesCmd(params=params).create_edit_subtitles_cmd()
+    cmd = EditSubtitlesCmd(params=params).create()
 
     assert _disposition_value(cmd, "-disposition:s:2") == "default"
     # La pista 0 era `default+forced`: conserva `forced`, pierde `default`.
@@ -129,11 +122,11 @@ def test_edit_without_default_leaves_others_untouched() -> None:
         Subtitles(path=Path("/tmp/input.mkv"), track_index=0, default=True),
         Subtitles(path=Path("/tmp/input.mkv"), track_index=1),
     ]
-    params = _params(
-        SubtitlesMode.EDIT,
-        stream_tracks=[1],
+    params = EditSubtitlesParameters(
+        overwrite=OverwriteMode.NO,
+        media=_media(media_subtitles),
         media_output=Path("/tmp/out.mkv"),
-        media_subtitles=media_subtitles,
+        stream_tracks=[1],
         subtitles=Subtitles(
             path=Path("/tmp/input.mkv"),
             track_index=1,
@@ -141,6 +134,6 @@ def test_edit_without_default_leaves_others_untouched() -> None:
         ),
     )
 
-    cmd = SubtitlesCmd(params=params).create_edit_subtitles_cmd()
+    cmd = EditSubtitlesCmd(params=params).create()
 
     assert "-disposition:s:0" not in cmd

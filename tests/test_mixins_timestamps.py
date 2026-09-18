@@ -1,4 +1,4 @@
-"""Tests de mixins de marcas de tiempo (pymedia.models.mixins.timestamps_mixin)."""
+"""Tests de mixins de marcas de tiempo (pymedia.mixins.timestamps_mixin)."""
 
 from datetime import timedelta
 from pathlib import Path
@@ -10,10 +10,10 @@ from pymedia.errors import (
     MissingPropertyError,
     UserError,
 )
-from pymedia.models.media import Media
-from pymedia.models.mixins.timestamps_mixin import (
+from pymedia.mixins.timestamps_mixin import (
     TimestampStartEndMixin,
 )
+from pymedia.models.media import Media
 
 
 def _media(duration: timedelta | None = timedelta(hours=2)) -> Media:

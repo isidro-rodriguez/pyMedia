@@ -1,12 +1,12 @@
-"""Tests para el mixin de transcodificación (pymedia.models.mixins.transcode_mixin)."""
+"""Tests para el mixin de transcodificación (pymedia.mixins.transcode_mixin)."""
 
 from pathlib import Path
 
 import pytest
 
 from pymedia.errors import MissingParameterError
+from pymedia.mixins.transcode_mixin import TranscodeMixin
 from pymedia.models.config import Transcode
-from pymedia.models.mixins.transcode_mixin import TranscodeMixin
 from pymedia.utils import to_ffmpeg_value
 
 
