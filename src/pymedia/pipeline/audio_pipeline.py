@@ -1,5 +1,6 @@
 """Pipeline de la familia de comandos de audio."""
 
+import sys
 from pathlib import Path
 
 from pymedia.errors import MissingParameterError
@@ -130,19 +131,6 @@ class AudioPipeline(BasePipeline[AudioParameters]):
 
         self.params = params
 
-    def _media_output(self) -> Path:
-        """Devuelve la salida de medios, abortando si no está definida.
-
-        Returns:
-            Ruta absoluta del fichero de medios de salida.
-
-        Raises:
-            MissingParameterError: Si la salida procesada no se pudo obtener.
-        """
-        if self.params.media_output is None:
-            raise MissingParameterError(name="media_output")
-        return self.params.media_output
-
     def process_cmd(self) -> None:
         """Construye el comando ffmpeg y ejecuta la manipulación de audio.
 
@@ -153,29 +141,33 @@ class AudioPipeline(BasePipeline[AudioParameters]):
             raise MissingParameterError(name="media")
 
         audio_cmd = AudioCmd(params=self.params)
+        outputs: list[Path] = []
         match self.params.audio_mode:
             case AudioMode.ADD:
                 cmd = audio_cmd.create_add_audio_cmd()
-                if not self.resolve_overwrite(output_list=[self._media_output()]):
-                    return
+                outputs = [self._media_output()]
+                if not self.resolve_overwrite(output_list=outputs):
+                    sys.exit(0)
                 description = _("Adding audio")
                 success = _("Audio added successfully: %(output)s")
             case AudioMode.DELETE:
                 cmd = audio_cmd.create_delete_audio_cmd()
-                if not self.resolve_overwrite(output_list=[self._media_output()]):
-                    return
+                outputs = [self._media_output()]
+                if not self.resolve_overwrite(output_list=outputs):
+                    sys.exit(0)
                 description = _("Deleting audio")
                 success = _("Audio deleted successfully: %(output)s")
             case AudioMode.EDIT:
                 cmd = audio_cmd.create_edit_audio_cmd()
-                if not self.resolve_overwrite(output_list=[self._media_output()]):
-                    return
+                outputs = [self._media_output()]
+                if not self.resolve_overwrite(output_list=outputs):
+                    sys.exit(0)
                 description = _("Editing audio metadata")
                 success = _("Audio metadata edited successfully: %(output)s")
             case AudioMode.EXTRACT:
-                cmd, output_list = audio_cmd.create_extract_audio_cmd()
-                if not self.resolve_overwrite(output_list=output_list):
-                    return
+                cmd, outputs = audio_cmd.create_extract_audio_cmd()
+                if not self.resolve_overwrite(output_list=outputs):
+                    sys.exit(0)
                 description = _("Extracting audio")
                 success = _("Audio extracted successfully: %(output)s")
 
@@ -184,6 +176,7 @@ class AudioPipeline(BasePipeline[AudioParameters]):
         self.run_ffmpeg(
             cmd=cmd,
             description=description,
+            output_list=outputs,
         )
 
         output = self.params.media_output or self.params.audio_output
@@ -199,3 +192,9 @@ class AudioPipeline(BasePipeline[AudioParameters]):
         if not media.audio:
             raise MissingParameterError(name=_("audio"))
         return ",".join(str(track.track_index) for track in media.audio)
+
+    def _media_output(self) -> Path:
+        """Devuelve la salida de medios, abortando si no está definida."""
+        if self.params.media_output is None:
+            raise MissingParameterError(name="media_output")
+        return self.params.media_output

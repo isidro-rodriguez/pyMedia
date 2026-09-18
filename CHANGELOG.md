@@ -18,6 +18,13 @@ con la sección anterior.
 - Comando `split` renombrado a `cut` (CLI, pipeline, ayuda, man page y tests)
 - Locales `es` regenerados y compilados (`pymedia.pot`/`.po`/`.mo`)
 - README actualizado al comando `cut`
+- Los pipelines pasan a `run_ffmpeg` los ficheros de salida esperados para
+  eliminarlos si el comando se interrumpe, agota el tiempo o falla
+- `run_ffmpeg` acepta un iterable perezoso de salidas (uso en `thumb --scene`,
+  cuyo número de ficheros solo se conoce al terminar ffmpeg)
+- `audio`/`subtitles --extract`: la limpieza de abort usa las rutas reales de
+  los ficheros extraídos (antes pasaba la salida de medios, inexistente en
+  dicho modo)
 
 ## [0.15.0-beta.0] - 2026-09-17
 

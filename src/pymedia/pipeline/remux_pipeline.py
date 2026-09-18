@@ -73,6 +73,7 @@ class RemuxPipeline(BasePipeline[RemuxParameters]):
         self.run_ffmpeg(
             cmd=cmd,
             description=_("Remuxing media file"),
+            output_list=[self.params.media_output],
         )
 
         self.logger.info(

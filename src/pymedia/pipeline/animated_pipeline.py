@@ -103,6 +103,7 @@ class AnimatedPipeline(BasePipeline[AnimatedParameters]):
             cmd=cmd,
             description=_("Generating animated image"),
             progress_time=self.params.get_range_time(),
+            output_list=[self.params.animated_output],
         )
 
         self.logger.info(

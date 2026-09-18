@@ -1,5 +1,6 @@
 """Pipeline de la familia de comandos de subtítulos."""
 
+import sys
 from pathlib import Path
 
 from pymedia.errors import MissingParameterError, UserError
@@ -155,35 +156,39 @@ class SubtitlesPipeline(BasePipeline[SubtitlesParameters]):
             raise MissingParameterError(name="media")
 
         sub_cmd = SubtitlesCmd(params=self.params)
+        outputs: list[Path] = []
         match self.params.subtitles_mode:
             case SubtitlesMode.ADD:
                 cmd = sub_cmd.create_add_subtitles_cmd()
-                if not self.resolve_overwrite(output_list=[self._media_output()]):
-                    return
+                outputs = [self._media_output()]
+                if not self.resolve_overwrite(output_list=outputs):
+                    sys.exit(0)
                 description = _("Adding subtitles")
                 success = _("Subtitles added successfully: %(output)s")
             case SubtitlesMode.DELETE:
                 cmd = sub_cmd.create_delete_subtitles_cmd()
-                if not self.resolve_overwrite(output_list=[self._media_output()]):
-                    return
+                outputs = [self._media_output()]
+                if not self.resolve_overwrite(output_list=outputs):
+                    sys.exit(0)
                 description = _("Deleting subtitles")
                 success = _("Subtitles deleted successfully: %(output)s")
             case SubtitlesMode.EDIT:
                 cmd = sub_cmd.create_edit_subtitles_cmd()
-                if not self.resolve_overwrite(output_list=[self._media_output()]):
-                    return
+                outputs = [self._media_output()]
+                if not self.resolve_overwrite(output_list=outputs):
+                    sys.exit(0)
                 description = _("Editing subtitles metadata")
                 success = _("Subtitles metadata edited successfully: %(output)s")
             case SubtitlesMode.EXTRACT:
-                cmd, output_list = sub_cmd.create_extract_subtitles_cmd()
-                if not self.resolve_overwrite(output_list=output_list):
-                    return
+                cmd, outputs = sub_cmd.create_extract_subtitles_cmd()
+                if not self.resolve_overwrite(output_list=outputs):
+                    sys.exit(0)
                 description = _("Extracting subtitles")
                 success = _("Subtitles extracted successfully: %(output)s")
 
         self.logger.debug(_("FFmpeg command: %(cmd)s"), cmd=cmd)
 
-        self.run_ffmpeg(cmd=cmd, description=description)
+        self.run_ffmpeg(cmd=cmd, description=description, output_list=outputs)
 
         output = self.params.media_output or self.params.subtitles_output
         self.logger.info(msg=success, output=output)

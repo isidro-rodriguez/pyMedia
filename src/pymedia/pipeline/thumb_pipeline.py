@@ -1,7 +1,9 @@
 """Pipeline para la familia de subcomandos de capturas de imágenes."""
 
+import glob
 import math
 import re
+from collections.abc import Iterable, Iterator
 from datetime import timedelta
 from pathlib import Path
 
@@ -124,11 +126,12 @@ class ThumbPipeline(BasePipeline[ThumbParameters]):
                     raise MissingParameterError(name="timestamp_at")
                 for timestamp in self.params.timestamp_at:
                     cmd = thumb_cmd.create_frames_cmd(timestamp=timestamp)
+                    output = self._frames_output_path(timestamp)
                     if not self.resolve_overwrite(
-                        [self._frames_output_path(timestamp)]
+                        [output],
                     ):
                         continue
-                    self._run_cmd(cmd=cmd)
+                    self._run_cmd(cmd=cmd, output_list=[output])
             case ThumbnailsMode.INTERVAL:
                 cmd = thumb_cmd.create_interval_cmd()
                 output_list = self._resolve_interval_output_list(self.params)
@@ -136,7 +139,7 @@ class ThumbPipeline(BasePipeline[ThumbParameters]):
                 if self.params.overwrite == OverwriteMode.ASK:
                     skip = not self._resolve_overwrite_list(output_list)
                 if not skip:
-                    self._run_cmd(cmd=cmd)
+                    self._run_cmd(cmd=cmd, output_list=output_list)
             case ThumbnailsMode.SCENE:
                 path = self.params.image_output
                 if path is None:
@@ -147,7 +150,10 @@ class ThumbPipeline(BasePipeline[ThumbParameters]):
                 if self.params.overwrite == OverwriteMode.ASK:
                     skip = not self._resolve_scene_overwrite(output_template)
                 if not skip:
-                    self._run_cmd(cmd=cmd)
+                    self._run_cmd(
+                        cmd=cmd,
+                        output_list=self._scene_output_list(output_template),
+                    )
 
     def _frames_output_path(self, timestamp: timedelta) -> Path:
         """Devuelve la ruta de salida para un fotograma en timestamp dado."""
@@ -228,7 +234,17 @@ class ThumbPipeline(BasePipeline[ThumbParameters]):
                 return False
         return True
 
-    def _run_cmd(self, cmd: list[str]) -> None:
+    def _scene_output_list(self, template: Path) -> Iterator[Path]:
+        """Resuelve en caliente las miniaturas parciales del patrón de escena."""
+        match = re.match(r"^(.+)_%03d$", template.stem)
+        if match is None:
+            self.logger.warning(_("Cannot resolve scene output pattern from template."))
+            return
+        # glob.escape evita que caracteres especiales del nombre actúen de patrón.
+        pattern = f"{glob.escape(match.group(1))}_??*{template.suffix}"
+        yield from sorted(template.parent.glob(pattern))
+
+    def _run_cmd(self, cmd: list[str], output_list: Iterable[Path]) -> None:
         """Ejecuta un comando ffmpeg de miniaturas y registra el resultado."""
         if cmd is None:
             raise CommandGenerationError(name=self.command_name)
@@ -241,6 +257,7 @@ class ThumbPipeline(BasePipeline[ThumbParameters]):
             cmd=cmd,
             progress_time=self.params.get_range_time(),
             description=_("Generating thumbnail"),
+            output_list=output_list,
         )
 
         self.logger.info(

@@ -90,11 +90,13 @@ class SheetPipeline(BasePipeline[SheetParameters]):
                 cmd=snapshots_cmd,
                 description=_("Generating sheet snapshots"),
                 total_steps=sheet_instance.capture_count,
+                output_list=[tile_tmp],
             )
 
             self.run_ffmpeg(
                 cmd=header_cmd,
                 description=_("Generating sheet header"),
+                output_list=[self.params.image_output],
             )
 
         self.logger.info(

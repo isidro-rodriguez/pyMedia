@@ -1,5 +1,6 @@
 """Subcomando `join`: une múltiples contenedores en uno solo."""
 
+import sys
 import tempfile
 from pathlib import Path
 
@@ -62,7 +63,7 @@ class JoinPipeline(BasePipeline[JoinParameters]):
             raise MissingParameterError(name="media_output")
 
         if not self.resolve_overwrite(output_list=[self.params.media_output]):
-            return
+            sys.exit(0)
 
         self._check_media_compatibility()
 
@@ -86,6 +87,7 @@ class JoinPipeline(BasePipeline[JoinParameters]):
             self.run_ffmpeg(
                 cmd=cmd,
                 description=_("Joining media files"),
+                output_list=[self.params.media_output],
             )
 
         self.logger.info(

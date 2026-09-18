@@ -81,7 +81,8 @@ class CutPipeline(BasePipeline[CutParameters]):
         if self.params.media is None:
             raise MissingParameterError(name="media")
 
-        self._resolve_overwrite()
+        if not self.resolve_overwrite(output_list=self._expected_outputs()):
+            sys.exit(0)
 
         cmd = CutCmd(params=self.params).create()
 
@@ -91,6 +92,7 @@ class CutPipeline(BasePipeline[CutParameters]):
             cmd=cmd,
             description=_("Splitting media file"),
             progress_time=self.params.get_range_time(),
+            output_list=self._expected_outputs(),
         )
 
         if self.params.timestamp_at is not None:
@@ -104,28 +106,15 @@ class CutPipeline(BasePipeline[CutParameters]):
                 output=self.params.media_output,
             )
 
-    def _resolve_overwrite(self) -> None:
-        """Resuelve los conflictos de salida."""
-
-        def _output_list() -> list[Path]:
-            """Genera lista de los ficheros de salida en base a cantidad de cortes."""
-            if self.params.timestamp_at is None:
-                raise MissingParameterError(name="timestamp_at")
-
-            base_path = str(self.params.media_output)
-            path_list: list[Path] = []
-
-            for i in range(len(self.params.timestamp_at) + 1):
-                path_list.append(Path(base_path.replace("_%03d", f"_{i:03d}")))
-
-            return path_list
-
+    def _expected_outputs(self) -> list[Path]:
+        """Genera la lista de ficheros de salida en base a la cantidad de cortes."""
+        if self.params.media_output is None:
+            raise MissingParameterError(name="media_output")
         if self.params.timestamp_at is None:
-            if self.params.media_output is None:
-                raise MissingParameterError(name="params.media_output")
-            if not self.resolve_overwrite(output_list=[self.params.media_output]):
-                sys.exit(1)
-            return
+            return [self.params.media_output]
 
-        if not self.resolve_overwrite(output_list=_output_list()):
-            sys.exit(1)
+        base_path = str(self.params.media_output)
+        return [
+            Path(base_path.replace("_%03d", f"_{i:03d}"))
+            for i in range(len(self.params.timestamp_at) + 1)
+        ]

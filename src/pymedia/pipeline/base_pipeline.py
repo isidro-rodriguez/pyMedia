@@ -7,11 +7,14 @@ de fichero único y de procesamiento por lotes.
 
 import queue
 import subprocess
+import sys
 import threading
 from abc import ABC
+from collections.abc import Iterable
 from datetime import timedelta
+from enum import Enum
 from pathlib import Path
-from typing import Protocol, TypeVar, cast
+from typing import Never, Protocol, TypeVar, cast
 
 import typer
 from rich.progress import Progress
@@ -19,6 +22,8 @@ from rich.progress import Progress
 from pymedia.errors import (
     CommandError,
     InvalidParameterError,
+    OsError,
+    UserError,
 )
 from pymedia.locales import _  # noqa
 from pymedia.logger import Logger
@@ -30,6 +35,14 @@ class _OverwriteParams(Protocol):
     """Parámetros capaces de resolver la sobrescritura de ficheros de salida."""
 
     overwrite: OverwriteMode
+
+
+class _AbortMode(Enum):
+    """Escenarios en los que se puede interrumpir el comando Ffmpeg."""
+
+    FFMPEG = "ffmpeg"
+    MANUAL = "manual"
+    TIMEOUT = "timeout"
 
 
 ParamsT = TypeVar("ParamsT")
@@ -62,6 +75,7 @@ class BasePipeline[ParamsT](ABC):
             raise InvalidParameterError(msg=_("Invalid class name format!"))
         self.command_name = command_name.removesuffix("Pipeline")
         self.config = Config.load()
+        self.debug = debug
         self.logger = Logger.create(debug=debug)
 
     def resolve_overwrite(self, output_list: list[Path]) -> bool:
@@ -96,6 +110,7 @@ class BasePipeline[ParamsT](ABC):
         self,
         cmd: list[str],
         description: str,
+        output_list: Iterable[Path],
         progress_time: timedelta | None = None,
         total_steps: int | None = None,
     ) -> None:
@@ -109,11 +124,15 @@ class BasePipeline[ParamsT](ABC):
         Args:
             cmd: Comando ffmpeg ya construido, listo para ejecutar.
             description: Mensaje a mostrar junto a la barra de progreso.
+            output_list: Ficheros de salida esperados; puede ser un iterable
+                perezoso para salidas que solo se conocen tras la ejecución.
             progress_time: Duración del tramo de vídeo a procesar.
             total_steps: Número de pasos esperados de `showinfo` por stderr.
 
         Raises:
             CommandError: Si falla el cmd o se bloquea.
+            UserError: Si el usuario interrumpe la ejecución.
+            OsError: Si no se puede borrar una salida al abortar.
         """
 
         def _read_stdout() -> None:
@@ -130,17 +149,57 @@ class BasePipeline[ParamsT](ABC):
                     events.put(("stderr", line_))
             events.put(("stderr", None))  # sentinel: fin de stream
 
-        def _abort() -> None:
-            """Mata el proceso si no se ha recibido avance en el tiempo establecido."""
-            proc.kill()
-            proc.wait()
-            stderr_thread.join()
-            stdout_thread.join()
-            raise CommandError(
-                msg=_("FFmpeg command timed out: %(command_name)s")
-                % {"command_name": self.command_name}
-            )
+        def _finish_readers() -> None:
+            """Espera solo a los lectores iniciados antes de cerrar los pipes."""
+            for thread in (stderr_thread, stdout_thread):
+                if thread.ident is not None:
+                    thread.join()
+            if proc.stdout is not None:
+                proc.stdout.close()
+            if proc.stderr is not None:
+                proc.stderr.close()
 
+        def _abort(mode: _AbortMode) -> Never:
+            """Detiene el proceso y elimina las salidas antes de informar del error."""
+            if proc.poll() is None:
+                proc.kill()
+            proc.wait()
+            _finish_readers()
+
+            try:
+                for output in output_list:
+                    if output.exists():
+                        output.unlink()
+            except OSError as e:
+                raise OsError(msg=_("File could not be deleted.")) from e
+
+            match mode:
+                case _AbortMode.MANUAL:
+                    raise UserError(
+                        msg=_("FFmpeg command interrupted manually: %(command_name)s")
+                        % {"command_name": self.command_name}
+                    )
+                case _AbortMode.TIMEOUT:
+                    raise CommandError(
+                        msg=_("FFmpeg command timed out: %(command_name)s")
+                        % {"command_name": self.command_name}
+                    )
+                case _AbortMode.FFMPEG:
+                    tail = "".join(stderr_lines[-10:]).strip()
+                    detail = f"\nffmpeg stderr:\n{tail}" if tail else ""
+                    raise CommandError(
+                        msg=_("FFmpeg command failed during execution.") + detail
+                    )
+
+        if self.debug:
+            if not typer.confirm(text=_("Do you want to run this ffmpeg command?")):
+                self.logger.warning(msg=_("User decided to abort process."))
+                sys.exit(0)
+
+        stderr_lines: list[str] = []
+        events: queue.Queue[tuple[str, str | None]] = queue.Queue()
+        stdout_thread = threading.Thread(target=_read_stdout, daemon=True)
+        stderr_thread = threading.Thread(target=_read_stderr, daemon=True)
         proc = subprocess.Popen(
             args=cmd,
             stdout=subprocess.PIPE,
@@ -149,55 +208,47 @@ class BasePipeline[ParamsT](ABC):
             bufsize=1,
         )
 
-        assert proc.stdout is not None
-        assert proc.stderr is not None
-        stderr_lines: list[str] = []
-        events: queue.Queue[tuple[str, str | None]] = queue.Queue()
+        try:
+            assert proc.stdout is not None
+            assert proc.stderr is not None
+            stdout_thread.start()
+            stderr_thread.start()
 
-        stdout_thread = threading.Thread(target=_read_stdout, daemon=True)
-        stderr_thread = threading.Thread(target=_read_stderr, daemon=True)
-        stdout_thread.start()
-        stderr_thread.start()
+            with Progress() as progress:
+                if progress_time is not None:
+                    total: float | None = progress_time.total_seconds()
+                elif total_steps is not None:
+                    total = float(total_steps)
+                else:
+                    total = None
+                task = progress.add_task(description=description, total=total)
 
-        with Progress() as progress:
-            if progress_time is not None:
-                total: float | None = progress_time.total_seconds()
-            elif total_steps is not None:
-                total = float(total_steps)
-            else:
-                total = None
-            task = progress.add_task(description=description, total=total)
-
-            pending_streams = {"stdout", "stderr"}
-            completed_steps = 0
-            while pending_streams:
-                try:
+                pending_streams = {"stdout", "stderr"}
+                completed_steps = 0
+                while pending_streams:
                     source, line = events.get(timeout=self.config.app.stall_timeout)
-                except queue.Empty:
-                    _abort()
+                    if line is None:
+                        pending_streams.discard(source)
+                        continue
 
-                if line is None:
-                    pending_streams.discard(source)
-                    continue
+                    if progress_time is not None and line.startswith("out_time_ms="):
+                        value = line.partition("=")[2].strip()
+                        if value.isdigit():
+                            progress.update(
+                                task_id=task, completed=int(value) / 1_000_000
+                            )
+                    elif total_steps is not None and source == "stderr":
+                        completed_steps += 1
+                        progress.update(task_id=task, completed=completed_steps)
 
-                if progress_time is not None and line.startswith("out_time_ms="):
-                    value = line.partition("=")[2].strip()
-                    if value.isdigit():
-                        progress.update(task_id=task, completed=int(value) / 1_000_000)
-                elif total_steps is not None and source == "stderr":
-                    completed_steps += 1
-                    progress.update(task_id=task, completed=completed_steps)
-
-            if total is not None:
-                progress.update(task_id=task, completed=total)
-
-        proc.wait()
-        stderr_thread.join()
-        stdout_thread.join()
+                proc.wait()
+                _finish_readers()
+                if proc.returncode == 0 and total is not None:
+                    progress.update(task_id=task, completed=total)
+        except KeyboardInterrupt:
+            _abort(mode=_AbortMode.MANUAL)
+        except queue.Empty:
+            _abort(mode=_AbortMode.TIMEOUT)
 
         if proc.returncode != 0:
-            tail = "".join(stderr_lines[-10:]).strip()
-            detail = f"\nffmpeg stderr:\n{tail}" if tail else ""
-            raise CommandError(
-                msg=_("FFmpeg command failed during execution.") + detail
-            )
+            _abort(mode=_AbortMode.FFMPEG)

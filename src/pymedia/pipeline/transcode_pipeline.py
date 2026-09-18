@@ -136,6 +136,7 @@ class TranscodePipeline(BasePipeline[TranscodeParameters]):
             cmd=cmd,
             description=_("Transcoding container"),
             progress_time=self.params.media.duration,
+            output_list=[self.params.media_output],
         )
 
         self.logger.info(

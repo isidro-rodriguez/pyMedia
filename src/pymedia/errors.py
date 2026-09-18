@@ -105,6 +105,10 @@ class MissingPropertyError(PyMediaError):
         super().__init__(_("Missing property: %(name)s") % {"name": name})
 
 
+class OsError(PyMediaError):
+    """Errores de instrucciones solicitadas al sistema operativo."""
+
+
 # =============================================================================
 #  Errores de usuario
 # =============================================================================

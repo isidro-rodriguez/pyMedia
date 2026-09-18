@@ -33,6 +33,14 @@ class Channels(Enum):
     SURROUND = "5.1"
 
 
+class LanguageMode(Enum):
+    """Locales disponibles en la aplicación, códigos ISO 639-2."""
+
+    SYSTEM = "sys"
+    ENGLISH = "eng"
+    SPANISH = "spa"
+
+
 class OverwriteMode(Enum):
     """Resolución de conflicto si ya existe un fichero con el mismo nombre."""
 
