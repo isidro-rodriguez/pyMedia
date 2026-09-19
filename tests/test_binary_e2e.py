@@ -26,17 +26,11 @@ from test_cli import (
     stream_types,
 )
 
+pytestmark = pytest.mark.prod
+
 ROOT = Path(__file__).resolve().parents[1]
 BUILD_SCRIPT = ROOT / "scripts" / "build_windows.py"
 BINARY_PATH = ROOT / "build" / "pymedia.exe"
-
-pytestmark = [
-    pytest.mark.binary_e2e,
-    pytest.mark.skipif(
-        os.environ.get("PYMEDIA_BINARY_E2E", "").lower() not in {"1", "true", "yes"},
-        reason="compilar el binario tarda minutos: exporta PYMEDIA_BINARY_E2E=1",
-    ),
-]
 
 
 def run_binary(

@@ -76,9 +76,13 @@ convention = "google"
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 pythonpath = ["src"]
+# Registra la marca para evitar advertencias en consola
 markers = [
-    "binary_e2e: compila el binario PyInstaller y ejecuta el .exe (lento; requiere PYMEDIA_BINARY_E2E=1)",
+    "prod: tests exclusivos para release de producción",
 ]
+
+# Excluye la marca 'prod' por defecto en cualquier ejecución
+addopts = "-m 'not prod'"
 
 # Configuración de Mypy
 [tool.mypy]

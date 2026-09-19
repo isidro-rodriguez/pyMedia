@@ -20,6 +20,8 @@ from babel.messages.extract import extract_from_dir
 from babel.messages.mofile import read_mo, write_mo
 from babel.messages.pofile import read_po
 
+pytestmark = pytest.mark.prod
+
 _SRC_DIR = Path(__file__).resolve().parents[1] / "src"
 _LOCALEDIR = _SRC_DIR / "pymedia" / "locales"
 _DOMAIN = "pymedia"
