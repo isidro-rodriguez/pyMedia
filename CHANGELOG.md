@@ -6,6 +6,34 @@ Las versiones se han reconstruido a partir del histórico de
 Las versiones intermedias no registradas (0.2–0.4, 0.6–0.8) se agrupan
 con la sección anterior.
 
+## [0.18.0-beta.8] - 2026-09-19
+
+### Añadido
+
+- Soporte de salida APNG y WEBP animado en el comando `animated`, con
+  opciones por contenedor (`apng`: compresión 9 y reproducción infinita;
+  `webp`: `libwebp_anim` con pérdida, calidad 80 y bucle infinito;
+  `gif`: `-loop 0`)
+- Enum `ScaleFlag` con los modos de redimensionado de filtros ffmpeg
+  (`fast_bilinear`, `bilinear`, `bicubic`, `area`, `lanczos`, `spline`,
+  `neighbor`)
+- Rotación diaria del log con `TimedRotatingFileHandler`: rotación a
+  medianoche, conservando los últimos 7 días como ficheros con sufijo
+  de fecha (`%Y-%m-%d`)
+
+### Cambiado
+
+- El redimensionado en `animated` usa el filtro `scale` con
+  `flags=lanczos` para mayor calidad
+- `animated` genera la paleta del APNG con `palettegen
+  max_colors=256:stats_mode=diff` y dithering `sierra2_4a` (antes solo
+  se optimizaba la paleta del GIF)
+- `ScaleMixin.to_scale_cmd` y `FiltersMixin.to_filters_cmd` aceptan un
+  `scale_flag` opcional para añadir los flags de redimensionado al filtro
+- Logger: los valores interpolados en los mensajes (`%s`) se convierten
+  a texto y se escapan del markup de Rich, evitando errores de
+  renderizado con ficheros/paths que contienen corchetes
+
 ## [0.17.0-beta.7] - 2026-09-18
 
 ### Cambiado

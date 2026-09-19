@@ -64,6 +64,18 @@ class RotateMode(Enum):
     D270 = 270
 
 
+class ScaleFlag(Enum):
+    """Flags de modos de redimensionado en filtros ffmpeg."""
+
+    FAST_BILINEAR = "fast_bilinear"
+    BILINEAR = "bilinear"
+    BICUBIC = "bicubic"
+    AREA = "area"
+    LANCZOS = "lanczos"
+    SPLINE = "spline"
+    NEIGHBOR = "neighbor"
+
+
 class ScaleMode(Enum):
     """Modo de redimensionado."""
 

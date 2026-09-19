@@ -7,7 +7,7 @@ from pymedia.mixins.crop_mixin import CropMixin
 from pymedia.mixins.flip_mixin import FlipMixin
 from pymedia.mixins.rotate_mixin import RotateMixin
 from pymedia.mixins.scale_mixin import ScaleMixin
-from pymedia.types import RotateMode, ScaleMode
+from pymedia.types import RotateMode, ScaleFlag, ScaleMode
 
 
 @dataclass(kw_only=True)
@@ -54,8 +54,11 @@ class FiltersMixin(CropMixin, ScaleMixin, RotateMixin, FlipMixin):
         self.hflip = hflip
         self.vflip = vflip
 
-    def to_filters_cmd(self) -> str:
+    def to_filters_cmd(self, scale_flag: ScaleFlag | None = None) -> str:
         """Devuelve la cadena de filtros lista para el consumo de ffmpeg.
+
+        Args:
+            scale_flag: Modo de redimensionado en filtro de comando ffmpeg.
 
         Returns:
             Cadena con los filtros separados por coma, o una cadena vacía
@@ -67,7 +70,7 @@ class FiltersMixin(CropMixin, ScaleMixin, RotateMixin, FlipMixin):
             filters.append(self.to_crop_cmd())
 
         if self.scale_to is not None:
-            scale_filter = self.to_scale_cmd()
+            scale_filter = self.to_scale_cmd(scale_flag=scale_flag)
             if scale_filter is not None:
                 filters.append(scale_filter)
 

@@ -12,7 +12,7 @@ from pymedia.errors import (
 from pymedia.locales import _  # noqa
 from pymedia.logger import Logger
 from pymedia.models.media import Media
-from pymedia.types import Dimensions, ScaleMode
+from pymedia.types import Dimensions, ScaleFlag, ScaleMode
 
 
 class _Dimension(Enum):
@@ -66,8 +66,11 @@ class ScaleMixin:
             scale_str=scale_to, media=media, logger=logger
         )
 
-    def to_scale_cmd(self) -> str | None:
+    def to_scale_cmd(self, scale_flag: ScaleFlag | None = None) -> str | None:
         """Devuelve el valor de escala como filtro listo para el consumo de ffmpeg.
+
+        Args:
+            scale_flag: Modos de redimensionados a aplicar en filtros ffmpeg.
 
         Returns:
             String con el filtro listo para un comando ffmpeg. La dimensión no
@@ -78,7 +81,13 @@ class ScaleMixin:
             return None
         width = self.scale_to.width if self.scale_to.width != 0 else -2
         height = self.scale_to.height if self.scale_to.height != 0 else -2
-        return f"scale={width}:{height}"
+
+        if scale_flag is not None:
+            to_scale_cmd = f"scale={width}:{height}:flags={scale_flag.value}"
+        else:
+            to_scale_cmd = f"scale={width}:{height}"
+
+        return to_scale_cmd
 
     def _process_scale(
         self, scale_str: str, media: Media, logger: Logger

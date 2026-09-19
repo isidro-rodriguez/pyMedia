@@ -5,12 +5,14 @@ Rich y un handler de fichero en el directorio de configuración del usuario.
 """
 
 import logging
+from logging.handlers import TimedRotatingFileHandler
 from pathlib import Path
-from typing import Self
+from typing import Any, Self
 
 import platformdirs
 from rich.console import Console, RenderableType
 from rich.logging import RichHandler
+from rich.markup import escape
 from rich.pretty import pretty_repr
 
 
@@ -49,6 +51,7 @@ class Logger:
         root = logging.getLogger()
         root.setLevel(level)
 
+        # Handler de Consola con Rich
         console = RichHandler(
             console=cls._console,
             show_time=False,
@@ -61,6 +64,7 @@ class Logger:
         console.addFilter(_DestinationFilter("to_console"))
         root.addHandler(console)
 
+        # Ruta del archivo de log
         log_path = (
             Path(
                 platformdirs.user_config_dir(
@@ -70,9 +74,21 @@ class Logger:
             / "logging.log"
         )
         log_path.parent.mkdir(parents=True, exist_ok=True)
-        file_handler = logging.FileHandler(filename=log_path, encoding="utf-8")
+
+        file_handler = TimedRotatingFileHandler(
+            filename=log_path,
+            when="midnight",  # Rotación cada día a medianoche
+            interval=1,  # Intervalo de 1 día
+            backupCount=7,  # Mantiene los últimos 7 días de historial
+            encoding="utf-8",
+        )
+        file_handler.suffix = "%Y-%m-%d"
+
         file_handler.setFormatter(
-            logging.Formatter("%(asctime)s %(levelname)-8s %(msg)s")
+            logging.Formatter(
+                fmt="%(asctime)s %(levelname)-8s %(msg)s",
+                datefmt="%Y-%m-%d %H:%M:%S",  # <-- Sin milisegundos
+            )
         )
         file_handler.addFilter(_DestinationFilter("to_file"))
         root.addHandler(file_handler)
@@ -175,11 +191,13 @@ class Logger:
             **kwargs: Valores para interpolar en `msg` vía `%`.
         """
 
-        def _prettify(value: object) -> object:
-            """Convierte dicts/lists/tuples/sets en texto multilínea legible."""
+        def _prettify(value: Any) -> object:
+            """Convierte en texto multilínea legible y escapa el markup."""
             if isinstance(value, (dict, list, tuple, set)):
-                return pretty_repr(_object=value, indent_size=2, expand_all=True)
-            return value
+                rendered = pretty_repr(_object=value, indent_size=2, expand_all=True)
+            else:
+                rendered = str(value)
+            return escape(rendered)
 
         kwargs = {name: _prettify(value) for name, value in kwargs.items()}
         self._log(
