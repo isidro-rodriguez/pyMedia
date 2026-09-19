@@ -29,18 +29,16 @@ repos:
         types: [python]
         pass_filenames: false
 
-      - id: pytest
-        name: Pytest (tests)
+      - id: pytest-development
+        name: Pytest (desarrollo)
         entry: uv run pytest
         language: system
         types: [python]
         pass_filenames: false
 
-      - id: pytest-binary-e2e
-        name: Pytest binario PyInstaller (E2E)
-        entry: uv run pytest tests/test_binary_e2e.py -v
+      - id: pytest-production
+        name: Pytest (producción)
+        entry: uv run pytest -m prod
         language: system
         types: [python]
         pass_filenames: false
-        env:
-          PYMEDIA_BINARY_E2E: "1"
