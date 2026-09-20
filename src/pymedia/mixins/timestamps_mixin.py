@@ -159,8 +159,12 @@ class TimestampAtMixin:
                 raise UserError(
                     msg=_("Time %(time)s is a duplicated timestamp.") % {"time": time}
                 )
+            for t in times:
+                if time < t:
+                    raise UserError(
+                        _("The list of timestamps must be in ascending order.")
+                    )
             times.append(time)
-        times.sort()
 
         self.timestamp_at = times
 

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-09-20 07:06+0100\n"
+"POT-Creation-Date: 2026-09-20 10:47+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -1452,11 +1452,15 @@ msgstr "Marcas de tiempo no válidas. Inicio (%(start)s) => Fin (%(end)s.)"
 msgid "Time %(time)s is a duplicated timestamp."
 msgstr "El tiempo %(time)s es una marca de tiempo duplicada."
 
-#: pymedia/mixins/timestamps_mixin.py:183
+#: pymedia/mixins/timestamps_mixin.py:165
+msgid "The list of timestamps must be in ascending order."
+msgstr "La lista de marcas de tiempo debe estar en orden ascendente."
+
+#: pymedia/mixins/timestamps_mixin.py:187
 msgid "Invalid timestamp format. Expected: hh:mm:ss."
 msgstr "Formato de marca de tiempo no válido. Esperado: hh:mm:ss."
 
-#: pymedia/mixins/timestamps_mixin.py:207
+#: pymedia/mixins/timestamps_mixin.py:211
 #, python-format
 msgid "Timestamp %(time)s exceeds video duration %(duration)s."
 msgstr "La marca de tiempo %(time)s supera la duración del vídeo %(duration)s."

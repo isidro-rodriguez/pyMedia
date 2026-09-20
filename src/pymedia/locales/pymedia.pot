@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-09-20 07:06+0100\n"
+"POT-Creation-Date: 2026-09-20 10:46+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -1212,11 +1212,15 @@ msgstr ""
 msgid "Time %(time)s is a duplicated timestamp."
 msgstr ""
 
-#: pymedia/mixins/timestamps_mixin.py:183
+#: pymedia/mixins/timestamps_mixin.py:165
+msgid "The list of timestamps must be in ascending order."
+msgstr ""
+
+#: pymedia/mixins/timestamps_mixin.py:187
 msgid "Invalid timestamp format. Expected: hh:mm:ss."
 msgstr ""
 
-#: pymedia/mixins/timestamps_mixin.py:207
+#: pymedia/mixins/timestamps_mixin.py:211
 #, python-format
 msgid "Timestamp %(time)s exceeds video duration %(duration)s."
 msgstr ""
