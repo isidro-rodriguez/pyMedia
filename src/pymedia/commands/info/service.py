@@ -92,7 +92,7 @@ class InfoService(BaseService[InfoParameters]):
             table.add_column(header=_("Codec"), ratio=2, justify="center")
             table.add_column(header=_("Sample rate"), ratio=2, justify="center")
             table.add_column(header=_("Channels"), ratio=1, justify="center")
-            table.add_column(header=_("Locale"), ratio=1, justify="center")
+            table.add_column(header=_("Language"), ratio=1, justify="center")
 
             for track in audio:
                 if track.track_index is None:
@@ -112,7 +112,7 @@ class InfoService(BaseService[InfoParameters]):
             """Construye la tabla de metadatos de las pistas de subtítulos."""
             table = Table(title=f"💬 {_('Subtitles')}", expand=True)
             table.add_column(header=_("Track"), ratio=1, justify="center")
-            table.add_column(header=_("Locale"), ratio=2, justify="center")
+            table.add_column(header=_("Language"), ratio=2, justify="center")
             table.add_column(header=_("Title"), ratio=2, justify="center")
             table.add_column(header=_("Forced"), ratio=1, justify="center")
             table.add_column(header=_("Default"), ratio=1, justify="center")

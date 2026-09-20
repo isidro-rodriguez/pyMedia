@@ -20,7 +20,7 @@ por perfiles y edición de pistas de audio y subtítulos.
   metadatos de idioma, título, _default_, _forced_, etc.
 - **Capturas**: fotogramas en marcas concretas (`frames`), por intervalos
   (`interval`) o por cambios de escena (`scene`).
-- **Imágenes animadas**: conversión de fragmentos de vídeo a GIF (`animated`).
+- **Imágenes animadas**: conversión de fragmentos de vídeo a imágenes animadas (`animated`).
 - **Barra de progreso** de Rich y detección de bloqueos de ffmpeg
   (`stall_timeout`).
 - **Multilingüe**: interfaz en inglés y español (gettext).
@@ -60,10 +60,10 @@ Compila con pyInstaller un único `build/pymedia.exe` con icono incluido.
 
 ## Uso rápido
 
-```console
-$ pymedia --help
-$ pymedia --version    # muestra versión, Python y plataforma y sale
-$ pymedia <comando> --help     # ayuda detallada de cada comando
+```bash
+pymedia --help
+pymedia --version    # muestra versión, Python y plataforma y sale
+pymedia <comando> --help     # ayuda detallada de cada comando
 ```
 
 | Comando         | Ejemplo                                                           |
@@ -102,13 +102,12 @@ $ pymedia <comando> --help     # ayuda detallada de cada comando
 | `join`      | Une varios vídeos consecutivamente en un único contenedor (_mínimo 2_).                                                                                  |
 | `cut`       | Recorta una sección con `--start`/`--end` o divide el vídeo por marcas de tiempo `--at hh:mm:ss[,hh:mm:ss,...]`.                                         |
 
-
 ### Audio
 
 | Comando         | Acción                                                                                                           |
 | --------------- | ---------------------------------------------------------------------------------------------------------------- |
 | `add-audio`     | Añade una pista de audio al contenedor.                                                                          |
-| `delete-audio`  | Elimina pistas (`--tracks 1,2`), sin `--tracks` elimina todas.                                                   |
+| `delete-audio`  | Elimina pistas (`--tracks 1,2`).                                                                                 |
 | `edit-audio`    | Edita metadatos de la pista `--track N` (idioma, título, _default_, _forced_, _commentary_, _hearing-impaired_). |
 | `extract-audio` | Extrae pistas a fichero de audio independiente (`--tracks por defecto todas`).                                   |
 
@@ -217,9 +216,9 @@ de `transcode` los selecciona por nombre.
 
 |      | AV1 | H.264 | H.265 | AAC | E-AC-3 | Opus | ASS | SRT | SSA |
 |------|:---:|:-----:|:-----:|:---:|:------:|:----:|:---:|:---:|:---:|
-| MKV  | ✓  |  ✓   |  ✓   | ✓  |   ✓   |  ✓  | ✓  | ✓  | ✓  |
-| MP4  | ✓  |  ✓   |  ✓   | ✓  |   ✓   |  ⚠  |     | ⚠  |     |
-| WebM | ✓  |       |       |     |        |  ✓  |     |     |     |
+| MKV  | ✓   |  ✓    |  ✓    | ✓   |   ✓    |  ✓   | ✓   | ✓   | ✓   |
+| MP4  | ✓   |  ✓    |  ✓    | ✓   |   ✓    |  ⚠   |     | ⚠   |     |
+| WebM | ✓   |       |       |     |        |  ✓   |     |     |     |
 
 > ⚠ = Soporte según versión de ffmpeg/reproductor. Para subtítulos, MP4
 > transcodifica `SRT` a `mov_text`.
@@ -228,9 +227,9 @@ de `transcode` los selecciona por nombre.
 
 |     | AAC | ALAC | FLAC | Opus | MP3 |
 |-----|:---:|:----:|:----:|:----:|:---:|
-| MKA | ✓  |  ✓  |  ✓  |  ✓  | ✓  |
-| M4A | ✓  |  ✓  |      |  ⚠  |     |
-| OGG |     |      |  ✓  |  ✓  | ⚠  |
+| MKA | ✓   |  ✓   |  ✓   |  ✓   | ✓   |
+| M4A | ✓   |  ✓   |      |  ⚠   |     |
+| OGG |     |      |  ✓   |  ✓   | ⚠   |
 
 > ⚠ = Soporte parcial/no universal, evitar si buscas compatibilidad amplia.
 
@@ -274,14 +273,15 @@ uv run pytest tests/test_locales.py tests/test_locale_manager.py
 ### Generadores de media de prueba
 
 ```bash
-uv run python scripts/video_simple.py    # simple.mp4 (AV1 1280x720, 30 s)
-uv run python scripts/video_metadata.py  # metadata.mkv (6 audio + 6 subtítulos)
-uv run python scripts/audio_tracks.py    # pistas de audio en .local/fixtures/audio/
+uv run python scripts/fixtures/video_simple.py      # simple.mp4 (AV1 1280x720, 30 s)
+uv run python scripts/fixtures/video_metadata.py    # metadata.mkv (6 audio + 6 subtítulos)
+uv run python scripts/fixtures/audio_tracks.py      # pistas de audio
+uv run python scripts/fixtures/subtitles_tracks.py  # pistas de subtítulos
 ```
 
 ### Otros scripts
 
-- `scripts/build_windows.py` — compila `build/pymedia.exe` (pyinstaller onefile).
+- `scripts/build.py` — compila `build/pymedia.exe` en Windows y `build/pymedia` en Linux(pyinstaller onefile).
 - `scripts/backup.py` — copia de seguridad de `src/`, `tests/` y `scripts/` en `.local/backup.zip`.
 
 ## Estructura del proyecto
@@ -289,10 +289,11 @@ uv run python scripts/audio_tracks.py    # pistas de audio en .local/fixtures/au
 ```shell
 pyMedia/
 ├── src/pymedia/
+│   ├── commands/         # Lógica de subcomandos de pyMedia
 │   ├── data/             # Catálogos de códecs, contenedores, formatos y lenguas
+│   ├── mixins/           # Mixins utilizados por los parámetros de los comandos
 │   ├── models/           # Dataclasses de parámetros y mixins de validación
 │   ├── commands/         # Cada comando CLI: cli, parameters, cmd, service
-│   ├── typer/            # CLI Typer: punto de entrada, opciones y textos de ayuda
 │   ├── locales/          # Catálogos gettext (pymedia.pot, es/)
 │   ├── resources/        # config.toml, iconos, man page y .desktop
 │   ├── ffprobe.py        # Herramienta Ffprobe para consulta de metadatos

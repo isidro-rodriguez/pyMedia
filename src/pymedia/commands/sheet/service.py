@@ -7,7 +7,6 @@ from pymedia.commands.base_service import BaseService
 from pymedia.commands.sheet.cmd import SheetCmd
 from pymedia.commands.sheet.parameters import SheetParameters
 from pymedia.errors import (
-    CommandGenerationError,
     MissingParameterError,
     MissingPropertyError,
 )
@@ -44,14 +43,6 @@ class SheetService(BaseService[SheetParameters]):
             snapshots_cmd = sheet_instance.create_snapshots()
             header_cmd = sheet_instance.create_header()
 
-            if snapshots_cmd is None:
-                raise CommandGenerationError(name="generate_sheet_cmd")
-            self.logger.debug(msg=_("FFmpeg command: %(cmd)s"), cmd=snapshots_cmd)
-
-            if header_cmd is None:
-                raise CommandGenerationError(name="generate_header_cmd")
-            self.logger.debug(msg=_("FFmpeg command: %(cmd)s"), cmd=header_cmd)
-
             self.run_ffmpeg(
                 cmd=snapshots_cmd,
                 description=_("Generating sheet snapshots"),
@@ -66,6 +57,6 @@ class SheetService(BaseService[SheetParameters]):
             )
 
         self.logger.info(
-            msg=_("Metadata generated successfully: %(output)s"),
+            msg=_("Sheet generated successfully: %(output)s"),
             output=self.params.image_output,
         )

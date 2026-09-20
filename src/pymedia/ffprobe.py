@@ -13,18 +13,7 @@ from pymedia.logger import Logger
 
 
 def _run_ffprobe(args: list[str], path: Path) -> dict[str, Any]:
-    """Ejecuta ffprobe y devuelve su JSON, con un error breve si falla.
-
-    Args:
-        args: Argumentos adicionales para ffprobe.
-        path: Ruta del fichero a analizar.
-
-    Raises:
-        FfprobeError: Si ffprobe no está instalado o no puede leer el fichero.
-
-    Returns:
-        Diccionario con la salida JSON de ffprobe.
-    """
+    """Ejecuta ffprobe y devuelve su JSON, con un error breve si falla."""
     cmd = ["ffprobe", "-v", "error", "-print_format", "json", *args, str(path)]
     try:
         result = subprocess.run(
@@ -130,9 +119,6 @@ def validate_subtitles_file_codec(subtitles_input: Path, logger: Logger) -> None
         FfprobeError: Si ffprobe no puede leer el archivo, no detecta un
             formato de subtítulos conocido, o el formato detectado no es
             compatible con la extensión del archivo.
-
-    Returns:
-        Nombre del códec de subtítulos detectado y validado.
     """
     data = _run_ffprobe(["-show_format"], subtitles_input)
     logger.debug(msg=_("ffprobe subtitles file data: %(data)s"), data=data)

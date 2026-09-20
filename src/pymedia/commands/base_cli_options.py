@@ -32,6 +32,7 @@ AudioArgument = Annotated[
     Path,
     typer.Argument(
         help=_("Audio track to insert in a media container."),
+        metavar="AUDIO_FILE",
         callback=validate_path,
     ),
 ]
@@ -40,6 +41,7 @@ MediaInputArgument = Annotated[
     Path,
     typer.Argument(
         help=_("Video to process."),
+        metavar="MEDIA_FILE",
         callback=validate_path,
     ),
 ]
@@ -48,6 +50,7 @@ MediaInputListArgument = Annotated[
     list[Path],
     typer.Argument(
         help=_("Video list to process."),
+        metavar="MEDIA_FILE MEDIA_FILE ...",
         callback=validate_path_list,
     ),
 ]
@@ -56,6 +59,7 @@ SubtitlesArgument = Annotated[
     Path,
     typer.Argument(
         help=_("Subtitles to insert in a media container."),
+        metavar="SUBTITLES_FILE",
         callback=validate_path,
     ),
 ]

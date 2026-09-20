@@ -37,10 +37,21 @@ Código simple, legible, stdlib antes que dependencias nuevas.
 
 ## Pre-commit checklist (orden estricto, detener en el primer fallo)
 
-1. `ruff check --fix`
-2. `ruff format`
-3. `ruff check`
-4. `mypy --strict`
-5. `pytest`
-6. Comprobar VERSION, parar si se han añadido características sin aumentar versión
-7. Si VERSION incrementada, actualizar CHANGELOG y README
+```bash
+uv run ruff format
+uv run ruff check --fix
+uv run ruff check
+uv run mypy --strict
+uv run pytest
+uv run pytest -m locales
+# Si se ha tocado mensajes:
+uv run python scripts/i18n.py extract
+uv run python scripts/i18n.py update -l es
+uv run python scripts/i18n.py compile -l es
+uv run python scripts/i18n.py check
+# Test de compilación
+uv run pytest -q -m prod
+# Comprobar versión: 
+# - Parar si se han añadido características sin incrementar versión
+# - Si se ha incrementado versión, actualizar CHANGELOG.md y README.md
+```
