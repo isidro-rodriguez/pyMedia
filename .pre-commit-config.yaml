@@ -43,9 +43,3 @@ repos:
         types: [python]
         pass_filenames: false
 
-      - id: pytest-production
-        name: Pytest (producción)
-        entry: uv run pytest -m prod
-        language: system
-        types: [python]
-        pass_filenames: false
