@@ -6,6 +6,28 @@ Las versiones se han reconstruido a partir del histórico de
 Las versiones intermedias no registradas (0.2–0.4, 0.6–0.8) se agrupan
 con la sección anterior.
 
+## [0.19.2-beta.9] - 2026-09-20
+
+### Añadido
+
+- `feat(cli)`: validación especializada por tipo de medio en comandos con listado de entradas (`transcode`, `sheet`, `join`)
+- `feat(remux)`: mejoras en la gestión de pistas y compatibilidad de subtítulos
+- `feat(commands)`: parámetros de configuración exclusiva integrados en comandos de audio (`add-audio`) y subtítulos (`add-subs`)
+
+### Cambiado
+
+- `chore`: mejorados mensajes de localización
+- `refactor(cli)`: mejorada la validación de opciones requeridas y tipos de argumentos en comandos de edición de audio y subtítulos
+- `refactor(join)`: reordenada la validación de compatibilidad de medios, eliminando comprobación redundante de `format_name`
+- `docs`: documentación, localización y configuración del proyecto actualizadas (README, `pyproject.toml`, páginas de ayuda)
+- `chore`: corrección de tipado, mejora del etiquetado en pistas de audio y subtítulos, actualización de tests
+
+### Corregido
+
+- `fix(core)`: mejorada la validación de marcas de tiempo y consistencia de extensiones
+- `fix`: corrección a los mensajes de entradas de marcas de tiempo incorrectas
+- `fix`: aplicación de la misma política `overwrite` a comandos de imágenes (`frames`, `interval`, `scene`)
+
 ## [0.19.1-beta.9] - 2026-09-20
 
 ### Cambiado
