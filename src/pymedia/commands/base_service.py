@@ -97,7 +97,9 @@ class BaseService[ParamsT](ABC):
                 if params.overwrite == OverwriteMode.NO:
                     self.logger.warning(process_skip_msg)
                     return False
-                self.logger.warning(_(f"Output file already exists: {output.name}"))
+                self.logger.warning(
+                    _("Output file already exists: %(name)s") % {"name": output.name}
+                )
                 if typer.confirm(_("Overwrite?")):
                     params.overwrite = OverwriteMode.YES
                     return True
@@ -195,6 +197,17 @@ class BaseService[ParamsT](ABC):
                 self.logger.warning(msg=_("User decided to abort process."))
                 sys.exit(0)
 
+        # ffmpeg no debe preguntar por su cuenta (el prompt queda oculto tras la
+        # barra de progreso y bloquea): la política ya se resolvió en el servicio.
+        if Path(cmd[0]).stem == "ffmpeg":
+            overwrite = getattr(getattr(self, "params", None), "overwrite", None)
+            cmd = [
+                cmd[0],
+                "-nostdin",
+                "-y" if overwrite == OverwriteMode.YES else "-n",
+                *(arg for arg in cmd[1:] if arg not in ("-y", "-n")),
+            ]
+
         stderr_lines: list[str] = []
         events: queue.Queue[tuple[str, str | None]] = queue.Queue()
         stdout_thread = threading.Thread(target=_read_stdout, daemon=True)
@@ -203,7 +216,9 @@ class BaseService[ParamsT](ABC):
             args=cmd,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
+            stdin=subprocess.DEVNULL,
             text=True,
+            errors="replace",
             bufsize=1,
         )
 

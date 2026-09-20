@@ -56,8 +56,11 @@ def english_locale() -> None:
 
 @pytest.fixture
 def runner() -> CliRunner:
-    """CliRunner para invocar la CLI tal como lo haría un usuario."""
-    return CliRunner()
+    """CliRunner para invocar la CLI tal como lo haría un usuario.
+
+    `COLUMNS` amplio evita que Rich parta los mensajes con rutas largas.
+    """
+    return CliRunner(env={"COLUMNS": "300"})
 
 
 @pytest.fixture(scope="session")

@@ -6,7 +6,7 @@ Las versiones se han reconstruido a partir del histórico de
 Las versiones intermedias no registradas (0.2–0.4, 0.6–0.8) se agrupan
 con la sección anterior.
 
-## [0.19.0-beta.9] - 2026-09-20
+## [0.19.1-beta.9] - 2026-09-20
 
 ### Cambiado
 
@@ -20,9 +20,24 @@ con la sección anterior.
 
 ### Corregido
 
-- Test `test_add_subs_error_invalid_subtitles_file`: normalización
-  de la salida de ffprobe (elimina saltos de línea y espacios extra)
-  para validar el mensaje de error de forma robusta.
+- La salida ya no puede coincidir con un fichero de entrada (antes `remux`/`cut`
+  con `-o` igual a la entrada borraban el original al fallar ffmpeg)
+- `transcode` conserva los subtítulos (a `mov_text` en MP4; los gráficos se
+  descartan) y mantiene el orden vídeo, audio, subtítulos
+- `join` copia todas las pistas (`-map 0`) y cita siempre las rutas del listado
+- ffmpeg se lanza con `-nostdin` y `-y`/`-n` según la política `--overwrite`:
+  `no` y `ask` ya no cuelgan hasta el `stall_timeout`
+- `frames`: ruta de salida real (protección de sobrescritura y mensajes) y
+  aviso si no se captura ningún fotograma
+- `scene`: regex de capturas existentes (`\d{3}` en f-string), valor por
+  defecto `--scene 0.3` y aviso si no hay cambios de escena
+- `interval`: nombres esperados `_001…`, `--every` obligatorio y >= 1
+- `FfprobeError` es un error de usuario (sin traceback ni banner de ffprobe) y
+  se avisa si ffmpeg/ffprobe no están en el `PATH`
+- Detección de idioma con precedencia POSIX (`LANGUAGE > LC_ALL > LC_MESSAGES >
+  LANG`)
+- `cut` informa del número correcto de ficheros; textos y ejemplos de ayuda
+  corregidos; mensaje de sobrescritura traducible
 
 ### Interno
 

@@ -41,7 +41,7 @@ class IntervalService(BaseService[IntervalParameters]):
 
         self.logger.info(
             msg=_("Thumbnail(s) generated successfully: %(output)s"),
-            output=self.params.image_output,
+            output=str(self.params.image_output).replace("%03d", "*"),
         )
 
     def _expected_outputs(self) -> list[Path]:
@@ -59,6 +59,6 @@ class IntervalService(BaseService[IntervalParameters]):
 
         frames = media.duration.total_seconds() * float(fps)
         return [
-            Path(str(output).replace("_%03d", f"_{i:3d}"))
-            for i in range(math.floor(frames))
+            Path(str(output).replace("_%03d", f"_{i:03d}"))
+            for i in range(1, math.floor(frames) + 1)
         ]

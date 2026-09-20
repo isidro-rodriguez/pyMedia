@@ -39,12 +39,9 @@ class JoinService(BaseService[JoinParameters]):
             with list_txt.open(mode="w", encoding="utf-8", newline="\n") as file:
                 for media in self.params.media_list:
                     path_str = media.path.as_posix()
-                    # Escapa la inscripción del fichero, ya que tiene que ir entre ''.
-                    if " " in path_str or "'" in path_str:
-                        escaped = path_str.replace("'", "'\\''")
-                        file.write(f"file '{escaped}'\n")
-                    else:
-                        file.write(f"file {path_str}\n")
+                    # Siempre entre comillas: `#`, `\` o espacios rompen el demuxer.
+                    escaped = path_str.replace("'", "'\\''")
+                    file.write(f"file '{escaped}'\n")
             cmd = JoinCmd(params=self.params).create(list_txt=list_txt)
 
             self.logger.debug(

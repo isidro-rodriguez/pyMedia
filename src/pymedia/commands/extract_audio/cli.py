@@ -28,7 +28,7 @@ You can consult what audio tracks have a container with `info` command.
   Extract a list of audio tracks from a media file: 
     > pymedia extract-audio input.mp4 --tracks 1,2
   Extract audio tracks with custom output:
-    > pymedia extract-audio input.mp4 --tracks 1,2 -o input-audio.aac
+    > pymedia extract-audio input.mp4 --tracks 1,2 -o input-audio.m4a
 """  # noqa
 )
 

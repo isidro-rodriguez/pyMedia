@@ -61,10 +61,6 @@ class ConfigError(PyMediaError):
     """Error de validación de la configuración de la aplicación."""
 
 
-class FfprobeError(PyMediaError):
-    """Errores relacionados con ffprobe/obtención de metadatos."""
-
-
 class InvalidParameterError(PyMediaError):
     """Error por un parámetro procesado con un valor no válido."""
 
@@ -130,6 +126,10 @@ class UserError(BadParameter):
         self.msg = f"{msg}"
         super().__init__(message=self.msg)
         logger.error(msg=self.msg, console=False)
+
+
+class FfprobeError(UserError):
+    """Errores de ffprobe al leer un fichero (sin traceback para el usuario)."""
 
 
 class InvalidCodecContainerError(UserError):

@@ -9,7 +9,7 @@ from dataclasses import dataclass
 from pathlib import Path
 
 DURATION_SECONDS = 30
-OUTPUT_DIR = Path("fixtures")
+OUTPUT_DIR = Path("audio_test")
 
 
 @dataclass(frozen=True, slots=True)

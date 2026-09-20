@@ -36,7 +36,7 @@ class SceneService(BaseService[SceneParameters]):
             raise MissingParameterError(name="image_output")
         template = output.with_stem(f"{output.stem}_%03d")
 
-        if self.params.overwrite == OverwriteMode.ASK and not self._confirm_overwrite(
+        if self.params.overwrite != OverwriteMode.YES and not self._confirm_overwrite(
             output_template=template
         ):
             return
@@ -50,9 +50,15 @@ class SceneService(BaseService[SceneParameters]):
             output_list=self._expected_outputs(template=template),
         )
 
+        if not any(self._expected_outputs(template=template)):
+            self.logger.warning(
+                _("No scene changes detected: no thumbnails generated.")
+            )
+            return
+
         self.logger.info(
             msg=_("Thumbnail(s) generated successfully: %(output)s"),
-            output=self.params.image_output,
+            output=str(template).replace("%03d", "*"),
         )
 
     def _confirm_overwrite(self, output_template: Path) -> bool:
@@ -67,7 +73,7 @@ class SceneService(BaseService[SceneParameters]):
         base_stem = match.group(1)
 
         directory = output_template.parent
-        pattern = re.compile(rf"^{re.escape(base_stem)}_(\d{3}){re.escape(suffix)}$")
+        pattern = re.compile(rf"^{re.escape(base_stem)}_(\d{{3}}){re.escape(suffix)}$")
 
         existing_files = []
         if directory.exists():
@@ -80,11 +86,14 @@ class SceneService(BaseService[SceneParameters]):
                 _("Found existing scene thumbnail files: %(files)s")
                 % {"files": ", ".join(f.name for f in existing_files)}
             )
-            if not typer.confirm(_("Overwrite?")):
+            if self.params.overwrite == OverwriteMode.NO or not typer.confirm(
+                _("Overwrite?")
+            ):
                 self.logger.warning(
                     _("Process skipped since output files already exist.")
                 )
                 return False
+            self.params.overwrite = OverwriteMode.YES
         return True
 
     def _expected_outputs(self, template: Path) -> Iterator[Path]:

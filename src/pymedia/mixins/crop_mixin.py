@@ -94,7 +94,7 @@ class CropMixin:
                 raise UserError(
                     msg=_(
                         "Invalid crop area. Area width (%(area_width)s) and coordinate "
-                        "X (%(area_x)s) is bigger that video width (%(video_width)s) "
+                        "X (%(area_x)s) is bigger than video width (%(video_width)s) "
                     )
                     % {
                         "area_width": crop_area.width,
@@ -107,7 +107,7 @@ class CropMixin:
                 raise UserError(
                     msg=_(
                         "Invalid crop area. Area height (%(area_height)s) and "
-                        "coordinate Y (%(area_y)s) is bigger that video height "
+                        "coordinate Y (%(area_y)s) is bigger than video height "
                         "(%(video_height)s) "
                     )
                     % {

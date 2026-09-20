@@ -58,15 +58,19 @@ class TranscodeCmd:
         if filter_chain != "":
             cmd.extend(["-filter_complex", f"{filter_chain}[v]"])
 
-        if self.params.media.audio is not None:
-            cmd.extend([*self.params.to_audio_transcode_cmd()])
-
+        # Orden de salida estable: vídeo, audios y subtítulos.
         if self.params.media.video is not None:
             video_map = "[v]" if filter_chain != "" else "0:v:0"
             cmd.extend(["-map", video_map])
 
+        if self.params.media.audio is not None:
+            cmd.extend([*self.params.to_audio_transcode_cmd()])
+
         cmd.extend(
             [
+                *self.params.to_subtitles_copy_cmd(
+                    container=self.params.media_output.suffix
+                ),
                 *self.params.to_video_transcode_cmd(),
                 "-progress",
                 "pipe:1",

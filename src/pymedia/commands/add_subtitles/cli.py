@@ -34,7 +34,7 @@ You can consult what subtitles tracks have a container with `info` command.
   Add english subtitles to a media container:
     > pymedia add-subs input.mp4 eng_subs.srt --language eng
   Add default forced spanish subtitles with custom title: 
-    > pymedia add-subs input.mp4 eng_subs.srt --language spa --title "Español (forced)" --default --forced
+    > pymedia add-subs input.mp4 spa_subs.srt --language spa --title "Español (forced)" --default --forced
 """  # noqa
 )
 

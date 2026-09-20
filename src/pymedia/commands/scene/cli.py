@@ -57,7 +57,7 @@ def scene(
     media_input: MediaInputArgument,
     output: OutputOption = None,
     overwrite: OverwriteOption = OverwriteMode.YES,
-    scene: SceneOption = None,
+    scene: SceneOption = 0.3,
     timestamp_start: TimestampStartThumbnailOption = None,
     timestamp_end: TimestampEndThumbnailOption = None,
     crop: CropOption = None,

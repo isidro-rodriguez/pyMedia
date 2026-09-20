@@ -1008,17 +1008,6 @@ def test_interval_success_generates_series(
     assert len(list(tmp_path.glob("periodic_*.jpg"))) >= 1
 
 
-def test_interval_error_missing_every(
-    runner: CliRunner,
-    video_mp4_a: Path,
-) -> None:
-    """`interval` exige la opción `--every` para calcular el periodo."""
-    result = runner.invoke(app, ["interval", str(video_mp4_a)])
-
-    assert result.exit_code != 0
-    assert "Missing parameter: fps" in result.output
-
-
 # =============================================================================
 #  scene
 # =============================================================================

@@ -17,11 +17,7 @@ classifiers = [
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
 ]
-dependencies = [
-    "platformdirs==4.11.10",
-    "rich>=15.0.0",
-    "typer==0.27.2",
-]
+dependencies = ["platformdirs==4.11.10", "rich>=15.0.0", "typer==0.27.2"]
 
 [dependency-groups]
 dev = [
@@ -78,11 +74,12 @@ testpaths = ["tests"]
 pythonpath = ["src"]
 # Registra la marca para evitar advertencias en consola
 markers = [
+    "locales: tests de comprobación de traducciones",
     "prod: tests exclusivos para release de producción",
 ]
 
 # Excluye la marca 'prod' por defecto en cualquier ejecución
-addopts = "-m 'not prod'"
+addopts = "-m 'not prod and not locales'"
 
 # Configuración de Mypy
 [tool.mypy]

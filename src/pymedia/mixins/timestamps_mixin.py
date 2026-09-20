@@ -62,7 +62,7 @@ class TimestampStartEndMixin:
         if self.timestamp_start is not None and self.timestamp_end is not None:
             if self.timestamp_start > self.timestamp_end:
                 raise UserError(
-                    msg=_("Invalid timestamps. Start (%(start)s) => End (%(end)s.)")
+                    msg=_("Invalid timestamps. Start (%(start)s) >= End (%(end)s).")
                     % {"start": timestamp_start, "end": timestamp_end}
                 )
 

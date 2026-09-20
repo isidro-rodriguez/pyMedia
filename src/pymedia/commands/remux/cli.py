@@ -30,9 +30,9 @@ Change container and metadata without transcoding.
   Change video container:
     > pymedia remux input.mp4 -o output.mkv
   Fix faststart moving moov atom at the start 
-    > pymedia remux input.mp4 --faststart -o output.mkv 
+    > pymedia remux input.mp4 --fast-start -o output.mp4 
   Fix broken timestamps
-    > pymedia remux input.mp4 --getpts -o output.mkv
+    > pymedia remux input.mp4 --genpts -o output.mkv
   Sort stream tracks
     > pymedia remux input.mp4 --sort-tracks -o output.mp4
 """  # noqa

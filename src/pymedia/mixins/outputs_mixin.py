@@ -298,6 +298,9 @@ class MediaOutputMixin:
             output_directory=self.output_directory,
         )
 
+        if media_list is not None:
+            _validate_not_input(output=output, inputs=[m.path for m in media_list])
+
         if media.video is None:
             raise MissingPropertyError(name="video")
         if media.video.codec is None:
@@ -523,4 +526,19 @@ def _process_output(
         if extension is not None:
             output = output.with_suffix(extension)
     _process_output_directory(output.parent)
+    _validate_not_input(output=output, inputs=[media.path])
     return output
+
+
+def _validate_not_input(output: Path, inputs: list[Path]) -> None:
+    """Impide que la salida sea uno de los ficheros de entrada.
+
+    Raises:
+        UserError: Si la salida coincide con alguna entrada.
+    """
+    for source in inputs:
+        if output.resolve() == source.resolve():
+            raise UserError(
+                msg=_("Output file must be different from the input file: %(path)s")
+                % {"path": output}
+            )

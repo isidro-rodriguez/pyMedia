@@ -21,6 +21,7 @@ from pymedia.commands.base_cli_options import (
 )
 from pymedia.commands.interval.parameters import IntervalParameters
 from pymedia.commands.interval.service import IntervalService
+from pymedia.errors import MissingRequiredOptionsError, UserError
 from pymedia.locales import _  # noqa
 from pymedia.logger import Logger
 from pymedia.types import OverwriteMode, ScaleMode
@@ -97,6 +98,10 @@ def interval(
             salida contiene caracteres no permitidos.
     """
     Logger.create(debug=debug)
+    if every is None:
+        raise MissingRequiredOptionsError(options=["every"])
+    if every < 1:
+        raise UserError(msg=_("Interval must be at least 1 second."))
     params = IntervalParameters.load(
         overwrite=overwrite,
         media_input=media_input,

@@ -46,6 +46,8 @@ class JoinCmd:
                 "0",
                 "-i",
                 str(list_txt),
+                "-map",
+                "0",
                 "-c",
                 "copy",
                 "-progress",

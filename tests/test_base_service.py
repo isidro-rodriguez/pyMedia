@@ -7,6 +7,7 @@ import subprocess
 import sys
 import threading
 from pathlib import Path
+from typing import Any
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -33,11 +34,9 @@ def test_manual_interrupt_stops_real_process(tmp_path: Path) -> None:
     ready = threading.Event()
     done = threading.Event()
 
-    def launch(
-        *, args: list[str], stdout: int, stderr: int, text: bool, bufsize: int
-    ) -> subprocess.Popen[str]:
+    def launch(*, args: list[str], **kwargs: Any) -> subprocess.Popen[str]:
         """Conserva el proceso real para verificar y limpiar sus recursos."""
-        proc = popen(args, stdout=stdout, stderr=stderr, text=text, bufsize=bufsize)
+        proc = popen(args, **kwargs)
         processes.append(proc)
         ready.set()
         return proc

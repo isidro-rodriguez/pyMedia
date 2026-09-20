@@ -1,7 +1,5 @@
 """Comando ``frames``: service."""
 
-from pathlib import Path
-
 from pymedia.commands.base_service import BaseService
 from pymedia.commands.frames.cmd import FramesCmd
 from pymedia.commands.frames.parameters import FramesParameters
@@ -29,7 +27,7 @@ class FramesService(BaseService[FramesParameters]):
             cmd = FramesCmd(params=self.params).create(timestamp=timestamp)
             if self.params.image_output is None:
                 raise MissingParameterError(name="image_output")
-            output = Path(
+            output = self.params.image_output.with_stem(
                 f"{self.params.image_output.stem}_{str(timestamp).replace(':', '-')}"
             )
 
@@ -45,7 +43,14 @@ class FramesService(BaseService[FramesParameters]):
                 output_list=[output],
             )
 
+            if not output.exists():
+                self.logger.warning(
+                    _("No frame was captured at %(timestamp)s."),
+                    timestamp=timestamp,
+                )
+                continue
+
             self.logger.info(
                 msg=_("Thumbnail(s) generated successfully: %(output)s"),
-                output=self.params.image_output,
+                output=output,
             )

@@ -1,7 +1,10 @@
 """Comando ``main``: cli."""
 
+import shutil
+
 from pymedia.commands.base_cli import base_cli
 from pymedia.commands.base_cli_options import HelpOption, VersionOption
+from pymedia.errors import UserError
 from pymedia.locales import _  # noqa
 
 main_cli = base_cli
@@ -33,5 +36,13 @@ def main(
     Args:
         help_: Solicitud explícita de ayuda del comando.
         version: Mostrar la versión de la aplicación.
+
+    Raises:
+        UserError: Si ffmpeg o ffprobe no están en el `PATH`.
     """
-    pass
+    for binary in ("ffmpeg", "ffprobe"):
+        if shutil.which(binary) is None:
+            raise UserError(
+                msg=_("%(binary)s was not found in PATH. Install ffmpeg first.")
+                % {"binary": binary}
+            )

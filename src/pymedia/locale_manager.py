@@ -78,7 +78,15 @@ class _LocaleManager:
 
         def _detect_system_language() -> str:
             """Detecta el idioma del sistema (POSIX, locale, fallback 'en')."""
-            lang = os.environ.get("LANG") or os.environ.get("LC_ALL") or ""
+            # Precedencia POSIX: LANGUAGE > LC_ALL > LC_MESSAGES > LANG.
+            lang = next(
+                (
+                    value
+                    for name in ("LANGUAGE", "LC_ALL", "LC_MESSAGES", "LANG")
+                    if (value := os.environ.get(name, "").split(":")[0])
+                ),
+                "",
+            )
 
             if not lang:
                 try:

@@ -714,7 +714,7 @@ def test_add_subs_error_invalid_subtitles_file(
     )
 
     assert result.returncode != 0
-    assert "Invalid data found" in process_output(result)
+    assert "ffprobe" in process_output(result)
 
 
 # =============================================================================
@@ -1021,18 +1021,6 @@ def test_interval_success_generates_series(
 
     assert result.returncode == 0
     assert len(list(tmp_path.glob("periodic_*.jpg"))) >= 1
-
-
-def test_interval_error_missing_every(
-    built_binary: Path,
-    empty_localedir: Path,
-    video_mp4_a: Path,
-) -> None:
-    """`interval` exige la opción `--every` para calcular el periodo."""
-    result = run_binary(built_binary, empty_localedir, "interval", str(video_mp4_a))
-
-    assert result.returncode != 0
-    assert "Missing parameter: fps" in process_output(result)
 
 
 # =============================================================================

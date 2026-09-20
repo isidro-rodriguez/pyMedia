@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-09-18 18:29+0100\n"
+"POT-Creation-Date: 2026-09-20 01:14+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -22,17 +22,17 @@ msgstr ""
 msgid "FFmpeg command was not generated: %(command_name)s"
 msgstr ""
 
-#: pymedia/errors.py:81
+#: pymedia/errors.py:77
 #, python-format
 msgid "Missing argument: %(name)s"
 msgstr ""
 
-#: pymedia/errors.py:93
+#: pymedia/errors.py:89
 #, python-format
 msgid "Missing parameter: %(name)s"
 msgstr ""
 
-#: pymedia/errors.py:105
+#: pymedia/errors.py:101
 #, python-format
 msgid "Missing property: %(name)s"
 msgstr ""
@@ -56,46 +56,50 @@ msgstr ""
 msgid "Missing required options: %(options)s"
 msgstr ""
 
-#: pymedia/ffprobe.py:51 pymedia/ffprobe.py:124 pymedia/ffprobe.py:167
+#: pymedia/ffprobe.py:32
+msgid "ffprobe was not found. Install ffmpeg."
+msgstr ""
+
+#: pymedia/ffprobe.py:37
 #, python-format
 msgid "ffprobe couldn't read %(path)s: %(err.stderr)s"
 msgstr ""
 
-#: pymedia/ffprobe.py:56
+#: pymedia/ffprobe.py:62
 #, python-format
 msgid "ffprobe audio file data: %(data)s"
 msgstr ""
 
-#: pymedia/ffprobe.py:72
+#: pymedia/ffprobe.py:78
 #, python-format
 msgid ""
 "\"%(path)s\" is not a recognized audio file (detected format: "
 "%(format_name)s)."
 msgstr ""
 
-#: pymedia/ffprobe.py:84
+#: pymedia/ffprobe.py:90
 #, python-format
 msgid "%(path.suffix)s extension doesn't support %(codec_name)s audio."
 msgstr ""
 
-#: pymedia/ffprobe.py:129
+#: pymedia/ffprobe.py:110
 #, python-format
 msgid "ffprobe media data: %(data)s"
 msgstr ""
 
-#: pymedia/ffprobe.py:172
+#: pymedia/ffprobe.py:131
 #, python-format
 msgid "ffprobe subtitles file data: %(data)s"
 msgstr ""
 
-#: pymedia/ffprobe.py:185
+#: pymedia/ffprobe.py:144
 #, python-format
 msgid ""
 "\"%(path)s\" is not a recognized subtitles file (detected format: "
 "%(format_name)s)."
 msgstr ""
 
-#: pymedia/ffprobe.py:194
+#: pymedia/ffprobe.py:153
 #, python-format
 msgid "%(path.suffix)s extension doesn't support %(codec_name)s subtitles."
 msgstr ""
@@ -211,7 +215,7 @@ msgid "Preset sheet style."
 msgstr ""
 
 #: pymedia/commands/base_cli_options.py:176
-msgid "TranscodePreset preset from config.toml."
+msgid "Transcoding profile from config.toml."
 msgstr ""
 
 #: pymedia/commands/base_cli_options.py:187
@@ -299,7 +303,7 @@ msgid "Set audio language, formatted as ISO 639-2 code."
 msgstr ""
 
 #: pymedia/commands/base_cli_options.py:363
-msgid "List of audio tracks to delete."
+msgid "List of audio tracks to process."
 msgstr ""
 
 #: pymedia/commands/base_cli_options.py:373
@@ -334,7 +338,7 @@ msgid "Set subtitles language, formatted as ISO 639-2 code."
 msgstr ""
 
 #: pymedia/commands/base_cli_options.py:432
-msgid "List subtitles tracks to delete."
+msgid "List of subtitles tracks to process."
 msgstr ""
 
 #: pymedia/commands/base_cli_options.py:442
@@ -403,33 +407,38 @@ msgstr ""
 msgid "Process skipped since output file already exists."
 msgstr ""
 
-#: pymedia/commands/base_service.py:101 pymedia/commands/scene/service.py:83
+#: pymedia/commands/base_service.py:101
+#, python-format
+msgid "Output file already exists: %(name)s"
+msgstr ""
+
+#: pymedia/commands/base_service.py:103 pymedia/commands/scene/service.py:90
 msgid "Overwrite?"
 msgstr ""
 
-#: pymedia/commands/base_service.py:173
+#: pymedia/commands/base_service.py:175
 msgid "File could not be deleted."
 msgstr ""
 
-#: pymedia/commands/base_service.py:178
+#: pymedia/commands/base_service.py:180
 #, python-format
 msgid "FFmpeg command interrupted manually: %(command_name)s"
 msgstr ""
 
-#: pymedia/commands/base_service.py:183
+#: pymedia/commands/base_service.py:185
 #, python-format
 msgid "FFmpeg command timed out: %(command_name)s"
 msgstr ""
 
-#: pymedia/commands/base_service.py:190
+#: pymedia/commands/base_service.py:192
 msgid "FFmpeg command failed during execution."
 msgstr ""
 
-#: pymedia/commands/base_service.py:194
+#: pymedia/commands/base_service.py:207
 msgid "Do you want to run this ffmpeg command?"
 msgstr ""
 
-#: pymedia/commands/base_service.py:195
+#: pymedia/commands/base_service.py:208
 msgid "User decided to abort process."
 msgstr ""
 
@@ -462,8 +471,8 @@ msgstr ""
 #: pymedia/commands/edit_subtitles/service.py:29
 #: pymedia/commands/extract_audio/service.py:27
 #: pymedia/commands/extract_subtitles/service.py:27
-#: pymedia/commands/frames/service.py:39
-#: pymedia/commands/interval/service.py:33 pymedia/commands/join/service.py:53
+#: pymedia/commands/frames/service.py:37
+#: pymedia/commands/interval/service.py:33 pymedia/commands/join/service.py:50
 #: pymedia/commands/remux/service.py:27 pymedia/commands/scene/service.py:44
 #: pymedia/commands/sheet/service.py:49 pymedia/commands/sheet/service.py:53
 #: pymedia/commands/transcode/service.py:29
@@ -491,7 +500,7 @@ msgid ""
 "  Add english subtitles to a media container:\n"
 "    > pymedia add-subs input.mp4 eng_subs.srt --language eng\n"
 "  Add default forced spanish subtitles with custom title: \n"
-"    > pymedia add-subs input.mp4 eng_subs.srt --language spa --title "
+"    > pymedia add-subs input.mp4 spa_subs.srt --language spa --title "
 "\"Español (forced)\" --default --forced\n"
 msgstr ""
 
@@ -526,8 +535,8 @@ msgid ""
 "    > pymedia animated input.mp4 --output output.gif\n"
 msgstr ""
 
-#: pymedia/commands/animated/cli.py:50 pymedia/commands/frames/cli.py:46
-#: pymedia/commands/interval/cli.py:48 pymedia/commands/scene/cli.py:53
+#: pymedia/commands/animated/cli.py:50 pymedia/commands/frames/cli.py:47
+#: pymedia/commands/interval/cli.py:49 pymedia/commands/scene/cli.py:53
 msgid "Image commands"
 msgstr ""
 
@@ -677,7 +686,7 @@ msgid ""
 "  Extract a list of audio tracks from a media file: \n"
 "    > pymedia extract-audio input.mp4 --tracks 1,2\n"
 "  Extract audio tracks with custom output:\n"
-"    > pymedia extract-audio input.mp4 --tracks 1,2 -o input-audio.aac\n"
+"    > pymedia extract-audio input.mp4 --tracks 1,2 -o input-audio.m4a\n"
 msgstr ""
 
 #: pymedia/commands/extract_audio/service.py:31
@@ -712,7 +721,7 @@ msgstr ""
 msgid "Subtitles extracted successfully: %(output)s"
 msgstr ""
 
-#: pymedia/commands/frames/cli.py:29
+#: pymedia/commands/frames/cli.py:30
 msgid ""
 "Captures video frames at the specified timestamps.\n"
 "\n"
@@ -725,13 +734,18 @@ msgid ""
 "    > pymedia frames input.mp4 --at 00:01:30 --output thumb.jpg\n"
 msgstr ""
 
-#: pymedia/commands/frames/service.py:44
+#: pymedia/commands/frames/service.py:42
 #: pymedia/commands/interval/service.py:38 pymedia/commands/scene/service.py:49
 msgid "Generating thumbnail"
 msgstr ""
 
-#: pymedia/commands/frames/service.py:49
-#: pymedia/commands/interval/service.py:43 pymedia/commands/scene/service.py:54
+#: pymedia/commands/frames/service.py:48
+#, python-format
+msgid "No frame was captured at %(timestamp)s."
+msgstr ""
+
+#: pymedia/commands/frames/service.py:54
+#: pymedia/commands/interval/service.py:43 pymedia/commands/scene/service.py:60
 #, python-format
 msgid "Thumbnail(s) generated successfully: %(output)s"
 msgstr ""
@@ -781,8 +795,8 @@ msgstr ""
 msgid "Size"
 msgstr ""
 
-#: pymedia/commands/info/service.py:66 pymedia/mixins/scale_mixin.py:103
-#: pymedia/mixins/scale_mixin.py:119
+#: pymedia/commands/info/service.py:66 pymedia/mixins/scale_mixin.py:112
+#: pymedia/mixins/scale_mixin.py:128
 msgid "video dimensions"
 msgstr ""
 
@@ -852,7 +866,7 @@ msgstr ""
 msgid "Metadata"
 msgstr ""
 
-#: pymedia/commands/interval/cli.py:31
+#: pymedia/commands/interval/cli.py:32
 msgid ""
 "Captures video frames at regular intervals.\n"
 "\n"
@@ -864,6 +878,10 @@ msgid ""
 "00:01:00\n"
 "  Save to a specific file:\n"
 "    > pymedia interval input.mp4 --every 5 --output thumb.jpg\n"
+msgstr ""
+
+#: pymedia/commands/interval/cli.py:104
+msgid "Interval must be at least 1 second."
 msgstr ""
 
 #: pymedia/commands/join/cli.py:23
@@ -881,23 +899,23 @@ msgstr ""
 msgid "It's required to provide at least 2 videos."
 msgstr ""
 
-#: pymedia/commands/join/service.py:51
+#: pymedia/commands/join/service.py:48
 #, python-format
 msgid ""
 "List file:\n"
 "%(list_txt)s"
 msgstr ""
 
-#: pymedia/commands/join/service.py:57
+#: pymedia/commands/join/service.py:54
 msgid "Joining media files"
 msgstr ""
 
-#: pymedia/commands/join/service.py:62
+#: pymedia/commands/join/service.py:59
 #, python-format
 msgid "Containers joined successfully: %(output)s"
 msgstr ""
 
-#: pymedia/commands/join/service.py:186
+#: pymedia/commands/join/service.py:183
 #, python-format
 msgid ""
 "Incompatible media files for join output %(output)s.\n"
@@ -905,7 +923,7 @@ msgid ""
 "%(incompatible_list)s"
 msgstr ""
 
-#: pymedia/commands/main/cli.py:10
+#: pymedia/commands/main/cli.py:13
 msgid ""
 "Easy CLI for ffmpeg.\n"
 "\n"
@@ -920,6 +938,11 @@ msgid ""
 "    > pymedia --version\n"
 msgstr ""
 
+#: pymedia/commands/main/cli.py:46
+#, python-format
+msgid "%(binary)s was not found in PATH. Install ffmpeg first."
+msgstr ""
+
 #: pymedia/commands/remux/cli.py:26
 msgid ""
 "Change container and metadata without transcoding.\n"
@@ -928,9 +951,9 @@ msgid ""
 "  Change video container:\n"
 "    > pymedia remux input.mp4 -o output.mkv\n"
 "  Fix faststart moving moov atom at the start \n"
-"    > pymedia remux input.mp4 --faststart -o output.mkv \n"
+"    > pymedia remux input.mp4 --fast-start -o output.mp4 \n"
 "  Fix broken timestamps\n"
-"    > pymedia remux input.mp4 --getpts -o output.mkv\n"
+"    > pymedia remux input.mp4 --genpts -o output.mkv\n"
 "  Sort stream tracks\n"
 "    > pymedia remux input.mp4 --sort-tracks -o output.mp4\n"
 msgstr ""
@@ -968,16 +991,20 @@ msgid ""
 "    > pymedia scene input.mp4 --output thumb.jpg\n"
 msgstr ""
 
-#: pymedia/commands/scene/service.py:65 pymedia/commands/scene/service.py:94
+#: pymedia/commands/scene/service.py:55
+msgid "No scene changes detected: no thumbnails generated."
+msgstr ""
+
+#: pymedia/commands/scene/service.py:71 pymedia/commands/scene/service.py:103
 msgid "Cannot resolve scene output pattern from template."
 msgstr ""
 
-#: pymedia/commands/scene/service.py:80
+#: pymedia/commands/scene/service.py:86
 #, python-format
 msgid "Found existing scene thumbnail files: %(files)s"
 msgstr ""
 
-#: pymedia/commands/scene/service.py:85
+#: pymedia/commands/scene/service.py:93
 msgid "Process skipped since output files already exist."
 msgstr ""
 
@@ -1014,13 +1041,12 @@ msgid ""
 "\n"
 "[bold]Examples[/bold]:\n"
 "    Transcode only video track changing with a configurated profile:\n"
-"    > pymedia transcode source.mp4 --profile balanced --video -o "
-"target.mp4\n"
+"    > pymedia transcode source.mp4 --preset even --video -o target.mp4\n"
 "    Transcode video track meanwhile its applied multiple filters: \n"
 "    > pymedia transcode source.mp4 --profile fast --size 1280x720 --hflip"
 "\n"
 "    Burn subtitles in video track.\n"
-"    > pymedia transcode source.mpt --burn-subtitles eng-subs.srt \n"
+"    > pymedia transcode source.mp4 --burn-subtitles eng-subs.srt \n"
 msgstr ""
 
 #: pymedia/commands/transcode/service.py:33
@@ -1067,14 +1093,14 @@ msgstr ""
 #, python-format
 msgid ""
 "Invalid crop area. Area width (%(area_width)s) and coordinate X "
-"(%(area_x)s) is bigger that video width (%(video_width)s) "
+"(%(area_x)s) is bigger than video width (%(video_width)s) "
 msgstr ""
 
 #: pymedia/mixins/crop_mixin.py:109
 #, python-format
 msgid ""
 "Invalid crop area. Area height (%(area_height)s) and coordinate Y "
-"(%(area_y)s) is bigger that video height (%(video_height)s) "
+"(%(area_y)s) is bigger than video height (%(video_height)s) "
 msgstr ""
 
 #: pymedia/mixins/flip_mixin.py:36
@@ -1097,45 +1123,50 @@ msgstr ""
 msgid "image"
 msgstr ""
 
-#: pymedia/mixins/outputs_mixin.py:309
+#: pymedia/mixins/outputs_mixin.py:312
 msgid "media"
 msgstr ""
 
-#: pymedia/mixins/outputs_mixin.py:416
+#: pymedia/mixins/outputs_mixin.py:419
 msgid "subtitles files"
 msgstr ""
 
-#: pymedia/mixins/outputs_mixin.py:467
+#: pymedia/mixins/outputs_mixin.py:470
 #, python-format
 msgid ""
 "Cannot remux %(codec)s to %(extension)s. Safe remux targets: "
 "%(supported)s."
 msgstr ""
 
-#: pymedia/mixins/outputs_mixin.py:491
+#: pymedia/mixins/outputs_mixin.py:494
 #, python-format
 msgid "%(name)s contains invalid characters: < > : \" / \\ | ? *"
 msgstr ""
 
-#: pymedia/mixins/outputs_mixin.py:503
+#: pymedia/mixins/outputs_mixin.py:506
 #, python-format
 msgid "Could not create directory: %(path)s"
 msgstr ""
 
-#: pymedia/mixins/scale_mixin.py:95
+#: pymedia/mixins/outputs_mixin.py:542
+#, python-format
+msgid "Output file must be different from the input file: %(path)s"
+msgstr ""
+
+#: pymedia/mixins/scale_mixin.py:104
 #, python-format
 msgid "Invalid dimensions %(value)s. Expected: WIDTHxHEIGHT"
 msgstr ""
 
-#: pymedia/mixins/scale_mixin.py:115
+#: pymedia/mixins/scale_mixin.py:124
 msgid "Scale mode not supported."
 msgstr ""
 
-#: pymedia/mixins/scale_mixin.py:124
+#: pymedia/mixins/scale_mixin.py:133
 msgid "Target dimensions must be even."
 msgstr ""
 
-#: pymedia/mixins/scale_mixin.py:129
+#: pymedia/mixins/scale_mixin.py:138
 msgid "Ignored scale. Target scale > video resolution, it requires upscale."
 msgstr ""
 
@@ -1169,7 +1200,7 @@ msgstr ""
 
 #: pymedia/mixins/timestamps_mixin.py:65
 #, python-format
-msgid "Invalid timestamps. Start (%(start)s) => End (%(end)s.)"
+msgid "Invalid timestamps. Start (%(start)s) >= End (%(end)s)."
 msgstr ""
 
 #: pymedia/mixins/timestamps_mixin.py:179

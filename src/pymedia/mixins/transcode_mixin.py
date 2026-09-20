@@ -10,6 +10,9 @@ from pymedia.models.config import Transcode
 from pymedia.models.media import Media
 from pymedia.utils import to_ffmpeg_value
 
+# Códecs de subtítulos de texto convertibles a `mov_text` (MP4).
+_TEXT_SUBTITLES = frozenset({"subrip", "srt", "ass", "ssa", "mov_text", "webvtt"})
+
 
 @dataclass(kw_only=True)
 class TranscodeMixin:
@@ -94,6 +97,33 @@ class TranscodeMixin:
             else:
                 audio_transcode.append("copy")
         return audio_transcode
+
+    def to_subtitles_copy_cmd(self, container: str) -> list[str]:
+        """Construye los argumentos para conservar las pistas de subtítulos.
+
+        Args:
+            container: Extensión del contenedor de salida (p. ej. `.mp4`).
+
+        Returns:
+            Argumentos `-map` y `-c:s` por pista. En MP4 los subtítulos de texto
+            se convierten a `mov_text` y los gráficos se descartan, ya que el
+            contenedor no los soporta.
+        """
+        if self.media is None or not self.media.subtitles:
+            return []
+
+        is_mp4 = container.lower() in {".mp4", ".m4v", ".mov"}
+        args: list[str] = []
+        output_index = 0
+        for track in self.media.subtitles:
+            if is_mp4 and track.codec not in _TEXT_SUBTITLES:
+                continue
+            codec = "mov_text" if is_mp4 and track.codec != "mov_text" else "copy"
+            args.extend(
+                ["-map", f"0:s:{track.track_index}", f"-c:s:{output_index}", codec]
+            )
+            output_index += 1
+        return args
 
     def to_burn_subtitles_cmd(self) -> str:
         """Construye el filtro que quema los subtítulos en la pista de vídeo.

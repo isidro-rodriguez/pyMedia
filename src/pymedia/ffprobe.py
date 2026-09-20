@@ -12,6 +12,42 @@ from pymedia.locales import _  # noqa
 from pymedia.logger import Logger
 
 
+def _run_ffprobe(args: list[str], path: Path) -> dict[str, Any]:
+    """Ejecuta ffprobe y devuelve su JSON, con un error breve si falla.
+
+    Args:
+        args: Argumentos adicionales para ffprobe.
+        path: Ruta del fichero a analizar.
+
+    Raises:
+        FfprobeError: Si ffprobe no está instalado o no puede leer el fichero.
+
+    Returns:
+        Diccionario con la salida JSON de ffprobe.
+    """
+    cmd = ["ffprobe", "-v", "error", "-print_format", "json", *args, str(path)]
+    try:
+        result = subprocess.run(
+            args=cmd,
+            capture_output=True,
+            text=True,
+            check=True,
+            encoding="utf-8",
+            errors="replace",
+        )
+    except FileNotFoundError as err:
+        raise FfprobeError(msg=_("ffprobe was not found. Install ffmpeg.")) from err
+    except subprocess.CalledProcessError as err:
+        lines = [line for line in err.stderr.splitlines() if line.strip()]
+        reason = lines[-1] if lines else str(err.returncode)
+        raise FfprobeError(
+            msg=_("ffprobe couldn't read %(path)s: %(err.stderr)s")
+            % {"path": path, "err.stderr": reason}
+        ) from err
+    data: dict[str, Any] = json.loads(result.stdout)
+    return data
+
+
 def get_audio_codec(audio_input: Path, logger: Logger) -> str:
     """Verifica que el archivo de audio externo sea realmente audio.
 
@@ -27,32 +63,9 @@ def get_audio_codec(audio_input: Path, logger: Logger) -> str:
     Returns:
         Nombre del códec de audio detectado y validado.
     """
-    try:
-        cmd = [
-            "ffprobe",
-            "-print_format",
-            "json",
-            "-show_format",
-            "-show_streams",
-            "-select_streams",
-            "a:0",
-            str(audio_input),
-        ]
-        result = subprocess.run(
-            args=cmd,
-            capture_output=True,
-            text=True,
-            check=True,
-            encoding="utf-8",
-            errors="strict",
-        )
-    except subprocess.CalledProcessError as err:
-        raise FfprobeError(
-            msg=_("ffprobe couldn't read %(path)s: %(err.stderr)s")
-            % {"path": audio_input, "err.stderr": err.stderr}
-        ) from err
-
-    data = json.loads(result.stdout)
+    data = _run_ffprobe(
+        ["-show_format", "-show_streams", "-select_streams", "a:0"], audio_input
+    )
     logger.debug(msg=_("ffprobe audio file data: %(data)s"), data=data)
 
     streams = data.get("streams", [])
@@ -100,32 +113,7 @@ def get_media_metadata(path: Path, logger: Logger) -> dict[str, Any]:
     Raises:
         FfprobeError: Si ffprobe no puede leer el fichero indicado.
     """
-    try:
-        cmd = [
-            "ffprobe",
-            "-v",
-            "quiet",
-            "-print_format",
-            "json",
-            "-show_format",
-            "-show_streams",
-            str(path),
-        ]
-        result = subprocess.run(
-            args=cmd,
-            capture_output=True,
-            text=True,
-            check=True,
-            encoding="utf-8",
-            errors="strict",
-        )
-    except subprocess.CalledProcessError as err:
-        raise FfprobeError(
-            msg=_("ffprobe couldn't read %(path)s: %(err.stderr)s")
-            % {"path": path, "err.stderr": err.stderr}
-        ) from err
-
-    data: dict[str, Any] = json.loads(result.stdout)
+    data = _run_ffprobe(["-show_format", "-show_streams"], path)
     logger.debug(msg=_("ffprobe media data: %(data)s"), data=data)
 
     return data
@@ -146,29 +134,7 @@ def validate_subtitles_file_codec(subtitles_input: Path, logger: Logger) -> None
     Returns:
         Nombre del códec de subtítulos detectado y validado.
     """
-    try:
-        cmd = [
-            "ffprobe",
-            "-print_format",
-            "json",
-            "-show_format",
-            str(subtitles_input),
-        ]
-        result = subprocess.run(
-            args=cmd,
-            capture_output=True,
-            text=True,
-            check=True,
-            encoding="utf-8",
-            errors="strict",
-        )
-    except subprocess.CalledProcessError as err:
-        raise FfprobeError(
-            msg=_("ffprobe couldn't read %(path)s: %(err.stderr)s")
-            % {"path": subtitles_input, "err.stderr": err.stderr}
-        ) from err
-
-    data = json.loads(result.stdout)
+    data = _run_ffprobe(["-show_format"], subtitles_input)
     logger.debug(msg=_("ffprobe subtitles file data: %(data)s"), data=data)
 
     format_name = data.get("format", {}).get("format_name", "")

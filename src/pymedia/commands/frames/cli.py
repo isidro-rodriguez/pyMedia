@@ -19,6 +19,7 @@ from pymedia.commands.base_cli_options import (
 )
 from pymedia.commands.frames.parameters import FramesParameters
 from pymedia.commands.frames.service import FramesService
+from pymedia.errors import MissingRequiredOptionsError
 from pymedia.locales import _  # noqa
 from pymedia.logger import Logger
 from pymedia.types import OverwriteMode, ScaleMode
@@ -91,6 +92,8 @@ def frames(
             salida contiene caracteres no permitidos.
     """
     Logger.create(debug=debug)
+    if not timestamp_at:
+        raise MissingRequiredOptionsError(options=["at"])
     params = FramesParameters.load(
         overwrite=overwrite,
         media_input=media_input,

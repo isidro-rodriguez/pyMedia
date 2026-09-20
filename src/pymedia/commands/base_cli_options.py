@@ -173,7 +173,7 @@ PresetsTranscodeOption = Annotated[
     typer.Option(
         default="--preset",
         rich_help_panel=_("Command options"),
-        help=_("TranscodePreset preset from config.toml."),
+        help=_("Transcoding profile from config.toml."),
     ),
 ]
 
@@ -360,7 +360,7 @@ AudioStreamTrackListOption = Annotated[
         default="--tracks",
         metavar="int,int,...",
         rich_help_panel=_("Audio options"),
-        help=_("List of audio tracks to delete."),
+        help=_("List of audio tracks to process."),
     ),
 ]
 
@@ -429,7 +429,7 @@ SubtitlesStreamTrackListOption = Annotated[
         default="--tracks",
         metavar="int,int,...",
         rich_help_panel=_("Subtitles options"),
-        help=_("List subtitles tracks to delete."),
+        help=_("List of subtitles tracks to process."),
     ),
 ]
 
