@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-09-20 16:42+0100\n"
+"POT-Creation-Date: 2026-09-20 19:37+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,46 +17,44 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.18.0\n"
 
-#: pymedia/errors.py:55
+#: pymedia/errors.py:56
 #, python-format
 msgid "FFmpeg command was not generated: %(command_name)s"
 msgstr ""
 
-#: pymedia/errors.py:77
+#: pymedia/errors.py:78
 #, python-format
 msgid "Missing argument: %(name)s"
 msgstr ""
 
-#: pymedia/errors.py:89
+#: pymedia/errors.py:90
 #, python-format
 msgid "Missing parameter: %(name)s"
 msgstr ""
 
-#: pymedia/errors.py:101
+#: pymedia/errors.py:102
 #, python-format
 msgid "Missing property: %(name)s"
 msgstr ""
 
-#: pymedia/errors.py:148
+#: pymedia/errors.py:149
 #, python-format
 msgid ""
 "Invalid extension %(extension)s. Codec %(codec)s requires one of: "
 "%(supported)s."
 msgstr ""
 
-#: pymedia/errors.py:174
+#: pymedia/errors.py:175
 #, python-format
-msgid ""
-"Invalid extension %(extension)s. %(media_type)s requires one of: "
-"%(supported)s."
+msgid "Invalid extension %(extension)s. %(media)s requires one of: %(supported)s."
 msgstr ""
 
-#: pymedia/errors.py:196
+#: pymedia/errors.py:197
 #, python-format
 msgid "Missing required option: %(options)s"
 msgstr ""
 
-#: pymedia/errors.py:201
+#: pymedia/errors.py:202
 #, python-format
 msgid "Missing at least one of these options: %(options)s"
 msgstr ""
@@ -109,298 +107,299 @@ msgstr ""
 msgid "%(path.suffix)s extension doesn't support %(codec_name)s subtitles."
 msgstr ""
 
-#: pymedia/commands/base_cli.py:55
+#: pymedia/commands/base_cli.py:61
 msgid "Version"
 msgstr ""
 
-#: pymedia/commands/base_cli.py:56
+#: pymedia/commands/base_cli.py:62
 msgid "Platform"
 msgstr ""
 
-#: pymedia/commands/base_cli.py:57
+#: pymedia/commands/base_cli.py:63
 msgid "Ffmpeg CLI handler"
 msgstr ""
 
-#: pymedia/commands/base_cli.py:93
+#: pymedia/commands/base_cli.py:99
 msgid "The following options are mutually exclusive: output, output_directory"
 msgstr ""
 
-#: pymedia/commands/base_cli.py:99
+#: pymedia/commands/base_cli.py:105
 msgid ""
 "It is not allowed to specify an output with multiple inputs, use output "
 "directory instead."
 msgstr ""
 
-#: pymedia/commands/base_cli.py:118 pymedia/commands/base_cli.py:136
+#: pymedia/commands/base_cli.py:126 pymedia/commands/base_cli.py:151
+#: pymedia/commands/base_cli.py:176
 #, python-format
 msgid "%(path)s is not a file."
 msgstr ""
 
-#: pymedia/commands/base_cli_options.py:34
+#: pymedia/commands/base_cli_options.py:36
 msgid "Audio track to insert in a media container."
 msgstr ""
 
-#: pymedia/commands/base_cli_options.py:43
+#: pymedia/commands/base_cli_options.py:45
 msgid "Video to process."
 msgstr ""
 
-#: pymedia/commands/base_cli_options.py:52
+#: pymedia/commands/base_cli_options.py:54
 msgid "Video list to process."
 msgstr ""
 
-#: pymedia/commands/base_cli_options.py:61
+#: pymedia/commands/base_cli_options.py:63
 msgid "Subtitles to insert in a media container."
 msgstr ""
 
-#: pymedia/commands/base_cli_options.py:75
+#: pymedia/commands/base_cli_options.py:77
 msgid "Log level DEBUG"
 msgstr ""
 
-#: pymedia/commands/base_cli_options.py:83
+#: pymedia/commands/base_cli_options.py:85
 msgid "Show this msg and exit."
 msgstr ""
 
-#: pymedia/commands/base_cli_options.py:94
+#: pymedia/commands/base_cli_options.py:96
 msgid "Show version and exit."
 msgstr ""
 
-#: pymedia/commands/base_cli_options.py:110
-#: pymedia/commands/base_cli_options.py:120
-#: pymedia/commands/base_cli_options.py:130
+#: pymedia/commands/base_cli_options.py:112
+#: pymedia/commands/base_cli_options.py:122
+#: pymedia/commands/base_cli_options.py:132
 msgid "Output options"
 msgstr ""
 
-#: pymedia/commands/base_cli_options.py:111
+#: pymedia/commands/base_cli_options.py:113
 msgid "Output directory for multiple output files."
 msgstr ""
 
-#: pymedia/commands/base_cli_options.py:121
+#: pymedia/commands/base_cli_options.py:123
 msgid "Output file name."
 msgstr ""
 
-#: pymedia/commands/base_cli_options.py:131
+#: pymedia/commands/base_cli_options.py:133
 msgid "Action to use if output file already exists."
 msgstr ""
 
-#: pymedia/commands/base_cli_options.py:143
-#: pymedia/commands/base_cli_options.py:152
-#: pymedia/commands/base_cli_options.py:161
-#: pymedia/commands/base_cli_options.py:170
-#: pymedia/commands/base_cli_options.py:179
-#: pymedia/commands/base_cli_options.py:190
-#: pymedia/commands/base_cli_options.py:199
-#: pymedia/commands/base_cli_options.py:209
-#: pymedia/commands/base_cli_options.py:219
-#: pymedia/commands/base_cli_options.py:229
-#: pymedia/commands/base_cli_options.py:239
-#: pymedia/commands/base_cli_options.py:249
-#: pymedia/commands/base_cli_options.py:259
-#: pymedia/commands/base_cli_options.py:269
-#: pymedia/commands/base_cli_options.py:279
-#: pymedia/commands/base_cli_options.py:289
-#: pymedia/commands/base_cli_options.py:298
-#: pymedia/commands/base_cli_options.py:307
+#: pymedia/commands/base_cli_options.py:145
+#: pymedia/commands/base_cli_options.py:154
+#: pymedia/commands/base_cli_options.py:163
+#: pymedia/commands/base_cli_options.py:172
+#: pymedia/commands/base_cli_options.py:181
+#: pymedia/commands/base_cli_options.py:192
+#: pymedia/commands/base_cli_options.py:201
+#: pymedia/commands/base_cli_options.py:211
+#: pymedia/commands/base_cli_options.py:221
+#: pymedia/commands/base_cli_options.py:231
+#: pymedia/commands/base_cli_options.py:241
+#: pymedia/commands/base_cli_options.py:251
+#: pymedia/commands/base_cli_options.py:261
+#: pymedia/commands/base_cli_options.py:271
+#: pymedia/commands/base_cli_options.py:281
+#: pymedia/commands/base_cli_options.py:291
+#: pymedia/commands/base_cli_options.py:300
+#: pymedia/commands/base_cli_options.py:309
 msgid "Command options"
 msgstr ""
 
-#: pymedia/commands/base_cli_options.py:144
+#: pymedia/commands/base_cli_options.py:146
 msgid "Interval between thumbnails, in seconds."
 msgstr ""
 
-#: pymedia/commands/base_cli_options.py:153
+#: pymedia/commands/base_cli_options.py:155
 msgid "Move metadata index at the start, quickening web streaming."
 msgstr ""
 
-#: pymedia/commands/base_cli_options.py:162
+#: pymedia/commands/base_cli_options.py:164
 msgid "Regenerates broken timestamps."
 msgstr ""
 
-#: pymedia/commands/base_cli_options.py:171
+#: pymedia/commands/base_cli_options.py:173
 msgid "Preset sheet style."
 msgstr ""
 
-#: pymedia/commands/base_cli_options.py:180
+#: pymedia/commands/base_cli_options.py:182
 msgid "Transcoding profile from config.toml."
 msgstr ""
 
-#: pymedia/commands/base_cli_options.py:191
+#: pymedia/commands/base_cli_options.py:193
 msgid "Scene-change sensitivity for thumbnail detection."
 msgstr ""
 
-#: pymedia/commands/base_cli_options.py:200
+#: pymedia/commands/base_cli_options.py:202
 msgid "Sort stream track by type and alphabetically by language."
 msgstr ""
 
-#: pymedia/commands/base_cli_options.py:210
+#: pymedia/commands/base_cli_options.py:212
 msgid "Timestamps list to split a media container."
 msgstr ""
 
-#: pymedia/commands/base_cli_options.py:220
+#: pymedia/commands/base_cli_options.py:222
 msgid "Timestamp where the output media file ends."
 msgstr ""
 
-#: pymedia/commands/base_cli_options.py:230
+#: pymedia/commands/base_cli_options.py:232
 msgid "Timestamp where the output media file starts."
 msgstr ""
 
-#: pymedia/commands/base_cli_options.py:240
+#: pymedia/commands/base_cli_options.py:242
 msgid "Take a thumbnail at specific TIMESTAMP(s)."
 msgstr ""
 
-#: pymedia/commands/base_cli_options.py:250
+#: pymedia/commands/base_cli_options.py:252
 msgid "Time point at which the animated image generation ends."
 msgstr ""
 
-#: pymedia/commands/base_cli_options.py:260
+#: pymedia/commands/base_cli_options.py:262
 msgid "Time point at which thumbnails generation ends."
 msgstr ""
 
-#: pymedia/commands/base_cli_options.py:270
+#: pymedia/commands/base_cli_options.py:272
 msgid "Time point at which the animated image generation starts."
 msgstr ""
 
-#: pymedia/commands/base_cli_options.py:280
+#: pymedia/commands/base_cli_options.py:282
 msgid "Time point at which thumbnails generation starts."
 msgstr ""
 
-#: pymedia/commands/base_cli_options.py:290
+#: pymedia/commands/base_cli_options.py:292
 msgid "Set to transcode an audio track."
 msgstr ""
 
-#: pymedia/commands/base_cli_options.py:299
+#: pymedia/commands/base_cli_options.py:301
 msgid "Burn subtitles file in video track."
 msgstr ""
 
-#: pymedia/commands/base_cli_options.py:308
+#: pymedia/commands/base_cli_options.py:310
 msgid "Set to transcode the video track."
 msgstr ""
 
-#: pymedia/commands/base_cli_options.py:320
-#: pymedia/commands/base_cli_options.py:329
-#: pymedia/commands/base_cli_options.py:338
-#: pymedia/commands/base_cli_options.py:347
-#: pymedia/commands/base_cli_options.py:356
-#: pymedia/commands/base_cli_options.py:366
-#: pymedia/commands/base_cli_options.py:376
-#: pymedia/commands/base_cli_options.py:385
+#: pymedia/commands/base_cli_options.py:322
+#: pymedia/commands/base_cli_options.py:331
+#: pymedia/commands/base_cli_options.py:340
+#: pymedia/commands/base_cli_options.py:349
+#: pymedia/commands/base_cli_options.py:358
+#: pymedia/commands/base_cli_options.py:368
+#: pymedia/commands/base_cli_options.py:378
+#: pymedia/commands/base_cli_options.py:387
 msgid "Audio options"
 msgstr ""
 
-#: pymedia/commands/base_cli_options.py:321
+#: pymedia/commands/base_cli_options.py:323
 msgid "Set as commentary audio track."
 msgstr ""
 
-#: pymedia/commands/base_cli_options.py:330
+#: pymedia/commands/base_cli_options.py:332
 msgid "Set as default audio track of the container."
 msgstr ""
 
-#: pymedia/commands/base_cli_options.py:339
-#: pymedia/commands/base_cli_options.py:408
+#: pymedia/commands/base_cli_options.py:341
+#: pymedia/commands/base_cli_options.py:410
 msgid "Set as forced to be displayed."
 msgstr ""
 
-#: pymedia/commands/base_cli_options.py:348
+#: pymedia/commands/base_cli_options.py:350
 msgid "Set audio track as targeted for hearing impaired people."
 msgstr ""
 
-#: pymedia/commands/base_cli_options.py:357
+#: pymedia/commands/base_cli_options.py:359
 msgid "Set audio language, formatted as ISO 639-2 code."
 msgstr ""
 
-#: pymedia/commands/base_cli_options.py:367
+#: pymedia/commands/base_cli_options.py:369
 msgid "List of audio tracks to process."
 msgstr ""
 
-#: pymedia/commands/base_cli_options.py:377
+#: pymedia/commands/base_cli_options.py:379
 msgid "Audio track to edit."
 msgstr ""
 
-#: pymedia/commands/base_cli_options.py:386
+#: pymedia/commands/base_cli_options.py:388
 msgid "Set a custom audio track title for video player."
 msgstr ""
 
-#: pymedia/commands/base_cli_options.py:398
-#: pymedia/commands/base_cli_options.py:407
-#: pymedia/commands/base_cli_options.py:416
-#: pymedia/commands/base_cli_options.py:425
-#: pymedia/commands/base_cli_options.py:435
-#: pymedia/commands/base_cli_options.py:445
-#: pymedia/commands/base_cli_options.py:454
-#: pymedia/commands/base_cli_options.py:463
+#: pymedia/commands/base_cli_options.py:400
+#: pymedia/commands/base_cli_options.py:409
+#: pymedia/commands/base_cli_options.py:418
+#: pymedia/commands/base_cli_options.py:427
+#: pymedia/commands/base_cli_options.py:437
+#: pymedia/commands/base_cli_options.py:447
+#: pymedia/commands/base_cli_options.py:456
+#: pymedia/commands/base_cli_options.py:465
 msgid "Subtitles options"
 msgstr ""
 
-#: pymedia/commands/base_cli_options.py:399
+#: pymedia/commands/base_cli_options.py:401
 msgid "Set as default subtitles of the container."
 msgstr ""
 
-#: pymedia/commands/base_cli_options.py:417
+#: pymedia/commands/base_cli_options.py:419
 msgid "Set as targeted for hearing impaired people."
 msgstr ""
 
-#: pymedia/commands/base_cli_options.py:426
+#: pymedia/commands/base_cli_options.py:428
 msgid "Set subtitles language, formatted as ISO 639-2 code."
 msgstr ""
 
-#: pymedia/commands/base_cli_options.py:436
+#: pymedia/commands/base_cli_options.py:438
 msgid "List of subtitles tracks to process."
 msgstr ""
 
-#: pymedia/commands/base_cli_options.py:446
+#: pymedia/commands/base_cli_options.py:448
 msgid "Subtitles track to edit."
 msgstr ""
 
-#: pymedia/commands/base_cli_options.py:455
+#: pymedia/commands/base_cli_options.py:457
 msgid "Set a custom title for video player."
 msgstr ""
 
-#: pymedia/commands/base_cli_options.py:464
+#: pymedia/commands/base_cli_options.py:466
 msgid "Set as targeted for visual impaired people."
 msgstr ""
 
-#: pymedia/commands/base_cli_options.py:477
-#: pymedia/commands/base_cli_options.py:486
-#: pymedia/commands/base_cli_options.py:495
-#: pymedia/commands/base_cli_options.py:506
-#: pymedia/commands/base_cli_options.py:515
+#: pymedia/commands/base_cli_options.py:479
+#: pymedia/commands/base_cli_options.py:488
+#: pymedia/commands/base_cli_options.py:497
+#: pymedia/commands/base_cli_options.py:508
+#: pymedia/commands/base_cli_options.py:517
 msgid "Filter options"
 msgstr ""
 
-#: pymedia/commands/base_cli_options.py:478
+#: pymedia/commands/base_cli_options.py:480
 msgid "Crop to WIDTH×HEIGHT at offset X,Y (from top-left)."
 msgstr ""
 
-#: pymedia/commands/base_cli_options.py:487
+#: pymedia/commands/base_cli_options.py:489
 msgid "Flip the image horizontally, swapping left and right."
 msgstr ""
 
-#: pymedia/commands/base_cli_options.py:496
+#: pymedia/commands/base_cli_options.py:498
 msgid "Flip the image vertically, swapping top and bottom."
 msgstr ""
 
-#: pymedia/commands/base_cli_options.py:507
+#: pymedia/commands/base_cli_options.py:509
 msgid "Set the animated image frame rate in frames per second."
 msgstr ""
 
-#: pymedia/commands/base_cli_options.py:516
+#: pymedia/commands/base_cli_options.py:518
 msgid "Specify an orthogonal arc degree to rotate the image."
 msgstr ""
 
-#: pymedia/commands/base_cli_options.py:528
-#: pymedia/commands/base_cli_options.py:538
-#: pymedia/commands/base_cli_options.py:547
+#: pymedia/commands/base_cli_options.py:530
+#: pymedia/commands/base_cli_options.py:540
+#: pymedia/commands/base_cli_options.py:549
 msgid "Scale filter options"
 msgstr ""
 
-#: pymedia/commands/base_cli_options.py:529
+#: pymedia/commands/base_cli_options.py:531
 msgid "Specify different ways to scale the video."
 msgstr ""
 
-#: pymedia/commands/base_cli_options.py:539
+#: pymedia/commands/base_cli_options.py:541
 msgid "Target resolution, in pixels, to resize the video."
 msgstr ""
 
-#: pymedia/commands/base_cli_options.py:548
+#: pymedia/commands/base_cli_options.py:550
 msgid "Allows upscaling beyond the source dimensions."
 msgstr ""
 
@@ -1120,44 +1119,24 @@ msgstr ""
 msgid "Image container not supported."
 msgstr ""
 
-#: pymedia/mixins/outputs_mixin.py:80
-msgid "animated images"
-msgstr ""
-
-#: pymedia/mixins/outputs_mixin.py:150
-msgid "audio"
-msgstr ""
-
-#: pymedia/mixins/outputs_mixin.py:234
-msgid "image"
-msgstr ""
-
-#: pymedia/mixins/outputs_mixin.py:312
-msgid "media"
-msgstr ""
-
-#: pymedia/mixins/outputs_mixin.py:419
-msgid "subtitles files"
-msgstr ""
-
-#: pymedia/mixins/outputs_mixin.py:470
+#: pymedia/mixins/outputs_mixin.py:471
 #, python-format
 msgid ""
 "Cannot remux %(codec)s to %(extension)s. Safe remux targets: "
 "%(supported)s."
 msgstr ""
 
-#: pymedia/mixins/outputs_mixin.py:494
+#: pymedia/mixins/outputs_mixin.py:495
 #, python-format
 msgid "%(name)s contains invalid characters: < > : \" / \\ | ? *"
 msgstr ""
 
-#: pymedia/mixins/outputs_mixin.py:506
+#: pymedia/mixins/outputs_mixin.py:507
 #, python-format
 msgid "Could not create directory: %(path)s"
 msgstr ""
 
-#: pymedia/mixins/outputs_mixin.py:542
+#: pymedia/mixins/outputs_mixin.py:543
 #, python-format
 msgid "Output file must be different from the input file: %(path)s"
 msgstr ""

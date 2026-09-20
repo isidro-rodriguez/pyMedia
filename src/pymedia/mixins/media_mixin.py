@@ -6,9 +6,7 @@ from datetime import timedelta
 from json import JSONDecodeError
 from pathlib import Path
 
-from pymedia.data.containers import VIDEO_CONTAINERS
 from pymedia.errors import (
-    InvalidContainerError,
     MissingParameterError,
 )
 from pymedia.ffprobe import get_media_metadata
@@ -114,21 +112,11 @@ class MediaListMixin:
 
 def _create_media(media_input: Path, logger: Logger) -> "Media":
     """Mapea el JSON de ffprobe a MediaInput."""
-
-    def _validate_media_extension() -> None:
-        """Valida que la lista de ficheros tengan extensiones de vídeos."""
-        if media_input.suffix not in VIDEO_CONTAINERS:
-            raise InvalidContainerError(
-                extension=media_input.suffix,
-                media_type="video",
-                supported=VIDEO_CONTAINERS,
-            )
-
-    _validate_media_extension()
-
     data = get_media_metadata(path=media_input, logger=logger)
 
-    video, audio, subtitles = None, None, None
+    video: Video | None = None
+    audio: list[Audio] | None = None
+    subtitles: list[Subtitles] | None = None
     video_track_index, audio_track_index, subtitles_track_index = 0, 0, 0
 
     for stream in data.get("streams", []):

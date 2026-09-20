@@ -23,6 +23,7 @@ from pymedia.errors import (
 )
 from pymedia.locales import _  # noqa
 from pymedia.models.media import Media
+from pymedia.types import MediaType
 
 
 @dataclass(kw_only=True)
@@ -77,7 +78,7 @@ class AnimatedOutputMixin:
         if output.suffix not in SUPPORTED.ANIMATED:
             raise InvalidContainerError(
                 extension=output.suffix,
-                media_type=_("animated images"),
+                media_type=MediaType.ANIMATED_IMAGE,
                 supported=SUPPORTED.ANIMATED,
             )
 
@@ -147,7 +148,7 @@ class AudioOutputMixin:
         if output.suffix not in SUPPORTED.AUDIO:
             raise InvalidContainerError(
                 extension=output.suffix,
-                media_type=_("audio"),
+                media_type=MediaType.AUDIO,
                 supported=SUPPORTED.AUDIO,
             )
 
@@ -231,7 +232,7 @@ class ImageOutputMixin:
         if output.suffix not in SUPPORTED.IMAGES:
             raise InvalidContainerError(
                 extension=output.suffix,
-                media_type=_("image"),
+                media_type=MediaType.IMAGE,
                 supported=SUPPORTED.IMAGES,
             )
 
@@ -309,7 +310,7 @@ class MediaOutputMixin:
         if output.suffix not in SUPPORTED.CONTAINERS:
             raise InvalidContainerError(
                 extension=output.suffix,
-                media_type=_("media"),
+                media_type=MediaType.VIDEO,
                 supported=SUPPORTED.CONTAINERS,
             )
 
@@ -416,7 +417,7 @@ class SubtitlesOutputMixin:
         if output.suffix not in SUPPORTED.SUBTITLES:
             raise InvalidContainerError(
                 extension=output.suffix,
-                media_type=_("subtitles files"),
+                media_type=MediaType.SUBTITLES,
                 supported=SUPPORTED.SUBTITLES,
             )
 
@@ -523,7 +524,7 @@ def _process_output(
         output = Path(parent / media.path.name).absolute()
         if affix is not None:
             output = output.with_stem(f"{output.stem}{affix}")
-        if extension is not None:
+        if extension:
             output = output.with_suffix(extension)
     _process_output_directory(output.parent)
     _validate_not_input(output=output, inputs=[media.path])

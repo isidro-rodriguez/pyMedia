@@ -450,6 +450,31 @@ def test_transcode_error_missing_action(
         assert option in normalized
 
 
+def test_transcode_error_invalid_audio_input(
+    runner: CliRunner,
+    audio_m4a: Path,
+) -> None:
+    """`transcode` rechaza ficheros de audio como entrada.
+
+    Son contenedores inválidos para un comando que exige vídeo.
+    """
+    result = runner.invoke(
+        app,
+        [
+            "transcode",
+            str(audio_m4a),
+            "--video",
+            "-o",
+            str(audio_m4a.parent / "out.mp4"),
+        ],
+    )
+
+    assert result.exit_code != 0
+    normalized = " ".join(result.output.split())
+    assert "Invalid extension .m4a" in normalized
+    assert "Video requires one of:" in normalized
+
+
 # =============================================================================
 #  add-audio
 # =============================================================================

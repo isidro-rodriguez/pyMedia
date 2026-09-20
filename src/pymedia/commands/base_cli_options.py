@@ -12,8 +12,10 @@ import typer
 from pymedia.commands.base_cli import (
     show_help,
     show_version,
-    validate_path,
-    validate_path_list,
+    validate_audio_path,
+    validate_media_path,
+    validate_media_path_list,
+    validate_subtitles_path,
 )
 from pymedia.locales import _  # noqa
 from pymedia.types import (
@@ -33,7 +35,7 @@ AudioArgument = Annotated[
     typer.Argument(
         help=_("Audio track to insert in a media container."),
         metavar="AUDIO_FILE",
-        callback=validate_path,
+        callback=validate_audio_path,
     ),
 ]
 
@@ -42,7 +44,7 @@ MediaInputArgument = Annotated[
     typer.Argument(
         help=_("Video to process."),
         metavar="MEDIA_FILE",
-        callback=validate_path,
+        callback=validate_media_path,
     ),
 ]
 
@@ -51,7 +53,7 @@ MediaInputListArgument = Annotated[
     typer.Argument(
         help=_("Video list to process."),
         metavar="MEDIA_FILE MEDIA_FILE ...",
-        callback=validate_path_list,
+        callback=validate_media_path_list,
     ),
 ]
 
@@ -60,7 +62,7 @@ SubtitlesArgument = Annotated[
     typer.Argument(
         help=_("Subtitles to insert in a media container."),
         metavar="SUBTITLES_FILE",
-        callback=validate_path,
+        callback=validate_subtitles_path,
     ),
 ]
 

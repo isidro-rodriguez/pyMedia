@@ -11,6 +11,7 @@ from typer import BadParameter, TyperException
 
 from pymedia.locales import _  # noqa
 from pymedia.logger import Logger
+from pymedia.types import MediaType
 
 logger = Logger(logging.getLogger("pymedia.logger"))
 
@@ -160,7 +161,7 @@ class InvalidContainerError(UserError):
     """Si indicado contenedor de salida incompatible con el tipo de contenido."""
 
     def __init__(
-        self, extension: str, media_type: str, supported: tuple[str, ...]
+        self, extension: str, media_type: MediaType, supported: tuple[str, ...]
     ) -> None:
         """Inicialización del error.
 
@@ -171,12 +172,12 @@ class InvalidContainerError(UserError):
         """
         super().__init__(
             _(
-                "Invalid extension %(extension)s. %(media_type)s requires one of: "
+                "Invalid extension %(extension)s. %(media)s requires one of: "
                 "%(supported)s."
             )
             % {
                 "extension": extension,
-                "media_type": media_type.capitalize(),
+                "media": media_type.value.capitalize(),
                 "supported": ", ".join(supported),
             }
         )

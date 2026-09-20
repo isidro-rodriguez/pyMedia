@@ -32,6 +32,16 @@ class LanguageMode(Enum):
     SPANISH = "spa"
 
 
+class MediaType(Enum):
+    """Tipos de streams presentes en un contenedor."""
+
+    ANIMATED_IMAGE = "animated image"
+    AUDIO = "audio"
+    IMAGE = "image"
+    SUBTITLES = "subtitles"
+    VIDEO = "video"
+
+
 class OverwriteMode(Enum):
     """Resolución de conflicto si ya existe un fichero con el mismo nombre."""
 

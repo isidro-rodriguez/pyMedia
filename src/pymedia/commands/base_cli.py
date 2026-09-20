@@ -8,8 +8,14 @@ from rich import print
 from rich.panel import Panel
 
 from pymedia import version
-from pymedia.errors import UserError
-from pymedia.locales import _  # noqa
+from pymedia.data.containers import (
+    AUDIO_CONTAINERS,
+    SUBTITLES_CONTAINERS,
+    VIDEO_CONTAINERS,
+)
+from pymedia.errors import InvalidContainerError, UserError
+from pymedia.locales import _
+from pymedia.types import MediaType  # noqa
 
 # =============================================================================
 #  Instancia base
@@ -102,36 +108,94 @@ def validate_conflict_output_options(
         )
 
 
-def validate_path(path: Path) -> Path:
-    """Valida que la ruta indicada sea un fichero existente.
+def validate_audio_path(path: Path) -> Path:
+    """Valida que la ruta indicada sea un fichero de audio existente.
 
     Args:
         path: Ruta a validar.
+        media_type: Tipo de fichero multimedia cargado.
 
     Returns:
         La propia ruta si es un fichero.
 
     Raises:
         UserError: Si la ruta no es un fichero.
+        InvalidContainerError: Si no es un contenedor de audio válido.
     """
     if not path.is_file():
         raise UserError(_("%(path)s is not a file.") % {"path": path})
+    if path.suffix not in AUDIO_CONTAINERS:
+        raise InvalidContainerError(
+            extension=path.suffix,
+            media_type=MediaType.AUDIO,
+            supported=AUDIO_CONTAINERS,
+        )
     return path
 
 
-def validate_path_list(paths: list[Path]) -> list[Path]:
-    """Valida que cada ruta del listado sea un fichero existente.
+def validate_media_path(path: Path) -> Path:
+    """Valida que la ruta indicada sea un fichero de vídeo existente.
+
+    Args:
+        path: Ruta a validar.
+        media_type: Tipo de fichero multimedia cargado.
+
+    Returns:
+        La propia ruta si es un fichero.
+
+    Raises:
+        UserError: Si la ruta no es un fichero.
+        InvalidContainerError: Si no es un contenedor de vídeo válido.
+    """
+    if not path.is_file():
+        raise UserError(_("%(path)s is not a file.") % {"path": path})
+    if path.suffix not in VIDEO_CONTAINERS:
+        raise InvalidContainerError(
+            extension=path.suffix,
+            media_type=MediaType.VIDEO,
+            supported=VIDEO_CONTAINERS,
+        )
+    return path
+
+
+def validate_subtitles_path(path: Path) -> Path:
+    """Valida que la ruta indicada sea un fichero de subtítulos existente.
+
+    Args:
+        path: Ruta a validar.
+        media_type: Tipo de fichero multimedia cargado.
+
+    Returns:
+        La propia ruta si es un fichero.
+
+    Raises:
+        UserError: Si la ruta no es un fichero.
+        InvalidContainerError: Si no es un contenedor de subtítulos válido.
+    """
+    if not path.is_file():
+        raise UserError(_("%(path)s is not a file.") % {"path": path})
+    if path.suffix not in SUBTITLES_CONTAINERS:
+        raise InvalidContainerError(
+            extension=path.suffix,
+            media_type=MediaType.SUBTITLES,
+            supported=SUBTITLES_CONTAINERS,
+        )
+    return path
+
+
+def validate_media_path_list(paths: list[Path]) -> list[Path]:
+    """Valida que cada ruta del listado sea un fichero de vídeo existente.
 
     Args:
         paths: Rutas a validar.
 
     Returns:
-        El propio listado de rutas si todos son ficheros.
+        El propio listado de rutas si todos son ficheros de vídeo válidos.
 
     Raises:
         UserError: Si alguna ruta no es un fichero.
+        InvalidContainerError: Si alguna ruta no es un contenedor de vídeo válido.
     """
     for p in paths:
-        if not p.is_file():
-            raise UserError(_("%(path)s is not a file.") % {"path": p})
+        validate_media_path(path=p)
     return paths

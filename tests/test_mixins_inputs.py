@@ -6,7 +6,7 @@ from typing import Any
 
 import pytest
 
-from pymedia.errors import MissingParameterError, UserError
+from pymedia.errors import MissingParameterError
 from pymedia.logger import Logger
 from pymedia.mixins.media_mixin import MediaInputMixin, MediaListMixin
 from pymedia.models.media import Media
@@ -49,15 +49,6 @@ class TestInputSingleCreate:
 
         assert mixin.media == _media(source.absolute())
 
-    def test_invalid_extension_raises(self, tmp_path: Path) -> None:
-        """Comprueba que una extensión no de vídeo lanza un error."""
-        mixin = MediaInputMixin()
-
-        with pytest.raises(UserError):
-            mixin.create_media_input(
-                media_input=tmp_path / "clip.txt", logger=_logger()
-            )
-
 
 class TestInputSingleCmd:
     """Pruebas de generación del comando de entrada individual."""
@@ -95,15 +86,6 @@ class TestInputListCreate:
             Media(path=source_a.absolute()),
             Media(path=source_b.absolute()),
         ]
-
-    def test_invalid_extension_raises(self, tmp_path: Path) -> None:
-        """Comprueba que una extensión no de vídeo lanza un error."""
-        mixin = MediaListMixin()
-
-        with pytest.raises(UserError):
-            mixin.create_media_list(
-                media_input_list=[tmp_path / "x.txt"], logger=_logger()
-            )
 
     def test_load_failure_raises_missing_media(
         self, monkeypatch: pytest.MonkeyPatch
