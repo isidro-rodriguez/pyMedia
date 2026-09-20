@@ -27,6 +27,14 @@ class RemuxCmd:
         """
         if self.params.media is None:
             raise MissingParameterError(name="media")
+        if self.params.media_output is None:
+            raise MissingParameterError(name="media_output")
+        container = self.params.media_output.suffix
+
+        if self.params.sort_tracks:
+            tracks = self.params.to_sort_tracks_cmd()
+        else:
+            tracks = ["-map", "0:v?", "-map", "0:a?", "-map", "0:s?"]
 
         cmd = ["ffmpeg"]
 
@@ -36,17 +44,22 @@ class RemuxCmd:
         if self.params.regenerate_pts:
             cmd.extend(self.params.to_regenerate_pts_cmd())
 
-        cmd.extend(["-i", str(self.params.media.path)])
-
-        if self.params.sort_tracks:
-            cmd.extend(self.params.to_sort_tracks_cmd())
-        else:
-            cmd.extend(["-map", "0"])
-
-        cmd.extend(["-c", "copy"])
+        cmd.extend(
+            [
+                "-i",
+                str(self.params.media.path),
+                *tracks,
+                "-c:v",
+                "copy",
+                "-c:a",
+                "copy",
+                "-c:s",
+                "copy" if container != ".mp4" else "mov_text",
+            ]
+        )
 
         if self.params.fast_start:
-            cmd.extend(self.params.to_fast_start_cmd())
+            cmd.extend([*self.params.to_fast_start_cmd()])
 
         cmd.append(str(self.params.media_output))
 
