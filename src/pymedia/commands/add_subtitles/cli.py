@@ -52,10 +52,10 @@ def add_subs(
     media_output: OutputOption = None,
     overwrite: OverwriteOption = OverwriteMode.ASK,
     title: SubtitlesTitleOption = None,
-    forced: SubtitlesForcedOption = False,
-    default: SubtitlesDefaultOption = False,
-    hearing_impaired: SubtitlesHearingImpairedOption = False,
-    visual_impaired: SubtitlesVisualImpairedOption = False,
+    forced: SubtitlesForcedOption = None,
+    default: SubtitlesDefaultOption = None,
+    hearing_impaired: SubtitlesHearingImpairedOption = None,
+    visual_impaired: SubtitlesVisualImpairedOption = None,
     debug: DebugOption = False,
     help_: HelpOption = False,  # noqa
 ) -> None:

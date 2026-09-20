@@ -316,7 +316,7 @@ TranscodeVideoOption = Annotated[
 AudioCommentaryOption = Annotated[
     bool | None,
     typer.Option(
-        default="--commentary",
+        default="--commentary/--no-commentary",
         rich_help_panel=_("Audio options"),
         help=_("Set as commentary audio track."),
     ),
@@ -325,7 +325,7 @@ AudioCommentaryOption = Annotated[
 AudioDefaultOption = Annotated[
     bool | None,
     typer.Option(
-        default="--default",
+        default="--default/--no-default",
         rich_help_panel=_("Audio options"),
         help=_("Set as default audio track of the container."),
     ),
@@ -334,7 +334,7 @@ AudioDefaultOption = Annotated[
 AudioForcedOption = Annotated[
     bool | None,
     typer.Option(
-        default="--forced",
+        default="--forced/--no-forced",
         rich_help_panel=_("Audio options"),
         help=_("Set as forced to be displayed."),
     ),
@@ -343,7 +343,7 @@ AudioForcedOption = Annotated[
 AudioHearingImpairedOption = Annotated[
     bool | None,
     typer.Option(
-        default="--hearing-impaired",
+        default="--hearing-impaired/--no-hearing-impaired",
         rich_help_panel=_("Audio options"),
         help=_("Set audio track as targeted for hearing impaired people."),
     ),
@@ -394,7 +394,7 @@ AudioTitleOption = Annotated[
 SubtitlesDefaultOption = Annotated[
     bool | None,
     typer.Option(
-        default="--default",
+        default="--default/--no-default",
         rich_help_panel=_("Subtitles options"),
         help=_("Set as default subtitles of the container."),
     ),
@@ -403,7 +403,7 @@ SubtitlesDefaultOption = Annotated[
 SubtitlesForcedOption = Annotated[
     bool | None,
     typer.Option(
-        default="--forced",
+        default="--forced/--no-forced",
         rich_help_panel=_("Subtitles options"),
         help=_("Set as forced to be displayed."),
     ),
@@ -412,7 +412,7 @@ SubtitlesForcedOption = Annotated[
 SubtitlesHearingImpairedOption = Annotated[
     bool | None,
     typer.Option(
-        default="--hearing-impaired",
+        default="--hearing-impaired/--no-hearing-impaired",
         rich_help_panel=_("Subtitles options"),
         help=_("Set as targeted for hearing impaired people."),
     ),
@@ -459,7 +459,7 @@ SubtitlesTitleOption = Annotated[
 SubtitlesVisualImpairedOption = Annotated[
     bool | None,
     typer.Option(
-        default="--visual-impaired",
+        default="--visual-impaired/--no-visual-impaired",
         rich_help_panel=_("Subtitles options"),
         help=_("Set as targeted for visual impaired people."),
     ),

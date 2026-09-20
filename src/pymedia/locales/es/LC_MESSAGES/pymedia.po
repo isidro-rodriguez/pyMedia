@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-09-20 12:47+0100\n"
+"POT-Creation-Date: 2026-09-20 16:42+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -424,48 +424,48 @@ msgstr "Resolución objetivo, en píxeles, para redimensionar el vídeo."
 msgid "Allows upscaling beyond the source dimensions."
 msgstr "Permite ampliar más allá de las dimensiones de origen."
 
-#: pymedia/commands/base_service.py:73
+#: pymedia/commands/base_service.py:74
 msgid "Invalid class name format!"
 msgstr "¡Formato de nombre de clase no válido!"
 
-#: pymedia/commands/base_service.py:94
+#: pymedia/commands/base_service.py:95
 msgid "Process skipped since output file already exists."
 msgstr "Proceso omitido porque el fichero de salida ya existe."
 
-#: pymedia/commands/base_service.py:101
+#: pymedia/commands/base_service.py:102 pymedia/commands/base_service.py:306
 #, python-format
 msgid "Output file already exists: %(name)s"
 msgstr "El fichero de salida ya existe: %(name)s"
 
-#: pymedia/commands/base_service.py:103 pymedia/commands/scene/service.py:90
+#: pymedia/commands/base_service.py:104 pymedia/commands/scene/service.py:90
 msgid "Overwrite?"
 msgstr "¿Sobrescribir?"
 
-#: pymedia/commands/base_service.py:175
-msgid "File could not be deleted."
-msgstr "No se pudo eliminar el fichero."
-
-#: pymedia/commands/base_service.py:180
+#: pymedia/commands/base_service.py:179
 #, python-format
 msgid "FFmpeg command interrupted manually: %(command_name)s"
 msgstr "Comando FFmpeg %(command_name)s interrumpido manualmente."
 
-#: pymedia/commands/base_service.py:185
+#: pymedia/commands/base_service.py:184
 #, python-format
 msgid "FFmpeg command timed out: %(command_name)s"
 msgstr "El comando FFmpeg %(command_name)s agotó el tiempo de espera."
 
-#: pymedia/commands/base_service.py:192
+#: pymedia/commands/base_service.py:191
 msgid "FFmpeg command failed during execution."
 msgstr "El comando FFmpeg falló durante la ejecución."
 
-#: pymedia/commands/base_service.py:196
+#: pymedia/commands/base_service.py:195
 msgid "Do you want to run this ffmpeg command?"
 msgstr "¿Quieres ejecutar este comando ffmpeg?"
 
-#: pymedia/commands/base_service.py:197
+#: pymedia/commands/base_service.py:196
 msgid "User decided to abort process."
 msgstr "El usuario decidió abortar el proceso."
+
+#: pymedia/commands/base_service.py:312
+msgid "Output file could not be moved."
+msgstr "No se pudo mover el fichero de salida."
 
 #: pymedia/commands/add_audio/cli.py:28
 msgid ""
@@ -1084,7 +1084,7 @@ msgstr "Uniendo archivos multimedia"
 msgid "Containers joined successfully: %(output)s"
 msgstr "Contenedores unidos correctamente: %(output)s"
 
-#: pymedia/commands/join/service.py:183
+#: pymedia/commands/join/service.py:178
 #, python-format
 msgid ""
 "Incompatible media files for join output %(output)s.\n"
@@ -1239,15 +1239,15 @@ msgstr ""
 "  Genera una hoja con otro preajuste y salida indicada:\n"
 "    > pymedia sheet input.mp4 --preset fhd -o vcs.webp\n"
 
-#: pymedia/commands/sheet/service.py:49
+#: pymedia/commands/sheet/service.py:48
 msgid "Generating sheet snapshots"
 msgstr "Generando las capturas de la hoja"
 
-#: pymedia/commands/sheet/service.py:56
+#: pymedia/commands/sheet/service.py:55
 msgid "Generating sheet header"
 msgstr "Generando la cabecera de la hoja"
 
-#: pymedia/commands/sheet/service.py:61
+#: pymedia/commands/sheet/service.py:60
 #, python-format
 msgid "Sheet generated successfully: %(output)s"
 msgstr "Hoja generada correctamente: %(output)s"

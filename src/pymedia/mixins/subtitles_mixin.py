@@ -35,10 +35,10 @@ class SubtitlesInputMixin:
         logger: Logger,
         language: str | None = None,
         title: str | None = None,
-        forced: bool = False,
-        default: bool = False,
-        hearing_impaired: bool = False,
-        visual_impaired: bool = False,
+        forced: bool | None = None,
+        default: bool | None = None,
+        hearing_impaired: bool | None = None,
+        visual_impaired: bool | None = None,
     ) -> None:
         """Crea un modelo de metadatos de subtítulos.
 

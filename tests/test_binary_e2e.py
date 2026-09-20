@@ -372,7 +372,9 @@ def test_cut_error_missing_options(
     )
 
     assert result.returncode != 0
-    assert "Missing required options: at, start, end" in process_output(result)
+    assert "Missing at least one of these options: at, start, end" in (
+        process_output(result)
+    )
 
 
 # =============================================================================
@@ -415,7 +417,7 @@ def test_transcode_error_missing_action(
 
     assert result.returncode != 0
     normalized = " ".join(process_output(result).split())
-    assert "Missing required options:" in normalized
+    assert "Missing at least one of these options:" in normalized
     for option in (
         "audio",
         "video",

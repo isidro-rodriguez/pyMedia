@@ -34,10 +34,10 @@ class AudioInputMixin:
         logger: Logger,
         language: str | None = None,
         title: str | None = None,
-        default: bool = False,
-        forced: bool = False,
-        hearing_impaired: bool = False,
-        commentary: bool = False,
+        default: bool | None = None,
+        forced: bool | None = None,
+        hearing_impaired: bool | None = None,
+        commentary: bool | None = None,
     ) -> None:
         """Crea un modelo de metadatos de audio.
 

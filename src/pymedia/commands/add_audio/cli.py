@@ -52,10 +52,10 @@ def add_audio(
     media_output: OutputOption = None,
     overwrite: OverwriteOption = OverwriteMode.ASK,
     title: AudioTitleOption = None,
-    forced: AudioForcedOption = False,
-    default: AudioDefaultOption = False,
-    hearing_impaired: AudioHearingImpairedOption = False,
-    commentary: AudioCommentaryOption = False,
+    forced: AudioForcedOption = None,
+    default: AudioDefaultOption = None,
+    hearing_impaired: AudioHearingImpairedOption = None,
+    commentary: AudioCommentaryOption = None,
     debug: DebugOption = False,
     help_: HelpOption = False,  # noqa
 ) -> None:

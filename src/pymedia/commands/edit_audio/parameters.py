@@ -32,10 +32,10 @@ class EditAudioParameters(
         language: str | None = None,
         media_output: Path | None = None,
         title: str | None = None,
-        forced: bool = False,
-        default: bool = False,
-        hearing_impaired: bool = False,
-        commentary: bool = False,
+        forced: bool | None = None,
+        default: bool | None = None,
+        hearing_impaired: bool | None = None,
+        commentary: bool | None = None,
     ) -> Self:
         """Valida y parsea los argumentos en parámetros procesados.
 

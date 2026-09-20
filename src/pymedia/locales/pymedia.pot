@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-09-20 12:47+0100\n"
+"POT-Creation-Date: 2026-09-20 16:42+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -404,47 +404,47 @@ msgstr ""
 msgid "Allows upscaling beyond the source dimensions."
 msgstr ""
 
-#: pymedia/commands/base_service.py:73
+#: pymedia/commands/base_service.py:74
 msgid "Invalid class name format!"
 msgstr ""
 
-#: pymedia/commands/base_service.py:94
+#: pymedia/commands/base_service.py:95
 msgid "Process skipped since output file already exists."
 msgstr ""
 
-#: pymedia/commands/base_service.py:101
+#: pymedia/commands/base_service.py:102 pymedia/commands/base_service.py:306
 #, python-format
 msgid "Output file already exists: %(name)s"
 msgstr ""
 
-#: pymedia/commands/base_service.py:103 pymedia/commands/scene/service.py:90
+#: pymedia/commands/base_service.py:104 pymedia/commands/scene/service.py:90
 msgid "Overwrite?"
 msgstr ""
 
-#: pymedia/commands/base_service.py:175
-msgid "File could not be deleted."
-msgstr ""
-
-#: pymedia/commands/base_service.py:180
+#: pymedia/commands/base_service.py:179
 #, python-format
 msgid "FFmpeg command interrupted manually: %(command_name)s"
 msgstr ""
 
-#: pymedia/commands/base_service.py:185
+#: pymedia/commands/base_service.py:184
 #, python-format
 msgid "FFmpeg command timed out: %(command_name)s"
 msgstr ""
 
-#: pymedia/commands/base_service.py:192
+#: pymedia/commands/base_service.py:191
 msgid "FFmpeg command failed during execution."
 msgstr ""
 
-#: pymedia/commands/base_service.py:196
+#: pymedia/commands/base_service.py:195
 msgid "Do you want to run this ffmpeg command?"
 msgstr ""
 
-#: pymedia/commands/base_service.py:197
+#: pymedia/commands/base_service.py:196
 msgid "User decided to abort process."
+msgstr ""
+
+#: pymedia/commands/base_service.py:312
+msgid "Output file could not be moved."
 msgstr ""
 
 #: pymedia/commands/add_audio/cli.py:28
@@ -923,7 +923,7 @@ msgstr ""
 msgid "Containers joined successfully: %(output)s"
 msgstr ""
 
-#: pymedia/commands/join/service.py:183
+#: pymedia/commands/join/service.py:178
 #, python-format
 msgid ""
 "Incompatible media files for join output %(output)s.\n"
@@ -1027,15 +1027,15 @@ msgid ""
 "    > pymedia sheet input.mp4 --preset fhd -o vcs.webp\n"
 msgstr ""
 
-#: pymedia/commands/sheet/service.py:49
+#: pymedia/commands/sheet/service.py:48
 msgid "Generating sheet snapshots"
 msgstr ""
 
-#: pymedia/commands/sheet/service.py:56
+#: pymedia/commands/sheet/service.py:55
 msgid "Generating sheet header"
 msgstr ""
 
-#: pymedia/commands/sheet/service.py:61
+#: pymedia/commands/sheet/service.py:60
 #, python-format
 msgid "Sheet generated successfully: %(output)s"
 msgstr ""

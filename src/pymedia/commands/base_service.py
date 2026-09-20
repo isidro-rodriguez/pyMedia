@@ -6,6 +6,7 @@ Define los servicios comunes para los comandos.
 import queue
 import subprocess
 import sys
+import tempfile
 import threading
 from abc import ABC
 from collections.abc import Iterable
@@ -117,6 +118,10 @@ class BaseService[ParamsT](ABC):
     ) -> None:
         """Ejecuta el cmd ffmpeg generado mientras muestra una barra de progreso.
 
+        ffmpeg escribe en un directorio temporal contiguo al destino y las
+        salidas solo se mueven a su ruta final si el proceso termina bien, por
+        lo que un fallo o una interrupción nunca tocan ficheros preexistentes.
+
         El progreso se reporta de tres formas posibles, según los parámetros
         recibidos: por tiempo (`progress_time`, vía `out_time_ms` en stdout),
         por pasos (`total_steps`, contando eventos `showinfo` en stderr) o de
@@ -125,15 +130,16 @@ class BaseService[ParamsT](ABC):
         Args:
             cmd: Comando ffmpeg ya construido, listo para ejecutar.
             description: Mensaje a mostrar junto a la barra de progreso.
-            output_list: Ficheros de salida esperados; puede ser un iterable
-                perezoso para salidas que solo se conocen tras la ejecución.
+            output_list: Ficheros de salida que recibe `cmd` como argumento;
+                se consume una sola vez. La última posición de `cmd` siempre
+                se trata como salida, exista o no en esta lista.
             progress_time: Duración del tramo de vídeo a procesar.
             total_steps: Número de pasos esperados de `showinfo` por stderr.
 
         Raises:
             CommandError: Si falla el cmd o se bloquea.
             UserError: Si el usuario interrumpe la ejecución.
-            OsError: Si no se puede borrar una salida al abortar.
+            OsError: Si no se puede mover una salida a su destino final.
         """
 
         def _read_stdout() -> None:
@@ -161,18 +167,11 @@ class BaseService[ParamsT](ABC):
                 proc.stderr.close()
 
         def _abort(mode: _AbortMode) -> Never:
-            """Detiene el proceso y elimina las salidas antes de informar del error."""
+            """Detiene el proceso e informa; el temporal se descarta al salir."""
             if proc.poll() is None:
                 proc.kill()
             proc.wait()
             _finish_readers()
-
-            try:
-                for output in output_list:
-                    if output.exists():
-                        output.unlink()
-            except OSError as e:
-                raise OsError(msg=_("File could not be deleted.")) from e
 
             match mode:
                 case _AbortMode.MANUAL:
@@ -199,70 +198,115 @@ class BaseService[ParamsT](ABC):
 
         # ffmpeg no debe preguntar por su cuenta (el prompt queda oculto tras la
         # barra de progreso y bloquea): la política ya se resolvió en el servicio.
+        overwrite = getattr(getattr(self, "params", None), "overwrite", None)
+        overwrite_yes = overwrite == OverwriteMode.YES
         if Path(cmd[0]).stem == "ffmpeg":
-            overwrite = getattr(getattr(self, "params", None), "overwrite", None)
             cmd = [
                 cmd[0],
                 "-nostdin",
-                "-y" if overwrite == OverwriteMode.YES else "-n",
+                "-y" if overwrite_yes else "-n",
                 *(arg for arg in cmd[1:] if arg not in ("-y", "-n")),
             ]
 
-        stderr_lines: list[str] = []
-        events: queue.Queue[tuple[str, str | None]] = queue.Queue()
-        stdout_thread = threading.Thread(target=_read_stdout, daemon=True)
-        stderr_thread = threading.Thread(target=_read_stderr, daemon=True)
-        proc = subprocess.Popen(
-            args=cmd,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            stdin=subprocess.DEVNULL,
-            text=True,
-            errors="replace",
-            bufsize=1,
-        )
+        dest_dir = Path(cmd[-1]).parent
+        # Mismo sistema de ficheros que el destino: `replace` es atómico. Si la
+        # limpieza falla no debe enmascarar el error real que la provoca.
+        with tempfile.TemporaryDirectory(
+            dir=dest_dir, prefix=".pymedia-", ignore_cleanup_errors=True
+        ) as tmp_dir:
+            staging = Path(tmp_dir)
+            cmd = self._stage_outputs(
+                cmd=cmd, output_list={str(o) for o in output_list}, staging=staging
+            )
+            stderr_lines: list[str] = []
+            events: queue.Queue[tuple[str, str | None]] = queue.Queue()
+            stdout_thread = threading.Thread(target=_read_stdout, daemon=True)
+            stderr_thread = threading.Thread(target=_read_stderr, daemon=True)
+            proc = subprocess.Popen(
+                args=cmd,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                stdin=subprocess.DEVNULL,
+                text=True,
+                errors="replace",
+                bufsize=1,
+            )
 
+            try:
+                assert proc.stdout is not None
+                assert proc.stderr is not None
+                stdout_thread.start()
+                stderr_thread.start()
+
+                with Progress() as progress:
+                    if progress_time is not None:
+                        total: float | None = progress_time.total_seconds()
+                    elif total_steps is not None:
+                        total = float(total_steps)
+                    else:
+                        total = None
+                    task = progress.add_task(description=description, total=total)
+
+                    pending_streams = {"stdout", "stderr"}
+                    completed_steps = 0
+                    while pending_streams:
+                        source, line = events.get(timeout=self.config.app.stall_timeout)
+                        if line is None:
+                            pending_streams.discard(source)
+                            continue
+
+                        if progress_time is not None and line.startswith(
+                            "out_time_ms="
+                        ):
+                            value = line.partition("=")[2].strip()
+                            if value.isdigit():
+                                progress.update(
+                                    task_id=task, completed=int(value) / 1_000_000
+                                )
+                        elif total_steps is not None and source == "stderr":
+                            completed_steps += 1
+                            progress.update(task_id=task, completed=completed_steps)
+
+                    proc.wait()
+                    _finish_readers()
+                    if proc.returncode == 0 and total is not None:
+                        progress.update(task_id=task, completed=total)
+            except KeyboardInterrupt:
+                _abort(mode=_AbortMode.MANUAL)
+            except queue.Empty:
+                _abort(mode=_AbortMode.TIMEOUT)
+
+            if proc.returncode != 0:
+                _abort(mode=_AbortMode.FFMPEG)
+
+            self._commit_outputs(
+                staging=staging, dest_dir=dest_dir, overwrite=overwrite_yes
+            )
+
+    @staticmethod
+    def _stage_outputs(
+        cmd: list[str], output_list: set[str], staging: Path
+    ) -> list[str]:
+        """Redirige al directorio temporal los argumentos de salida del comando."""
+        # La salida principal (o su plantilla `%03d`) es siempre el último
+        # argumento; `output_list` aporta el resto en comandos multisalida.
+        targets = {cmd[-1], *output_list}
+        return [
+            str(staging / Path(arg).name) if index and arg in targets else arg
+            for index, arg in enumerate(cmd)
+        ]
+
+    @staticmethod
+    def _commit_outputs(staging: Path, dest_dir: Path, overwrite: bool) -> None:
+        """Mueve las salidas completas del temporal a su destino final."""
+        staged = sorted(staging.iterdir())
+        for file in staged:
+            if not overwrite and (dest_dir / file.name).exists():
+                raise CommandError(
+                    msg=_("Output file already exists: %(name)s") % {"name": file.name}
+                )
         try:
-            assert proc.stdout is not None
-            assert proc.stderr is not None
-            stdout_thread.start()
-            stderr_thread.start()
-
-            with Progress() as progress:
-                if progress_time is not None:
-                    total: float | None = progress_time.total_seconds()
-                elif total_steps is not None:
-                    total = float(total_steps)
-                else:
-                    total = None
-                task = progress.add_task(description=description, total=total)
-
-                pending_streams = {"stdout", "stderr"}
-                completed_steps = 0
-                while pending_streams:
-                    source, line = events.get(timeout=self.config.app.stall_timeout)
-                    if line is None:
-                        pending_streams.discard(source)
-                        continue
-
-                    if progress_time is not None and line.startswith("out_time_ms="):
-                        value = line.partition("=")[2].strip()
-                        if value.isdigit():
-                            progress.update(
-                                task_id=task, completed=int(value) / 1_000_000
-                            )
-                    elif total_steps is not None and source == "stderr":
-                        completed_steps += 1
-                        progress.update(task_id=task, completed=completed_steps)
-
-                proc.wait()
-                _finish_readers()
-                if proc.returncode == 0 and total is not None:
-                    progress.update(task_id=task, completed=total)
-        except KeyboardInterrupt:
-            _abort(mode=_AbortMode.MANUAL)
-        except queue.Empty:
-            _abort(mode=_AbortMode.TIMEOUT)
-
-        if proc.returncode != 0:
-            _abort(mode=_AbortMode.FFMPEG)
+            for file in staged:
+                file.replace(dest_dir / file.name)
+        except OSError as e:
+            raise OsError(msg=_("Output file could not be moved.")) from e

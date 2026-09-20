@@ -32,10 +32,10 @@ class EditSubtitlesParameters(
         language: str | None = None,
         media_output: Path | None = None,
         title: str | None = None,
-        forced: bool | None = False,
-        default: bool | None = False,
-        hearing_impaired: bool | None = False,
-        visual_impaired: bool | None = False,
+        forced: bool | None = None,
+        default: bool | None = None,
+        hearing_impaired: bool | None = None,
+        visual_impaired: bool | None = None,
     ) -> Self:
         """Valida y parsea los argumentos en parámetros procesados.
 
