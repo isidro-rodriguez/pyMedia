@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-09-20 01:14+0000\n"
+"POT-Creation-Date: 2026-09-20 07:06+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -56,50 +56,50 @@ msgstr ""
 msgid "Missing required options: %(options)s"
 msgstr ""
 
-#: pymedia/ffprobe.py:32
+#: pymedia/ffprobe.py:39
 msgid "ffprobe was not found. Install ffmpeg."
 msgstr ""
 
-#: pymedia/ffprobe.py:37
+#: pymedia/ffprobe.py:44
 #, python-format
 msgid "ffprobe couldn't read %(path)s: %(err.stderr)s"
 msgstr ""
 
-#: pymedia/ffprobe.py:62
+#: pymedia/ffprobe.py:69
 #, python-format
 msgid "ffprobe audio file data: %(data)s"
 msgstr ""
 
-#: pymedia/ffprobe.py:78
+#: pymedia/ffprobe.py:85
 #, python-format
 msgid ""
 "\"%(path)s\" is not a recognized audio file (detected format: "
 "%(format_name)s)."
 msgstr ""
 
-#: pymedia/ffprobe.py:90
+#: pymedia/ffprobe.py:97
 #, python-format
 msgid "%(path.suffix)s extension doesn't support %(codec_name)s audio."
 msgstr ""
 
-#: pymedia/ffprobe.py:110
+#: pymedia/ffprobe.py:117
 #, python-format
 msgid "ffprobe media data: %(data)s"
 msgstr ""
 
-#: pymedia/ffprobe.py:131
+#: pymedia/ffprobe.py:138
 #, python-format
 msgid "ffprobe subtitles file data: %(data)s"
 msgstr ""
 
-#: pymedia/ffprobe.py:144
+#: pymedia/ffprobe.py:151
 #, python-format
 msgid ""
 "\"%(path)s\" is not a recognized subtitles file (detected format: "
 "%(format_name)s)."
 msgstr ""
 
-#: pymedia/ffprobe.py:153
+#: pymedia/ffprobe.py:160
 #, python-format
 msgid "%(path.suffix)s extension doesn't support %(codec_name)s subtitles."
 msgstr ""
@@ -434,11 +434,11 @@ msgstr ""
 msgid "FFmpeg command failed during execution."
 msgstr ""
 
-#: pymedia/commands/base_service.py:207
+#: pymedia/commands/base_service.py:196
 msgid "Do you want to run this ffmpeg command?"
 msgstr ""
 
-#: pymedia/commands/base_service.py:208
+#: pymedia/commands/base_service.py:197
 msgid "User decided to abort process."
 msgstr ""
 
@@ -464,7 +464,7 @@ msgstr ""
 
 #: pymedia/commands/add_audio/service.py:29
 #: pymedia/commands/add_subtitles/service.py:29
-#: pymedia/commands/animated/service.py:31 pymedia/commands/cut/service.py:31
+#: pymedia/commands/animated/service.py:31 pymedia/commands/cut/service.py:33
 #: pymedia/commands/delete_audio/service.py:29
 #: pymedia/commands/delete_subtitles/service.py:29
 #: pymedia/commands/edit_audio/service.py:29
@@ -573,16 +573,20 @@ msgstr ""
 msgid "Ambiguous options: You can't select --at with --start or --end."
 msgstr ""
 
-#: pymedia/commands/cut/service.py:35
+#: pymedia/commands/cut/service.py:29
+msgid "Remux cut may be imprecise."
+msgstr ""
+
+#: pymedia/commands/cut/service.py:37
 msgid "Splitting media file"
 msgstr ""
 
-#: pymedia/commands/cut/service.py:42
+#: pymedia/commands/cut/service.py:44
 #, python-format
 msgid "Container split successfully: %(count)d files."
 msgstr ""
 
-#: pymedia/commands/cut/service.py:47
+#: pymedia/commands/cut/service.py:49
 #, python-format
 msgid "Container split successfully: %(output)s"
 msgstr ""
@@ -1203,11 +1207,16 @@ msgstr ""
 msgid "Invalid timestamps. Start (%(start)s) >= End (%(end)s)."
 msgstr ""
 
-#: pymedia/mixins/timestamps_mixin.py:179
+#: pymedia/mixins/timestamps_mixin.py:160
+#, python-format
+msgid "Time %(time)s is a duplicated timestamp."
+msgstr ""
+
+#: pymedia/mixins/timestamps_mixin.py:183
 msgid "Invalid timestamp format. Expected: hh:mm:ss."
 msgstr ""
 
-#: pymedia/mixins/timestamps_mixin.py:203
+#: pymedia/mixins/timestamps_mixin.py:207
 #, python-format
 msgid "Timestamp %(time)s exceeds video duration %(duration)s."
 msgstr ""

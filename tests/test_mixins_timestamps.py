@@ -70,14 +70,15 @@ class TestCreateTimestampStart:
                 timestamp_start="00:00:31", timestamp_end=None
             )
 
-    def test_equal_to_duration_is_allowed(self) -> None:
-        """Comprueba que una marca igual a la duración es válida."""
+    def test_equal_to_duration_raises(self) -> None:
+        """Comprueba que una marca igual a la duración lanza error."""
         mixin = TimestampStartEndMixin()
         mixin.media = _media(duration=timedelta(minutes=1))
 
-        mixin.create_timestamp_start_end(timestamp_start="00:01:00", timestamp_end=None)
-
-        assert mixin.timestamp_start == timedelta(minutes=1)
+        with pytest.raises(UserError):
+            mixin.create_timestamp_start_end(
+                timestamp_start="00:00:60", timestamp_end=None
+            )
 
 
 class TestCreateTimestampEnd:

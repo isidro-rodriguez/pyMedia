@@ -26,6 +26,8 @@ class CutService(BaseService[CutParameters]):
         if not self.resolve_overwrite(output_list=self._expected_outputs()):
             sys.exit(0)
 
+        self.logger.warning(msg=_("Remux cut may be imprecise."))
+
         cmd = CutCmd(params=self.params).create()
 
         self.logger.debug(_("FFmpeg command: %(cmd)s"), cmd=cmd)

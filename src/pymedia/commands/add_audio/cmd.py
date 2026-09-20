@@ -38,8 +38,6 @@ class AddAudioCmd:
             raise MissingParameterError(name="audio.codec")
         if audio.language is None:
             raise MissingParameterError(name="audio.language")
-        if audio.path is None:
-            raise MissingParameterError(name="audio.path")
         if audio.track_index is None:
             raise MissingParameterError(name="audio.track_index")
         if audio.title is None:

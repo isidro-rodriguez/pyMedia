@@ -56,7 +56,7 @@ class CutParameters(
         )
 
         params.create_media_output(
-            extension=params.config.default_containers.media,
+            extension=media_input.suffix,
             affix="_split",
             output=media_output,
             remux=True,

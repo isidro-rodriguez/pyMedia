@@ -155,6 +155,10 @@ class TimestampAtMixin:
         times: list[timedelta] = []
         for time_str in times_str.split(","):
             time = _process_time(time_str=time_str, media=media)
+            if time in times:
+                raise UserError(
+                    msg=_("Time %(time)s is a duplicated timestamp.") % {"time": time}
+                )
             times.append(time)
         times.sort()
 
@@ -198,7 +202,7 @@ def _process_time(time_str: str, media: Media) -> timedelta:
         """Valida que la marca de tiempo no supere la duración del vídeo."""
         if media.duration is None:
             raise MissingPropertyError(name="video.duration")
-        if time_delta > media.duration:
+        if time_delta >= media.duration:
             raise UserError(
                 _("Timestamp %(time)s exceeds video duration %(duration)s.")
                 % {"time": str(time_delta), "duration": str(media.duration)}
