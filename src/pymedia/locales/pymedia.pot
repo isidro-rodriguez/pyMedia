@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-09-20 10:46+0100\n"
+"POT-Creation-Date: 2026-09-20 11:15+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -1078,10 +1078,11 @@ msgstr ""
 msgid "Audio index not included."
 msgstr ""
 
-#: pymedia/mixins/audio_mixin.py:274 pymedia/mixins/subtitles_mixin.py:273
+#: pymedia/mixins/audio_mixin.py:274
 msgid ""
-"Value doesn't match with ISO 639-2: Codes for the Representation of Names"
-" of Languages.[https://www.loc.gov/standards/iso639-2/php/code_list.php]"
+"Value doesn't match a native language name, an English language name, or "
+"a standard ISO 639-2 code: "
+"[https://www.loc.gov/standards/iso639-2/php/code_list.php]"
 msgstr ""
 
 #: pymedia/mixins/crop_mixin.py:74
@@ -1200,6 +1201,12 @@ msgstr ""
 
 #: pymedia/mixins/subtitles_mixin.py:243
 msgid "Subtitles codec not supported."
+msgstr ""
+
+#: pymedia/mixins/subtitles_mixin.py:273
+msgid ""
+"Value doesn't match with ISO 639-2: Codes for the Representation of Names"
+" of Languages.[https://www.loc.gov/standards/iso639-2/php/code_list.php]"
 msgstr ""
 
 #: pymedia/mixins/timestamps_mixin.py:65

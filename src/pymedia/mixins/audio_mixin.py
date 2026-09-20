@@ -271,8 +271,8 @@ class AudioInputMixin:
 
         raise UserError(
             msg=_(
-                "Value doesn't match with ISO 639-2: "
-                "Codes for the Representation of Names of Languages."
+                "Value doesn't match a native language name, "
+                "an English language name, or a standard ISO 639-2 code: "
                 "[https://www.loc.gov/standards/iso639-2/php/code_list.php]"
             )
         )

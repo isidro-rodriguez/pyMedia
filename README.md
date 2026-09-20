@@ -5,7 +5,7 @@ habituales de procesamiento de vídeo: análisis de metadatos, capturas, unión,
 corte y división de contenedores, remux sin transcodificar, transcodificación
 por perfiles y edición de pistas de audio y subtítulos.
 
-> **Versión:** Beta 0.16.0
+> **Versión:** Beta 0.19.2
 
 ## Características
 
