@@ -191,6 +191,13 @@ class MissingRequiredOptionsError(UserError):
         Args:
             options: Lista de opciones requeridas.
         """
-        super().__init__(
-            _("Missing required options: %(options)s") % {"options": ", ".join(options)}
-        )
+        if len(options) == 1:
+            super().__init__(
+                _("Missing required option: %(options)s")
+                % {"options": ", ".join(options)}
+            )
+        else:
+            super().__init__(
+                _("Missing at least one of these options: %(options)s")
+                % {"options": ", ".join(options)}
+            )

@@ -18,6 +18,7 @@ from pymedia.commands.base_cli_options import (
 )
 from pymedia.commands.edit_subtitles.parameters import EditSubtitlesParameters
 from pymedia.commands.edit_subtitles.service import EditSubtitlesService
+from pymedia.errors import MissingRequiredOptionsError
 from pymedia.locales import _  # noqa
 from pymedia.logger import Logger
 from pymedia.types import OverwriteMode
@@ -52,10 +53,10 @@ def edit_subs(
     media_output: OutputOption = None,
     overwrite: OverwriteOption = OverwriteMode.ASK,
     title: SubtitlesTitleOption = None,
-    forced: SubtitlesForcedOption = False,
-    default: SubtitlesDefaultOption = False,
-    hearing_impaired: SubtitlesHearingImpairedOption = False,
-    visual_impaired: SubtitlesVisualImpairedOption = False,
+    forced: SubtitlesForcedOption = None,
+    default: SubtitlesDefaultOption = None,
+    hearing_impaired: SubtitlesHearingImpairedOption = None,
+    visual_impaired: SubtitlesVisualImpairedOption = None,
     debug: DebugOption = False,
     help_: HelpOption = False,  # noqa
 ) -> None:
@@ -81,6 +82,25 @@ def edit_subs(
         UserError: Si el idioma no sigue el estándar ISO 639-2 o la pista
             indicada no existe en el contenedor.
     """
+    if (
+        language is None
+        and title is None
+        and forced is None
+        and default is None
+        and hearing_impaired is None
+        and visual_impaired is None
+    ):
+        raise MissingRequiredOptionsError(
+            options=[
+                "language",
+                "title",
+                "forced",
+                "default",
+                "hearing_impaired",
+                "visual_impaired",
+            ]
+        )
+
     Logger.create(debug=debug)
     params = EditSubtitlesParameters.load(
         overwrite=overwrite,

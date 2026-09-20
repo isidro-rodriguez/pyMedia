@@ -116,7 +116,7 @@ def test_frames_requires_at(runner: CliRunner, video_mp4_a: Path) -> None:
     result = runner.invoke(app, ["frames", str(video_mp4_a)])
 
     assert result.exit_code != 0
-    assert "Missing required options: at" in result.output
+    assert "Missing required option: at" in result.output
 
 
 def test_scene_ask_detects_existing_files(

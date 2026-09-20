@@ -91,6 +91,9 @@ def frames(
         UserError: Si una marca supera la duración del vídeo o el nombre de
             salida contiene caracteres no permitidos.
     """
+    if timestamp_at is None:
+        raise MissingRequiredOptionsError(options=["at"])
+
     Logger.create(debug=debug)
     if not timestamp_at:
         raise MissingRequiredOptionsError(options=["at"])

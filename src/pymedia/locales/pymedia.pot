@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-09-20 11:15+0100\n"
+"POT-Creation-Date: 2026-09-20 11:55+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -51,9 +51,14 @@ msgid ""
 "%(supported)s."
 msgstr ""
 
-#: pymedia/errors.py:195
+#: pymedia/errors.py:196
 #, python-format
-msgid "Missing required options: %(options)s"
+msgid "Missing required option: %(options)s"
+msgstr ""
+
+#: pymedia/errors.py:201
+#, python-format
+msgid "Missing at least one of these options: %(options)s"
 msgstr ""
 
 #: pymedia/ffprobe.py:39
@@ -457,7 +462,7 @@ msgid ""
 msgstr ""
 
 #: pymedia/commands/add_audio/cli.py:45 pymedia/commands/delete_audio/cli.py:37
-#: pymedia/commands/edit_audio/cli.py:45
+#: pymedia/commands/edit_audio/cli.py:46
 #: pymedia/commands/extract_audio/cli.py:39
 msgid "Audio commands"
 msgstr ""
@@ -506,7 +511,7 @@ msgstr ""
 
 #: pymedia/commands/add_subtitles/cli.py:45
 #: pymedia/commands/delete_subtitles/cli.py:37
-#: pymedia/commands/edit_subtitles/cli.py:45
+#: pymedia/commands/edit_subtitles/cli.py:46
 #: pymedia/commands/extract_subtitles/cli.py:39
 msgid "Subtitles commands"
 msgstr ""
@@ -632,7 +637,7 @@ msgstr ""
 msgid "Subtitles deleted successfully: %(output)s"
 msgstr ""
 
-#: pymedia/commands/edit_audio/cli.py:28
+#: pymedia/commands/edit_audio/cli.py:29
 msgid ""
 "Edit audio track metadata from a media file.\n"
 "\n"
@@ -655,7 +660,7 @@ msgstr ""
 msgid "Audio metadata edited successfully: %(output)s"
 msgstr ""
 
-#: pymedia/commands/edit_subtitles/cli.py:28
+#: pymedia/commands/edit_subtitles/cli.py:29
 msgid ""
 "Edit subtitles metadata from a media file.\n"
 "\n"

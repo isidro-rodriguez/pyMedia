@@ -18,6 +18,7 @@ from pymedia.commands.base_cli_options import (
 )
 from pymedia.commands.edit_audio.parameters import EditAudioParameters
 from pymedia.commands.edit_audio.service import EditAudioService
+from pymedia.errors import MissingRequiredOptionsError
 from pymedia.locales import _  # noqa
 from pymedia.logger import Logger
 from pymedia.types import OverwriteMode
@@ -52,10 +53,10 @@ def edit_audio(
     media_output: OutputOption = None,
     overwrite: OverwriteOption = OverwriteMode.ASK,
     title: AudioTitleOption = None,
-    forced: AudioForcedOption = False,
-    default: AudioDefaultOption = False,
-    hearing_impaired: AudioHearingImpairedOption = False,
-    commentary: AudioCommentaryOption = False,
+    forced: AudioForcedOption = None,
+    default: AudioDefaultOption = None,
+    hearing_impaired: AudioHearingImpairedOption = None,
+    commentary: AudioCommentaryOption = None,
     debug: DebugOption = False,
     help_: HelpOption = False,  # noqa
 ) -> None:
@@ -81,6 +82,25 @@ def edit_audio(
         UserError: Si el idioma no sigue el estándar ISO 639-2 o la pista
             indicada no existe en el contenedor.
     """
+    if (
+        language is None
+        and title is None
+        and forced is None
+        and default is None
+        and hearing_impaired is None
+        and commentary is None
+    ):
+        raise MissingRequiredOptionsError(
+            options=[
+                "language",
+                "title",
+                "forced",
+                "default",
+                "hearing_impaired",
+                "commentary",
+            ]
+        )
+
     Logger.create(debug=debug)
     params = EditAudioParameters.load(
         overwrite=overwrite,

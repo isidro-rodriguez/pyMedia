@@ -310,7 +310,7 @@ TranscodeVideoOption = Annotated[
 # =============================================================================
 
 AudioCommentaryOption = Annotated[
-    bool,
+    bool | None,
     typer.Option(
         default="--commentary",
         rich_help_panel=_("Audio options"),
@@ -319,7 +319,7 @@ AudioCommentaryOption = Annotated[
 ]
 
 AudioDefaultOption = Annotated[
-    bool,
+    bool | None,
     typer.Option(
         default="--default",
         rich_help_panel=_("Audio options"),
@@ -328,7 +328,7 @@ AudioDefaultOption = Annotated[
 ]
 
 AudioForcedOption = Annotated[
-    bool,
+    bool | None,
     typer.Option(
         default="--forced",
         rich_help_panel=_("Audio options"),
@@ -337,7 +337,7 @@ AudioForcedOption = Annotated[
 ]
 
 AudioHearingImpairedOption = Annotated[
-    bool,
+    bool | None,
     typer.Option(
         default="--hearing-impaired",
         rich_help_panel=_("Audio options"),
@@ -388,7 +388,7 @@ AudioTitleOption = Annotated[
 # =============================================================================
 
 SubtitlesDefaultOption = Annotated[
-    bool,
+    bool | None,
     typer.Option(
         default="--default",
         rich_help_panel=_("Subtitles options"),
@@ -397,7 +397,7 @@ SubtitlesDefaultOption = Annotated[
 ]
 
 SubtitlesForcedOption = Annotated[
-    bool,
+    bool | None,
     typer.Option(
         default="--forced",
         rich_help_panel=_("Subtitles options"),
@@ -406,7 +406,7 @@ SubtitlesForcedOption = Annotated[
 ]
 
 SubtitlesHearingImpairedOption = Annotated[
-    bool,
+    bool | None,
     typer.Option(
         default="--hearing-impaired",
         rich_help_panel=_("Subtitles options"),
@@ -453,7 +453,7 @@ SubtitlesTitleOption = Annotated[
 ]
 
 SubtitlesVisualImpairedOption = Annotated[
-    bool,
+    bool | None,
     typer.Option(
         default="--visual-impaired",
         rich_help_panel=_("Subtitles options"),
