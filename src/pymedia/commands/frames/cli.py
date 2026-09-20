@@ -50,7 +50,7 @@ Captures video frames at the specified timestamps.
 def frames(
     media_input: MediaInputArgument,
     output: OutputOption = None,
-    overwrite: OverwriteOption = OverwriteMode.YES,
+    overwrite: OverwriteOption = OverwriteMode.ASK,
     timestamp_at: TimestampAtThumbnailOption = None,
     crop: CropOption = None,
     rotate: RotateOption = None,

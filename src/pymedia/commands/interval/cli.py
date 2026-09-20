@@ -52,7 +52,7 @@ Captures video frames at regular intervals.
 def interval(
     media_input: MediaInputArgument,
     output: OutputOption = None,
-    overwrite: OverwriteOption = OverwriteMode.YES,
+    overwrite: OverwriteOption = OverwriteMode.ASK,
     every: EveryOption = None,
     timestamp_start: TimestampStartThumbnailOption = None,
     timestamp_end: TimestampEndThumbnailOption = None,

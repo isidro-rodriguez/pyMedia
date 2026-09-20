@@ -56,7 +56,7 @@ than the user-defined threshold, expressed as a value between 0 and 1.
 def scene(
     media_input: MediaInputArgument,
     output: OutputOption = None,
-    overwrite: OverwriteOption = OverwriteMode.YES,
+    overwrite: OverwriteOption = OverwriteMode.ASK,
     scene: SceneOption = 0.3,
     timestamp_start: TimestampStartThumbnailOption = None,
     timestamp_end: TimestampEndThumbnailOption = None,
