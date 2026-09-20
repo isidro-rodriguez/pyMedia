@@ -1,15 +1,20 @@
 """Genera pistas de audio de prueba.
 
-Pistas de audio de 30 segundos en formatos compatibles con
-.mp4, .mkv y .webm, para probar los comandos `add-audio` / `edit-audio`.
+Pistas de 30 segundos en formatos compatibles con .mp4, .mkv y .webm,
+para probar los comandos `add-audio` / `edit-audio`.
 """
 
-import subprocess
 from dataclasses import dataclass
 from pathlib import Path
 
-DURATION_SECONDS = 30
-OUTPUT_DIR = Path("audio_test")
+from _common import (
+    DURATION_SECONDS,
+    FIXTURES_DIR,
+    print_generated,
+    run_ffmpeg,
+)
+
+AUDIO_DIR_NAME = "audio"
 
 
 @dataclass(frozen=True, slots=True)
@@ -18,7 +23,7 @@ class TrackSpec:
 
     Attributes:
         filename: Nombre del fichero de salida.
-        codec: Códec de audio a usar (nombre del encoder de ffmpeg).
+        codec: Códec de audio (nombre del encoder de ffmpeg).
         frequency: Frecuencia del tono senoidal en Hz.
         language: Código de idioma ISO 639-2/B a insertar como metadato.
         title: Título de la pista.
@@ -69,51 +74,50 @@ TRACKS: tuple[TrackSpec, ...] = (
 )
 
 
-def build_track(spec: TrackSpec, output_dir: Path) -> Path:
-    """Genera un fichero de audio de prueba con ffmpeg.
+def build_ffmpeg_args(spec: TrackSpec, output: Path) -> list[str]:
+    """Construye los argumentos de ffmpeg para una pista.
 
     Args:
-        spec: Especificación de la pista a generar.
-        output_dir: Directorio donde escribir el fichero resultante.
+        spec: Especificación de la pista.
+        output: Ruta del fichero de salida.
 
     Returns:
-        Ruta del fichero de audio generado.
+        Argumentos de ffmpeg (sin el ejecutable).
+    """
+    tone = f"sine=frequency={spec.frequency}:duration={DURATION_SECONDS}"
+    args = ["-f", "lavfi", "-i", tone, "-c:a", spec.codec]
+    args += ["-metadata", f"language={spec.language}"]
+    args += ["-metadata", f"title={spec.title}"]
+    args.append(str(output))
+    return args
+
+
+def generate(output_dir: Path = FIXTURES_DIR) -> list[Path]:
+    """Genera todas las pistas definidas en `TRACKS`.
+
+    Args:
+        output_dir: Directorio raíz de fixtures.
+
+    Returns:
+        Rutas de los ficheros generados.
 
     Raises:
-        subprocess.CalledProcessError: Si ffmpeg falla al generar la pista.
+        FixtureGenerationError: Si ffmpeg falla en alguna pista.
     """
-    output_path = output_dir / spec.filename
-    cmd = [
-        "ffmpeg",
-        "-y",
-        "-f",
-        "lavfi",
-        "-i",
-        f"sine=frequency={spec.frequency}:duration={DURATION_SECONDS}",
-        "-c:a",
-        spec.codec,
-        "-metadata",
-        f"language={spec.language}",
-        "-metadata",
-        f"title={spec.title}",
-        str(output_path),
-    ]
-    subprocess.run(cmd, capture_output=True, text=True, check=True)
-    return output_path
+    audio_dir = output_dir / AUDIO_DIR_NAME
+    audio_dir.mkdir(parents=True, exist_ok=True)
+
+    paths: list[Path] = []
+    for spec in TRACKS:
+        output = audio_dir / spec.filename
+        run_ffmpeg(build_ffmpeg_args(spec, output))
+        paths.append(output)
+    return paths
 
 
 def main() -> None:
-    """Genera todas las pistas de prueba definidas en TRACKS."""
-    OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
-
-    for spec in TRACKS:
-        try:
-            path = build_track(spec=spec, output_dir=OUTPUT_DIR)
-        except subprocess.CalledProcessError as err:
-            print(f"[ERROR] {spec.filename}: {err.stderr}")
-            continue
-        containers = ", ".join(spec.compatible_with)
-        print(f"[OK] {path} ({spec.codec}, {containers})")
+    """Genera los fixtures en el directorio por defecto."""
+    print_generated(generate())
 
 
 if __name__ == "__main__":

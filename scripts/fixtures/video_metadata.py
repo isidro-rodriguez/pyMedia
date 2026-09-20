@@ -1,34 +1,19 @@
-"""Genera un vídeo de prueba con múltiples pistas de audio y subtítulos."""
+"""Genera un MKV de prueba con 6 pistas de audio y 6 de subtítulos con metadatos."""
 
-import subprocess
+import tempfile
+from dataclasses import dataclass
 from pathlib import Path
 
-SUBTITLES = {
-    "sub_es.ass": "Español",
-    "sub_en.ass": "English",
-    "sub_fr.ass": "Français",
-    "sub_de.ass": "Deutsch",
-    "sub_it.ass": "Italiano",
-    "sub_pt.ass": "Português",
-}
+from _common import (
+    DURATION_SECONDS,
+    FIXTURES_DIR,
+    FPS,
+    RESOLUTION,
+    print_generated,
+    run_ffmpeg,
+)
 
-AUDIO_TITLES = {
-    "spa": "Español (AAC Stereo)",
-    "eng": "English (AC3 5.1)",
-    "fra": "Français (MP3 Stereo)",
-    "deu": "Deutsch (Opus Mono)",
-    "ita": "Italiano (FLAC Stereo)",
-    "por": "Português (E-AC3 5.1)",
-}
-
-SUBTITLE_TITLES = {
-    "spa": "Español",
-    "eng": "English",
-    "fra": "Français",
-    "deu": "Deutsch",
-    "ita": "Italiano",
-    "por": "Português",
-}
+OUTPUT_NAME = "metadata.mkv"
 
 ASS_TEMPLATE = """[Script Info]
 ScriptType: v4.00+
@@ -36,156 +21,156 @@ PlayResX: 1280
 PlayResY: 720
 
 [V4+ Styles]
-Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
-Style: Default,Arial,36,&H00FFFFFF,&H000000FF,&H00000000,&H00000000,0,0,0,0,100,100,0,0,1,2,2,2,10,10,50,1
+Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, \
+OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, \
+ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, \
+MarginR, MarginV, Encoding
+Style: Default,Arial,36,&H00FFFFFF,&H000000FF,&H00000000,&H00000000,0,0,0,0,\
+100,100,0,0,1,2,2,2,10,10,50,1
 
 [Events]
 Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
 Dialogue: 0,0:00:00.00,0:00:30.00,Default,,0,0,0,,Subtitulo: {text}
-"""  # noqa: E501
+"""
 
 
-def build_subtitle_files(output_dir: Path) -> list[Path]:
-    """Crea los .ass temporales y devuelve sus rutas en orden.
+@dataclass(frozen=True, slots=True)
+class AudioSpec:
+    """Pista de audio del vídeo de prueba.
+
+    Attributes:
+        language: Código de idioma ISO 639-2.
+        title: Título de la pista.
+        codec: Encoder de ffmpeg.
+        bitrate: Bitrate de audio.
+        channels: Número de canales.
+        frequency: Frecuencia del tono en Hz.
+    """
+
+    language: str
+    title: str
+    codec: str
+    bitrate: str
+    channels: int
+    frequency: int
+
+
+@dataclass(frozen=True, slots=True)
+class SubtitleSpec:
+    """Pista de subtítulos del vídeo de prueba.
+
+    Attributes:
+        language: Código de idioma ISO 639-2.
+        title: Título de la pista (y texto mostrado).
+    """
+
+    language: str
+    title: str
+
+
+AUDIO_TRACKS: tuple[AudioSpec, ...] = (
+    AudioSpec("spa", "Español (AAC Stereo)", "aac", "128k", 2, 440),
+    AudioSpec("eng", "English (AC3 5.1)", "ac3", "384k", 6, 440),
+    AudioSpec("fra", "Français (MP3 Stereo)", "mp3", "192k", 2, 440),
+    AudioSpec("deu", "Deutsch (Opus Mono)", "libopus", "96k", 1, 880),
+    AudioSpec("ita", "Italiano (FLAC Stereo)", "flac", "300k", 2, 880),
+    AudioSpec("por", "Português (E-AC3 5.1)", "eac3", "448k", 6, 880),
+)
+
+SUBTITLE_TRACKS: tuple[SubtitleSpec, ...] = (
+    SubtitleSpec("spa", "Español"),
+    SubtitleSpec("eng", "English"),
+    SubtitleSpec("fra", "Français"),
+    SubtitleSpec("deu", "Deutsch"),
+    SubtitleSpec("ita", "Italiano"),
+    SubtitleSpec("por", "Português"),
+)
+
+
+def build_subtitle_files(tmpdir: Path) -> list[Path]:
+    """Crea los .ass temporales, uno por pista de subtítulos.
 
     Args:
-        output_dir: Directorio donde crear los ficheros de subtítulos.
+        tmpdir: Directorio donde crear los ficheros.
 
     Returns:
-        Las rutas de los ficheros `.ass` creados, en orden.
+        Rutas de los ficheros `.ass` creados, en orden.
     """
-    paths = []
-    for filename, text in SUBTITLES.items():
-        path = output_dir / filename
-        path.write_text(ASS_TEMPLATE.format(text=text), encoding="utf-8")
+    paths: list[Path] = []
+    for spec in SUBTITLE_TRACKS:
+        path = tmpdir / f"sub_{spec.language}.ass"
+        path.write_text(ASS_TEMPLATE.format(text=spec.title), encoding="utf-8")
         paths.append(path)
     return paths
 
 
-def build_ffmpeg_command(sub_paths: list[Path], output: Path) -> list[str]:
-    """Ensambla el comando ffmpeg completo.
+def build_ffmpeg_args(subtitle_files: list[Path], output: Path) -> list[str]:
+    """Ensambla los argumentos de ffmpeg: inputs, mapeo, códecs y metadatos.
 
     Args:
-        sub_paths: Rutas de los ficheros `.ass` a incrustar.
+        subtitle_files: Ficheros `.ass` a incrustar.
         output: Ruta del fichero de salida.
 
     Returns:
-        El comando ffmpeg completo como lista de cadenas.
+        Argumentos de ffmpeg (sin el ejecutable).
     """
-    cmd = [
-        "ffmpeg",
-        "-y",
-        "-f",
-        "lavfi",
-        "-i",
-        "testsrc=duration=30:size=1280x720:rate=30",
-        "-f",
-        "lavfi",
-        "-i",
-        "sine=frequency=440:duration=30",
-        "-f",
-        "lavfi",
-        "-i",
-        "sine=frequency=880:duration=30",
-    ]
-    for sub_path in sub_paths:
-        cmd += ["-i", str(sub_path)]
+    # Inputs: vídeo, un tono por pista de audio, un fichero por subtítulo.
+    testsrc = f"testsrc=duration={DURATION_SECONDS}:size={RESOLUTION}:rate={FPS}"
+    args = ["-f", "lavfi", "-i", testsrc]
+    for audio in AUDIO_TRACKS:
+        tone = f"sine=frequency={audio.frequency}:duration={DURATION_SECONDS}"
+        args += ["-f", "lavfi", "-i", tone]
+    for path in subtitle_files:
+        args += ["-i", str(path)]
 
-    cmd += [
-        "-map",
-        "0:v:0",
-        "-map",
-        "1:a:0",
-        "-map",
-        "1:a:0",
-        "-map",
-        "1:a:0",
-        "-map",
-        "2:a:0",
-        "-map",
-        "2:a:0",
-        "-map",
-        "2:a:0",
-        "-map",
-        "3:s:0",
-        "-map",
-        "4:s:0",
-        "-map",
-        "5:s:0",
-        "-map",
-        "6:s:0",
-        "-map",
-        "7:s:0",
-        "-map",
-        "8:s:0",
-        "-c:v",
-        "libx264",
-        "-pix_fmt",
-        "yuv420p",
-        "-c:a:0",
-        "aac",
-        "-b:a:0",
-        "128k",
-        "-ac:a:0",
-        "2",
-        "-c:a:1",
-        "ac3",
-        "-b:a:1",
-        "384k",
-        "-ac:a:1",
-        "6",
-        "-c:a:2",
-        "mp3",
-        "-b:a:2",
-        "192k",
-        "-ac:a:2",
-        "2",
-        "-c:a:3",
-        "libopus",
-        "-b:a:3",
-        "96k",
-        "-ac:a:3",
-        "1",
-        "-c:a:4",
-        "flac",
-        "-b:a:4",
-        "300k",
-        "-ac:a:4",
-        "2",
-        "-c:a:5",
-        "eac3",
-        "-b:a:5",
-        "448k",
-        "-ac:a:5",
-        "6",
-        "-c:s",
-        "ass",
-    ]
+    # Mapeo: 1 vídeo + N audio + N subtítulos.
+    args += ["-map", "0:v:0"]
+    for i in range(len(AUDIO_TRACKS)):
+        args += ["-map", f"{i + 1}:a:0"]
+    subtitle_offset = 1 + len(AUDIO_TRACKS)
+    for i in range(len(subtitle_files)):
+        args += ["-map", f"{subtitle_offset + i}:s:0"]
 
-    for index, (lang, title) in enumerate(AUDIO_TITLES.items()):
-        cmd += [f"-metadata:s:a:{index}", f"language={lang}"]
-        cmd += [f"-metadata:s:a:{index}", f"title={title}"]
+    args += ["-c:v", "libx264", "-pix_fmt", "yuv420p", "-c:s", "ass"]
 
-    for index, (lang, title) in enumerate(SUBTITLE_TITLES.items()):
-        cmd += [f"-metadata:s:s:{index}", f"language={lang}"]
-        cmd += [f"-metadata:s:s:{index}", f"title={title}"]
+    for i, audio in enumerate(AUDIO_TRACKS):
+        args += [f"-c:a:{i}", audio.codec, f"-b:a:{i}", audio.bitrate]
+        args += [f"-ac:a:{i}", str(audio.channels)]
+        args += [f"-metadata:s:a:{i}", f"language={audio.language}"]
+        args += [f"-metadata:s:a:{i}", f"title={audio.title}"]
 
-    cmd += ["-write_crc32", "1", str(output)]
-    return cmd
+    for i, subtitle in enumerate(SUBTITLE_TRACKS):
+        args += [f"-metadata:s:s:{i}", f"language={subtitle.language}"]
+        args += [f"-metadata:s:s:{i}", f"title={subtitle.title}"]
+
+    args += ["-write_crc32", "1", str(output)]
+    return args
+
+
+def generate(output_dir: Path = FIXTURES_DIR) -> list[Path]:
+    """Genera el vídeo de prueba con metadatos completos.
+
+    Args:
+        output_dir: Directorio raíz de fixtures.
+
+    Returns:
+        Rutas de los ficheros generados.
+
+    Raises:
+        FixtureGenerationError: Si ffmpeg falla.
+    """
+    output_dir.mkdir(parents=True, exist_ok=True)
+    output = output_dir / OUTPUT_NAME
+
+    with tempfile.TemporaryDirectory() as tmp:
+        subtitle_files = build_subtitle_files(Path(tmp))
+        run_ffmpeg(build_ffmpeg_args(subtitle_files, output))
+    return [output]
 
 
 def main() -> None:
-    """Genera el vídeo de prueba y limpia los subtítulos temporales."""
-    output_dir = Path.cwd()
-    output = output_dir / "metadata.mkv"
-
-    sub_paths = build_subtitle_files(output_dir)
-    try:
-        cmd = build_ffmpeg_command(sub_paths, output)
-        subprocess.run(cmd, check=True, encoding="utf-8", errors="strict")
-    finally:
-        for path in sub_paths:
-            path.unlink(missing_ok=True)
+    """Genera los fixtures en el directorio por defecto."""
+    print_generated(generate())
 
 
 if __name__ == "__main__":

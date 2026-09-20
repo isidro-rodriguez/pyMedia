@@ -1,184 +1,105 @@
-"""Genera un vídeo de prueba con un fractal de Mandelbrot animado y audio tonal."""
+"""Genera un vídeo de prueba con un fractal de Mandelbrot y audio tonal."""
 
-#!/usr/bin/env python3
+from dataclasses import dataclass
+from pathlib import Path
 
-import subprocess
-from typing import TypedDict
-
-
-class _VideoConfig(TypedDict):
-    """Parámetros de generación del vídeo de prueba."""
-
-    output: str
-    width: int
-    height: int
-    fps: int
-    duration: int
-    video_codec: str
-    video_crf: int
-    video_preset: int
-    fractal_start: str
-    fractal_end: str
-    fractal_maxiter: int
-    audio_codec: str
-    audio_bitrate: str
-    audio_frequency: int
-    audio_sample_rate: int
+from _common import (
+    DURATION_SECONDS,
+    FIXTURES_DIR,
+    FPS,
+    RESOLUTION,
+    print_generated,
+    run_ffmpeg,
+)
 
 
-# ============================================================
-# CONFIGURACIÓN
-# ============================================================
-CONFIG: _VideoConfig = {
-    # Archivo de salida
-    "output": "simple.mp4",
-    # Vídeo
-    "width": 1280,
-    "height": 720,
-    "fps": 30,
-    "duration": 30,
-    # AV1 / SVT-AV1
-    # CRF más bajo = mayor calidad / archivo más grande
-    "video_codec": "libsvtav1",
-    "video_crf": 30,
-    "video_preset": 8,
-    # Fractal Mandelbrot
-    "fractal_start": "0.001",
-    "fractal_end": "0.001",
-    "fractal_maxiter": 200,
-    # Audio
-    "audio_codec": "aac",
-    "audio_bitrate": "128k",
-    "audio_frequency": 440,
-    "audio_sample_rate": 48000,
-}
+@dataclass(frozen=True, slots=True)
+class VideoSpec:
+    """Parámetros de generación del vídeo de prueba.
+
+    Attributes:
+        filename: Nombre del fichero de salida.
+        video_codec: Encoder de vídeo de ffmpeg.
+        crf: Calidad (más bajo = más calidad y más tamaño).
+        preset: Preset del encoder.
+        maxiter: Iteraciones máximas del fractal (más detalle, más CPU).
+        audio_codec: Encoder de audio de ffmpeg.
+        audio_bitrate: Bitrate de audio.
+        audio_frequency: Frecuencia del tono en Hz.
+        audio_sample_rate: Frecuencia de muestreo en Hz.
+    """
+
+    filename: str = "simple.mp4"
+    video_codec: str = "libsvtav1"
+    crf: int = 30
+    preset: int = 8
+    maxiter: int = 200
+    audio_codec: str = "aac"
+    audio_bitrate: str = "128k"
+    audio_frequency: int = 440
+    audio_sample_rate: int = 48000
 
 
-def build_ffmpeg_command(config: _VideoConfig) -> list[str]:
-    """Construye el comando ffmpeg a partir de la configuración indicada.
+SPEC = VideoSpec()
+
+
+def build_ffmpeg_args(spec: VideoSpec, output: Path) -> list[str]:
+    """Construye los argumentos de ffmpeg para el vídeo de prueba.
 
     Args:
-        config: Parámetros de generación del vídeo.
+        spec: Parámetros de generación.
+        output: Ruta del fichero de salida.
 
     Returns:
-        Lista con el comando ffmpeg listo para ejecutar.
+        Argumentos de ffmpeg (sin el ejecutable).
     """
-    width = config["width"]
-    height = config["height"]
-    fps = config["fps"]
-    duration = config["duration"]
-
-    # --------------------------------------------------------
-    # Fractal
-    #
-    # Generamos Mandelbrot directamente con FFmpeg.
-    #
-    # size:
-    #     Resolución final.
-    #
-    # rate:
-    #     Número de frames por segundo.
-    #
-    # maxiter:
-    #     Número máximo de iteraciones del fractal.
-    #     Valores mayores producen más detalle, pero consumen
-    #     más CPU.
-    # --------------------------------------------------------
-    fractal = (
-        f"mandelbrot="
-        f"size={width}x{height}:"
-        f"rate={fps}:"
-        f"maxiter={config['fractal_maxiter']}"
-    )
-
-    # --------------------------------------------------------
-    # Zoom suave.
-    #
-    # zoompan genera una animación continua sobre el fractal.
-    # La expresión aumenta ligeramente el zoom con el tiempo.
-    #
-    # 'on' = número de frame generado.
-    # --------------------------------------------------------
+    fractal = f"mandelbrot=size={RESOLUTION}:rate={FPS}:maxiter={spec.maxiter}"
+    # Zoom suave y continuo sobre el fractal.
     zoom = (
-        f"zoompan="
-        f"z='min(zoom+0.0015,2.5)':"
-        f"x='iw/2-(iw/zoom/2)':"
-        f"y='ih/2-(ih/zoom/2)':"
-        f"d=1:"
-        f"s={width}x{height}:"
-        f"fps={fps}"
+        "zoompan=z='min(zoom+0.0015,2.5)':"
+        "x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)':"
+        f"d=1:s={RESOLUTION}:fps={FPS}"
     )
-
-    video_filter = f"{fractal},{zoom},trim=duration={duration},setpts=PTS-STARTPTS"
-
-    # --------------------------------------------------------
-    # Audio:
-    # tono sinusoidal sencillo de duración exacta.
-    # --------------------------------------------------------
+    video_filter = (
+        f"{fractal},{zoom},trim=duration={DURATION_SECONDS},setpts=PTS-STARTPTS"
+    )
     audio_filter = (
-        f"sine="
-        f"frequency={config['audio_frequency']}:"
-        f"sample_rate={config['audio_sample_rate']}:"
-        f"duration={duration}"
+        f"sine=frequency={spec.audio_frequency}:"
+        f"sample_rate={spec.audio_sample_rate}:duration={DURATION_SECONDS}"
     )
 
-    command = [
-        "ffmpeg",
-        "-y",
-        # ----------------------------------------------------
-        # Entrada de vídeo: filtro fractal de FFmpeg
-        # ----------------------------------------------------
-        "-f",
-        "lavfi",
-        "-i",
-        video_filter,
-        # ----------------------------------------------------
-        # Entrada de audio: tono sinusoidal
-        # ----------------------------------------------------
-        "-f",
-        "lavfi",
-        "-i",
-        audio_filter,
-        # ----------------------------------------------------
-        # Vídeo AV1
-        # ----------------------------------------------------
-        "-c:v",
-        config["video_codec"],
-        "-crf",
-        str(config["video_crf"]),
-        "-preset",
-        str(config["video_preset"]),
-        # ----------------------------------------------------
-        # Audio AAC
-        # ----------------------------------------------------
-        "-c:a",
-        config["audio_codec"],
-        "-b:a",
-        config["audio_bitrate"],
-        # Duración exacta
-        "-t",
-        str(duration),
-        # Permite reproducir el MP4 progresivamente
-        "-movflags",
-        "+faststart",
-        config["output"],
-    ]
+    args = ["-f", "lavfi", "-i", video_filter]
+    args += ["-f", "lavfi", "-i", audio_filter]
+    args += ["-c:v", spec.video_codec, "-crf", str(spec.crf)]
+    args += ["-preset", str(spec.preset)]
+    args += ["-c:a", spec.audio_codec, "-b:a", spec.audio_bitrate]
+    args += ["-t", str(DURATION_SECONDS)]
+    args += ["-movflags", "+faststart"]  # reproducción progresiva del MP4
+    args.append(str(output))
+    return args
 
-    return command
+
+def generate(output_dir: Path = FIXTURES_DIR) -> list[Path]:
+    """Genera el vídeo de prueba.
+
+    Args:
+        output_dir: Directorio raíz de fixtures.
+
+    Returns:
+        Rutas de los ficheros generados.
+
+    Raises:
+        FixtureGenerationError: Si ffmpeg falla.
+    """
+    output_dir.mkdir(parents=True, exist_ok=True)
+    output = output_dir / SPEC.filename
+    run_ffmpeg(build_ffmpeg_args(SPEC, output))
+    return [output]
 
 
 def main() -> None:
-    """Genera el vídeo de prueba ejecutando ffmpeg."""
-    command = build_ffmpeg_command(CONFIG)
-
-    print("Ejecutando FFmpeg:\n")
-    print(" ".join(command))
-    print()
-
-    subprocess.run(command, check=True)
-
-    print()
-    print(f"Vídeo generado: {CONFIG['output']}")
+    """Genera los fixtures en el directorio por defecto."""
+    print_generated(generate())
 
 
 if __name__ == "__main__":
