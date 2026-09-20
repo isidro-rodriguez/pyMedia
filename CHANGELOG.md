@@ -6,6 +6,28 @@ Las versiones se han reconstruido a partir del histórico de
 Las versiones intermedias no registradas (0.2–0.4, 0.6–0.8) se agrupan
 con la sección anterior.
 
+## [0.19.0-beta.9] - 2026-09-20
+
+### Cambiado
+
+- Script de compilación renombrado de `build_windows.py` a `build.py`
+  con soporte multiplataforma (Windows/Linux/macOS); genera
+  `build/pymedia.exe` en Windows y `build/pymedia` en Unix.
+- Tests E2E del binario adaptados a la nueva ruta y nombre del script
+  de compilación, con detección automática de plataforma.
+- Fixture de pistas de audio: directorio de salida simplificado a
+  `fixtures/` relativo y creación recursiva con `parents=True`.
+
+### Corregido
+
+- Test `test_add_subs_error_invalid_subtitles_file`: normalización
+  de la salida de ffprobe (elimina saltos de línea y espacios extra)
+  para validar el mensaje de error de forma robusta.
+
+### Interno
+
+- `.gitignore`: añadidos directorios `.kilo/` y `.vscode/`.
+
 ## [0.18.0-beta.8] - 2026-09-19
 
 ### Añadido

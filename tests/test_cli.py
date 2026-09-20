@@ -725,7 +725,10 @@ def test_add_subs_error_invalid_subtitles_file(
     )
 
     assert result.exit_code != 0
-    assert "Invalid data found" in result.output
+    # El mensaje de ffprobe puede partirse en varias líneas con espacios extra
+    output = " ".join(result.output.split())
+    assert "Invalid data found" in output
+    assert "when processing input" in output
 
 
 # =============================================================================

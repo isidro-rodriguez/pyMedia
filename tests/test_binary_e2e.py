@@ -29,8 +29,11 @@ from test_cli import (
 pytestmark = pytest.mark.prod
 
 ROOT = Path(__file__).resolve().parents[1]
-BUILD_SCRIPT = ROOT / "scripts" / "build_windows.py"
-BINARY_PATH = ROOT / "build" / "pymedia.exe"
+BUILD_SCRIPT = ROOT / "scripts" / "build.py"
+if sys.platform == "win32":
+    binary_path = ROOT / "build" / "pymedia.exe"
+else:
+    binary_path = ROOT / "build" / "pymedia"
 
 
 def run_binary(
@@ -102,9 +105,9 @@ def built_binary() -> Path:
             f"build_windows.py falló (exit {result.returncode}):\n"
             f"{result.stdout}\n{result.stderr}"
         )
-    assert BINARY_PATH.is_file(), f"No se generó {BINARY_PATH}"
-    assert BINARY_PATH.stat().st_size > 1_000_000, "El ejecutable parece incompleto"
-    return BINARY_PATH
+    assert binary_path.is_file(), f"No se generó {binary_path}"
+    assert binary_path.stat().st_size > 1_000_000, "El ejecutable parece incompleto"
+    return binary_path
 
 
 # =============================================================================

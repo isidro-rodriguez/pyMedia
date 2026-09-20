@@ -9,7 +9,7 @@ from dataclasses import dataclass
 from pathlib import Path
 
 DURATION_SECONDS = 30
-OUTPUT_DIR = Path("../../.local/fixtures/audio")
+OUTPUT_DIR = Path("fixtures")
 
 
 @dataclass(frozen=True, slots=True)
@@ -104,7 +104,7 @@ def build_track(spec: TrackSpec, output_dir: Path) -> Path:
 
 def main() -> None:
     """Genera todas las pistas de prueba definidas en TRACKS."""
-    OUTPUT_DIR.mkdir(exist_ok=True)
+    OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
     for spec in TRACKS:
         try:
