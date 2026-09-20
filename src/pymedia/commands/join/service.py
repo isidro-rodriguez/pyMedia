@@ -28,10 +28,10 @@ class JoinService(BaseService[JoinParameters]):
         if self.params.media_output is None:
             raise MissingParameterError(name="media_output")
 
+        self._check_media_compatibility()
+
         if not self.resolve_overwrite(output_list=[self.params.media_output]):
             sys.exit(0)
-
-        self._check_media_compatibility()
 
         with tempfile.TemporaryDirectory() as tmp_dir:
             list_txt = Path(tmp_dir) / "list.txt"
@@ -78,11 +78,6 @@ class JoinService(BaseService[JoinParameters]):
 
         for media in self.params.media_list[1:]:
             issues: list[str] = []
-
-            if first.format_name != media.format_name:
-                issues.append(
-                    f"format_name differs: {first.format_name} vs {media.format_name}"
-                )
 
             if first.video is None and media.video is not None:
                 issues.append(
