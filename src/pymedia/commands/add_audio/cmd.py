@@ -63,6 +63,7 @@ class AddAudioCmd:
                 f"-c:a:{audio.track_index}",
                 audio.codec,
                 *self.params.to_audio_metadata_cmd(audio=audio),
+                *self.params.to_exclusive_default_cmd(),
                 "-progress",
                 "pipe:1",
                 "-nostats",

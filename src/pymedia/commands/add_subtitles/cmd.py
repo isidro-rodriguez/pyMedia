@@ -38,8 +38,6 @@ class AddSubtitlesCmd:
             raise MissingParameterError(name="subtitles.codec")
         if subtitles.language is None:
             raise MissingParameterError(name="subtitles.language")
-        if subtitles.path is None:
-            raise MissingParameterError(name="subtitles.path")
         if subtitles.track_index is None:
             raise MissingParameterError(name="subtitles.track_index")
         if subtitles.title is None:
@@ -65,6 +63,7 @@ class AddSubtitlesCmd:
                 f"-c:s:{subtitles.track_index}",
                 subtitles.codec,
                 *self.params.to_subtitles_metadata_cmd(subtitles=subtitles),
+                *self.params.to_exclusive_default_cmd(),
                 "-progress",
                 "pipe:1",
                 "-nostats",
