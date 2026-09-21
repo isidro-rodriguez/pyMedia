@@ -1,12 +1,9 @@
 .github/
-.idea/
 .kilo/
 .local/
-.mypy_cache/
 .pytest_cache/
 .ruff_cache/
 .venv/
-.vscode/
 __pycache__/
 *.egg-info/
 build/
