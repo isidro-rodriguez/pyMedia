@@ -7,7 +7,7 @@ para probar los comandos `add-audio` / `edit-audio`.
 from dataclasses import dataclass
 from pathlib import Path
 
-from _common import (
+from ._common import (
     DURATION_SECONDS,
     FIXTURES_DIR,
     print_generated,
@@ -92,6 +92,19 @@ def build_ffmpeg_args(spec: TrackSpec, output: Path) -> list[str]:
     return args
 
 
+def track_path(spec: TrackSpec, output_dir: Path = FIXTURES_DIR) -> Path:
+    """Devuelve la ruta donde se genera (o se espera) una pista.
+
+    Args:
+        spec: Especificación de la pista.
+        output_dir: Directorio raíz de fixtures.
+
+    Returns:
+        Ruta del fichero de la pista.
+    """
+    return output_dir / AUDIO_DIR_NAME / spec.filename
+
+
 def generate(output_dir: Path = FIXTURES_DIR) -> list[Path]:
     """Genera todas las pistas definidas en `TRACKS`.
 
@@ -104,12 +117,11 @@ def generate(output_dir: Path = FIXTURES_DIR) -> list[Path]:
     Raises:
         FixtureGenerationError: Si ffmpeg falla en alguna pista.
     """
-    audio_dir = output_dir / AUDIO_DIR_NAME
-    audio_dir.mkdir(parents=True, exist_ok=True)
+    (output_dir / AUDIO_DIR_NAME).mkdir(parents=True, exist_ok=True)
 
     paths: list[Path] = []
     for spec in TRACKS:
-        output = audio_dir / spec.filename
+        output = track_path(spec, output_dir)
         run_ffmpeg(build_ffmpeg_args(spec, output))
         paths.append(output)
     return paths

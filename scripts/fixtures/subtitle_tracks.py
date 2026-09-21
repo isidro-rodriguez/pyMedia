@@ -3,7 +3,7 @@
 from collections.abc import Callable
 from pathlib import Path
 
-from _common import FIXTURES_DIR, print_generated
+from ._common import FIXTURES_DIR, print_generated
 
 SUBTITLES_DIR_NAME = "subtitles"
 
@@ -199,6 +199,22 @@ GENERATORS: dict[str, Callable[[list[str]], str]] = {
 }
 
 
+def subtitle_path(
+    language: str, extension: str, output_dir: Path = FIXTURES_DIR
+) -> Path:
+    """Devuelve la ruta donde se genera (o se espera) un fichero de subtítulos.
+
+    Args:
+        language: Código de idioma ISO 639-2.
+        extension: Formato del subtítulo (`srt`, `ass` o `ssa`).
+        output_dir: Directorio raíz de fixtures.
+
+    Returns:
+        Ruta del fichero de subtítulos.
+    """
+    return output_dir / SUBTITLES_DIR_NAME / f"test_{language}.{extension}"
+
+
 def write_subtitle_files(
     language: str, lines: list[str], output_dir: Path
 ) -> list[Path]:
@@ -207,14 +223,14 @@ def write_subtitle_files(
     Args:
         language: Código de idioma ISO 639-2.
         lines: Textos de los subtítulos.
-        output_dir: Directorio donde escribir los ficheros.
+        output_dir: Directorio raíz de fixtures.
 
     Returns:
         Rutas de los ficheros escritos.
     """
     paths: list[Path] = []
     for extension, generator in GENERATORS.items():
-        path = output_dir / f"test_{language}.{extension}"
+        path = subtitle_path(language, extension, output_dir)
         path.write_text(generator(lines), encoding="utf-8")
         paths.append(path)
     return paths
@@ -229,12 +245,11 @@ def generate(output_dir: Path = FIXTURES_DIR) -> list[Path]:
     Returns:
         Rutas de los ficheros generados.
     """
-    subtitles_dir = output_dir / SUBTITLES_DIR_NAME
-    subtitles_dir.mkdir(parents=True, exist_ok=True)
+    (output_dir / SUBTITLES_DIR_NAME).mkdir(parents=True, exist_ok=True)
 
     paths: list[Path] = []
     for language, lines in SUBTITLES.items():
-        paths += write_subtitle_files(language, lines, subtitles_dir)
+        paths += write_subtitle_files(language, lines, output_dir)
     return paths
 
 
