@@ -5,13 +5,22 @@ Genera medios sintéticos diminutos con ffmpeg (mismo estilo que
 mensajes visibles no dependan del idioma del sistema.
 """
 
+import os
 import subprocess
+import sys
 from pathlib import Path
 
 import pytest
+from helpers import CliResult, Invoke
 from typer.testing import CliRunner
 
 from pymedia.locale_manager import locale_manager
+from pymedia.main import app
+
+ROOT = Path(__file__).resolve().parents[1]
+BUILD_SCRIPT = ROOT / "scripts" / "build.py"
+BINARY_NAME = "pymedia.exe" if sys.platform == "win32" else "pymedia"
+BINARY_PATH = ROOT / "build" / BINARY_NAME
 
 # `-g 10` fuerza un keyframe por segundo (vídeo a 10 fps): sin él, el
 # segmentador de `split` no puede cortar en la marca indicada.
@@ -52,15 +61,6 @@ def _run_ffmpeg(args: list[str]) -> None:
 def english_locale() -> None:
     """Fuerza el idioma `en` para que los mensajes de error sean estables."""
     locale_manager.set_language("en")
-
-
-@pytest.fixture
-def runner() -> CliRunner:
-    """CliRunner para invocar la CLI tal como lo haría un usuario.
-
-    `COLUMNS` amplio evita que Rich parta los mensajes con rutas largas.
-    """
-    return CliRunner(env={"COLUMNS": "300"})
 
 
 @pytest.fixture(scope="session")
@@ -285,3 +285,87 @@ def subs_bad(inputs_dir: Path) -> Path:
     output = inputs_dir / "subs_bad.srt"
     output.write_text("this is not a subtitles file", encoding="utf-8")
     return output
+
+
+# =============================================================================
+#  Ejecutores de pyMedia (CLI Typer y binario compilado)
+# =============================================================================
+
+
+@pytest.fixture(scope="session")
+def empty_localedir(tmp_path_factory: pytest.TempPathFactory) -> Path:
+    """Directorio vacío que fuerza msgid en inglés dentro del binario."""
+    return tmp_path_factory.mktemp("binary_empty_locales")
+
+
+@pytest.fixture(scope="session")
+def built_binary() -> Path:
+    """Compila el ejecutable con el script oficial y devuelve su ruta.
+
+    Solo se instancia si se seleccionan los tests `binary`, porque el build
+    tarda minutos y `pymedia` lo pide de forma perezosa.
+    """
+    result = subprocess.run(
+        [sys.executable, str(BUILD_SCRIPT)],
+        cwd=ROOT,
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
+        check=False,
+    )
+    if result.returncode != 0:
+        pytest.fail(
+            f"build.py falló (exit {result.returncode}):\n"
+            f"{result.stdout}\n{result.stderr}"
+        )
+    assert BINARY_PATH.is_file(), f"No se generó {BINARY_PATH}"
+    assert BINARY_PATH.stat().st_size > 1_000_000, "El ejecutable parece incompleto"
+    return BINARY_PATH
+
+
+def _cli_invoker() -> Invoke:
+    """Ejecutor en proceso sobre `pymedia.main.app` (rápido, depurable)."""
+    runner = CliRunner(env={"COLUMNS": "300"})
+
+    def invoke(*args: str, input: str | None = None) -> CliResult:
+        result = runner.invoke(app, list(args), input=input)
+        return CliResult(exit_code=result.exit_code, output=result.output)
+
+    return invoke
+
+
+def _binary_invoker(binary: Path, localedir: Path) -> Invoke:
+    """Ejecutor que lanza el binario compilado como un proceso independiente."""
+    # `COLUMNS` amplio: mismo motivo que en el CliRunner (Rich parte líneas).
+    env = os.environ | {"PYMEDIA_LOCALEDIR": str(localedir), "COLUMNS": "300"}
+
+    def invoke(*args: str, input: str | None = None) -> CliResult:
+        result = subprocess.run(
+            [str(binary), *args],
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+            env=env,
+            input=input,
+            check=False,
+        )
+        return CliResult(
+            exit_code=result.returncode, output=result.stdout + result.stderr
+        )
+
+    return invoke
+
+
+@pytest.fixture(params=["cli", pytest.param("binary", marks=pytest.mark.binary)])
+def pymedia(request: pytest.FixtureRequest) -> Invoke:
+    """Ejecuta pyMedia como CLI en proceso o como binario compilado.
+
+    Cada test que use esta fixture se ejecuta dos veces (`[cli]` y `[binary]`);
+    la variante `binary` se excluye por defecto con `-m 'not binary'`.
+    """
+    if request.param == "binary":
+        return _binary_invoker(
+            binary=request.getfixturevalue("built_binary"),
+            localedir=request.getfixturevalue("empty_localedir"),
+        )
+    return _cli_invoker()

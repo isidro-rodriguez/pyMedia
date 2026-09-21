@@ -115,7 +115,7 @@ class TestToFiltersCmd:
         mixin = _mixin()
         mixin.create_filters(logger=Mock(), crop="100,100,10,10")
 
-        assert mixin.to_filters_cmd() == "crop=100:100:10:10"
+        assert mixin.to_filters_cmd() == "crop=100:100:10:10:exact=1"
 
     def test_scale_only(self) -> None:
         """Comprueba que solo el escalado produce el filtro scale."""
@@ -164,7 +164,7 @@ class TestToFiltersCmd:
             rotate=RotateMode.D90,
         )
 
-        expected = "crop=100:100:10:10,scale=1280:720,hflip,vflip,transpose=1"
+        expected = "crop=100:100:10:10:exact=1,scale=1280:720,hflip,vflip,transpose=1"
         assert mixin.to_filters_cmd() == expected
 
     def test_rejected_scale_is_omitted(self) -> None:
@@ -197,5 +197,5 @@ class TestFiltersIntegration:
             rotate=RotateMode.D90,
         )
 
-        expected = "crop=100:100:10:10,scale=1280:720,hflip,vflip,transpose=1"
+        expected = "crop=100:100:10:10:exact=1,scale=1280:720,hflip,vflip,transpose=1"
         assert params.to_filters_cmd() == expected
