@@ -258,7 +258,11 @@ uv sync                     # instala dependencias y grupo dev
 uv run ruff check .         # lint
 uv run ruff format .        # formato
 uv run pytest               # suite de tests (tests/)
+# Tests contra el binario compilado (build lento):
+uv run pytest -q -m binary
 ```
+
+La fixture `pymedia` ejecuta cada test como CLI en proceso (`[cli]`) y como binario compilado (`[binary]`). La marca `binary` se excluye por defecto.
 
 ### Traducciones (i18n)
 

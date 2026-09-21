@@ -1,153 +1,51 @@
-"""Tests end-to-end de la superficie Typer de la CLI de pyMedia.
+"""Tests end-to-end de la superficie de la CLI de pyMedia.
 
-Cada test invoca `pymedia.main.app` con `typer.testing.CliRunner` tal como lo
-haría un usuario, comprobando el código de salida, los mensajes visibles y las
-propiedades básicas de los ficheros generados (vía ffprobe). La lógica interna
-de mixins y pipelines ya está cubierta por el resto de suites.
+Cada test usa la fixture `pymedia`, que ejecuta el mismo escenario como CLI en
+proceso (`[cli]`) y como binario compilado (`[binary]`, marca `binary`). Se
+comprueban el código de salida, los mensajes visibles y las propiedades de los
+ficheros generados (vía ffprobe). Aquí viven los escenarios propios de cada
+comando; las opciones compartidas entre comandos están parametrizadas en
+`tests/test_cli_options.py`.
 """
 
-import json
 import shutil
-import subprocess
 from pathlib import Path
-from typing import Any, cast
 
 import pytest
-from typer.testing import CliRunner
-
-from pymedia.main import app
-
-
-def ffprobe_streams(path: Path) -> list[dict[str, Any]]:
-    """Devuelve los streams que ffprobe detecta en el fichero indicado.
-
-    Args:
-        path: Ruta del fichero multimedia a inspeccionar.
-
-    Returns:
-        Streams del fichero en formato JSON de ffprobe.
-    """
-    result = subprocess.run(
-        [
-            "ffprobe",
-            "-v",
-            "quiet",
-            "-print_format",
-            "json",
-            "-show_streams",
-            str(path),
-        ],
-        capture_output=True,
-        text=True,
-        encoding="utf-8",
-        check=True,
-    )
-    data = cast(dict[str, Any], json.loads(result.stdout))
-    return cast(list[dict[str, Any]], data["streams"])
-
-
-def ffprobe_duration(path: Path) -> float:
-    """Devuelve la duración total, en segundos, del fichero indicado.
-
-    Args:
-        path: Ruta del fichero multimedia a inspeccionar.
-
-    Returns:
-        Duración total del fichero en segundos.
-    """
-    result = subprocess.run(
-        [
-            "ffprobe",
-            "-v",
-            "quiet",
-            "-print_format",
-            "json",
-            "-show_format",
-            str(path),
-        ],
-        capture_output=True,
-        text=True,
-        encoding="utf-8",
-        check=True,
-    )
-    data = cast(dict[str, Any], json.loads(result.stdout))
-    return float(data["format"]["duration"])
-
-
-def stream_types(path: Path) -> list[str | None]:
-    """Lista los tipos de stream (video/audio/subtitle) del fichero indicado.
-
-    Args:
-        path: Ruta del fichero multimedia a inspeccionar.
-
-    Returns:
-        Tipos de stream en el orden que reporta ffprobe.
-    """
-    return [stream.get("codec_type") for stream in ffprobe_streams(path)]
-
-
-def stream_tag(path: Path, stream_type: str, tag: str, index: int = 0) -> str | None:
-    """Devuelve un tag del stream indicado según su tipo y posición local.
-
-    Args:
-        path: Ruta del fichero multimedia a inspeccionar.
-        stream_type: Tipo de stream (video/audio/subtitle).
-        tag: Nombre del tag (p. ej. `language` o `title`).
-        index: Índice local dentro del tipo de stream.
-
-    Returns:
-        Valor del tag, o `None` si no está presente.
-    """
-    matching = [
-        stream
-        for stream in ffprobe_streams(path)
-        if stream.get("codec_type") == stream_type
-    ]
-    tags = matching[index].get("tags") or {}
-    return tags.get(tag)
-
-
-def stream_codec_names(path: Path, stream_type: str) -> list[str | None]:
-    """Lista los códecs de los streams del tipo indicado.
-
-    Args:
-        path: Ruta del fichero multimedia a inspeccionar.
-        stream_type: Tipo de stream (video/audio/subtitle).
-
-    Returns:
-        Nombres de códec en el orden que reporta ffprobe.
-    """
-    return [
-        stream.get("codec_name")
-        for stream in ffprobe_streams(path)
-        if stream.get("codec_type") == stream_type
-    ]
-
+from helpers import (
+    Invoke,
+    ffprobe_duration,
+    ffprobe_streams,
+    stream_codec_names,
+    stream_tag,
+    stream_types,
+    video_size,
+)
 
 # =============================================================================
 #  info
 # =============================================================================
 
 
-def test_info_success_shows_metadata(runner: CliRunner, video_mp4_a: Path) -> None:
+def test_info_success_shows_metadata(pymedia: Invoke, video_mp4_a: Path) -> None:
     """`info` termina sin error y muestra la tabla de metadatos del vídeo."""
-    result = runner.invoke(app, ["info", str(video_mp4_a)])
+    result = pymedia("info", str(video_mp4_a))
 
     assert result.exit_code == 0
     assert "Metadata" in result.output
 
 
-def test_info_error_nonexistent_input(runner: CliRunner, tmp_path: Path) -> None:
+def test_info_error_nonexistent_input(pymedia: Invoke, tmp_path: Path) -> None:
     """`info` con una ruta inexistente falla en la validación de Typer."""
-    result = runner.invoke(app, ["info", str(tmp_path / "missing.mp4")])
+    result = pymedia("info", str(tmp_path / "missing.mp4"))
 
     assert result.exit_code != 0
     assert "is not a file" in result.output
 
 
-def test_info_success_with_debug(runner: CliRunner, video_mp4_a: Path) -> None:
+def test_info_success_with_debug(pymedia: Invoke, video_mp4_a: Path) -> None:
     """`info --debug` termina sin error mostrando los metadatos."""
-    result = runner.invoke(app, ["info", str(video_mp4_a), "--debug"])
+    result = pymedia("info", str(video_mp4_a), "--debug")
 
     assert result.exit_code == 0
     assert "Metadata" in result.output
@@ -159,17 +57,14 @@ def test_info_success_with_debug(runner: CliRunner, video_mp4_a: Path) -> None:
 
 
 def test_sheet_success_generates_jpg(
-    runner: CliRunner,
+    pymedia: Invoke,
     video_mp4_a: Path,
     tmp_path: Path,
 ) -> None:
     """`sheet --preset web` genera una imagen jpg con la rejilla de capturas."""
     output = tmp_path / "sheet.jpg"
 
-    result = runner.invoke(
-        app,
-        ["sheet", str(video_mp4_a), "-o", str(output), "--preset", "web"],
-    )
+    result = pymedia("sheet", str(video_mp4_a), "-o", str(output), "--preset", "web")
 
     assert result.exit_code == 0
     assert output.exists()
@@ -177,7 +72,7 @@ def test_sheet_success_generates_jpg(
 
 
 def test_sheet_success_with_conflicting_name(
-    runner: CliRunner,
+    pymedia: Invoke,
     video_mp4_a: Path,
     tmp_path: Path,
 ) -> None:
@@ -186,31 +81,25 @@ def test_sheet_success_with_conflicting_name(
     shutil.copy(video_mp4_a, source)
     output = tmp_path / "sheet.jpg"
 
-    result = runner.invoke(
-        app,
-        ["sheet", str(source), "-o", str(output), "--preset", "web"],
-    )
+    result = pymedia("sheet", str(source), "-o", str(output), "--preset", "web")
 
     assert result.exit_code == 0
     assert output.exists()
 
 
 def test_sheet_error_exclusive_output_options(
-    runner: CliRunner,
+    pymedia: Invoke,
     video_mp4_a: Path,
     tmp_path: Path,
 ) -> None:
     """`sheet` rechaza `--output` y `--directory` usados a la vez."""
-    result = runner.invoke(
-        app,
-        [
-            "sheet",
-            str(video_mp4_a),
-            "-o",
-            str(tmp_path / "sheet.jpg"),
-            "-d",
-            str(tmp_path),
-        ],
+    result = pymedia(
+        "sheet",
+        str(video_mp4_a),
+        "-o",
+        str(tmp_path / "sheet.jpg"),
+        "-d",
+        str(tmp_path),
     )
 
     assert result.exit_code != 0
@@ -218,24 +107,52 @@ def test_sheet_error_exclusive_output_options(
 
 
 def test_sheet_success_with_fhd_preset(
-    runner: CliRunner,
+    pymedia: Invoke,
     video_mp4_a: Path,
     tmp_path: Path,
 ) -> None:
     """`sheet --preset fhd` genera una imagen jpg en resolución FHD."""
     output = tmp_path / "sheet_fhd.jpg"
 
-    result = runner.invoke(
-        app,
-        ["sheet", str(video_mp4_a), "-o", str(output), "--preset", "fhd"],
-    )
+    result = pymedia("sheet", str(video_mp4_a), "-o", str(output), "--preset", "fhd")
 
     assert result.exit_code == 0
     assert output.exists()
 
 
+@pytest.mark.parametrize(
+    ("preset", "width"), [("hd", 1280), ("fhd", 1920), ("web", 800)]
+)
+def test_sheet_preset_sets_width(
+    pymedia: Invoke,
+    video_mp4_a: Path,
+    tmp_path: Path,
+    preset: str,
+    width: int,
+) -> None:
+    """Cada `sheet --preset` genera la hoja con su ancho característico."""
+    output = tmp_path / f"sheet_{preset}.jpg"
+
+    result = pymedia("sheet", str(video_mp4_a), "-o", str(output), "--preset", preset)
+
+    assert result.exit_code == 0
+    assert video_size(output)[0] == width
+
+
+def test_sheet_default_preset_is_hd(
+    pymedia: Invoke, video_mp4_a: Path, tmp_path: Path
+) -> None:
+    """`sheet` sin `--preset` usa el preset `hd`."""
+    output = tmp_path / "sheet_default.jpg"
+
+    result = pymedia("sheet", str(video_mp4_a), "-o", str(output))
+
+    assert result.exit_code == 0
+    assert video_size(output)[0] == 1280
+
+
 def test_sheet_success_with_overwrite_yes(
-    runner: CliRunner,
+    pymedia: Invoke,
     video_mp4_a: Path,
     tmp_path: Path,
 ) -> None:
@@ -243,44 +160,23 @@ def test_sheet_success_with_overwrite_yes(
     output = tmp_path / "sheet_overwrite.jpg"
     output.write_bytes(b"existing")
 
-    result = runner.invoke(
-        app,
-        ["sheet", str(video_mp4_a), "-o", str(output), "-ov", "yes"],
-    )
+    result = pymedia("sheet", str(video_mp4_a), "-o", str(output), "-ov", "yes")
 
     assert result.exit_code == 0
     assert output.exists()
     assert output.read_bytes() != b"existing"
 
 
-def test_sheet_error_overwrite_never(
-    runner: CliRunner,
-    video_mp4_a: Path,
-    tmp_path: Path,
-) -> None:
-    """`sheet -ov never` falla cuando el fichero ya existe."""
-    output = tmp_path / "sheet_never.jpg"
-    output.write_bytes(b"existing")
-
-    result = runner.invoke(
-        app,
-        ["sheet", str(video_mp4_a), "-o", str(output), "-ov", "never"],
-    )
-
-    assert result.exit_code != 0
-
-
 def test_sheet_success_with_directory(
-    runner: CliRunner,
+    pymedia: Invoke,
     video_mp4_a: Path,
     tmp_path: Path,
 ) -> None:
     """`sheet --directory` genera la hoja dentro del directorio indicado."""
     directory = tmp_path / "sheets"
 
-    result = runner.invoke(
-        app,
-        ["sheet", str(video_mp4_a), "--directory", str(directory), "--preset", "web"],
+    result = pymedia(
+        "sheet", str(video_mp4_a), "--directory", str(directory), "--preset", "web"
     )
 
     assert result.exit_code == 0
@@ -289,7 +185,7 @@ def test_sheet_success_with_directory(
 
 
 def test_sheet_success_multiple_inputs(
-    runner: CliRunner,
+    pymedia: Invoke,
     video_mp4_a: Path,
     video_mp4_b: Path,
     tmp_path: Path,
@@ -297,17 +193,14 @@ def test_sheet_success_multiple_inputs(
     """`sheet` con múltiples entradas y `--directory` genera una hoja por vídeo."""
     directory = tmp_path / "sheets"
 
-    result = runner.invoke(
-        app,
-        [
-            "sheet",
-            str(video_mp4_a),
-            str(video_mp4_b),
-            "--directory",
-            str(directory),
-            "--preset",
-            "web",
-        ],
+    result = pymedia(
+        "sheet",
+        str(video_mp4_a),
+        str(video_mp4_b),
+        "--directory",
+        str(directory),
+        "--preset",
+        "web",
     )
 
     assert result.exit_code == 0
@@ -321,7 +214,7 @@ def test_sheet_success_multiple_inputs(
 
 
 def test_join_success_concatenates_videos(
-    runner: CliRunner,
+    pymedia: Invoke,
     video_mp4_a: Path,
     video_mp4_b: Path,
     tmp_path: Path,
@@ -329,9 +222,8 @@ def test_join_success_concatenates_videos(
     """`join` une dos vídeos en un contenedor con la duración combinada."""
     output = tmp_path / "joined.mp4"
 
-    result = runner.invoke(
-        app,
-        ["join", str(video_mp4_a), str(video_mp4_b), "-o", str(output), "-ov", "yes"],
+    result = pymedia(
+        "join", str(video_mp4_a), str(video_mp4_b), "-o", str(output), "-ov", "yes"
     )
 
     assert result.exit_code == 0
@@ -339,22 +231,19 @@ def test_join_success_concatenates_videos(
 
 
 def test_join_error_single_input(
-    runner: CliRunner,
+    pymedia: Invoke,
     video_mp4_a: Path,
     tmp_path: Path,
 ) -> None:
     """`join` con un único vídeo exige al menos dos entradas."""
-    result = runner.invoke(
-        app,
-        ["join", str(video_mp4_a), "-o", str(tmp_path / "joined.mp4")],
-    )
+    result = pymedia("join", str(video_mp4_a), "-o", str(tmp_path / "joined.mp4"))
 
     assert result.exit_code != 0
     assert "at least 2 videos" in result.output
 
 
 def test_join_success_with_overwrite_yes(
-    runner: CliRunner,
+    pymedia: Invoke,
     video_mp4_a: Path,
     video_mp4_b: Path,
     tmp_path: Path,
@@ -363,32 +252,13 @@ def test_join_success_with_overwrite_yes(
     output = tmp_path / "joined.mp4"
     output.write_bytes(b"existing")
 
-    result = runner.invoke(
-        app,
-        ["join", str(video_mp4_a), str(video_mp4_b), "-o", str(output), "-ov", "yes"],
+    result = pymedia(
+        "join", str(video_mp4_a), str(video_mp4_b), "-o", str(output), "-ov", "yes"
     )
 
     assert result.exit_code == 0
     assert output.exists()
     assert output.read_bytes() != b"existing"
-
-
-def test_join_error_overwrite_never(
-    runner: CliRunner,
-    video_mp4_a: Path,
-    video_mp4_b: Path,
-    tmp_path: Path,
-) -> None:
-    """`join -ov never` falla cuando el fichero de salida ya existe."""
-    output = tmp_path / "joined_never.mp4"
-    output.write_bytes(b"existing")
-
-    result = runner.invoke(
-        app,
-        ["join", str(video_mp4_a), str(video_mp4_b), "-o", str(output), "-ov", "never"],
-    )
-
-    assert result.exit_code != 0
 
 
 # =============================================================================
@@ -397,17 +267,14 @@ def test_join_error_overwrite_never(
 
 
 def test_remux_success_changes_container(
-    runner: CliRunner,
+    pymedia: Invoke,
     video_mp4_a: Path,
     tmp_path: Path,
 ) -> None:
     """`remux` copia los streams a un contenedor distinto sin recodificar."""
     output = tmp_path / "remuxed.mkv"
 
-    result = runner.invoke(
-        app,
-        ["remux", str(video_mp4_a), "-o", str(output), "-ov", "yes"],
-    )
+    result = pymedia("remux", str(video_mp4_a), "-o", str(output), "-ov", "yes")
 
     assert result.exit_code == 0
     assert output.exists()
@@ -415,20 +282,13 @@ def test_remux_success_changes_container(
 
 
 def test_remux_error_fast_start_non_mp4(
-    runner: CliRunner,
+    pymedia: Invoke,
     video_mp4_a: Path,
     tmp_path: Path,
 ) -> None:
     """`remux` rechaza `--fast-start` con un contenedor distinto de mp4."""
-    result = runner.invoke(
-        app,
-        [
-            "remux",
-            str(video_mp4_a),
-            "-o",
-            str(tmp_path / "remuxed.mkv"),
-            "--fast-start",
-        ],
+    result = pymedia(
+        "remux", str(video_mp4_a), "-o", str(tmp_path / "remuxed.mkv"), "--fast-start"
     )
 
     assert result.exit_code != 0
@@ -436,16 +296,15 @@ def test_remux_error_fast_start_non_mp4(
 
 
 def test_remux_success_with_genpts(
-    runner: CliRunner,
+    pymedia: Invoke,
     video_mp4_a: Path,
     tmp_path: Path,
 ) -> None:
     """`remux --genpts` regenera los marcadores de tiempo."""
     output = tmp_path / "remuxed_genpts.mkv"
 
-    result = runner.invoke(
-        app,
-        ["remux", str(video_mp4_a), "-o", str(output), "--genpts", "-ov", "yes"],
+    result = pymedia(
+        "remux", str(video_mp4_a), "-o", str(output), "--genpts", "-ov", "yes"
     )
 
     assert result.exit_code == 0
@@ -454,16 +313,15 @@ def test_remux_success_with_genpts(
 
 
 def test_remux_success_with_sort_tracks(
-    runner: CliRunner,
+    pymedia: Invoke,
     video_mp4_a: Path,
     tmp_path: Path,
 ) -> None:
     """`remux --sort-tracks` ordena las pistas del contenedor."""
     output = tmp_path / "remuxed_sorted.mkv"
 
-    result = runner.invoke(
-        app,
-        ["remux", str(video_mp4_a), "-o", str(output), "--sort-tracks", "-ov", "yes"],
+    result = pymedia(
+        "remux", str(video_mp4_a), "-o", str(output), "--sort-tracks", "-ov", "yes"
     )
 
     assert result.exit_code == 0
@@ -471,35 +329,15 @@ def test_remux_success_with_sort_tracks(
     assert stream_types(output) == ["video", "audio"]
 
 
-def test_remux_error_overwrite_never(
-    runner: CliRunner,
-    video_mp4_a: Path,
-    tmp_path: Path,
-) -> None:
-    """`remux -ov never` falla cuando el fichero ya existe."""
-    output = tmp_path / "remux_never.mkv"
-    output.write_bytes(b"existing")
-
-    result = runner.invoke(
-        app,
-        ["remux", str(video_mp4_a), "-o", str(output), "-ov", "never"],
-    )
-
-    assert result.exit_code != 0
-
-
 def test_remux_error_change_incompatible_container(
-    runner: CliRunner,
+    pymedia: Invoke,
     video_mp4_a: Path,
     tmp_path: Path,
 ) -> None:
     """`remux` rechaza cambiar a un contenedor incompatible con el códec."""
     output = tmp_path / "remuxed.webm"
 
-    result = runner.invoke(
-        app,
-        ["remux", str(video_mp4_a), "-o", str(output), "-ov", "yes"],
-    )
+    result = pymedia("remux", str(video_mp4_a), "-o", str(output), "-ov", "yes")
 
     assert result.exit_code != 0
 
@@ -510,25 +348,15 @@ def test_remux_error_change_incompatible_container(
 
 
 def test_cut_success_cuts_at_timestamp(
-    runner: CliRunner,
+    pymedia: Invoke,
     video_mp4_a: Path,
     tmp_path: Path,
 ) -> None:
     """`cut --at` divide el vídeo en un segmento por cada marca."""
     output = tmp_path / "part.mp4"
 
-    result = runner.invoke(
-        app,
-        [
-            "cut",
-            str(video_mp4_a),
-            "--at",
-            "00:00:01",
-            "-o",
-            str(output),
-            "-ov",
-            "yes",
-        ],
+    result = pymedia(
+        "cut", str(video_mp4_a), "--at", "00:00:01", "-o", str(output), "-ov", "yes"
     )
 
     assert result.exit_code == 0
@@ -538,15 +366,12 @@ def test_cut_success_cuts_at_timestamp(
 
 
 def test_cut_error_missing_options(
-    runner: CliRunner,
+    pymedia: Invoke,
     video_mp4_a: Path,
     tmp_path: Path,
 ) -> None:
     """`cut` exige una de `--at`, `--start` o `--end`."""
-    result = runner.invoke(
-        app,
-        ["cut", str(video_mp4_a), "-o", str(tmp_path / "part.mp4")],
-    )
+    result = pymedia("cut", str(video_mp4_a), "-o", str(tmp_path / "part.mp4"))
 
     assert result.exit_code != 0
     normalized = " ".join(result.output.split())
@@ -554,25 +379,15 @@ def test_cut_error_missing_options(
 
 
 def test_cut_success_with_start(
-    runner: CliRunner,
+    pymedia: Invoke,
     video_mp4_a: Path,
     tmp_path: Path,
 ) -> None:
     """`cut --start` divide el vídeo desde una marca hasta el final."""
     output = tmp_path / "from_start.mp4"
 
-    result = runner.invoke(
-        app,
-        [
-            "cut",
-            str(video_mp4_a),
-            "--start",
-            "00:00:01",
-            "-o",
-            str(output),
-            "-ov",
-            "yes",
-        ],
+    result = pymedia(
+        "cut", str(video_mp4_a), "--start", "00:00:01", "-o", str(output), "-ov", "yes"
     )
 
     assert result.exit_code == 0
@@ -581,25 +396,15 @@ def test_cut_success_with_start(
 
 
 def test_cut_success_with_end(
-    runner: CliRunner,
+    pymedia: Invoke,
     video_mp4_a: Path,
     tmp_path: Path,
 ) -> None:
     """`cut --end` divide el vídeo desde el inicio hasta una marca."""
     output = tmp_path / "from_end.mp4"
 
-    result = runner.invoke(
-        app,
-        [
-            "cut",
-            str(video_mp4_a),
-            "--end",
-            "00:00:01",
-            "-o",
-            str(output),
-            "-ov",
-            "yes",
-        ],
+    result = pymedia(
+        "cut", str(video_mp4_a), "--end", "00:00:01", "-o", str(output), "-ov", "yes"
     )
 
     assert result.exit_code == 0
@@ -608,23 +413,20 @@ def test_cut_success_with_end(
 
 
 def test_cut_error_ambiguous_at_start(
-    runner: CliRunner,
+    pymedia: Invoke,
     video_mp4_a: Path,
     tmp_path: Path,
 ) -> None:
     """`cut` rechaza combinar `--at` con `--start`."""
-    result = runner.invoke(
-        app,
-        [
-            "cut",
-            str(video_mp4_a),
-            "--at",
-            "00:00:01",
-            "--start",
-            "00:00:00",
-            "-o",
-            str(tmp_path / "part.mp4"),
-        ],
+    result = pymedia(
+        "cut",
+        str(video_mp4_a),
+        "--at",
+        "00:00:01",
+        "--start",
+        "00:00:00",
+        "-o",
+        str(tmp_path / "part.mp4"),
     )
 
     assert result.exit_code != 0
@@ -632,73 +434,41 @@ def test_cut_error_ambiguous_at_start(
 
 
 def test_cut_error_ambiguous_at_end(
-    runner: CliRunner,
+    pymedia: Invoke,
     video_mp4_a: Path,
     tmp_path: Path,
 ) -> None:
     """`cut` rechaza combinar `--at` con `--end`."""
-    result = runner.invoke(
-        app,
-        [
-            "cut",
-            str(video_mp4_a),
-            "--at",
-            "00:00:01",
-            "--end",
-            "00:00:02",
-            "-o",
-            str(tmp_path / "part.mp4"),
-        ],
+    result = pymedia(
+        "cut",
+        str(video_mp4_a),
+        "--at",
+        "00:00:01",
+        "--end",
+        "00:00:02",
+        "-o",
+        str(tmp_path / "part.mp4"),
     )
 
     assert result.exit_code != 0
     assert "Ambiguous options" in result.output
 
 
-def test_cut_error_overwrite_never(
-    runner: CliRunner,
-    video_mp4_a: Path,
-    tmp_path: Path,
-) -> None:
-    """`cut -ov never` falla cuando el fichero ya existe."""
-    output = tmp_path / "cut_never.mp4"
-    output.write_bytes(b"existing")
-
-    result = runner.invoke(
-        app,
-        [
-            "cut",
-            str(video_mp4_a),
-            "--at",
-            "00:00:01",
-            "-o",
-            str(output),
-            "-ov",
-            "never",
-        ],
-    )
-
-    assert result.exit_code != 0
-
-
 def test_cut_error_start_bigger_end(
-    runner: CliRunner,
+    pymedia: Invoke,
     video_mp4_a: Path,
     tmp_path: Path,
 ) -> None:
     """`cut` rechaza `--start` posterior a `--end`."""
-    result = runner.invoke(
-        app,
-        [
-            "cut",
-            str(video_mp4_a),
-            "--start",
-            "00:00:02",
-            "--end",
-            "00:00:01",
-            "-o",
-            str(tmp_path / "part.mp4"),
-        ],
+    result = pymedia(
+        "cut",
+        str(video_mp4_a),
+        "--start",
+        "00:00:02",
+        "--end",
+        "00:00:01",
+        "-o",
+        str(tmp_path / "part.mp4"),
     )
 
     assert result.exit_code != 0
@@ -710,16 +480,15 @@ def test_cut_error_start_bigger_end(
 
 
 def test_transcode_success_transcodes_video(
-    runner: CliRunner,
+    pymedia: Invoke,
     video_mp4_a: Path,
     tmp_path: Path,
 ) -> None:
     """`transcode --video` recodifica la pista con el preset por defecto."""
     output = tmp_path / "transcoded.mp4"
 
-    result = runner.invoke(
-        app,
-        ["transcode", str(video_mp4_a), "--video", "-o", str(output), "-ov", "yes"],
+    result = pymedia(
+        "transcode", str(video_mp4_a), "--video", "-o", str(output), "-ov", "yes"
     )
 
     assert result.exit_code == 0
@@ -727,7 +496,7 @@ def test_transcode_success_transcodes_video(
 
 
 def test_transcode_success_burns_subtitles(
-    runner: CliRunner,
+    pymedia: Invoke,
     video_mp4_a: Path,
     tmp_path: Path,
 ) -> None:
@@ -738,18 +507,15 @@ def test_transcode_success_burns_subtitles(
     )
     output = tmp_path / "burned.mp4"
 
-    result = runner.invoke(
-        app,
-        [
-            "transcode",
-            str(video_mp4_a),
-            "--burn-subtitles",
-            str(subtitle),
-            "-o",
-            str(output),
-            "-ov",
-            "yes",
-        ],
+    result = pymedia(
+        "transcode",
+        str(video_mp4_a),
+        "--burn-subtitles",
+        str(subtitle),
+        "-o",
+        str(output),
+        "-ov",
+        "yes",
     )
 
     assert result.exit_code == 0
@@ -758,7 +524,7 @@ def test_transcode_success_burns_subtitles(
 
 @pytest.mark.parametrize("name", ["Joan's first bycicle, [2].srt", "mi fichero.srt"])
 def test_transcode_burns_subtitles_with_conflicting_name(
-    runner: CliRunner,
+    pymedia: Invoke,
     video_mp4_a: Path,
     tmp_path: Path,
     name: str,
@@ -770,20 +536,17 @@ def test_transcode_burns_subtitles_with_conflicting_name(
     )
     output = tmp_path / "burned.mp4"
 
-    result = runner.invoke(
-        app,
-        [
-            "transcode",
-            str(video_mp4_a),
-            "--burn-subtitles",
-            str(subtitle),
-            "--size",
-            "64x36",
-            "-o",
-            str(output),
-            "-ov",
-            "yes",
-        ],
+    result = pymedia(
+        "transcode",
+        str(video_mp4_a),
+        "--burn-subtitles",
+        str(subtitle),
+        "--size",
+        "64x36",
+        "-o",
+        str(output),
+        "-ov",
+        "yes",
     )
 
     assert result.exit_code == 0
@@ -791,11 +554,11 @@ def test_transcode_burns_subtitles_with_conflicting_name(
 
 
 def test_transcode_error_missing_action(
-    runner: CliRunner,
+    pymedia: Invoke,
     video_mp4_a: Path,
 ) -> None:
     """`transcode` sin ninguna opción de transcodificación avisa de las requeridas."""
-    result = runner.invoke(app, ["transcode", str(video_mp4_a)])
+    result = pymedia("transcode", str(video_mp4_a))
 
     assert result.exit_code != 0
     output = result.output.replace("\u2502", " ").replace("\u250c", " ")
@@ -815,22 +578,15 @@ def test_transcode_error_missing_action(
 
 
 def test_transcode_error_invalid_audio_input(
-    runner: CliRunner,
+    pymedia: Invoke,
     audio_m4a: Path,
 ) -> None:
     """`transcode` rechaza ficheros de audio como entrada.
 
     Son contenedores inválidos para un comando que exige vídeo.
     """
-    result = runner.invoke(
-        app,
-        [
-            "transcode",
-            str(audio_m4a),
-            "--video",
-            "-o",
-            str(audio_m4a.parent / "out.mp4"),
-        ],
+    result = pymedia(
+        "transcode", str(audio_m4a), "--video", "-o", str(audio_m4a.parent / "out.mp4")
     )
 
     assert result.exit_code != 0
@@ -839,316 +595,114 @@ def test_transcode_error_invalid_audio_input(
     assert "Video requires one of:" in normalized
 
 
-def test_transcode_error_crop_bigger_than_video_dimensions(
-    runner: CliRunner,
+@pytest.mark.parametrize("preset", ["fast", "even", "slow"])
+def test_transcode_success_with_preset(
+    pymedia: Invoke,
+    video_mp4_a: Path,
+    tmp_path: Path,
+    preset: str,
+) -> None:
+    """`transcode --preset` recodifica el vídeo a hevc con cada perfil."""
+    output = tmp_path / f"transcoded_{preset}.mp4"
+
+    result = pymedia(
+        "transcode",
+        str(video_mp4_a),
+        "--preset",
+        preset,
+        "--video",
+        "-o",
+        str(output),
+        "-ov",
+        "yes",
+    )
+
+    assert result.exit_code == 0
+    assert stream_codec_names(output, "video") == ["hevc"]
+
+
+def test_transcode_success_default_preset_is_even(
+    pymedia: Invoke,
     video_mp4_a: Path,
     tmp_path: Path,
 ) -> None:
-    """`transcode --crop` rechaza área mayor que las dimensiones del vídeo."""
-    output = tmp_path / "transcoded_crop.mp4"
+    """`transcode` sin `--preset` usa el perfil `even` (hevc)."""
+    output = tmp_path / "transcoded_default.mp4"
 
-    result = runner.invoke(
-        app,
-        [
-            "transcode",
-            str(video_mp4_a),
-            "--crop",
-            "160,90,10,10",
-            "--video",
-            "-o",
-            str(output),
-            "-ov",
-            "yes",
-        ],
+    result = pymedia(
+        "transcode", str(video_mp4_a), "--video", "-o", str(output), "-ov", "yes"
+    )
+
+    assert result.exit_code == 0
+    assert stream_codec_names(output, "video") == ["hevc"]
+
+
+@pytest.mark.parametrize("command", [("sheet",), ("transcode", "--video")])
+def test_output_with_multiple_inputs_is_rejected(
+    pymedia: Invoke,
+    video_mp4_a: Path,
+    video_mp4_b: Path,
+    tmp_path: Path,
+    command: tuple[str, ...],
+) -> None:
+    """`-o` con varias entradas se rechaza en favor de `--directory`."""
+    result = pymedia(
+        command[0],
+        str(video_mp4_a),
+        str(video_mp4_b),
+        *command[1:],
+        "-o",
+        str(tmp_path / "out.mp4"),
     )
 
     assert result.exit_code != 0
-    assert "Invalid crop area" in result.output
+    assert "not allowed to specify an output with multiple inputs" in result.output
 
 
-def test_transcode_error_oversize_without_upscale(
-    runner: CliRunner,
+@pytest.mark.parametrize(
+    ("command", "pattern"),
+    [(("sheet",), "*_sheet.jpg"), (("transcode", "--video"), "*_transcoded.mp4")],
+)
+def test_directory_with_multiple_inputs_generates_one_output_each(
+    pymedia: Invoke,
     video_mp4_a: Path,
+    video_mp4_b: Path,
     tmp_path: Path,
+    command: tuple[str, ...],
+    pattern: str,
 ) -> None:
-    """`transcode --size` mayor que el vídeo sin `--upscale` ignora el escalado."""
-    output = tmp_path / "transcoded_oversize.mp4"
+    """`--directory` procesa cada entrada y deja una salida por fichero."""
+    directory = tmp_path / "batch"
 
-    result = runner.invoke(
-        app,
-        [
-            "transcode",
-            str(video_mp4_a),
-            "--size",
-            "320x180",
-            "--video",
-            "-o",
-            str(output),
-            "-ov",
-            "yes",
-        ],
+    result = pymedia(
+        command[0],
+        str(video_mp4_a),
+        str(video_mp4_b),
+        *command[1:],
+        "-d",
+        str(directory),
+        "-ov",
+        "yes",
     )
 
     assert result.exit_code == 0
-    assert "Ignored scale" in result.output
-
-
-def test_transcode_success_with_preset_fast(
-    runner: CliRunner,
-    video_mp4_a: Path,
-    tmp_path: Path,
-) -> None:
-    """`transcode --preset fast` recodifica con el perfil fast."""
-    output = tmp_path / "transcoded_fast.mp4"
-
-    result = runner.invoke(
-        app,
-        [
-            "transcode",
-            str(video_mp4_a),
-            "--preset",
-            "fast",
-            "--video",
-            "-o",
-            str(output),
-            "-ov",
-            "yes",
-        ],
-    )
-
-    assert result.exit_code == 0
-    assert output.exists()
+    assert len(list(directory.glob(pattern))) == 2
 
 
 def test_transcode_success_transcode_audio(
-    runner: CliRunner,
+    pymedia: Invoke,
     video_mp4_a: Path,
     tmp_path: Path,
 ) -> None:
     """`transcode --audio` recodifica la pista de audio."""
     output = tmp_path / "transcoded_audio.mp4"
 
-    result = runner.invoke(
-        app,
-        [
-            "transcode",
-            str(video_mp4_a),
-            "--audio",
-            "0",
-            "-o",
-            str(output),
-            "-ov",
-            "yes",
-        ],
+    result = pymedia(
+        "transcode", str(video_mp4_a), "--audio", "0", "-o", str(output), "-ov", "yes"
     )
 
     assert result.exit_code == 0
     assert output.exists()
-
-
-def test_transcode_success_with_crop(
-    runner: CliRunner,
-    video_mp4_a: Path,
-    tmp_path: Path,
-) -> None:
-    """`transcode --crop` aplica recorte de imagen."""
-    output = tmp_path / "transcoded_crop.mp4"
-
-    result = runner.invoke(
-        app,
-        [
-            "transcode",
-            str(video_mp4_a),
-            "--crop",
-            "80,45,0,0",
-            "--video",
-            "-o",
-            str(output),
-            "-ov",
-            "yes",
-        ],
-    )
-
-    assert result.exit_code == 0
-    assert output.exists()
-
-
-def test_transcode_success_with_rotate(
-    runner: CliRunner,
-    video_mp4_a: Path,
-    tmp_path: Path,
-) -> None:
-    """`transcode --rotate` rota la imagen 90 grados."""
-    output = tmp_path / "transcoded_rotate.mp4"
-
-    result = runner.invoke(
-        app,
-        [
-            "transcode",
-            str(video_mp4_a),
-            "--rotate",
-            "90",
-            "--video",
-            "-o",
-            str(output),
-            "-ov",
-            "yes",
-        ],
-    )
-
-    assert result.exit_code == 0
-    assert output.exists()
-
-
-def test_transcode_success_with_size(
-    runner: CliRunner,
-    video_mp4_a: Path,
-    tmp_path: Path,
-) -> None:
-    """`transcode --size` escala la imagen a dimensiones objetivo."""
-    output = tmp_path / "transcoded_size.mp4"
-
-    result = runner.invoke(
-        app,
-        [
-            "transcode",
-            str(video_mp4_a),
-            "--size",
-            "128x72",
-            "--video",
-            "-o",
-            str(output),
-            "-ov",
-            "yes",
-        ],
-    )
-
-    assert result.exit_code == 0
-    assert output.exists()
-
-
-def test_transcode_success_with_mode_stretch(
-    runner: CliRunner,
-    video_mp4_a: Path,
-    tmp_path: Path,
-) -> None:
-    """`transcode --mode stretch` escala modificando el aspect ratio."""
-    output = tmp_path / "transcoded_mode.mp4"
-
-    result = runner.invoke(
-        app,
-        [
-            "transcode",
-            str(video_mp4_a),
-            "--mode",
-            "stretch",
-            "--video",
-            "-o",
-            str(output),
-            "-ov",
-            "yes",
-        ],
-    )
-
-    assert result.exit_code == 0
-    assert output.exists()
-
-
-def test_transcode_success_with_upscale(
-    runner: CliRunner,
-    video_mp4_a: Path,
-    tmp_path: Path,
-) -> None:
-    """`transcode --upscale` permite aumentar dimensiones."""
-    output = tmp_path / "transcoded_upscale.mp4"
-
-    result = runner.invoke(
-        app,
-        [
-            "transcode",
-            str(video_mp4_a),
-            "--upscale",
-            "--size",
-            "320x180",
-            "--video",
-            "-o",
-            str(output),
-            "-ov",
-            "yes",
-        ],
-    )
-
-    assert result.exit_code == 0
-    assert output.exists()
-
-
-def test_transcode_success_with_hflip(
-    runner: CliRunner,
-    video_mp4_a: Path,
-    tmp_path: Path,
-) -> None:
-    """`transcode --hflip` invierte la imagen horizontalmente."""
-    output = tmp_path / "transcoded_hflip.mp4"
-
-    result = runner.invoke(
-        app,
-        [
-            "transcode",
-            str(video_mp4_a),
-            "--hflip",
-            "--video",
-            "-o",
-            str(output),
-            "-ov",
-            "yes",
-        ],
-    )
-
-    assert result.exit_code == 0
-    assert output.exists()
-
-
-def test_transcode_success_with_vflip(
-    runner: CliRunner,
-    video_mp4_a: Path,
-    tmp_path: Path,
-) -> None:
-    """`transcode --vflip` invierte la imagen verticalmente."""
-    output = tmp_path / "transcoded_vflip.mp4"
-
-    result = runner.invoke(
-        app,
-        [
-            "transcode",
-            str(video_mp4_a),
-            "--vflip",
-            "--video",
-            "-o",
-            str(output),
-            "-ov",
-            "yes",
-        ],
-    )
-
-    assert result.exit_code == 0
-    assert output.exists()
-
-
-def test_transcode_error_overwrite_never(
-    runner: CliRunner,
-    video_mp4_a: Path,
-    tmp_path: Path,
-) -> None:
-    """`transcode -ov never` falla cuando el fichero ya existe."""
-    output = tmp_path / "transcoded_never.mp4"
-    output.write_bytes(b"existing")
-
-    result = runner.invoke(
-        app,
-        ["transcode", str(video_mp4_a), "--video", "-o", str(output), "-ov", "never"],
-    )
-
-    assert result.exit_code != 0
 
 
 # =============================================================================
@@ -1157,7 +711,7 @@ def test_transcode_error_overwrite_never(
 
 
 def test_add_audio_success_inserts_track(
-    runner: CliRunner,
+    pymedia: Invoke,
     video_mkv: Path,
     audio_m4a: Path,
     tmp_path: Path,
@@ -1165,19 +719,16 @@ def test_add_audio_success_inserts_track(
     """`add-audio` añade la pista externa con su idioma al contenedor."""
     output = tmp_path / "with_audio.mkv"
 
-    result = runner.invoke(
-        app,
-        [
-            "add-audio",
-            str(video_mkv),
-            str(audio_m4a),
-            "--language",
-            "eng",
-            "-o",
-            str(output),
-            "-ov",
-            "yes",
-        ],
+    result = pymedia(
+        "add-audio",
+        str(video_mkv),
+        str(audio_m4a),
+        "--language",
+        "eng",
+        "-o",
+        str(output),
+        "-ov",
+        "yes",
     )
 
     assert result.exit_code == 0
@@ -1191,214 +742,40 @@ def test_add_audio_success_inserts_track(
 
 
 def test_add_audio_error_missing_language(
-    runner: CliRunner,
+    pymedia: Invoke,
     video_mkv: Path,
     audio_m4a: Path,
     tmp_path: Path,
 ) -> None:
     """`add-audio` exige la opción `--language` para la nueva pista."""
-    result = runner.invoke(
-        app,
-        [
-            "add-audio",
-            str(video_mkv),
-            str(audio_m4a),
-            "-o",
-            str(tmp_path / "with_audio.mkv"),
-        ],
+    result = pymedia(
+        "add-audio",
+        str(video_mkv),
+        str(audio_m4a),
+        "-o",
+        str(tmp_path / "with_audio.mkv"),
     )
 
     assert result.exit_code != 0
     assert "Missing option '--language'" in result.output
 
 
-def test_add_audio_success_with_title(
-    runner: CliRunner,
-    video_mkv: Path,
-    audio_m4a: Path,
-    tmp_path: Path,
+def test_add_audio_error_audio_file_missing(
+    pymedia: Invoke, video_mkv: Path, tmp_path: Path
 ) -> None:
-    """`add-audio --title` añade título a la pista de audio."""
-    output = tmp_path / "with_title.mkv"
-
-    result = runner.invoke(
-        app,
-        [
-            "add-audio",
-            str(video_mkv),
-            str(audio_m4a),
-            "--language",
-            "eng",
-            "--title",
-            "My Audio",
-            "-o",
-            str(output),
-            "-ov",
-            "yes",
-        ],
-    )
-
-    assert result.exit_code == 0
-    audio_streams = [
-        s for s in ffprobe_streams(output) if s.get("codec_type") == "audio"
-    ]
-    assert (audio_streams[-1].get("tags") or {}).get("title") == "My Audio"
-
-
-def test_add_audio_success_with_forced(
-    runner: CliRunner,
-    video_mkv: Path,
-    audio_m4a: Path,
-    tmp_path: Path,
-) -> None:
-    """`add-audio --forced` marca la pista como forzada."""
-    output = tmp_path / "with_forced.mkv"
-
-    result = runner.invoke(
-        app,
-        [
-            "add-audio",
-            str(video_mkv),
-            str(audio_m4a),
-            "--language",
-            "eng",
-            "--forced",
-            "-o",
-            str(output),
-            "-ov",
-            "yes",
-        ],
-    )
-
-    assert result.exit_code == 0
-    audio_streams = [
-        s for s in ffprobe_streams(output) if s.get("codec_type") == "audio"
-    ]
-    assert audio_streams[-1].get("disposition", {}).get("forced") == 1
-
-
-def test_add_audio_success_with_default(
-    runner: CliRunner,
-    video_mkv: Path,
-    audio_m4a: Path,
-    tmp_path: Path,
-) -> None:
-    """`add-audio --default` establece la pista como por defecto."""
-    output = tmp_path / "with_default.mkv"
-
-    result = runner.invoke(
-        app,
-        [
-            "add-audio",
-            str(video_mkv),
-            str(audio_m4a),
-            "--language",
-            "eng",
-            "--default",
-            "-o",
-            str(output),
-            "-ov",
-            "yes",
-        ],
-    )
-
-    assert result.exit_code == 0
-    audio_streams = [
-        s for s in ffprobe_streams(output) if s.get("codec_type") == "audio"
-    ]
-    assert audio_streams[-1].get("disposition", {}).get("default") == 1
-
-
-def test_add_audio_success_with_hearing_impaired(
-    runner: CliRunner,
-    video_mkv: Path,
-    audio_m4a: Path,
-    tmp_path: Path,
-) -> None:
-    """`add-audio --hearing-impaired` marca pista para discapacitados auditivos."""
-    output = tmp_path / "with_hi.mkv"
-
-    result = runner.invoke(
-        app,
-        [
-            "add-audio",
-            str(video_mkv),
-            str(audio_m4a),
-            "--language",
-            "eng",
-            "--hearing-impaired",
-            "-o",
-            str(output),
-            "-ov",
-            "yes",
-        ],
-    )
-
-    assert result.exit_code == 0
-    audio_streams = [
-        s for s in ffprobe_streams(output) if s.get("codec_type") == "audio"
-    ]
-    assert audio_streams[-1].get("disposition", {}).get("hearing_impaired") == 1
-
-
-def test_add_audio_success_with_commentary(
-    runner: CliRunner,
-    video_mkv: Path,
-    audio_m4a: Path,
-    tmp_path: Path,
-) -> None:
-    """`add-audio --commentary` marca la pista como comentario."""
-    output = tmp_path / "with_commentary.mkv"
-
-    result = runner.invoke(
-        app,
-        [
-            "add-audio",
-            str(video_mkv),
-            str(audio_m4a),
-            "--language",
-            "eng",
-            "--commentary",
-            "-o",
-            str(output),
-            "-ov",
-            "yes",
-        ],
-    )
-
-    assert result.exit_code == 0
-    audio_streams = [
-        s for s in ffprobe_streams(output) if s.get("codec_type") == "audio"
-    ]
-    assert audio_streams[-1].get("disposition", {}).get("comment") == 1
-
-
-def test_add_audio_error_overwrite_never(
-    runner: CliRunner,
-    video_mkv: Path,
-    audio_m4a: Path,
-    tmp_path: Path,
-) -> None:
-    """`add-audio -ov never` falla cuando el fichero ya existe."""
-    output = tmp_path / "audio_never.mkv"
-    output.write_bytes(b"existing")
-
-    result = runner.invoke(
-        app,
-        [
-            "add-audio",
-            str(video_mkv),
-            str(audio_m4a),
-            "--language",
-            "eng",
-            "-o",
-            str(output),
-            "-ov",
-            "never",
-        ],
+    """`add-audio` rechaza un fichero de audio que no existe."""
+    result = pymedia(
+        "add-audio",
+        str(video_mkv),
+        str(tmp_path / "missing.m4a"),
+        "--language",
+        "eng",
+        "-o",
+        str(tmp_path / "out.mkv"),
     )
 
     assert result.exit_code != 0
+    assert "is not a file" in result.output
 
 
 # =============================================================================
@@ -1407,25 +784,15 @@ def test_add_audio_error_overwrite_never(
 
 
 def test_delete_audio_success_removes_tracks(
-    runner: CliRunner,
+    pymedia: Invoke,
     video_mkv: Path,
     tmp_path: Path,
 ) -> None:
     """`delete-audio` elimina las pistas indicadas del contenedor."""
     output = tmp_path / "no_audio.mkv"
 
-    result = runner.invoke(
-        app,
-        [
-            "delete-audio",
-            str(video_mkv),
-            "--tracks",
-            "0",
-            "-o",
-            str(output),
-            "-ov",
-            "yes",
-        ],
+    result = pymedia(
+        "delete-audio", str(video_mkv), "--tracks", "0", "-o", str(output), "-ov", "yes"
     )
 
     assert result.exit_code == 0
@@ -1433,53 +800,24 @@ def test_delete_audio_success_removes_tracks(
 
 
 def test_delete_audio_error_without_audio_tracks(
-    runner: CliRunner,
+    pymedia: Invoke,
     video_no_audio: Path,
     tmp_path: Path,
 ) -> None:
     """`delete-audio` avisa cuando el medio no tiene pistas de audio."""
-    result = runner.invoke(
-        app,
-        [
-            "delete-audio",
-            str(video_no_audio),
-            "--tracks",
-            "0",
-            "-o",
-            str(tmp_path / "out.mp4"),
-            "-ov",
-            "yes",
-        ],
+    result = pymedia(
+        "delete-audio",
+        str(video_no_audio),
+        "--tracks",
+        "0",
+        "-o",
+        str(tmp_path / "out.mp4"),
+        "-ov",
+        "yes",
     )
 
     assert result.exit_code != 0
     assert "Missing parameter: media.audio" in result.output
-
-
-def test_delete_audio_error_overwrite_never(
-    runner: CliRunner,
-    video_mkv: Path,
-    tmp_path: Path,
-) -> None:
-    """`delete-audio -ov never` falla cuando el fichero ya existe."""
-    output = tmp_path / "no_audio_never.mkv"
-    output.write_bytes(b"existing")
-
-    result = runner.invoke(
-        app,
-        [
-            "delete-audio",
-            str(video_mkv),
-            "--tracks",
-            "0",
-            "-o",
-            str(output),
-            "-ov",
-            "never",
-        ],
-    )
-
-    assert result.exit_code != 0
 
 
 # =============================================================================
@@ -1488,29 +826,26 @@ def test_delete_audio_error_overwrite_never(
 
 
 def test_edit_audio_success_updates_metadata(
-    runner: CliRunner,
+    pymedia: Invoke,
     video_mkv: Path,
     tmp_path: Path,
 ) -> None:
     """`edit-audio` actualiza el idioma y el título de la pista indicada."""
     output = tmp_path / "edited_audio.mkv"
 
-    result = runner.invoke(
-        app,
-        [
-            "edit-audio",
-            str(video_mkv),
-            "--track",
-            "0",
-            "--language",
-            "fre",
-            "--title",
-            "Edited",
-            "-o",
-            str(output),
-            "-ov",
-            "yes",
-        ],
+    result = pymedia(
+        "edit-audio",
+        str(video_mkv),
+        "--track",
+        "0",
+        "--language",
+        "fre",
+        "--title",
+        "Edited",
+        "-o",
+        str(output),
+        "-ov",
+        "yes",
     )
 
     assert result.exit_code == 0
@@ -1519,217 +854,45 @@ def test_edit_audio_success_updates_metadata(
 
 
 def test_edit_audio_error_missing_track(
-    runner: CliRunner,
+    pymedia: Invoke,
     video_mkv: Path,
 ) -> None:
     """`edit-audio` exige la opción `--track` para identificar la pista."""
-    result = runner.invoke(
-        app,
-        ["edit-audio", str(video_mkv), "--language", "fre"],
-    )
+    result = pymedia("edit-audio", str(video_mkv), "--language", "fre")
 
     assert result.exit_code != 0
     assert "Missing option '--track'" in result.output
 
 
-def test_edit_audio_success_with_title(
-    runner: CliRunner,
-    video_mkv: Path,
-    tmp_path: Path,
-) -> None:
-    """`edit-audio --title` actualiza el título de la pista."""
-    output = tmp_path / "edited_title.mkv"
-
-    result = runner.invoke(
-        app,
-        [
-            "edit-audio",
-            str(video_mkv),
-            "--track",
-            "0",
-            "--language",
-            "fre",
-            "--title",
-            "French Audio",
-            "-o",
-            str(output),
-            "-ov",
-            "yes",
-        ],
-    )
-
-    assert result.exit_code == 0
-    assert stream_tag(output, "audio", "title") == "French Audio"
-
-
-def test_edit_audio_success_with_forced(
-    runner: CliRunner,
-    video_mkv: Path,
-    tmp_path: Path,
-) -> None:
-    """`edit-audio --forced` marca la pista como forzada."""
-    output = tmp_path / "edited_forced.mkv"
-
-    result = runner.invoke(
-        app,
-        [
-            "edit-audio",
-            str(video_mkv),
-            "--track",
-            "0",
-            "--language",
-            "fre",
-            "--forced",
-            "-o",
-            str(output),
-            "-ov",
-            "yes",
-        ],
-    )
-
-    assert result.exit_code == 0
-    assert stream_tag(output, "audio", "language") == "fre"
-    assert ffprobe_streams(output)[1].get("disposition", {}).get("forced") == 1
-
-
-def test_edit_audio_success_with_default(
-    runner: CliRunner,
-    video_mkv: Path,
-    tmp_path: Path,
-) -> None:
-    """`edit-audio --default` establece la pista como por defecto."""
-    output = tmp_path / "edited_default.mkv"
-
-    result = runner.invoke(
-        app,
-        [
-            "edit-audio",
-            str(video_mkv),
-            "--track",
-            "0",
-            "--language",
-            "fre",
-            "--default",
-            "-o",
-            str(output),
-            "-ov",
-            "yes",
-        ],
-    )
-
-    assert result.exit_code == 0
-    assert stream_tag(output, "audio", "language") == "fre"
-    assert ffprobe_streams(output)[1].get("disposition", {}).get("default") == 1
-
-
-def test_edit_audio_success_with_hearing_impaired(
-    runner: CliRunner,
-    video_mkv: Path,
-    tmp_path: Path,
-) -> None:
-    """`edit-audio --hearing-impaired` marca pista para discapacitados auditivos."""
-    output = tmp_path / "edited_hi.mkv"
-
-    result = runner.invoke(
-        app,
-        [
-            "edit-audio",
-            str(video_mkv),
-            "--track",
-            "0",
-            "--language",
-            "fre",
-            "--hearing-impaired",
-            "-o",
-            str(output),
-            "-ov",
-            "yes",
-        ],
-    )
-
-    assert result.exit_code == 0
-    assert stream_tag(output, "audio", "language") == "fre"
-    assert (
-        ffprobe_streams(output)[1].get("disposition", {}).get("hearing_impaired") == 1
-    )
-
-
-def test_edit_audio_success_with_commentary(
-    runner: CliRunner,
-    video_mkv: Path,
-    tmp_path: Path,
-) -> None:
-    """`edit-audio --commentary` marca la pista como comentario."""
-    output = tmp_path / "edited_commentary.mkv"
-
-    result = runner.invoke(
-        app,
-        [
-            "edit-audio",
-            str(video_mkv),
-            "--track",
-            "0",
-            "--language",
-            "fre",
-            "--commentary",
-            "-o",
-            str(output),
-            "-ov",
-            "yes",
-        ],
-    )
-
-    assert result.exit_code == 0
-    assert stream_tag(output, "audio", "language") == "fre"
-    assert ffprobe_streams(output)[1].get("disposition", {}).get("comment") == 1
-
-
 def test_edit_audio_error_missing_metadata(
-    runner: CliRunner,
+    pymedia: Invoke,
     video_mkv: Path,
 ) -> None:
     """`edit-audio` exige al menos una opción de metadatos."""
-    result = runner.invoke(
-        app,
-        [
-            "edit-audio",
-            str(video_mkv),
-            "--track",
-            "0",
-        ],
-    )
+    result = pymedia("edit-audio", str(video_mkv), "--track", "0")
 
     assert result.exit_code != 0
     normalized = " ".join(result.output.split())
     assert "Missing at least one of these options:" in normalized
 
 
-def test_edit_audio_error_overwrite_never(
-    runner: CliRunner,
-    video_mkv: Path,
-    tmp_path: Path,
+def test_delete_audio_error_track_out_of_range(
+    pymedia: Invoke, video_mkv: Path, tmp_path: Path
 ) -> None:
-    """`edit-audio -ov never` falla cuando el fichero ya existe."""
-    output = tmp_path / "edited_never.mkv"
-    output.write_bytes(b"existing")
-
-    result = runner.invoke(
-        app,
-        [
-            "edit-audio",
-            str(video_mkv),
-            "--track",
-            "0",
-            "--language",
-            "fre",
-            "-o",
-            str(output),
-            "-ov",
-            "never",
-        ],
+    """`delete-audio` rechaza un índice de pista inexistente."""
+    result = pymedia(
+        "delete-audio",
+        str(video_mkv),
+        "--tracks",
+        "5",
+        "-o",
+        str(tmp_path / "out.mkv"),
+        "-ov",
+        "yes",
     )
 
     assert result.exit_code != 0
+    assert "Audio index not included" in result.output
 
 
 # =============================================================================
@@ -1738,25 +901,22 @@ def test_edit_audio_error_overwrite_never(
 
 
 def test_extract_audio_success_extracts_track(
-    runner: CliRunner,
+    pymedia: Invoke,
     video_mkv: Path,
     tmp_path: Path,
 ) -> None:
     """`extract-audio` vuelca la pista indicada a un fichero de audio."""
     output = tmp_path / "audio.m4a"
 
-    result = runner.invoke(
-        app,
-        [
-            "extract-audio",
-            str(video_mkv),
-            "--tracks",
-            "0",
-            "-o",
-            str(output),
-            "-ov",
-            "yes",
-        ],
+    result = pymedia(
+        "extract-audio",
+        str(video_mkv),
+        "--tracks",
+        "0",
+        "-o",
+        str(output),
+        "-ov",
+        "yes",
     )
 
     assert result.exit_code == 0
@@ -1766,43 +926,14 @@ def test_extract_audio_success_extracts_track(
 
 
 def test_extract_audio_error_without_audio_tracks(
-    runner: CliRunner,
+    pymedia: Invoke,
     video_no_audio: Path,
 ) -> None:
     """`extract-audio` avisa cuando el medio no tiene pistas de audio."""
-    result = runner.invoke(
-        app,
-        ["extract-audio", str(video_no_audio), "--tracks", "0"],
-    )
+    result = pymedia("extract-audio", str(video_no_audio), "--tracks", "0")
 
     assert result.exit_code != 0
     assert "Missing parameter: media.audio" in result.output
-
-
-def test_extract_audio_error_overwrite_never(
-    runner: CliRunner,
-    video_mkv: Path,
-    tmp_path: Path,
-) -> None:
-    """`extract-audio -ov never` falla cuando el fichero ya existe."""
-    output = tmp_path / "audio_never.m4a"
-    output.write_bytes(b"existing")
-
-    result = runner.invoke(
-        app,
-        [
-            "extract-audio",
-            str(video_mkv),
-            "--tracks",
-            "0",
-            "-o",
-            str(output),
-            "-ov",
-            "never",
-        ],
-    )
-
-    assert result.exit_code != 0
 
 
 # =============================================================================
@@ -1811,7 +942,7 @@ def test_extract_audio_error_overwrite_never(
 
 
 def test_add_subs_success_inserts_track(
-    runner: CliRunner,
+    pymedia: Invoke,
     video_mkv: Path,
     subs_spa: Path,
     tmp_path: Path,
@@ -1819,19 +950,16 @@ def test_add_subs_success_inserts_track(
     """`add-subs` inserta el fichero externo como pista con su idioma."""
     output = tmp_path / "with_subs.mkv"
 
-    result = runner.invoke(
-        app,
-        [
-            "add-subs",
-            str(video_mkv),
-            str(subs_spa),
-            "--language",
-            "spa",
-            "-o",
-            str(output),
-            "-ov",
-            "yes",
-        ],
+    result = pymedia(
+        "add-subs",
+        str(video_mkv),
+        str(subs_spa),
+        "--language",
+        "spa",
+        "-o",
+        str(output),
+        "-ov",
+        "yes",
     )
 
     assert result.exit_code == 0
@@ -1845,25 +973,22 @@ def test_add_subs_success_inserts_track(
 
 
 def test_add_subs_error_invalid_subtitles_file(
-    runner: CliRunner,
+    pymedia: Invoke,
     video_mkv: Path,
     subs_bad: Path,
     tmp_path: Path,
 ) -> None:
     """`add-subs` rechaza ficheros con extensión srt pero contenido inválido."""
-    result = runner.invoke(
-        app,
-        [
-            "add-subs",
-            str(video_mkv),
-            str(subs_bad),
-            "--language",
-            "spa",
-            "-o",
-            str(tmp_path / "with_subs.mkv"),
-            "-ov",
-            "yes",
-        ],
+    result = pymedia(
+        "add-subs",
+        str(video_mkv),
+        str(subs_bad),
+        "--language",
+        "spa",
+        "-o",
+        str(tmp_path / "with_subs.mkv"),
+        "-ov",
+        "yes",
     )
 
     assert result.exit_code != 0
@@ -1873,217 +998,28 @@ def test_add_subs_error_invalid_subtitles_file(
     assert "when processing input" in output
 
 
-def test_add_subs_success_with_title(
-    runner: CliRunner,
-    video_mkv: Path,
-    subs_spa: Path,
-    tmp_path: Path,
-) -> None:
-    """`add-subs --title` añade título a la pista de subtítulos."""
-    output = tmp_path / "with_title.mkv"
-
-    result = runner.invoke(
-        app,
-        [
-            "add-subs",
-            str(video_mkv),
-            str(subs_spa),
-            "--language",
-            "spa",
-            "--title",
-            "Spanish subs",
-            "-o",
-            str(output),
-            "-ov",
-            "yes",
-        ],
-    )
-
-    assert result.exit_code == 0
-    assert stream_tag(output, "subtitle", "title") == "Spanish subs"
-
-
-def test_add_subs_success_with_forced(
-    runner: CliRunner,
-    video_mkv: Path,
-    subs_spa: Path,
-    tmp_path: Path,
-) -> None:
-    """`add-subs --forced` marca la pista como forzada."""
-    output = tmp_path / "with_forced.mkv"
-
-    result = runner.invoke(
-        app,
-        [
-            "add-subs",
-            str(video_mkv),
-            str(subs_spa),
-            "--language",
-            "spa",
-            "--forced",
-            "-o",
-            str(output),
-            "-ov",
-            "yes",
-        ],
-    )
-
-    assert result.exit_code == 0
-    sub_streams = [
-        s for s in ffprobe_streams(output) if s.get("codec_type") == "subtitle"
-    ]
-    assert sub_streams[-1].get("disposition", {}).get("forced") == 1
-
-
-def test_add_subs_success_with_default(
-    runner: CliRunner,
-    video_mkv: Path,
-    subs_spa: Path,
-    tmp_path: Path,
-) -> None:
-    """`add-subs --default` establece la pista como por defecto."""
-    output = tmp_path / "with_default.mkv"
-
-    result = runner.invoke(
-        app,
-        [
-            "add-subs",
-            str(video_mkv),
-            str(subs_spa),
-            "--language",
-            "spa",
-            "--default",
-            "-o",
-            str(output),
-            "-ov",
-            "yes",
-        ],
-    )
-
-    assert result.exit_code == 0
-    sub_streams = [
-        s for s in ffprobe_streams(output) if s.get("codec_type") == "subtitle"
-    ]
-    assert sub_streams[-1].get("disposition", {}).get("default") == 1
-
-
-def test_add_subs_success_with_hearing_impaired(
-    runner: CliRunner,
-    video_mkv: Path,
-    subs_spa: Path,
-    tmp_path: Path,
-) -> None:
-    """`add-subs --hearing-impaired` marca pista para discapacitados auditivos."""
-    output = tmp_path / "with_hi.mkv"
-
-    result = runner.invoke(
-        app,
-        [
-            "add-subs",
-            str(video_mkv),
-            str(subs_spa),
-            "--language",
-            "spa",
-            "--hearing-impaired",
-            "-o",
-            str(output),
-            "-ov",
-            "yes",
-        ],
-    )
-
-    assert result.exit_code == 0
-    sub_streams = [
-        s for s in ffprobe_streams(output) if s.get("codec_type") == "subtitle"
-    ]
-    assert sub_streams[-1].get("disposition", {}).get("hearing_impaired") == 1
-
-
-def test_add_subs_success_with_visual_impaired(
-    runner: CliRunner,
-    video_mkv: Path,
-    subs_spa: Path,
-    tmp_path: Path,
-) -> None:
-    """`add-subs --visual-impaired` marca pista para discapacitados visuales."""
-    output = tmp_path / "with_visual.mkv"
-
-    result = runner.invoke(
-        app,
-        [
-            "add-subs",
-            str(video_mkv),
-            str(subs_spa),
-            "--language",
-            "spa",
-            "--visual-impaired",
-            "-o",
-            str(output),
-            "-ov",
-            "yes",
-        ],
-    )
-
-    assert result.exit_code == 0
-    sub_streams = [
-        s for s in ffprobe_streams(output) if s.get("codec_type") == "subtitle"
-    ]
-    assert sub_streams[-1].get("disposition", {}).get("visual_impaired") == 1
-
-
-def test_add_subs_error_overwrite_never(
-    runner: CliRunner,
-    video_mkv: Path,
-    subs_spa: Path,
-    tmp_path: Path,
-) -> None:
-    """`add-subs -ov never` falla cuando el fichero ya existe."""
-    output = tmp_path / "subs_never.mkv"
-    output.write_bytes(b"existing")
-
-    result = runner.invoke(
-        app,
-        [
-            "add-subs",
-            str(video_mkv),
-            str(subs_spa),
-            "--language",
-            "spa",
-            "-o",
-            str(output),
-            "-ov",
-            "never",
-        ],
-    )
-
-    assert result.exit_code != 0
-
-
 # =============================================================================
 #  delete-subs
 # =============================================================================
 
 
 def test_delete_subs_success_removes_track(
-    runner: CliRunner,
+    pymedia: Invoke,
     video_mkv_subs: Path,
     tmp_path: Path,
 ) -> None:
     """`delete-subs` elimina las pistas indicadas y conserva el resto."""
     output = tmp_path / "fewer_subs.mkv"
 
-    result = runner.invoke(
-        app,
-        [
-            "delete-subs",
-            str(video_mkv_subs),
-            "--tracks",
-            "1",
-            "-o",
-            str(output),
-            "-ov",
-            "yes",
-        ],
+    result = pymedia(
+        "delete-subs",
+        str(video_mkv_subs),
+        "--tracks",
+        "1",
+        "-o",
+        str(output),
+        "-ov",
+        "yes",
     )
 
     assert result.exit_code == 0
@@ -2096,23 +1032,20 @@ def test_delete_subs_success_removes_track(
 
 
 def test_delete_subs_error_without_subtitles(
-    runner: CliRunner,
+    pymedia: Invoke,
     video_mkv: Path,
     tmp_path: Path,
 ) -> None:
     """`delete-subs` avisa cuando el medio no tiene pistas de subtítulos."""
-    result = runner.invoke(
-        app,
-        [
-            "delete-subs",
-            str(video_mkv),
-            "--tracks",
-            "0",
-            "-o",
-            str(tmp_path / "out.mkv"),
-            "-ov",
-            "yes",
-        ],
+    result = pymedia(
+        "delete-subs",
+        str(video_mkv),
+        "--tracks",
+        "0",
+        "-o",
+        str(tmp_path / "out.mkv"),
+        "-ov",
+        "yes",
     )
 
     assert result.exit_code != 0
@@ -2120,55 +1053,26 @@ def test_delete_subs_error_without_subtitles(
 
 
 def test_delete_subs_success_multiple_tracks(
-    runner: CliRunner,
+    pymedia: Invoke,
     video_mkv_subs: Path,
     tmp_path: Path,
 ) -> None:
     """`delete-subs --tracks 0,1` elimina ambas pistas de subtítulos."""
     output = tmp_path / "no_subs.mkv"
 
-    result = runner.invoke(
-        app,
-        [
-            "delete-subs",
-            str(video_mkv_subs),
-            "--tracks",
-            "0,1",
-            "-o",
-            str(output),
-            "-ov",
-            "yes",
-        ],
+    result = pymedia(
+        "delete-subs",
+        str(video_mkv_subs),
+        "--tracks",
+        "0,1",
+        "-o",
+        str(output),
+        "-ov",
+        "yes",
     )
 
     assert result.exit_code == 0
     assert "subtitle" not in stream_types(output)
-
-
-def test_delete_subs_error_overwrite_never(
-    runner: CliRunner,
-    video_mkv_subs: Path,
-    tmp_path: Path,
-) -> None:
-    """`delete-subs -ov never` falla cuando el fichero ya existe."""
-    output = tmp_path / "subs_never.mkv"
-    output.write_bytes(b"existing")
-
-    result = runner.invoke(
-        app,
-        [
-            "delete-subs",
-            str(video_mkv_subs),
-            "--tracks",
-            "0",
-            "-o",
-            str(output),
-            "-ov",
-            "never",
-        ],
-    )
-
-    assert result.exit_code != 0
 
 
 # =============================================================================
@@ -2177,27 +1081,24 @@ def test_delete_subs_error_overwrite_never(
 
 
 def test_edit_subs_success_updates_metadata(
-    runner: CliRunner,
+    pymedia: Invoke,
     video_mkv_subs: Path,
     tmp_path: Path,
 ) -> None:
     """`edit-subs` actualiza el idioma de la pista de subtítulos indicada."""
     output = tmp_path / "edited_subs.mkv"
 
-    result = runner.invoke(
-        app,
-        [
-            "edit-subs",
-            str(video_mkv_subs),
-            "--track",
-            "0",
-            "--language",
-            "fre",
-            "-o",
-            str(output),
-            "-ov",
-            "yes",
-        ],
+    result = pymedia(
+        "edit-subs",
+        str(video_mkv_subs),
+        "--track",
+        "0",
+        "--language",
+        "fre",
+        "-o",
+        str(output),
+        "-ov",
+        "yes",
     )
 
     assert result.exit_code == 0
@@ -2205,219 +1106,26 @@ def test_edit_subs_success_updates_metadata(
 
 
 def test_edit_subs_error_missing_track(
-    runner: CliRunner,
+    pymedia: Invoke,
     video_mkv_subs: Path,
 ) -> None:
     """`edit-subs` exige la opción `--track` para identificar la pista."""
-    result = runner.invoke(
-        app,
-        ["edit-subs", str(video_mkv_subs), "--language", "fre"],
-    )
+    result = pymedia("edit-subs", str(video_mkv_subs), "--language", "fre")
 
     assert result.exit_code != 0
     assert "Missing option '--track'" in result.output
 
 
-def test_edit_subs_success_with_title(
-    runner: CliRunner,
-    video_mkv_subs: Path,
-    tmp_path: Path,
-) -> None:
-    """`edit-subs --title` actualiza el título de la pista."""
-    output = tmp_path / "edited_title.mkv"
-
-    result = runner.invoke(
-        app,
-        [
-            "edit-subs",
-            str(video_mkv_subs),
-            "--track",
-            "0",
-            "--language",
-            "fre",
-            "--title",
-            "French Subs",
-            "-o",
-            str(output),
-            "-ov",
-            "yes",
-        ],
-    )
-
-    assert result.exit_code == 0
-    assert stream_tag(output, "subtitle", "title") == "French Subs"
-
-
-def test_edit_subs_success_with_forced(
-    runner: CliRunner,
-    video_mkv_subs: Path,
-    tmp_path: Path,
-) -> None:
-    """`edit-subs --forced` marca la pista como forzada."""
-    output = tmp_path / "edited_forced.mkv"
-
-    result = runner.invoke(
-        app,
-        [
-            "edit-subs",
-            str(video_mkv_subs),
-            "--track",
-            "0",
-            "--language",
-            "fre",
-            "--forced",
-            "-o",
-            str(output),
-            "-ov",
-            "yes",
-        ],
-    )
-
-    assert result.exit_code == 0
-    assert stream_tag(output, "subtitle", "language") == "fre"
-    sub = next(s for s in ffprobe_streams(output) if s.get("codec_type") == "subtitle")
-    assert sub.get("disposition", {}).get("forced") == 1
-
-
-def test_edit_subs_success_with_default(
-    runner: CliRunner,
-    video_mkv_subs: Path,
-    tmp_path: Path,
-) -> None:
-    """`edit-subs --default` establece la pista como por defecto."""
-    output = tmp_path / "edited_default.mkv"
-
-    result = runner.invoke(
-        app,
-        [
-            "edit-subs",
-            str(video_mkv_subs),
-            "--track",
-            "0",
-            "--language",
-            "fre",
-            "--default",
-            "-o",
-            str(output),
-            "-ov",
-            "yes",
-        ],
-    )
-
-    assert result.exit_code == 0
-    assert stream_tag(output, "subtitle", "language") == "fre"
-    sub = next(s for s in ffprobe_streams(output) if s.get("codec_type") == "subtitle")
-    assert sub.get("disposition", {}).get("default") == 1
-
-
-def test_edit_subs_success_with_hearing_impaired(
-    runner: CliRunner,
-    video_mkv_subs: Path,
-    tmp_path: Path,
-) -> None:
-    """`edit-subs --hearing-impaired` marca pista para discapacitados auditivos."""
-    output = tmp_path / "edited_hi.mkv"
-
-    result = runner.invoke(
-        app,
-        [
-            "edit-subs",
-            str(video_mkv_subs),
-            "--track",
-            "0",
-            "--language",
-            "fre",
-            "--hearing-impaired",
-            "-o",
-            str(output),
-            "-ov",
-            "yes",
-        ],
-    )
-
-    assert result.exit_code == 0
-    assert stream_tag(output, "subtitle", "language") == "fre"
-    sub = next(s for s in ffprobe_streams(output) if s.get("codec_type") == "subtitle")
-    assert sub.get("disposition", {}).get("hearing_impaired") == 1
-
-
-def test_edit_subs_success_with_visual_impaired(
-    runner: CliRunner,
-    video_mkv_subs: Path,
-    tmp_path: Path,
-) -> None:
-    """`edit-subs --visual-impaired` marca pista para discapacitados visuales."""
-    output = tmp_path / "edited_visual.mkv"
-
-    result = runner.invoke(
-        app,
-        [
-            "edit-subs",
-            str(video_mkv_subs),
-            "--track",
-            "0",
-            "--language",
-            "fre",
-            "--visual-impaired",
-            "-o",
-            str(output),
-            "-ov",
-            "yes",
-        ],
-    )
-
-    assert result.exit_code == 0
-    assert stream_tag(output, "subtitle", "language") == "fre"
-    sub = next(s for s in ffprobe_streams(output) if s.get("codec_type") == "subtitle")
-    assert sub.get("disposition", {}).get("visual_impaired") == 1
-
-
 def test_edit_subs_error_missing_metadata(
-    runner: CliRunner,
+    pymedia: Invoke,
     video_mkv_subs: Path,
 ) -> None:
     """`edit-subs` exige al menos una opción de metadatos."""
-    result = runner.invoke(
-        app,
-        [
-            "edit-subs",
-            str(video_mkv_subs),
-            "--track",
-            "0",
-        ],
-    )
+    result = pymedia("edit-subs", str(video_mkv_subs), "--track", "0")
 
     assert result.exit_code != 0
     normalized = " ".join(result.output.split())
     assert "Missing at least one of these options:" in normalized
-
-
-def test_edit_subs_error_overwrite_never(
-    runner: CliRunner,
-    video_mkv_subs: Path,
-    tmp_path: Path,
-) -> None:
-    """`edit-subs -ov never` falla cuando el fichero ya existe."""
-    output = tmp_path / "edited_never.mkv"
-    output.write_bytes(b"existing")
-
-    result = runner.invoke(
-        app,
-        [
-            "edit-subs",
-            str(video_mkv_subs),
-            "--track",
-            "0",
-            "--language",
-            "fre",
-            "-o",
-            str(output),
-            "-ov",
-            "never",
-        ],
-    )
-
-    assert result.exit_code != 0
 
 
 # =============================================================================
@@ -2426,25 +1134,22 @@ def test_edit_subs_error_overwrite_never(
 
 
 def test_extract_subs_success_extracts_track(
-    runner: CliRunner,
+    pymedia: Invoke,
     video_mkv_subs: Path,
     tmp_path: Path,
 ) -> None:
     """`extract-subs` vuelca la pista indicada a un fichero srt."""
     output = tmp_path / "subs.srt"
 
-    result = runner.invoke(
-        app,
-        [
-            "extract-subs",
-            str(video_mkv_subs),
-            "--tracks",
-            "0",
-            "-o",
-            str(output),
-            "-ov",
-            "yes",
-        ],
+    result = pymedia(
+        "extract-subs",
+        str(video_mkv_subs),
+        "--tracks",
+        "0",
+        "-o",
+        str(output),
+        "-ov",
+        "yes",
     )
 
     assert result.exit_code == 0
@@ -2454,23 +1159,20 @@ def test_extract_subs_success_extracts_track(
 
 
 def test_extract_subs_error_incompatible_container(
-    runner: CliRunner,
+    pymedia: Invoke,
     video_mkv_subs: Path,
     tmp_path: Path,
 ) -> None:
     """`extract-subs` rechaza contenedores no compatibles con el códec srt."""
-    result = runner.invoke(
-        app,
-        [
-            "extract-subs",
-            str(video_mkv_subs),
-            "--tracks",
-            "0",
-            "-o",
-            str(tmp_path / "subs.ass"),
-            "-ov",
-            "yes",
-        ],
+    result = pymedia(
+        "extract-subs",
+        str(video_mkv_subs),
+        "--tracks",
+        "0",
+        "-o",
+        str(tmp_path / "subs.ass"),
+        "-ov",
+        "yes",
     )
 
     assert result.exit_code != 0
@@ -2478,56 +1180,27 @@ def test_extract_subs_error_incompatible_container(
 
 
 def test_extract_subs_success_multiple_tracks(
-    runner: CliRunner,
+    pymedia: Invoke,
     video_mkv_subs: Path,
     tmp_path: Path,
 ) -> None:
     """`extract-subs --tracks 0,1` extrae ambas pistas de subtítulos."""
     output = tmp_path / "subs.srt"
 
-    result = runner.invoke(
-        app,
-        [
-            "extract-subs",
-            str(video_mkv_subs),
-            "--tracks",
-            "0,1",
-            "-o",
-            str(output),
-            "-ov",
-            "yes",
-        ],
+    result = pymedia(
+        "extract-subs",
+        str(video_mkv_subs),
+        "--tracks",
+        "0,1",
+        "-o",
+        str(output),
+        "-ov",
+        "yes",
     )
 
     assert result.exit_code == 0
     extracted = list(tmp_path.glob("subs_subtitles_track_*.srt"))
     assert len(extracted) == 2
-
-
-def test_extract_subs_error_overwrite_never(
-    runner: CliRunner,
-    video_mkv_subs: Path,
-    tmp_path: Path,
-) -> None:
-    """`extract-subs -ov never` falla cuando el fichero ya existe."""
-    output = tmp_path / "subs.srt"
-    output.write_text("existing", encoding="utf-8")
-
-    result = runner.invoke(
-        app,
-        [
-            "extract-subs",
-            str(video_mkv_subs),
-            "--tracks",
-            "0",
-            "-o",
-            str(output),
-            "-ov",
-            "never",
-        ],
-    )
-
-    assert result.exit_code != 0
 
 
 # =============================================================================
@@ -2536,27 +1209,24 @@ def test_extract_subs_error_overwrite_never(
 
 
 def test_animated_success_generates_gif(
-    runner: CliRunner,
+    pymedia: Invoke,
     video_mp4_a: Path,
     tmp_path: Path,
 ) -> None:
     """`animated --end` genera un gif limitado al rango temporal indicado."""
     output = tmp_path / "anim.gif"
 
-    result = runner.invoke(
-        app,
-        [
-            "animated",
-            str(video_mp4_a),
-            "-o",
-            str(output),
-            "-ov",
-            "yes",
-            "--fps",
-            "10",
-            "--end",
-            "00:00:01",
-        ],
+    result = pymedia(
+        "animated",
+        str(video_mp4_a),
+        "-o",
+        str(output),
+        "-ov",
+        "yes",
+        "--fps",
+        "10",
+        "--end",
+        "00:00:01",
     )
 
     assert result.exit_code == 0
@@ -2565,14 +1235,13 @@ def test_animated_success_generates_gif(
 
 
 def test_animated_error_invalid_container(
-    runner: CliRunner,
+    pymedia: Invoke,
     video_mp4_a: Path,
     tmp_path: Path,
 ) -> None:
     """`animated` rechaza salidas que no sean imágenes animadas."""
-    result = runner.invoke(
-        app,
-        ["animated", str(video_mp4_a), "-o", str(tmp_path / "anim.mp4"), "-ov", "yes"],
+    result = pymedia(
+        "animated", str(video_mp4_a), "-o", str(tmp_path / "anim.mp4"), "-ov", "yes"
     )
 
     assert result.exit_code != 0
@@ -2580,27 +1249,24 @@ def test_animated_error_invalid_container(
 
 
 def test_animated_success_with_range(
-    runner: CliRunner,
+    pymedia: Invoke,
     video_mp4_a: Path,
     tmp_path: Path,
 ) -> None:
     """`animated --start --end` genera gif limitado al rango."""
     output = tmp_path / "anim_range.gif"
 
-    result = runner.invoke(
-        app,
-        [
-            "animated",
-            str(video_mp4_a),
-            "-o",
-            str(output),
-            "-ov",
-            "yes",
-            "--start",
-            "00:00:00",
-            "--end",
-            "00:00:01",
-        ],
+    result = pymedia(
+        "animated",
+        str(video_mp4_a),
+        "-o",
+        str(output),
+        "-ov",
+        "yes",
+        "--start",
+        "00:00:00",
+        "--end",
+        "00:00:01",
     )
 
     assert result.exit_code == 0
@@ -2608,25 +1274,15 @@ def test_animated_success_with_range(
 
 
 def test_animated_success_with_fps_15(
-    runner: CliRunner,
+    pymedia: Invoke,
     video_mp4_a: Path,
     tmp_path: Path,
 ) -> None:
     """`animated --fps 15` genera gif a 15 fps."""
     output = tmp_path / "anim_fps15.gif"
 
-    result = runner.invoke(
-        app,
-        [
-            "animated",
-            str(video_mp4_a),
-            "-o",
-            str(output),
-            "-ov",
-            "yes",
-            "--fps",
-            "15",
-        ],
+    result = pymedia(
+        "animated", str(video_mp4_a), "-o", str(output), "-ov", "yes", "--fps", "15"
     )
 
     assert result.exit_code == 0
@@ -2634,316 +1290,29 @@ def test_animated_success_with_fps_15(
 
 
 def test_animated_error_fps_out_of_range(
-    runner: CliRunner,
+    pymedia: Invoke,
     video_mp4_a: Path,
     tmp_path: Path,
 ) -> None:
     """`animated --fps 3` rechaza fps fuera del rango."""
-    result = runner.invoke(
-        app,
-        ["animated", str(video_mp4_a), "-o", str(tmp_path / "anim.gif"), "--fps", "3"],
+    result = pymedia(
+        "animated", str(video_mp4_a), "-o", str(tmp_path / "anim.gif"), "--fps", "3"
     )
 
     assert result.exit_code != 0
     assert "Invalid value for '--fps'" in result.output
 
 
-def test_animated_success_with_crop(
-    runner: CliRunner,
-    video_mp4_a: Path,
-    tmp_path: Path,
-) -> None:
-    """`animated --crop` aplica recorte."""
-    output = tmp_path / "anim_crop.gif"
-
-    result = runner.invoke(
-        app,
-        [
-            "animated",
-            str(video_mp4_a),
-            "-o",
-            str(output),
-            "-ov",
-            "yes",
-            "--crop",
-            "80,45,0,0",
-        ],
-    )
-
-    assert result.exit_code == 0
-    assert output.exists()
-
-
-def test_animated_success_with_rotate(
-    runner: CliRunner,
-    video_mp4_a: Path,
-    tmp_path: Path,
-) -> None:
-    """`animated --rotate` rota la imagen."""
-    output = tmp_path / "anim_rotate.gif"
-
-    result = runner.invoke(
-        app,
-        [
-            "animated",
-            str(video_mp4_a),
-            "-o",
-            str(output),
-            "-ov",
-            "yes",
-            "--rotate",
-            "90",
-        ],
-    )
-
-    assert result.exit_code == 0
-    assert output.exists()
-
-
-def test_animated_success_with_size(
-    runner: CliRunner,
-    video_mp4_a: Path,
-    tmp_path: Path,
-) -> None:
-    """`animated --size` cambia la resolución."""
-    output = tmp_path / "anim_size.gif"
-
-    result = runner.invoke(
-        app,
-        [
-            "animated",
-            str(video_mp4_a),
-            "-o",
-            str(output),
-            "-ov",
-            "yes",
-            "--size",
-            "320x180",
-        ],
-    )
-
-    assert result.exit_code == 0
-    assert output.exists()
-
-
-def test_animated_success_with_mode_stretch(
-    runner: CliRunner,
-    video_mp4_a: Path,
-    tmp_path: Path,
-) -> None:
-    """`animated --mode stretch` escala modificando aspect ratio."""
-    output = tmp_path / "anim_mode.gif"
-
-    result = runner.invoke(
-        app,
-        [
-            "animated",
-            str(video_mp4_a),
-            "-o",
-            str(output),
-            "-ov",
-            "yes",
-            "--mode",
-            "stretch",
-        ],
-    )
-
-    assert result.exit_code == 0
-    assert output.exists()
-
-
-def test_animated_success_with_upscale(
-    runner: CliRunner,
-    video_mp4_a: Path,
-    tmp_path: Path,
-) -> None:
-    """`animated --upscale` permite aumentar dimensiones."""
-    output = tmp_path / "anim_upscale.gif"
-
-    result = runner.invoke(
-        app,
-        [
-            "animated",
-            str(video_mp4_a),
-            "-o",
-            str(output),
-            "-ov",
-            "yes",
-            "--upscale",
-            "--size",
-            "640x360",
-        ],
-    )
-
-    assert result.exit_code == 0
-    assert output.exists()
-
-
-def test_animated_success_with_hflip(
-    runner: CliRunner,
-    video_mp4_a: Path,
-    tmp_path: Path,
-) -> None:
-    """`animated --hflip` invierte horizontalmente."""
-    output = tmp_path / "anim_hflip.gif"
-
-    result = runner.invoke(
-        app,
-        [
-            "animated",
-            str(video_mp4_a),
-            "-o",
-            str(output),
-            "-ov",
-            "yes",
-            "--hflip",
-        ],
-    )
-
-    assert result.exit_code == 0
-    assert output.exists()
-
-
-def test_animated_success_with_vflip(
-    runner: CliRunner,
-    video_mp4_a: Path,
-    tmp_path: Path,
-) -> None:
-    """`animated --vflip` invierte verticalmente."""
-    output = tmp_path / "anim_vflip.gif"
-
-    result = runner.invoke(
-        app,
-        [
-            "animated",
-            str(video_mp4_a),
-            "-o",
-            str(output),
-            "-ov",
-            "yes",
-            "--vflip",
-        ],
-    )
-
-    assert result.exit_code == 0
-    assert output.exists()
-
-
-def test_animated_error_overwrite_never(
-    runner: CliRunner,
-    video_mp4_a: Path,
-    tmp_path: Path,
-) -> None:
-    """`animated -ov never` falla cuando el fichero ya existe."""
-    output = tmp_path / "anim_never.gif"
-    output.write_bytes(b"existing")
-
-    result = runner.invoke(
-        app,
-        ["animated", str(video_mp4_a), "-o", str(output), "-ov", "never"],
-    )
-
-    assert result.exit_code != 0
-
-
-def test_animated_error_crop_bigger_than_video_dimensions(
-    runner: CliRunner,
-    video_mp4_a: Path,
-    tmp_path: Path,
-) -> None:
-    """`animated --crop` rechaza área mayor que las dimensiones del vídeo."""
-    output = tmp_path / "anim_crop.gif"
-
-    result = runner.invoke(
-        app,
-        [
-            "animated",
-            str(video_mp4_a),
-            "-o",
-            str(output),
-            "-ov",
-            "yes",
-            "--crop",
-            "160,90,10,10",
-        ],
-    )
-
-    assert result.exit_code != 0
-    assert "Invalid crop area" in result.output
-
-
-def test_animated_error_oversize_without_upscale(
-    runner: CliRunner,
-    video_mp4_a: Path,
-    tmp_path: Path,
-) -> None:
-    """`animated --size` mayor que el vídeo sin `--upscale` ignora el escalado."""
-    output = tmp_path / "anim_oversize.gif"
-
-    result = runner.invoke(
-        app,
-        [
-            "animated",
-            str(video_mp4_a),
-            "-o",
-            str(output),
-            "-ov",
-            "yes",
-            "--size",
-            "320x180",
-        ],
-    )
-
-    assert result.exit_code == 0
-    assert "Ignored scale" in result.output
-
-
-def test_animated_error_timestamp_bigger_than_video_duration(
-    runner: CliRunner,
-    video_mp4_a: Path,
-    tmp_path: Path,
-) -> None:
-    """`animated --start` rechaza marca de tiempo mayor que la duración."""
-    output = tmp_path / "anim_timestamp.gif"
-
-    result = runner.invoke(
-        app,
-        [
-            "animated",
-            str(video_mp4_a),
-            "-o",
-            str(output),
-            "-ov",
-            "yes",
-            "--start",
-            "00:00:03",
-        ],
-    )
-
-    assert result.exit_code != 0
-    assert "exceeds video duration" in result.output
-
-
 def test_animated_success_generates_apng(
-    runner: CliRunner,
+    pymedia: Invoke,
     video_mp4_a: Path,
     tmp_path: Path,
 ) -> None:
     """`animated -o output.apng` genera una imagen APNG."""
     output = tmp_path / "anim.apng"
 
-    result = runner.invoke(
-        app,
-        [
-            "animated",
-            str(video_mp4_a),
-            "-o",
-            str(output),
-            "-ov",
-            "yes",
-            "--fps",
-            "10",
-        ],
+    result = pymedia(
+        "animated", str(video_mp4_a), "-o", str(output), "-ov", "yes", "--fps", "10"
     )
 
     assert result.exit_code == 0
@@ -2952,25 +1321,15 @@ def test_animated_success_generates_apng(
 
 
 def test_animated_success_generates_webp(
-    runner: CliRunner,
+    pymedia: Invoke,
     video_mp4_a: Path,
     tmp_path: Path,
 ) -> None:
     """`animated -o output.webp` genera una imagen WebP animada."""
     output = tmp_path / "anim.webp"
 
-    result = runner.invoke(
-        app,
-        [
-            "animated",
-            str(video_mp4_a),
-            "-o",
-            str(output),
-            "-ov",
-            "yes",
-            "--fps",
-            "10",
-        ],
+    result = pymedia(
+        "animated", str(video_mp4_a), "-o", str(output), "-ov", "yes", "--fps", "10"
     )
 
     assert result.exit_code == 0
@@ -2983,25 +1342,15 @@ def test_animated_success_generates_webp(
 
 
 def test_frames_success_captures_at_timestamp(
-    runner: CliRunner,
+    pymedia: Invoke,
     video_mp4_a: Path,
     tmp_path: Path,
 ) -> None:
     """`frames --at` captura una miniatura en cada marca indicada."""
     output = tmp_path / "thumb.jpg"
 
-    result = runner.invoke(
-        app,
-        [
-            "frames",
-            str(video_mp4_a),
-            "--at",
-            "00:00:01",
-            "-o",
-            str(output),
-            "-ov",
-            "yes",
-        ],
+    result = pymedia(
+        "frames", str(video_mp4_a), "--at", "00:00:01", "-o", str(output), "-ov", "yes"
     )
 
     assert result.exit_code == 0
@@ -3009,317 +1358,35 @@ def test_frames_success_captures_at_timestamp(
 
 
 def test_frames_error_invalid_timestamp(
-    runner: CliRunner,
+    pymedia: Invoke,
     video_mp4_a: Path,
 ) -> None:
     """`frames` rechaza marcas de tiempo con formato distinto de hh:mm:ss."""
-    result = runner.invoke(app, ["frames", str(video_mp4_a), "--at", "zz:zz"])
+    result = pymedia("frames", str(video_mp4_a), "--at", "zz:zz")
 
     assert result.exit_code != 0
     assert "Invalid timestamp format" in result.output
 
 
-def test_frames_success_with_crop(
-    runner: CliRunner,
-    video_mp4_a: Path,
-    tmp_path: Path,
+def test_frames_success_multiple_timestamps(
+    pymedia: Invoke, video_mp4_a: Path, tmp_path: Path
 ) -> None:
-    """`frames --crop` aplica recorte a la miniatura."""
-    output = tmp_path / "thumb_crop.jpg"
+    """`frames --at a,b` captura un fotograma por cada instante."""
+    output = tmp_path / "multi.jpg"
 
-    result = runner.invoke(
-        app,
-        [
-            "frames",
-            str(video_mp4_a),
-            "--at",
-            "00:00:01",
-            "-o",
-            str(output),
-            "-ov",
-            "yes",
-            "--crop",
-            "80,45,0,0",
-        ],
+    result = pymedia(
+        "frames",
+        str(video_mp4_a),
+        "--at",
+        "00:00:00,00:00:01",
+        "-o",
+        str(output),
+        "-ov",
+        "yes",
     )
 
     assert result.exit_code == 0
-    assert len(list(tmp_path.glob("thumb_crop_*.jpg"))) == 1
-
-
-def test_frames_success_with_rotate(
-    runner: CliRunner,
-    video_mp4_a: Path,
-    tmp_path: Path,
-) -> None:
-    """`frames --rotate` rota la miniatura."""
-    output = tmp_path / "thumb_rotate.jpg"
-
-    result = runner.invoke(
-        app,
-        [
-            "frames",
-            str(video_mp4_a),
-            "--at",
-            "00:00:01",
-            "-o",
-            str(output),
-            "-ov",
-            "yes",
-            "--rotate",
-            "90",
-        ],
-    )
-
-    assert result.exit_code == 0
-    assert len(list(tmp_path.glob("thumb_rotate_*.jpg"))) == 1
-
-
-def test_frames_success_with_size(
-    runner: CliRunner,
-    video_mp4_a: Path,
-    tmp_path: Path,
-) -> None:
-    """`frames --size` cambia la resolución de la miniatura."""
-    output = tmp_path / "thumb_size.jpg"
-
-    result = runner.invoke(
-        app,
-        [
-            "frames",
-            str(video_mp4_a),
-            "--at",
-            "00:00:01",
-            "-o",
-            str(output),
-            "-ov",
-            "yes",
-            "--size",
-            "128x72",
-        ],
-    )
-
-    assert result.exit_code == 0
-    assert len(list(tmp_path.glob("thumb_size_*.jpg"))) == 1
-
-
-def test_frames_success_with_mode_stretch(
-    runner: CliRunner,
-    video_mp4_a: Path,
-    tmp_path: Path,
-) -> None:
-    """`frames --mode stretch` escala modificando aspect ratio."""
-    output = tmp_path / "thumb_mode.jpg"
-
-    result = runner.invoke(
-        app,
-        [
-            "frames",
-            str(video_mp4_a),
-            "--at",
-            "00:00:01",
-            "-o",
-            str(output),
-            "-ov",
-            "yes",
-            "--mode",
-            "stretch",
-        ],
-    )
-
-    assert result.exit_code == 0
-    assert len(list(tmp_path.glob("thumb_mode_*.jpg"))) == 1
-
-
-def test_frames_success_with_upscale(
-    runner: CliRunner,
-    video_mp4_a: Path,
-    tmp_path: Path,
-) -> None:
-    """`frames --upscale` permite aumentar dimensiones."""
-    output = tmp_path / "thumb_upscale.jpg"
-
-    result = runner.invoke(
-        app,
-        [
-            "frames",
-            str(video_mp4_a),
-            "--at",
-            "00:00:01",
-            "-o",
-            str(output),
-            "-ov",
-            "yes",
-            "--upscale",
-            "--size",
-            "320x180",
-        ],
-    )
-
-    assert result.exit_code == 0
-    assert len(list(tmp_path.glob("thumb_upscale_*.jpg"))) == 1
-
-
-def test_frames_success_with_hflip(
-    runner: CliRunner,
-    video_mp4_a: Path,
-    tmp_path: Path,
-) -> None:
-    """`frames --hflip` invierte horizontalmente."""
-    output = tmp_path / "thumb_hflip.jpg"
-
-    result = runner.invoke(
-        app,
-        [
-            "frames",
-            str(video_mp4_a),
-            "--at",
-            "00:00:01",
-            "-o",
-            str(output),
-            "-ov",
-            "yes",
-            "--hflip",
-        ],
-    )
-
-    assert result.exit_code == 0
-    assert len(list(tmp_path.glob("thumb_hflip_*.jpg"))) == 1
-
-
-def test_frames_success_with_vflip(
-    runner: CliRunner,
-    video_mp4_a: Path,
-    tmp_path: Path,
-) -> None:
-    """`frames --vflip` invierte verticalmente."""
-    output = tmp_path / "thumb_vflip.jpg"
-
-    result = runner.invoke(
-        app,
-        [
-            "frames",
-            str(video_mp4_a),
-            "--at",
-            "00:00:01",
-            "-o",
-            str(output),
-            "-ov",
-            "yes",
-            "--vflip",
-        ],
-    )
-
-    assert result.exit_code == 0
-    assert len(list(tmp_path.glob("thumb_vflip_*.jpg"))) == 1
-
-
-def test_frames_error_overwrite_never(
-    runner: CliRunner,
-    video_mp4_a: Path,
-    tmp_path: Path,
-) -> None:
-    """`frames -ov never` falla cuando el fichero ya existe."""
-    output = tmp_path / "thumb_never.jpg"
-    output.write_bytes(b"existing")
-
-    result = runner.invoke(
-        app,
-        [
-            "frames",
-            str(video_mp4_a),
-            "--at",
-            "00:00:01",
-            "-o",
-            str(output),
-            "-ov",
-            "never",
-        ],
-    )
-
-    assert result.exit_code != 0
-
-
-def test_frames_error_crop_bigger_than_video_dimensions(
-    runner: CliRunner,
-    video_mp4_a: Path,
-    tmp_path: Path,
-) -> None:
-    """`frames --crop` rechaza área mayor que las dimensiones del vídeo."""
-    output = tmp_path / "frames_crop.jpg"
-
-    result = runner.invoke(
-        app,
-        [
-            "frames",
-            str(video_mp4_a),
-            "--at",
-            "00:00:01",
-            "-o",
-            str(output),
-            "-ov",
-            "yes",
-            "--crop",
-            "160,90,10,10",
-        ],
-    )
-
-    assert result.exit_code != 0
-    assert "Invalid crop area" in result.output
-
-
-def test_frames_error_oversize_without_upscale(
-    runner: CliRunner,
-    video_mp4_a: Path,
-    tmp_path: Path,
-) -> None:
-    """`frames --size` mayor que el vídeo sin `--upscale` ignora el escalado."""
-    output = tmp_path / "frames_oversize.jpg"
-
-    result = runner.invoke(
-        app,
-        [
-            "frames",
-            str(video_mp4_a),
-            "--at",
-            "00:00:01",
-            "-o",
-            str(output),
-            "-ov",
-            "yes",
-            "--size",
-            "320x180",
-        ],
-    )
-
-    assert result.exit_code == 0
-    assert "Ignored scale" in result.output
-
-
-def test_frames_error_timestamp_bigger_than_video_duration(
-    runner: CliRunner,
-    video_mp4_a: Path,
-    tmp_path: Path,
-) -> None:
-    """`frames --at` rechaza marca de tiempo mayor que la duración."""
-    output = tmp_path / "frames_timestamp.jpg"
-
-    result = runner.invoke(
-        app,
-        [
-            "frames",
-            str(video_mp4_a),
-            "--at",
-            "00:00:03",
-            "-o",
-            str(output),
-            "-ov",
-            "yes",
-        ],
-    )
-
-    assert result.exit_code != 0
-    assert "exceeds video duration" in result.output
+    assert len(list(tmp_path.glob("multi_*.jpg"))) == 2
 
 
 # =============================================================================
@@ -3328,16 +1395,15 @@ def test_frames_error_timestamp_bigger_than_video_duration(
 
 
 def test_interval_success_generates_series(
-    runner: CliRunner,
+    pymedia: Invoke,
     video_mp4_a: Path,
     tmp_path: Path,
 ) -> None:
     """`interval --every` genera miniaturas periódicas numeradas."""
     output = tmp_path / "periodic.jpg"
 
-    result = runner.invoke(
-        app,
-        ["interval", str(video_mp4_a), "--every", "1", "-o", str(output), "-ov", "yes"],
+    result = pymedia(
+        "interval", str(video_mp4_a), "--every", "1", "-o", str(output), "-ov", "yes"
     )
 
     assert result.exit_code == 0
@@ -3345,29 +1411,26 @@ def test_interval_success_generates_series(
 
 
 def test_interval_success_with_range(
-    runner: CliRunner,
+    pymedia: Invoke,
     video_mp4_a: Path,
     tmp_path: Path,
 ) -> None:
     """`interval --start --end` genera miniaturas en el rango indicado."""
     output = tmp_path / "periodic_range.jpg"
 
-    result = runner.invoke(
-        app,
-        [
-            "interval",
-            str(video_mp4_a),
-            "--every",
-            "1",
-            "-o",
-            str(output),
-            "-ov",
-            "yes",
-            "--start",
-            "00:00:00",
-            "--end",
-            "00:00:01",
-        ],
+    result = pymedia(
+        "interval",
+        str(video_mp4_a),
+        "--every",
+        "1",
+        "-o",
+        str(output),
+        "-ov",
+        "yes",
+        "--start",
+        "00:00:00",
+        "--end",
+        "00:00:01",
     )
 
     assert result.exit_code == 0
@@ -3375,323 +1438,17 @@ def test_interval_success_with_range(
 
 
 def test_interval_error_every_too_small(
-    runner: CliRunner,
+    pymedia: Invoke,
     video_mp4_a: Path,
     tmp_path: Path,
 ) -> None:
     """`interval --every 0` rechaza periodo menor a 1 segundo."""
-    result = runner.invoke(
-        app,
-        ["interval", str(video_mp4_a), "--every", "0", "-o", str(tmp_path / "p.jpg")],
+    result = pymedia(
+        "interval", str(video_mp4_a), "--every", "0", "-o", str(tmp_path / "p.jpg")
     )
 
     assert result.exit_code != 0
     assert "Interval must be at least 1 second" in result.output
-
-
-def test_interval_success_with_crop(
-    runner: CliRunner,
-    video_mp4_a: Path,
-    tmp_path: Path,
-) -> None:
-    """`interval --crop` aplica recorte."""
-    output = tmp_path / "periodic_crop.jpg"
-
-    result = runner.invoke(
-        app,
-        [
-            "interval",
-            str(video_mp4_a),
-            "--every",
-            "1",
-            "-o",
-            str(output),
-            "-ov",
-            "yes",
-            "--crop",
-            "80,45,0,0",
-        ],
-    )
-
-    assert result.exit_code == 0
-    assert len(list(tmp_path.glob("periodic_crop_*.jpg"))) >= 1
-
-
-def test_interval_success_with_rotate(
-    runner: CliRunner,
-    video_mp4_a: Path,
-    tmp_path: Path,
-) -> None:
-    """`interval --rotate` rota las miniaturas."""
-    output = tmp_path / "periodic_rotate.jpg"
-
-    result = runner.invoke(
-        app,
-        [
-            "interval",
-            str(video_mp4_a),
-            "--every",
-            "1",
-            "-o",
-            str(output),
-            "-ov",
-            "yes",
-            "--rotate",
-            "90",
-        ],
-    )
-
-    assert result.exit_code == 0
-    assert len(list(tmp_path.glob("periodic_rotate_*.jpg"))) >= 1
-
-
-def test_interval_success_with_size(
-    runner: CliRunner,
-    video_mp4_a: Path,
-    tmp_path: Path,
-) -> None:
-    """`interval --size` cambia la resolución."""
-    output = tmp_path / "periodic_size.jpg"
-
-    result = runner.invoke(
-        app,
-        [
-            "interval",
-            str(video_mp4_a),
-            "--every",
-            "1",
-            "-o",
-            str(output),
-            "-ov",
-            "yes",
-            "--size",
-            "128x72",
-        ],
-    )
-
-    assert result.exit_code == 0
-    assert len(list(tmp_path.glob("periodic_size_*.jpg"))) >= 1
-
-
-def test_interval_success_with_mode_stretch(
-    runner: CliRunner,
-    video_mp4_a: Path,
-    tmp_path: Path,
-) -> None:
-    """`interval --mode stretch` escala modificando aspect ratio."""
-    output = tmp_path / "periodic_mode.jpg"
-
-    result = runner.invoke(
-        app,
-        [
-            "interval",
-            str(video_mp4_a),
-            "--every",
-            "1",
-            "-o",
-            str(output),
-            "-ov",
-            "yes",
-            "--mode",
-            "stretch",
-        ],
-    )
-
-    assert result.exit_code == 0
-    assert len(list(tmp_path.glob("periodic_mode_*.jpg"))) >= 1
-
-
-def test_interval_success_with_upscale(
-    runner: CliRunner,
-    video_mp4_a: Path,
-    tmp_path: Path,
-) -> None:
-    """`interval --upscale` permite aumentar dimensiones."""
-    output = tmp_path / "periodic_upscale.jpg"
-
-    result = runner.invoke(
-        app,
-        [
-            "interval",
-            str(video_mp4_a),
-            "--every",
-            "1",
-            "-o",
-            str(output),
-            "-ov",
-            "yes",
-            "--upscale",
-            "--size",
-            "320x180",
-        ],
-    )
-
-    assert result.exit_code == 0
-    assert len(list(tmp_path.glob("periodic_upscale_*.jpg"))) >= 1
-
-
-def test_interval_success_with_hflip(
-    runner: CliRunner,
-    video_mp4_a: Path,
-    tmp_path: Path,
-) -> None:
-    """`interval --hflip` invierte horizontalmente."""
-    output = tmp_path / "periodic_hflip.jpg"
-
-    result = runner.invoke(
-        app,
-        [
-            "interval",
-            str(video_mp4_a),
-            "--every",
-            "1",
-            "-o",
-            str(output),
-            "-ov",
-            "yes",
-            "--hflip",
-        ],
-    )
-
-    assert result.exit_code == 0
-    assert len(list(tmp_path.glob("periodic_hflip_*.jpg"))) >= 1
-
-
-def test_interval_success_with_vflip(
-    runner: CliRunner,
-    video_mp4_a: Path,
-    tmp_path: Path,
-) -> None:
-    """`interval --vflip` invierte verticalmente."""
-    output = tmp_path / "periodic_vflip.jpg"
-
-    result = runner.invoke(
-        app,
-        [
-            "interval",
-            str(video_mp4_a),
-            "--every",
-            "1",
-            "-o",
-            str(output),
-            "-ov",
-            "yes",
-            "--vflip",
-        ],
-    )
-
-    assert result.exit_code == 0
-    assert len(list(tmp_path.glob("periodic_vflip_*.jpg"))) >= 1
-
-
-def test_interval_error_overwrite_never(
-    runner: CliRunner,
-    video_mp4_a: Path,
-    tmp_path: Path,
-) -> None:
-    """`interval -ov never` falla cuando el fichero ya existe."""
-    output = tmp_path / "periodic_never.jpg"
-    output.write_bytes(b"existing")
-
-    result = runner.invoke(
-        app,
-        [
-            "interval",
-            str(video_mp4_a),
-            "--every",
-            "1",
-            "-o",
-            str(output),
-            "-ov",
-            "never",
-        ],
-    )
-
-    assert result.exit_code != 0
-
-
-def test_interval_error_crop_bigger_than_video_dimensions(
-    runner: CliRunner,
-    video_mp4_a: Path,
-    tmp_path: Path,
-) -> None:
-    """`interval --crop` rechaza área mayor que las dimensiones del vídeo."""
-    output = tmp_path / "periodic_crop.jpg"
-
-    result = runner.invoke(
-        app,
-        [
-            "interval",
-            str(video_mp4_a),
-            "--every",
-            "1",
-            "-o",
-            str(output),
-            "-ov",
-            "yes",
-            "--crop",
-            "160,90,10,10",
-        ],
-    )
-
-    assert result.exit_code != 0
-    assert "Invalid crop area" in result.output
-
-
-def test_interval_error_oversize_without_upscale(
-    runner: CliRunner,
-    video_mp4_a: Path,
-    tmp_path: Path,
-) -> None:
-    """`interval --size` mayor que el vídeo sin `--upscale` ignora el escalado."""
-    output = tmp_path / "periodic_oversize.jpg"
-
-    result = runner.invoke(
-        app,
-        [
-            "interval",
-            str(video_mp4_a),
-            "--every",
-            "1",
-            "-o",
-            str(output),
-            "-ov",
-            "yes",
-            "--size",
-            "320x180",
-        ],
-    )
-
-    assert result.exit_code == 0
-    assert "Ignored scale" in result.output
-
-
-def test_interval_error_timestamp_bigger_than_video_duration(
-    runner: CliRunner,
-    video_mp4_a: Path,
-    tmp_path: Path,
-) -> None:
-    """`interval --start` rechaza marca de tiempo mayor que la duración."""
-    output = tmp_path / "periodic_timestamp.jpg"
-
-    result = runner.invoke(
-        app,
-        [
-            "interval",
-            str(video_mp4_a),
-            "--every",
-            "1",
-            "-o",
-            str(output),
-            "-ov",
-            "yes",
-            "--start",
-            "00:00:03",
-        ],
-    )
-
-    assert result.exit_code != 0
-    assert "exceeds video duration" in result.output
 
 
 # =============================================================================
@@ -3700,25 +1457,15 @@ def test_interval_error_timestamp_bigger_than_video_duration(
 
 
 def test_scene_success_detects_scene_changes(
-    runner: CliRunner,
+    pymedia: Invoke,
     video_scenes: Path,
     tmp_path: Path,
 ) -> None:
     """`scene --scene` captura una miniatura en cada corte detectado."""
     output = tmp_path / "scene.jpg"
 
-    result = runner.invoke(
-        app,
-        [
-            "scene",
-            str(video_scenes),
-            "--scene",
-            "0.3",
-            "-o",
-            str(output),
-            "-ov",
-            "yes",
-        ],
+    result = pymedia(
+        "scene", str(video_scenes), "--scene", "0.3", "-o", str(output), "-ov", "yes"
     )
 
     assert result.exit_code == 0
@@ -3726,318 +1473,39 @@ def test_scene_success_detects_scene_changes(
 
 
 def test_scene_error_threshold_out_of_range(
-    runner: CliRunner,
+    pymedia: Invoke,
     video_scenes: Path,
 ) -> None:
     """`scene` valida que el umbral esté en el rango permitido por Typer."""
-    result = runner.invoke(app, ["scene", str(video_scenes), "--scene", "5"])
+    result = pymedia("scene", str(video_scenes), "--scene", "5")
 
     assert result.exit_code != 0
     assert "Invalid value for '--scene'" in result.output
 
 
 def test_scene_success_with_range(
-    runner: CliRunner,
+    pymedia: Invoke,
     video_scenes: Path,
     tmp_path: Path,
 ) -> None:
     """`scene --start --end` captura en el rango indicado."""
     output = tmp_path / "scene_range.jpg"
 
-    result = runner.invoke(
-        app,
-        [
-            "scene",
-            str(video_scenes),
-            "-o",
-            str(output),
-            "-ov",
-            "yes",
-            "--start",
-            "00:00:00",
-            "--end",
-            "00:00:02",
-        ],
+    result = pymedia(
+        "scene",
+        str(video_scenes),
+        "-o",
+        str(output),
+        "-ov",
+        "yes",
+        "--start",
+        "00:00:00",
+        "--end",
+        "00:00:02",
     )
 
     assert result.exit_code == 0
     assert len(list(tmp_path.glob("scene_range_*.jpg"))) >= 1
-
-
-def test_scene_success_with_crop(
-    runner: CliRunner,
-    video_scenes: Path,
-    tmp_path: Path,
-) -> None:
-    """`scene --crop` aplica recorte."""
-    output = tmp_path / "scene_crop.jpg"
-
-    result = runner.invoke(
-        app,
-        [
-            "scene",
-            str(video_scenes),
-            "-o",
-            str(output),
-            "-ov",
-            "yes",
-            "--crop",
-            "80,45,0,0",
-        ],
-    )
-
-    assert result.exit_code == 0
-    assert len(list(tmp_path.glob("scene_crop_*.jpg"))) >= 1
-
-
-def test_scene_success_with_rotate(
-    runner: CliRunner,
-    video_scenes: Path,
-    tmp_path: Path,
-) -> None:
-    """`scene --rotate` rota las capturas."""
-    output = tmp_path / "scene_rotate.jpg"
-
-    result = runner.invoke(
-        app,
-        [
-            "scene",
-            str(video_scenes),
-            "-o",
-            str(output),
-            "-ov",
-            "yes",
-            "--rotate",
-            "90",
-        ],
-    )
-
-    assert result.exit_code == 0
-    assert len(list(tmp_path.glob("scene_rotate_*.jpg"))) >= 1
-
-
-def test_scene_success_with_size(
-    runner: CliRunner,
-    video_scenes: Path,
-    tmp_path: Path,
-) -> None:
-    """`scene --size` cambia la resolución."""
-    output = tmp_path / "scene_size.jpg"
-
-    result = runner.invoke(
-        app,
-        [
-            "scene",
-            str(video_scenes),
-            "-o",
-            str(output),
-            "-ov",
-            "yes",
-            "--size",
-            "128x72",
-        ],
-    )
-
-    assert result.exit_code == 0
-    assert len(list(tmp_path.glob("scene_size_*.jpg"))) >= 1
-
-
-def test_scene_success_with_mode_stretch(
-    runner: CliRunner,
-    video_scenes: Path,
-    tmp_path: Path,
-) -> None:
-    """`scene --mode stretch` escala modificando aspect ratio."""
-    output = tmp_path / "scene_mode.jpg"
-
-    result = runner.invoke(
-        app,
-        [
-            "scene",
-            str(video_scenes),
-            "-o",
-            str(output),
-            "-ov",
-            "yes",
-            "--mode",
-            "stretch",
-        ],
-    )
-
-    assert result.exit_code == 0
-    assert len(list(tmp_path.glob("scene_mode_*.jpg"))) >= 1
-
-
-def test_scene_success_with_upscale(
-    runner: CliRunner,
-    video_scenes: Path,
-    tmp_path: Path,
-) -> None:
-    """`scene --upscale` permite aumentar dimensiones."""
-    output = tmp_path / "scene_upscale.jpg"
-
-    result = runner.invoke(
-        app,
-        [
-            "scene",
-            str(video_scenes),
-            "-o",
-            str(output),
-            "-ov",
-            "yes",
-            "--upscale",
-            "--size",
-            "320x180",
-        ],
-    )
-
-    assert result.exit_code == 0
-    assert len(list(tmp_path.glob("scene_upscale_*.jpg"))) >= 1
-
-
-def test_scene_success_with_hflip(
-    runner: CliRunner,
-    video_scenes: Path,
-    tmp_path: Path,
-) -> None:
-    """`scene --hflip` invierte horizontalmente."""
-    output = tmp_path / "scene_hflip.jpg"
-
-    result = runner.invoke(
-        app,
-        [
-            "scene",
-            str(video_scenes),
-            "-o",
-            str(output),
-            "-ov",
-            "yes",
-            "--hflip",
-        ],
-    )
-
-    assert result.exit_code == 0
-    assert len(list(tmp_path.glob("scene_hflip_*.jpg"))) >= 1
-
-
-def test_scene_success_with_vflip(
-    runner: CliRunner,
-    video_scenes: Path,
-    tmp_path: Path,
-) -> None:
-    """`scene --vflip` invierte verticalmente."""
-    output = tmp_path / "scene_vflip.jpg"
-
-    result = runner.invoke(
-        app,
-        [
-            "scene",
-            str(video_scenes),
-            "-o",
-            str(output),
-            "-ov",
-            "yes",
-            "--vflip",
-        ],
-    )
-
-    assert result.exit_code == 0
-    assert len(list(tmp_path.glob("scene_vflip_*.jpg"))) >= 1
-
-
-def test_scene_error_overwrite_never(
-    runner: CliRunner,
-    video_scenes: Path,
-    tmp_path: Path,
-) -> None:
-    """`scene -ov never` falla cuando el fichero ya existe."""
-    output = tmp_path / "scene_never.jpg"
-    output.write_bytes(b"existing")
-
-    result = runner.invoke(
-        app,
-        ["scene", str(video_scenes), "-o", str(output), "-ov", "never"],
-    )
-
-    assert result.exit_code != 0
-
-
-def test_scene_error_crop_bigger_than_video_dimensions(
-    runner: CliRunner,
-    video_scenes: Path,
-    tmp_path: Path,
-) -> None:
-    """`scene --crop` rechaza área mayor que las dimensiones del vídeo."""
-    output = tmp_path / "scene_crop.jpg"
-
-    result = runner.invoke(
-        app,
-        [
-            "scene",
-            str(video_scenes),
-            "-o",
-            str(output),
-            "-ov",
-            "yes",
-            "--crop",
-            "160,90,10,10",
-        ],
-    )
-
-    assert result.exit_code != 0
-    assert "Invalid crop area" in result.output
-
-
-def test_scene_error_oversize_without_upscale(
-    runner: CliRunner,
-    video_scenes: Path,
-    tmp_path: Path,
-) -> None:
-    """`scene --size` mayor que el vídeo sin `--upscale` ignora el escalado."""
-    output = tmp_path / "scene_oversize.jpg"
-
-    result = runner.invoke(
-        app,
-        [
-            "scene",
-            str(video_scenes),
-            "-o",
-            str(output),
-            "-ov",
-            "yes",
-            "--size",
-            "320x180",
-        ],
-    )
-
-    assert result.exit_code == 0
-    assert "Ignored scale" in result.output
-
-
-def test_scene_error_timestamp_bigger_than_video_duration(
-    runner: CliRunner,
-    video_scenes: Path,
-    tmp_path: Path,
-) -> None:
-    """`scene --start` rechaza marca de tiempo mayor que la duración."""
-    output = tmp_path / "scene_timestamp.jpg"
-
-    result = runner.invoke(
-        app,
-        [
-            "scene",
-            str(video_scenes),
-            "-o",
-            str(output),
-            "-ov",
-            "yes",
-            "--start",
-            "00:00:04",
-        ],
-    )
-
-    assert result.exit_code != 0
-    assert "exceeds video duration" in result.output
 
 
 # =============================================================================
@@ -4045,22 +1513,43 @@ def test_scene_error_timestamp_bigger_than_video_duration(
 # =============================================================================
 
 
-def test_main_version(runner: CliRunner) -> None:
+def test_main_version(pymedia: Invoke) -> None:
     """`--version` muestra la versión de la aplicación."""
-    result = runner.invoke(app, ["--version"])
+    result = pymedia("--version")
 
     assert result.exit_code == 0
     assert "Version" in result.output
 
 
-def test_main_help(runner: CliRunner) -> None:
+def test_main_help(pymedia: Invoke) -> None:
     """`--help` muestra la ayuda global."""
-    result = runner.invoke(app, ["--help"])
+    result = pymedia("--help")
 
     assert result.exit_code == 0
-    assert "pyMedia" in result.output
+    # El nombre del programa difiere (`pyMedia` en CliRunner, `pymedia` en el
+    # binario), así que se comprueba el texto de la ayuda, no el prog_name.
+    assert "Usage:" in result.output
+    assert "Easy CLI for ffmpeg" in result.output
 
 
 # =============================================================================
 #  end
 # =============================================================================
+
+
+def test_main_version_shows_runtime_details(pymedia: Invoke) -> None:
+    """`--version` incluye la versión de Python y la plataforma."""
+    result = pymedia("--version")
+
+    assert result.exit_code == 0
+    assert "Python:" in result.output
+    assert "Platform:" in result.output
+
+
+def test_main_without_arguments_shows_help(pymedia: Invoke) -> None:
+    """`pymedia` sin argumentos muestra la ayuda global."""
+    result = pymedia()
+
+    # El código de salida (0 o 2) depende de la versión de Click.
+    assert "Usage:" in result.output
+    assert "Traceback" not in result.output

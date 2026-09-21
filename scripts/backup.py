@@ -10,15 +10,17 @@ Uso:
 import pathlib
 import zipfile
 
+from pymedia import version
+
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 BACKUP_DIR = ROOT / ".local"
-BACKUP_PATH = BACKUP_DIR / "backup.zip"
+BACKUP_PATH = BACKUP_DIR / f"pyMedia_{version}.zip"
 
 # Directorios cuya estructura se incluye completa.
 DIRS = ["src", "tests", "scripts"]
 
 # Patrones de ficheros sueltos de raíz a incluir.
-ROOT_PATTERNS = ["*.toml", "*.md", "*.lock", "*.py"]
+ROOT_PATTERNS = ["*.toml", "*.md", "*.lock", "*.py", "*.yaml", ".gitignore"]
 
 
 def _limpiar_pycache() -> int:

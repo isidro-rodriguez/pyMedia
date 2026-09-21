@@ -1,6 +1,7 @@
 """Mixin de recorte de imagen (filtro crop de ffmpeg)."""
 
 from dataclasses import dataclass
+from pathlib import Path
 
 from pymedia.errors import (
     MissingParameterError,
@@ -21,6 +22,7 @@ class CropMixin:
     """
 
     media: Media | None = None
+    media_output: Path | None = None
     crop_area: CropArea | None = None
 
     def create_crop(self, crop_str: str | None) -> None:
@@ -53,7 +55,12 @@ class CropMixin:
         if self.crop_area is None:
             raise MissingParameterError(name="crop")
         crop = self.crop_area
-        return f"crop={crop.width}:{crop.height}:{crop.x}:{crop.y}"
+
+        #
+        if self.media_output is not None:
+            return f"crop={crop.width}:{crop.height}:{crop.x}:{crop.y}"
+        else:
+            return f"crop={crop.width}:{crop.height}:{crop.x}:{crop.y}:exact=1"
 
     @staticmethod
     def _process_crop_area(crop_str: str, media: Media) -> CropArea:

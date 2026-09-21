@@ -74,11 +74,11 @@ pythonpath = ["src"]
 # Registra la marca para evitar advertencias en consola
 markers = [
     "locales: tests de comprobación de traducciones",
-    "prod: tests exclusivos para release de producción",
+    "binary: tests contra el ejecutable compilado con PyInstaller (build lento)",
 ]
 
-# Excluye la marca 'prod' por defecto en cualquier ejecución
-addopts = "-m 'not prod and not locales'"
+# Excluye la marca 'binary' por defecto en cualquier ejecución
+addopts = "-m 'not binary and not locales'"
 
 # Configuración de Mypy
 [tool.mypy]

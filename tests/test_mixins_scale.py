@@ -73,6 +73,7 @@ class TestParseErrors:
     def test_odd_dimensions_raise(self, value: str) -> None:
         """Comprueba que las dimensiones impares lanzan un error."""
         mixin = _mixin()
+        mixin.media_output = Path("output.mp4")
 
         with pytest.raises(UserError) as exc_info:
             mixin.create_scale(logger=Mock(), scale_upscale=False, scale_to=value)
@@ -239,12 +240,12 @@ class TestToScaleCmd:
         ("width", "height", "expected"),
         [
             (1280, 720, "scale=1280:720"),
-            (1280, 0, "scale=1280:-2"),
-            (0, 720, "scale=-2:720"),
+            (1280, 0, "scale=1280:-1"),
+            (0, 720, "scale=-1:720"),
         ],
     )
     def test_cmd(self, width: int, height: int, expected: str) -> None:
-        """Comprueba que el filtro se genera con `-2` en la dimensión libre."""
+        """Comprueba que el filtro se genera con `-1` en la dimensión libre."""
         mixin = _mixin()
         mixin.scale_to = Dimensions(width, height)
 

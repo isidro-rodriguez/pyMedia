@@ -174,7 +174,7 @@ con la sección anterior.
 ## [0.14.0-beta.0] - 2026-09-11 → 2026-09-17
 
 ### Añadido
-- Tests E2E del binario PyInstaller (`tests/test_binary_e2e.py`)
+- Tests E2E del binario PyInstaller integrados en la suite CLI (`tests/test_cli.py`, `tests/test_cli_options.py`)
 - Hook de pre-commit para el binario compilado
 - Campos de duración de pistas de vídeo/audio
 

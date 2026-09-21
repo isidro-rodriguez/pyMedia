@@ -2,6 +2,7 @@
 
 from dataclasses import dataclass
 from enum import Enum
+from pathlib import Path
 
 from pymedia.errors import (
     InvalidParameterError,
@@ -31,6 +32,7 @@ class ScaleMixin:
     """
 
     media: Media | None = None
+    media_output: Path | None = None
     scale_mode: ScaleMode = ScaleMode.FIT
     scale_upscale: bool = False
     scale_to: Dimensions | None = None
@@ -79,8 +81,14 @@ class ScaleMixin:
         """
         if self.scale_to is None:
             return None
-        width = self.scale_to.width if self.scale_to.width != 0 else -2
-        height = self.scale_to.height if self.scale_to.height != 0 else -2
+
+        # Si la salida es un vídeo, se limita a redondear a resoluciones pares
+        if self.media_output is not None:
+            width = self.scale_to.width if self.scale_to.width != 0 else -2
+            height = self.scale_to.height if self.scale_to.height != 0 else -2
+        else:
+            width = self.scale_to.width if self.scale_to.width != 0 else -1
+            height = self.scale_to.height if self.scale_to.height != 0 else -1
 
         if scale_flag is not None:
             to_scale_cmd = f"scale={width}:{height}:flags={scale_flag.value}"
@@ -129,8 +137,10 @@ class ScaleMixin:
 
         target = _parse_dimensions(scale_str)
 
-        if target.width % 2 != 0 or target.height % 2 != 0:
-            raise UserError(msg=_("Target dimensions must be even."))
+        # Comprueba si la salida es un vídeo para aplicar la limitación de resoluciones
+        if self.media_output is not None:
+            if target.width % 2 != 0 or target.height % 2 != 0:
+                raise UserError(msg=_("Target dimensions must be even."))
 
         if video.width == target.width and video.height == target.height:
             return None

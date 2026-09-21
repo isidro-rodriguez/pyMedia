@@ -9,7 +9,7 @@ import logging
 
 from typer import BadParameter, TyperException
 
-from pymedia.locales import _  # noqa
+from pymedia.locales import _
 from pymedia.logger import Logger
 from pymedia.types import MediaType
 
@@ -36,7 +36,7 @@ class PyMediaError(TyperException):
         """
         self.msg = f"{msg}"
         super().__init__(self.msg)
-        logger.error(msg=self.msg, exc_info=True)
+        logger.error(msg=self.msg)
 
 
 class CommandError(PyMediaError):
