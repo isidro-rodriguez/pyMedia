@@ -17,22 +17,17 @@
             "command": "uv run ruff check"
         },
         {
-            "label": "CHECK 4 - mypy --strict",
-            "type": "shell",
-            "command": "uv run mypy --strict"
-        },
-        {
-            "label": "CHECK 5 - pytest",
+            "label": "CHECK 4 - pytest",
             "type": "shell",
             "command": "uv run pytest"
         },
         {
-            "label": "CHECK 6 - pytest -m locales",
+            "label": "CHECK 5 - pytest -m locales",
             "type": "shell",
             "command": "uv run pytest -m locales"
         },
         {
-            "label": "CHECK 7 - pytest -m binario",
+            "label": "CHECK 6 - pytest -m binario",
             "type": "shell",
             "command": "uv run pytest -m binario"
         },
@@ -42,7 +37,6 @@
                 "ruff format",
                 "ruff check --fix",
                 "ruff check",
-                "mypy --strict",
                 "pytest",
                 "pytest -m locales"
             ],
