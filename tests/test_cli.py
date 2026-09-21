@@ -620,6 +620,25 @@ def test_cut_error_start_bigger_end(
     assert result.exit_code != 0
 
 
+def test_cut_error_duplicate_timestamps(
+    pymedia: Invoke,
+    video_mp4_a: Path,
+    tmp_path: Path,
+) -> None:
+    """`cut` rechaza marcas de tiempo duplicadas en `--at`."""
+    result = pymedia(
+        "cut",
+        str(video_mp4_a),
+        "--at",
+        "00:00:01,00:00:01",
+        "-o",
+        str(tmp_path / "part.mp4"),
+    )
+
+    assert result.exit_code != 0
+    assert "duplicated timestamp" in result.output
+
+
 # =============================================================================
 #  transcode
 # =============================================================================
@@ -1828,6 +1847,54 @@ def test_vflip_changes_content(
     vflip_bytes = generated[0].read_bytes()
 
     assert no_flip_bytes != vflip_bytes
+
+
+def test_both_flip_changes_content(
+    pymedia: Invoke,
+    video_mp4_a: Path,
+    tmp_path: Path,
+) -> None:
+    """`--hflip --vflip` produce una imagen volteada en ambos ejes."""
+    no_flip_path = tmp_path / "no_flip_both.jpg"
+    both_path = tmp_path / "both_flip.jpg"
+
+    assert (
+        pymedia(
+            "frames",
+            str(video_mp4_a),
+            "--at",
+            "00:00:01",
+            "-o",
+            str(no_flip_path),
+            "-ov",
+            "yes",
+        ).exit_code
+        == 0
+    )
+    assert (
+        pymedia(
+            "frames",
+            str(video_mp4_a),
+            "--at",
+            "00:00:01",
+            "-o",
+            str(both_path),
+            "-ov",
+            "yes",
+            "--hflip",
+            "--vflip",
+        ).exit_code
+        == 0
+    )
+
+    generated = list(tmp_path.glob("no_flip_both_*.jpg"))
+    assert generated
+    no_flip_bytes = generated[0].read_bytes()
+    generated = list(tmp_path.glob("both_flip_*.jpg"))
+    assert generated
+    both_bytes = generated[0].read_bytes()
+
+    assert no_flip_bytes != both_bytes
 
 
 def test_rotate_90_differs_from_270(

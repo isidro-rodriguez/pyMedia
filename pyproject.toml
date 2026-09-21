@@ -81,6 +81,9 @@ markers = [
 # Excluye la marca 'binary' por defecto en cualquier ejecución
 addopts = "-m 'not binary and not locales'"
 
+[tool.coverage.report]
+exclude_also = ["raise MissingParameterError", "raise InvalidParameterError"]
+
 # Configuración de Mypy
 [tool.mypy]
 python_version = "3.13"

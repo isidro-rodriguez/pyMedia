@@ -380,6 +380,53 @@ def test_crop_bigger_than_video_is_rejected(
 
 
 @pytest.mark.parametrize("name", VISUAL)
+def test_crop_zero_dimensions_is_rejected(
+    pymedia: Invoke, request: pytest.FixtureRequest, name: str, tmp_path: Path
+) -> None:
+    """`--crop` rechaza dimensiones de recorte iguales a cero."""
+    output = tmp_path / f"out{COMMANDS[name].suffix}"
+
+    result = pymedia(
+        *build_args(COMMANDS[name], request, output, "-ov", "yes", "--crop", "0,0,0,0")
+    )
+
+    assert result.exit_code != 0
+    assert "Invalid crop dimensions" in result.output
+
+
+@pytest.mark.parametrize("name", VISUAL)
+def test_crop_invalid_format_is_rejected(
+    pymedia: Invoke, request: pytest.FixtureRequest, name: str, tmp_path: Path
+) -> None:
+    """`--crop` rechaza formatos que no son WIDTH,HEIGHT,X,Y."""
+    output = tmp_path / f"out{COMMANDS[name].suffix}"
+
+    result = pymedia(
+        *build_args(COMMANDS[name], request, output, "-ov", "yes", "--crop", "abc")
+    )
+
+    assert result.exit_code != 0
+    assert "Invalid crop" in result.output
+
+
+@pytest.mark.parametrize("name", VISUAL)
+def test_crop_exceeds_video_height_is_rejected(
+    pymedia: Invoke, request: pytest.FixtureRequest, name: str, tmp_path: Path
+) -> None:
+    """`--crop` rechaza un área que se sale de la altura del vídeo."""
+    output = tmp_path / f"out{COMMANDS[name].suffix}"
+
+    result = pymedia(
+        *build_args(
+            COMMANDS[name], request, output, "-ov", "yes", "--crop", "10,80,0,11"
+        )
+    )
+
+    assert result.exit_code != 0
+    assert "Invalid crop area" in result.output
+
+
+@pytest.mark.parametrize("name", VISUAL)
 def test_oversize_without_upscale_is_ignored(
     pymedia: Invoke, request: pytest.FixtureRequest, name: str, tmp_path: Path
 ) -> None:
