@@ -4,7 +4,7 @@ from pymedia.commands.base_service import BaseService
 from pymedia.commands.frames.cmd import FramesCmd
 from pymedia.commands.frames.parameters import FramesParameters
 from pymedia.errors import MissingParameterError
-from pymedia.locales import _  # noqa
+from pymedia.locales import _
 
 
 class FramesService(BaseService[FramesParameters]):

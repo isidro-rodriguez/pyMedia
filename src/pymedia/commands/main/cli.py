@@ -5,7 +5,7 @@ import shutil
 from pymedia.commands.base_cli import base_cli
 from pymedia.commands.base_cli_options import HelpOption, VersionOption
 from pymedia.errors import UserError
-from pymedia.locales import _  # noqa
+from pymedia.locales import _
 
 main_cli = base_cli
 

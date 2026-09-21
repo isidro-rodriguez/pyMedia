@@ -12,7 +12,7 @@ from pymedia.data.audio_codecs import AUDIO_CODECS
 from pymedia.data.supported import SUPPORTED
 from pymedia.data.video_codecs import VIDEO_CODECS
 from pymedia.errors import ConfigError
-from pymedia.locales import _  # noqa
+from pymedia.locales import _
 from pymedia.types import AudioCodecMode, PresetsTranscodeMode, VideoCodecMode
 
 

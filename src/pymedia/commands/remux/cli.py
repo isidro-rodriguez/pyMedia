@@ -15,7 +15,7 @@ from pymedia.commands.base_cli_options import (
 from pymedia.commands.remux.parameters import RemuxParameters
 from pymedia.commands.remux.service import RemuxService
 from pymedia.errors import MissingArgumentError, UserError
-from pymedia.locales import _  # noqa
+from pymedia.locales import _
 from pymedia.logger import Logger
 from pymedia.types import OverwriteMode
 
@@ -29,8 +29,8 @@ Change container and metadata without transcoding.
 [bold]Examples[/bold]:
   Change video container:
     > pymedia remux input.mp4 -o output.mkv
-  Fix faststart moving moov atom at the start 
-    > pymedia remux input.mp4 --fast-start -o output.mp4 
+  Fix faststart moving moov atom at the start
+    > pymedia remux input.mp4 --fast-start -o output.mp4
   Fix broken timestamps
     > pymedia remux input.mp4 --genpts -o output.mkv
   Sort stream tracks

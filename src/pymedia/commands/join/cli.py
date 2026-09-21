@@ -12,7 +12,7 @@ from pymedia.commands.base_cli_options import (
 from pymedia.commands.join.parameters import JoinParameters
 from pymedia.commands.join.service import JoinService
 from pymedia.errors import UserError
-from pymedia.locales import _  # noqa
+from pymedia.locales import _
 from pymedia.logger import Logger
 from pymedia.types import OverwriteMode
 

@@ -82,7 +82,7 @@ VIDEOS: tuple[VideoSpec, ...] = (
         subtitle_format="ass",
     ),
     VideoSpec(
-        filename="test_null_metadata.mkv",
+        filename="null.mkv",
         source=_lavfi("testsrc2"),
         video_args=H264,
         subtitle_format="srt",

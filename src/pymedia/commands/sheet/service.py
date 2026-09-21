@@ -10,7 +10,7 @@ from pymedia.errors import (
     MissingParameterError,
     MissingPropertyError,
 )
-from pymedia.locales import _  # noqa
+from pymedia.locales import _
 
 
 class SheetService(BaseService[SheetParameters]):

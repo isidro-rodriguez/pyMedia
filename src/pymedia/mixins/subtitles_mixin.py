@@ -10,7 +10,7 @@ from pymedia.errors import (
     UserError,
 )
 from pymedia.ffprobe import validate_subtitles_file_codec
-from pymedia.locales import _  # noqa
+from pymedia.locales import _
 from pymedia.logger import Logger
 from pymedia.models.media import Media
 from pymedia.models.subtitles import Subtitles
@@ -239,8 +239,8 @@ class SubtitlesInputMixin:
                 return "srt"
             case ".webm":
                 return "webvtt"
-
-        raise UserError(msg=_("Subtitles codec not supported."))
+            case _:
+                raise UserError(msg=_("Subtitles codec not supported."))
 
     @staticmethod
     def _process_stream_index(media: Media) -> int:

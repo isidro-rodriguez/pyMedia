@@ -10,7 +10,7 @@ from pymedia.errors import (
     MissingPropertyError,
     UserError,
 )
-from pymedia.locales import _  # noqa
+from pymedia.locales import _
 from pymedia.logger import Logger
 from pymedia.models.media import Media
 from pymedia.types import Dimensions, ScaleFlag, ScaleMode

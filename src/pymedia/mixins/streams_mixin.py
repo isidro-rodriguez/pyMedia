@@ -7,7 +7,7 @@ from pymedia.errors import (
     MissingParameterError,
     UserError,
 )
-from pymedia.locales import _  # noqa
+from pymedia.locales import _
 from pymedia.models.media import Media
 from pymedia.types import StreamsMode
 

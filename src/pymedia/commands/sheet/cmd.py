@@ -11,7 +11,7 @@ from pymedia.errors import (
     MissingPropertyError,
 )
 from pymedia.locale_manager import locale_manager
-from pymedia.locales import _  # noqa
+from pymedia.locales import _
 from pymedia.models.media import Audio, Subtitles
 from pymedia.utils import parse_quantity, parse_size, parse_timedelta, to_ffmpeg_value
 

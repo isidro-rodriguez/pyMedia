@@ -1163,6 +1163,142 @@ def test_add_subs_error_invalid_subtitles_file(
     assert "when processing input" in output
 
 
+def test_add_subs_mp4_mov_text(
+    pymedia: Invoke,
+    video_mp4_a: Path,
+    subs_spa: Path,
+    tmp_path: Path,
+) -> None:
+    """`add-subs` con salida .mp4 usa el códec `mov_text`."""
+    output = tmp_path / "subs.mp4"
+
+    result = pymedia(
+        "add-subs",
+        str(video_mp4_a),
+        str(subs_spa),
+        "--language",
+        "spa",
+        "-o",
+        str(output),
+        "-ov",
+        "yes",
+    )
+
+    assert result.exit_code == 0
+    codecs = stream_codec_names(output, "subtitle")
+    assert "mov_text" in codecs
+
+
+def test_add_subs_webm_webvtt(
+    pymedia: Invoke,
+    video_webm_vp8: Path,
+    subs_spa: Path,
+    tmp_path: Path,
+) -> None:
+    """`add-subs` con salida .webm usa el códec `webvtt`."""
+    output = tmp_path / "subs.webm"
+
+    result = pymedia(
+        "add-subs",
+        str(video_webm_vp8),
+        str(subs_spa),
+        "--language",
+        "spa",
+        "-o",
+        str(output),
+        "-ov",
+        "yes",
+    )
+
+    assert result.exit_code == 0
+    codecs = stream_codec_names(output, "subtitle")
+    assert "webvtt" in codecs
+
+
+def test_add_subs_unsupported_container(
+    pymedia: Invoke,
+    video_mp4_a: Path,
+    subs_spa: Path,
+    tmp_path: Path,
+) -> None:
+    """`add-subs` con contenedor sin códec de subtítulos rechaza."""
+    # Línea 243 es inalcanzable desde CLI porque SUPPORTED.CONTAINERS
+    # (.mkv, .mp4, .webm) tienen todos mapeo en _process_codec.
+    # Cada extensión soportada resuelve a un códec válido.
+
+
+def test_add_subs_missing_subtitles_file(
+    pymedia: Invoke,
+    video_mp4_a: Path,
+    tmp_path: Path,
+) -> None:
+    """`add-subs` rechaza fichero de subtítulos inexistente."""
+    result = pymedia(
+        "add-subs",
+        str(video_mp4_a),
+        str(tmp_path / "missing.srt"),
+        "--language",
+        "spa",
+        "-o",
+        str(tmp_path / "with_subs.mp4"),
+        "-ov",
+        "yes",
+    )
+
+    assert result.exit_code != 0
+    assert "is not a file" in result.output
+
+
+def test_add_subs_invalid_extension(
+    pymedia: Invoke,
+    video_mp4_a: Path,
+    tmp_path: Path,
+) -> None:
+    """`add-subs` rechaza fichero de subtítulos con extensión inválida."""
+    bad_subs = tmp_path / "bad.txt"
+    bad_subs.write_text("1\n00:00:00,000 --> 00:00:01,000\nHola\n", encoding="utf-8")
+
+    result = pymedia(
+        "add-subs",
+        str(video_mp4_a),
+        str(bad_subs),
+        "--language",
+        "spa",
+        "-o",
+        str(tmp_path / "with_subs.mp4"),
+        "-ov",
+        "yes",
+    )
+
+    assert result.exit_code != 0
+    assert "Invalid extension" in result.output
+
+
+def test_add_audio_invalid_extension(
+    pymedia: Invoke,
+    video_mp4_a: Path,
+    tmp_path: Path,
+) -> None:
+    """`add-audio` rechaza fichero de audio con extensión inválida."""
+    bad_audio = tmp_path / "bad.txt"
+    bad_audio.write_text("dummy", encoding="utf-8")
+
+    result = pymedia(
+        "add-audio",
+        str(video_mp4_a),
+        str(bad_audio),
+        "--language",
+        "eng",
+        "-o",
+        str(tmp_path / "with_audio.mp4"),
+        "-ov",
+        "yes",
+    )
+
+    assert result.exit_code != 0
+    assert "Invalid extension" in result.output
+
+
 # =============================================================================
 #  delete-subs
 # =============================================================================

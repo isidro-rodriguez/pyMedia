@@ -7,7 +7,7 @@ from pymedia.commands.base_service import BaseService
 from pymedia.commands.interval.cmd import IntervalCmd
 from pymedia.commands.interval.parameters import IntervalParameters
 from pymedia.errors import MissingParameterError
-from pymedia.locales import _  # noqa
+from pymedia.locales import _
 
 
 class IntervalService(BaseService[IntervalParameters]):

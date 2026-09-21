@@ -4,7 +4,7 @@ from dataclasses import dataclass
 from pathlib import Path
 
 from pymedia.errors import InvalidParameterError, MissingParameterError
-from pymedia.locales import _  # noqa
+from pymedia.locales import _
 from pymedia.types import ImageQuality
 
 

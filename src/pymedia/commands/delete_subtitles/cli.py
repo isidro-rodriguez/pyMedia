@@ -12,7 +12,7 @@ from pymedia.commands.base_cli_options import (
 )
 from pymedia.commands.delete_subtitles.parameters import DeleteSubtitlesParameters
 from pymedia.commands.delete_subtitles.service import DeleteSubtitlesService
-from pymedia.locales import _  # noqa
+from pymedia.locales import _
 from pymedia.logger import Logger
 from pymedia.types import OverwriteMode
 
@@ -25,7 +25,7 @@ Delete subtitles from a media file.
 You can consult what subtitles tracks have a container with `info` command.
 
 [bold]Examples[/bold]:
-  Delete a list of subtitles tracks from a media file: 
+  Delete a list of subtitles tracks from a media file:
     > pymedia delete-subs input.mp4 --tracks 3,4,5
 """  # noqa
 )

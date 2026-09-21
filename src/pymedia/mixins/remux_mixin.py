@@ -3,7 +3,6 @@
 from dataclasses import dataclass
 
 from pymedia.errors import MissingParameterError
-from pymedia.locales import _  # noqa
 from pymedia.models.media import Media
 
 

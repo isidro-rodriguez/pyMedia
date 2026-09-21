@@ -19,7 +19,7 @@ from pymedia.commands.base_cli_options import (
 from pymedia.commands.edit_subtitles.parameters import EditSubtitlesParameters
 from pymedia.commands.edit_subtitles.service import EditSubtitlesService
 from pymedia.errors import MissingRequiredOptionsError
-from pymedia.locales import _  # noqa
+from pymedia.locales import _
 from pymedia.logger import Logger
 from pymedia.types import OverwriteMode
 
@@ -34,7 +34,7 @@ You can consult what subtitles tracks have a container with `info` command.
 [bold]Examples[/bold]:
   Edit language metadata to subtitles stream track 2 from a media container:
     > pymedia edit-subs input.mp4 --track 2 --language eng
-  Edit multiple tags in a single call: 
+  Edit multiple tags in a single call:
     > pymedia edit-subs input.mp4 --track 2 --language spa --title "Español (forced)" --default --forced
 """  # noqa
 )

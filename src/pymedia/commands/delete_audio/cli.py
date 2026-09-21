@@ -12,7 +12,7 @@ from pymedia.commands.base_cli_options import (
 )
 from pymedia.commands.delete_audio.parameters import DeleteAudioParameters
 from pymedia.commands.delete_audio.service import DeleteAudioService
-from pymedia.locales import _  # noqa
+from pymedia.locales import _
 from pymedia.logger import Logger
 from pymedia.types import OverwriteMode
 
@@ -25,7 +25,7 @@ Delete audio tracks from a media file.
 You can consult what audio tracks have a container with `info` command.
 
 [bold]Examples[/bold]:
-  Delete a list of audio tracks from a media file: 
+  Delete a list of audio tracks from a media file:
     > pymedia delete-audio input.mp4 --tracks 1,2
 """  # noqa
 )

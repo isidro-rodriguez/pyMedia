@@ -21,7 +21,7 @@ from pymedia.commands.base_cli_options import (
 )
 from pymedia.commands.scene.parameters import SceneParameters
 from pymedia.commands.scene.service import SceneService
-from pymedia.locales import _  # noqa
+from pymedia.locales import _
 from pymedia.logger import Logger
 from pymedia.types import OverwriteMode, ScaleMode
 
@@ -31,7 +31,7 @@ SCENE_HELP = _(
     """\
 Captures video frames when the image changes significantly following a shot transition.
 
-Captures images when a change in framing causes the image to change by more 
+Captures images when a change in framing causes the image to change by more
 than the user-defined threshold, expressed as a value between 0 and 1.
 
 [bold]Examples[/bold]:

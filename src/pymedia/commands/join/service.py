@@ -9,7 +9,7 @@ from pymedia.commands.base_service import BaseService
 from pymedia.commands.join.cmd import JoinCmd
 from pymedia.commands.join.parameters import JoinParameters
 from pymedia.errors import MissingParameterError, UserError
-from pymedia.locales import _  # noqa
+from pymedia.locales import _
 
 
 class JoinService(BaseService[JoinParameters]):

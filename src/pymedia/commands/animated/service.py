@@ -6,7 +6,7 @@ from pymedia.commands.base_service import BaseService
 from pymedia.errors import (
     MissingParameterError,
 )
-from pymedia.locales import _  # noqa
+from pymedia.locales import _
 
 
 class AnimatedService(BaseService[AnimatedParameters]):

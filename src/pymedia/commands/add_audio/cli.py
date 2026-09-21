@@ -18,7 +18,7 @@ from pymedia.commands.base_cli_options import (
     OutputOption,
     OverwriteOption,
 )
-from pymedia.locales import _  # noqa
+from pymedia.locales import _
 from pymedia.logger import Logger
 from pymedia.types import OverwriteMode
 
@@ -33,7 +33,7 @@ You can consult what audio tracks have a container with `info` command.
 [bold]Examples[/bold]:
   Add english audio to a media container:
     > pymedia add-audio input.mp4 eng_audio.aac --language eng
-  Add default commentary spanish audio with custom title: 
+  Add default commentary spanish audio with custom title:
     > pymedia add-audio input.mp4 spa_audio.aac --language spa --title "Comentario director" --default --commentary
 """  # noqa
 )

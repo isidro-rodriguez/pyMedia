@@ -3,8 +3,6 @@
 from dataclasses import dataclass
 from pathlib import Path
 
-from pymedia.locales import _  # noqa
-
 
 @dataclass(frozen=True, kw_only=True, slots=True)
 class Subtitles:

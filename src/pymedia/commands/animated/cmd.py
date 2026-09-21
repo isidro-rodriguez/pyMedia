@@ -1,7 +1,8 @@
 """Comando ``animated``: compositor de comandos ffmpeg."""
 
 from pymedia.commands.animated.parameters import AnimatedParameters
-from pymedia.errors import MissingParameterError
+from pymedia.errors import InvalidParameterError, MissingParameterError
+from pymedia.locales import _
 from pymedia.types import OverwriteMode, ScaleFlag
 
 
@@ -81,6 +82,8 @@ class AnimatedCmd:
                     "split[a][b];[a]palettegen[p];"
                     "[b][p]paletteuse=dither=floyd_steinberg"
                 )
+            case _:
+                pass
 
         return ",".join(filters)
 
@@ -119,5 +122,9 @@ class AnimatedCmd:
                     "-loop",
                     "0",
                 ]
+            case _:
+                raise InvalidParameterError(
+                    msg=_("Animated image output not supported")
+                )
 
         return args

@@ -5,7 +5,6 @@ from pathlib import Path
 from typing import Self
 
 from pymedia.commands.base_parameters import BaseParameters
-from pymedia.locales import _  # noqa
 from pymedia.mixins.media_mixin import MediaInputMixin
 from pymedia.mixins.outputs_mixin import AudioOutputMixin
 from pymedia.mixins.streams_mixin import StreamsMixin

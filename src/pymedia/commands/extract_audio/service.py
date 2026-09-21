@@ -4,7 +4,7 @@ from pymedia.commands.base_service import BaseService
 from pymedia.commands.extract_audio.cmd import ExtractAudioCmd
 from pymedia.commands.extract_audio.parameters import ExtractAudioParameters
 from pymedia.errors import MissingParameterError
-from pymedia.locales import _  # noqa
+from pymedia.locales import _
 
 
 class ExtractAudioService(BaseService[ExtractAudioParameters]):

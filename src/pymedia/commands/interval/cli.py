@@ -22,7 +22,7 @@ from pymedia.commands.base_cli_options import (
 from pymedia.commands.interval.parameters import IntervalParameters
 from pymedia.commands.interval.service import IntervalService
 from pymedia.errors import MissingRequiredOptionsError, UserError
-from pymedia.locales import _  # noqa
+from pymedia.locales import _
 from pymedia.logger import Logger
 from pymedia.types import OverwriteMode, ScaleMode
 

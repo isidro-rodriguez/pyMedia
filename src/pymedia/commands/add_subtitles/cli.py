@@ -18,7 +18,7 @@ from pymedia.commands.base_cli_options import (
     SubtitlesTitleOption,
     SubtitlesVisualImpairedOption,
 )
-from pymedia.locales import _  # noqa
+from pymedia.locales import _
 from pymedia.logger import Logger
 from pymedia.types import OverwriteMode
 
@@ -33,7 +33,7 @@ You can consult what subtitles tracks have a container with `info` command.
 [bold]Examples[/bold]:
   Add english subtitles to a media container:
     > pymedia add-subs input.mp4 eng_subs.srt --language eng
-  Add default forced spanish subtitles with custom title: 
+  Add default forced spanish subtitles with custom title:
     > pymedia add-subs input.mp4 spa_subs.srt --language spa --title "Español (forced)" --default --forced
 """  # noqa
 )

@@ -9,7 +9,7 @@ from pymedia.commands.base_cli_options import (
 )
 from pymedia.commands.info.parameters import InfoParameters
 from pymedia.commands.info.service import InfoService
-from pymedia.locales import _  # noqa
+from pymedia.locales import _
 from pymedia.logger import Logger
 
 info_cli = typer.Typer()

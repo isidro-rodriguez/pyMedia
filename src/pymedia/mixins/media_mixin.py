@@ -10,7 +10,6 @@ from pymedia.errors import (
     MissingParameterError,
 )
 from pymedia.ffprobe import get_media_metadata
-from pymedia.locales import _  # noqa
 from pymedia.logger import Logger
 from pymedia.models.audio import Audio
 from pymedia.models.media import Media

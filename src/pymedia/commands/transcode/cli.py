@@ -25,7 +25,7 @@ from pymedia.commands.base_cli_options import (
 from pymedia.commands.transcode.parameters import TranscodeParameters
 from pymedia.commands.transcode.service import TranscodeService
 from pymedia.errors import MissingRequiredOptionsError
-from pymedia.locales import _  # noqa
+from pymedia.locales import _
 from pymedia.logger import Logger
 from pymedia.types import OverwriteMode, PresetsTranscodeMode, ScaleMode
 
@@ -41,10 +41,10 @@ NOTE: You can edit preset profiles in config.toml.
 [bold]Examples[/bold]:
     Transcode only video track changing with a configurated profile:
     > pymedia transcode source.mp4 --preset even --video -o target.mp4
-    Transcode video track meanwhile its applied multiple filters: 
+    Transcode video track meanwhile its applied multiple filters:
     > pymedia transcode source.mp4 --profile fast --size 1280x720 --hflip
     Burn subtitles in video track.
-    > pymedia transcode source.mp4 --burn-subtitles eng-subs.srt 
+    > pymedia transcode source.mp4 --burn-subtitles eng-subs.srt
 """
 )
 

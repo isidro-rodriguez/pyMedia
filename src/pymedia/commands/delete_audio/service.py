@@ -4,7 +4,7 @@ from pymedia.commands.base_service import BaseService
 from pymedia.commands.delete_audio.cmd import DeleteAudioCmd
 from pymedia.commands.delete_audio.parameters import DeleteAudioParameters
 from pymedia.errors import MissingParameterError
-from pymedia.locales import _  # noqa
+from pymedia.locales import _
 
 
 class DeleteAudioService(BaseService[DeleteAudioParameters]):

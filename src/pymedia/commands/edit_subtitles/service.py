@@ -4,7 +4,7 @@ from pymedia.commands.base_service import BaseService
 from pymedia.commands.edit_subtitles.cmd import EditSubtitlesCmd
 from pymedia.commands.edit_subtitles.parameters import EditSubtitlesParameters
 from pymedia.errors import MissingParameterError
-from pymedia.locales import _  # noqa
+from pymedia.locales import _
 
 
 class EditSubtitlesService(BaseService[EditSubtitlesParameters]):

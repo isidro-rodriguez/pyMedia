@@ -8,7 +8,7 @@ from typing import Any
 from pymedia.data.audio_codecs import AUDIO_CODECS
 from pymedia.data.subtitles_formats import SUBTITLES_FORMATS
 from pymedia.errors import FfprobeError
-from pymedia.locales import _  # noqa
+from pymedia.locales import _
 from pymedia.logger import Logger
 
 

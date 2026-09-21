@@ -17,7 +17,7 @@ from pymedia.commands.base_cli import (
     validate_media_path_list,
     validate_subtitles_path,
 )
-from pymedia.locales import _  # noqa
+from pymedia.locales import _
 from pymedia.types import (
     OverwriteMode,
     PresetsSheetMode,

@@ -4,7 +4,7 @@ from pymedia.commands.base_service import BaseService
 from pymedia.commands.transcode.cmd import TranscodeCmd
 from pymedia.commands.transcode.parameters import TranscodeParameters
 from pymedia.errors import MissingParameterError
-from pymedia.locales import _  # noqa
+from pymedia.locales import _
 
 
 class TranscodeService(BaseService[TranscodeParameters]):

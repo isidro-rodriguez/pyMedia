@@ -11,7 +11,7 @@ from pymedia.commands.base_service import BaseService
 from pymedia.commands.scene.cmd import SceneCmd
 from pymedia.commands.scene.parameters import SceneParameters
 from pymedia.errors import MissingParameterError
-from pymedia.locales import _  # noqa
+from pymedia.locales import _
 from pymedia.types import OverwriteMode
 
 

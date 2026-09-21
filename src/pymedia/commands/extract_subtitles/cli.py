@@ -12,7 +12,7 @@ from pymedia.commands.base_cli_options import (
 )
 from pymedia.commands.extract_subtitles.parameters import ExtractSubtitlesParameters
 from pymedia.commands.extract_subtitles.service import ExtractSubtitlesService
-from pymedia.locales import _  # noqa
+from pymedia.locales import _
 from pymedia.logger import Logger
 from pymedia.types import OverwriteMode
 
@@ -25,7 +25,7 @@ Extract subtitles from a media file.
 You can consult what subtitles tracks have a container with `info` command.
 
 [bold]Examples[/bold]:
-  Extract a list of subtitles tracks from a media file: 
+  Extract a list of subtitles tracks from a media file:
     > pymedia extract-subs input.mp4 --tracks 3,4,5
   Extract subtitles tracks with custom output:
     > pymedia extract-subs input.mp4 --tracks 3,5 -o input-subtitles.srt

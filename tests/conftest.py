@@ -482,6 +482,36 @@ def video_mp4_multi_audio(inputs_dir: Path) -> Path:
 
 
 @pytest.fixture(scope="session")
+def video_webm_vp8(inputs_dir: Path) -> Path:
+    """Vídeo webm de 2 s con códec vp8."""
+    output = inputs_dir / "video_vp8.webm"
+    _run_ffmpeg(
+        [
+            "-f",
+            "lavfi",
+            "-i",
+            "testsrc2=size=160x90:rate=10:duration=2",
+            "-f",
+            "lavfi",
+            "-i",
+            "sine=frequency=440:duration=2",
+            "-c:v",
+            "libvpx",
+            "-preset",
+            "ultrafast",
+            "-g",
+            "10",
+            "-pix_fmt",
+            "yuv420p",
+            "-c:a",
+            "libopus",
+            str(output),
+        ]
+    )
+    return output
+
+
+@pytest.fixture(scope="session")
 def audio_m4a(inputs_dir: Path) -> Path:
     """Pista de audio aac de 1 s."""
     output = inputs_dir / "audio.m4a"

@@ -12,7 +12,7 @@ from pymedia.commands.base_cli_options import (
 )
 from pymedia.commands.extract_audio.parameters import ExtractAudioParameters
 from pymedia.commands.extract_audio.service import ExtractAudioService
-from pymedia.locales import _  # noqa
+from pymedia.locales import _
 from pymedia.logger import Logger
 from pymedia.types import OverwriteMode
 
@@ -25,7 +25,7 @@ Extract audio tracks from a media file.
 You can consult what audio tracks have a container with `info` command.
 
 [bold]Examples[/bold]:
-  Extract a list of audio tracks from a media file: 
+  Extract a list of audio tracks from a media file:
     > pymedia extract-audio input.mp4 --tracks 1,2
   Extract audio tracks with custom output:
     > pymedia extract-audio input.mp4 --tracks 1,2 -o input-audio.m4a
