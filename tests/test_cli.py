@@ -1215,16 +1215,83 @@ def test_add_subs_webm_webvtt(
     assert "webvtt" in codecs
 
 
+# Extensiones de salida que `MediaOutputMixin` rechaza por no estar en
+# SUPPORTED.CONTAINERS (.mkv, .mp4, .webm), incluso las que `_process_codec`
+# sí sabría mapear (.mov, .ts).
+UNSUPPORTED_SUBS_OUTPUTS = [
+    pytest.param(".avi", id="avi"),
+    pytest.param(".mov", id="mov"),
+    pytest.param(".ts", id="ts"),
+]
+
+
+@pytest.mark.parametrize("suffix", UNSUPPORTED_SUBS_OUTPUTS)
 def test_add_subs_unsupported_container(
     pymedia: Invoke,
     video_mp4_a: Path,
     subs_spa: Path,
+    suffix: str,
     tmp_path: Path,
 ) -> None:
-    """`add-subs` con contenedor sin códec de subtítulos rechaza."""
-    # Línea 243 es inalcanzable desde CLI porque SUPPORTED.CONTAINERS
-    # (.mkv, .mp4, .webm) tienen todos mapeo en _process_codec.
-    # Cada extensión soportada resuelve a un códec válido.
+    """`add-subs` solo admite .mkv, .mp4 y .webm como contenedor de salida.
+
+    El mensaje «Subtitles codec not supported.» de `_process_codec` es
+    inalcanzable desde la CLI: `MediaOutputMixin` corta antes cualquier extensión
+    fuera de `SUPPORTED.CONTAINERS` y las tres admitidas tienen códec asignado.
+    """
+    output = tmp_path / f"out{suffix}"
+
+    result = pymedia(
+        "add-subs",
+        str(video_mp4_a),
+        str(subs_spa),
+        "--language",
+        "spa",
+        "-o",
+        str(output),
+        "-ov",
+        "yes",
+    )
+
+    assert result.exit_code != 0
+    assert f"Invalid extension {suffix}" in result.output
+    assert not output.exists()
+
+
+# Formatos de subtítulo aceptados como entrada; el srt ya se cubre en
+# `test_add_subs_success_inserts_track`.
+SUBS_INPUT_FORMATS = [
+    pytest.param("subs_ass", id="ass"),
+    pytest.param("subs_vtt", id="vtt"),
+]
+
+
+@pytest.mark.parametrize("fixture_name", SUBS_INPUT_FORMATS)
+def test_add_subs_input_formats(
+    pymedia: Invoke,
+    request: pytest.FixtureRequest,
+    video_mkv: Path,
+    fixture_name: str,
+    tmp_path: Path,
+) -> None:
+    """`add-subs` acepta entradas .ass y .vtt y usa el códec del contenedor."""
+    output = tmp_path / "with_subs.mkv"
+
+    result = pymedia(
+        "add-subs",
+        str(video_mkv),
+        str(request.getfixturevalue(fixture_name)),
+        "--language",
+        "spa",
+        "-o",
+        str(output),
+        "-ov",
+        "yes",
+    )
+
+    assert result.exit_code == 0
+    assert stream_codec_names(output, "subtitle") == ["subrip"]
+    assert stream_tag(output, "subtitle", "language") == "spa"
 
 
 def test_add_subs_missing_subtitles_file(

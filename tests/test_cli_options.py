@@ -505,7 +505,9 @@ def test_start_after_end_is_rejected(
 
     assert result.exit_code != 0
     assert "Invalid timestamps" in result.output
-    assert "Start" in result.output and "End" in result.output
+    # El panel de error muestra la marca completa: si Rich partiese la línea,
+    # los valores se perderían y el mensaje quedaría a medias.
+    assert "Start (00:00:01.5) >= End (00:00:01)" in result.output
 
 
 # Test específico para cut con --start/--end (tiene --at por defecto en COMMANDS)
@@ -598,6 +600,40 @@ def test_at_invalid_format_is_rejected(
     assert "Invalid timestamp format" in result.output
 
 
+# `--at` con campos de más (`hh:mm:ss:ss`) o con un elemento malo dentro de una
+# lista: el parseo de cada elemento comparte el mensaje de error.
+AT_MALFORMED = [
+    pytest.param("1:2:3:4", id="too-many-fields"),
+    pytest.param("00:00:01,1:2:3:4", id="malformed-element"),
+]
+
+
+@pytest.mark.parametrize("value", AT_MALFORMED)
+@pytest.mark.parametrize("name", AT_COMMANDS)
+def test_at_malformed_value_is_rejected(
+    pymedia: Invoke,
+    request: pytest.FixtureRequest,
+    name: str,
+    value: str,
+    tmp_path: Path,
+) -> None:
+    """`--at` con marcas mal formadas se rechaza, aunque la lista tenga válidas."""
+    cmd = COMMANDS[name]
+    output = tmp_path / f"out{cmd.suffix}"
+
+    # Para cut, hay que anular el --at por defecto de la invocación mínima
+    if name == "cut":
+        inputs = [str(request.getfixturevalue(n)) for n in cmd.inputs]
+        args = ["cut", *inputs, "-o", str(output), "-ov", "yes", "--at", value]
+    else:
+        args = build_args(cmd, request, output, "-ov", "yes", "--at", value)
+
+    result = pymedia(*args)
+
+    assert result.exit_code != 0
+    assert "Invalid timestamp format" in result.output
+
+
 # =============================================================================
 #  Flags de pista (audio y subtítulos)
 # =============================================================================
@@ -677,6 +713,78 @@ def test_edit_track_sets_and_clears_flag(
     assert stream_disposition(marked, kind, flag, index=0) == 1
     assert second.exit_code == 0
     assert stream_disposition(cleared, kind, flag, index=0) == 0
+
+
+# `--default` es exclusivo: al marcar una pista, la que ya lo tuviera dentro del
+# mismo tipo de stream lo pierde. Campos de cada caso: comando, fixture de
+# entrada, tipo de pista, opciones extra, índice de la pista marcada e índice de
+# la pista que era `default` antes (`None` si el medio no tenía ninguna).
+EXCLUSIVE_DEFAULT_CASES = [
+    pytest.param(
+        "add-audio", "video_mkv_default_audio", "audio", (), 1, 0, id="add-audio"
+    ),
+    pytest.param("add-audio", "video_no_audio", "audio", (), 0, None, id="no-previous"),
+    # `video_mkv_subs` ya trae dos pistas (la 0 es `default`), así que la nueva es la 2.
+    pytest.param("add-subs", "video_mkv_subs", "subtitle", (), 2, 0, id="add-subs"),
+    pytest.param(
+        "edit-audio", "video_mkv_two_audio", "audio", (), 0, 1, id="edit-audio"
+    ),
+    pytest.param(
+        "edit-subs",
+        "video_mkv_subs",
+        "subtitle",
+        ("--track", "1"),
+        1,
+        0,
+        id="edit-subs",
+    ),
+]
+
+
+@pytest.mark.parametrize(
+    ("name", "input_name", "kind", "extra", "new_index", "previous_index"),
+    EXCLUSIVE_DEFAULT_CASES,
+)
+def test_default_flag_is_exclusive(
+    pymedia: Invoke,
+    request: pytest.FixtureRequest,
+    name: str,
+    input_name: str,
+    kind: str,
+    extra: tuple[str, ...],
+    new_index: int,
+    previous_index: int | None,
+    tmp_path: Path,
+) -> None:
+    """`--default` marca una pista y desmarca la que ya era la de por defecto."""
+    cmd = COMMANDS[name]
+    output = tmp_path / f"out{cmd.suffix}"
+    args = build_args(cmd, request, output, "-ov", "yes", *extra, "--default")
+    args[1] = str(request.getfixturevalue(input_name))
+
+    result = pymedia(*args)
+
+    assert result.exit_code == 0
+    assert stream_disposition(output, kind, "default", index=new_index) == 1
+    if previous_index is not None:
+        assert stream_disposition(output, kind, "default", index=previous_index) == 0
+
+
+def test_edit_audio_default_preserves_other_flags(
+    pymedia: Invoke, request: pytest.FixtureRequest, tmp_path: Path
+) -> None:
+    """Al retirar `default` de otra pista se conservan sus demás disposiciones."""
+    cmd = COMMANDS["edit-audio"]
+    output = tmp_path / f"out{cmd.suffix}"
+    args = build_args(cmd, request, output, "-ov", "yes", "--default")
+    args[1] = str(request.getfixturevalue("video_mkv_two_audio"))
+
+    result = pymedia(*args)
+
+    assert result.exit_code == 0
+    assert stream_disposition(output, "audio", "default", index=0) == 1
+    assert stream_disposition(output, "audio", "default", index=1) == 0
+    assert stream_disposition(output, "audio", "forced", index=1) == 1
 
 
 TRACK_TITLE_CASES = [

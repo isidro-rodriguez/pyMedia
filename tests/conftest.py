@@ -185,6 +185,73 @@ def video_mkv_subs(inputs_dir: Path) -> Path:
 
 
 @pytest.fixture(scope="session")
+def video_mkv_default_audio(inputs_dir: Path) -> Path:
+    """Vídeo mkv de 2 s cuya única pista de audio está marcada como `default`.
+
+    A diferencia de `video_mkv`, ffmpeg aquí marca la pista con la disposición
+    `default`, que es lo que activa el borrado del `default` anterior al añadir
+    o editar una pista de audio.
+    """
+    output = inputs_dir / "video_default_audio.mkv"
+    _run_ffmpeg(
+        [
+            "-f",
+            "lavfi",
+            "-i",
+            "testsrc2=size=160x90:rate=10:duration=2",
+            "-f",
+            "lavfi",
+            "-i",
+            "sine=frequency=440:duration=2",
+            *VIDEO_ARGS,
+            "-c:a",
+            "aac",
+            "-disposition:a:0",
+            "default",
+            str(output),
+        ]
+    )
+    return output
+
+
+@pytest.fixture(scope="session")
+def video_mkv_two_audio(inputs_dir: Path) -> Path:
+    """Vídeo mkv de 2 s con dos pistas de audio: la última `default` y `forced`."""
+    output = inputs_dir / "video_two_audio.mkv"
+    _run_ffmpeg(
+        [
+            "-f",
+            "lavfi",
+            "-i",
+            "testsrc2=size=160x90:rate=10:duration=2",
+            "-f",
+            "lavfi",
+            "-i",
+            "sine=frequency=440:duration=2",
+            "-f",
+            "lavfi",
+            "-i",
+            "sine=frequency=523:duration=2",
+            "-map",
+            "0:v",
+            "-map",
+            "1:a",
+            "-map",
+            "2:a",
+            *VIDEO_ARGS,
+            "-c:a",
+            "aac",
+            "-disposition:a:0",
+            "0",
+            "-disposition:a:1",
+            "default+forced",
+            str(output),
+        ]
+    )
+    return output
+
+
+@pytest.fixture(scope="session")
 def video_no_audio(inputs_dir: Path) -> Path:
     """Vídeo mp4 de 2 s sin pistas de audio."""
     output = inputs_dir / "video_no_audio.mp4"
@@ -552,6 +619,22 @@ def subs_spa(inputs_dir: Path) -> Path:
     """Fichero srt válido con un evento de subtítulo."""
     output = inputs_dir / "subs_spa.srt"
     output.write_text(SRT_SPA, encoding="utf-8")
+    return output
+
+
+@pytest.fixture(scope="session")
+def subs_ass(inputs_dir: Path, subs_spa: Path) -> Path:
+    """Fichero ass válido: el srt convertido por ffmpeg al formato ass."""
+    output = inputs_dir / "subs_spa.ass"
+    _run_ffmpeg(["-i", str(subs_spa), str(output)])
+    return output
+
+
+@pytest.fixture(scope="session")
+def subs_vtt(inputs_dir: Path, subs_spa: Path) -> Path:
+    """Fichero vtt válido: el srt convertido por ffmpeg al formato webvtt."""
+    output = inputs_dir / "subs_spa.vtt"
+    _run_ffmpeg(["-i", str(subs_spa), str(output)])
     return output
 
 
