@@ -41,12 +41,12 @@ uv run ruff format
 uv run ruff check --fix
 uv run ruff check
 uv run pytest
-uv run pytest -m locales
 # Si se ha tocado mensajes:
 uv run python scripts/i18n.py extract
 uv run python scripts/i18n.py update -l es
 uv run python scripts/i18n.py compile -l es
 uv run python scripts/i18n.py check
+uv run pytest -m locales
 # Test de compilación
 uv run pytest -q -m prod
 # Comprobar versión:

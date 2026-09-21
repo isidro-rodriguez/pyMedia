@@ -22,16 +22,9 @@ repos:
         language: system
         types: [python]
 
-      - id: pytest-development
-        name: Pytest (desarrollo)
+      - id: pytest
+        name: Pytest
         entry: uv run pytest
-        language: system
-        types: [python]
-        pass_filenames: false
-
-      - id: pytest-locales
-        name: Pytest (traducciones)
-        entry: uv run pytest -m locales
         language: system
         types: [python]
         pass_filenames: false

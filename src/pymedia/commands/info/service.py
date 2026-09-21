@@ -1,5 +1,7 @@
 """Comando ``info``: service."""
 
+import math
+
 from rich.console import Group
 from rich.panel import Panel
 from rich.table import Table
@@ -11,6 +13,8 @@ from pymedia.locale_manager import locale_manager
 from pymedia.locales import _
 from pymedia.models.media import Audio, Subtitles, Video
 from pymedia.utils import parse_quantity, parse_size, parse_timedelta
+
+_PANEL_WIDTH = 120
 
 
 class InfoService(BaseService[InfoParameters]):
@@ -36,7 +40,6 @@ class InfoService(BaseService[InfoParameters]):
         media = self.params.media
         media_input = media.path
         locale = locale_manager.detect_language()
-        panel_width = 100
         na = _("-")
 
         def _build_general_table() -> Table:
@@ -78,21 +81,27 @@ class InfoService(BaseService[InfoParameters]):
                 else video.codec or na,
                 f"{video.width}x{video.height}",
                 str(video.fps) if video.fps else na,
-                _("%(bit_rate)s bps")
-                % {"bit_rate": parse_quantity(value=video.bit_rate, locale=locale)}
-                if video.bit_rate
-                else na,
+                self._estimated_bit_rate(),
             )
             return table
 
         def _build_audio_table(audio: list[Audio]) -> Table:
-            """Construye la tabla de metadatos de las pistas de audio."""
+            """Construye la tabla compacta de metadatos de las pistas de audio."""
             table = Table(title=f"🎵 {_('Audio')}", expand=True)
             table.add_column(header=_("Track"), ratio=1, justify="center")
-            table.add_column(header=_("Codec"), ratio=2, justify="center")
-            table.add_column(header=_("Sample rate"), ratio=2, justify="center")
+            table.add_column(header=_("Codec"), ratio=1, justify="center")
+            table.add_column(header=_("Sample"), ratio=1, justify="center")
             table.add_column(header=_("Channels"), ratio=1, justify="center")
-            table.add_column(header=_("Language"), ratio=1, justify="center")
+            table.add_column(header=_("Lang"), ratio=1, justify="center")
+            table.add_column(header=_("Title"), ratio=2, justify="center")
+            # Inciales de "Default" para mantener tabla compacta
+            table.add_column(header=_("Def"), ratio=1, justify="center")
+            # Iniciales de "Forced"
+            table.add_column(header=_("For"), ratio=1, justify="center")
+            # Iniciales de Hearing Impaired
+            table.add_column(header=_("HI"), ratio=1, justify="center")
+            # Iniciales de Commentary
+            table.add_column(header=_("Com"), ratio=1, justify="center")
 
             for track in audio:
                 if track.track_index is None:
@@ -104,6 +113,11 @@ class InfoService(BaseService[InfoParameters]):
                     f"{track.sample_rate} Hz" if track.sample_rate else na,
                     str(track.channels or na),
                     track.language or na,
+                    track.title or na,
+                    "✓" if track.default else "",
+                    "✓" if track.forced else "",
+                    "✓" if track.hearing_impaired else "",
+                    "✓" if track.commentary else "",
                 )
 
             return table
@@ -112,20 +126,30 @@ class InfoService(BaseService[InfoParameters]):
             """Construye la tabla de metadatos de las pistas de subtítulos."""
             table = Table(title=f"💬 {_('Subtitles')}", expand=True)
             table.add_column(header=_("Track"), ratio=1, justify="center")
+            table.add_column(header=_("Codec"), ratio=2, justify="center")
             table.add_column(header=_("Language"), ratio=2, justify="center")
             table.add_column(header=_("Title"), ratio=2, justify="center")
-            table.add_column(header=_("Forced"), ratio=1, justify="center")
-            table.add_column(header=_("Default"), ratio=1, justify="center")
+            # Iniciales de "Default"
+            table.add_column(header=_("Def"), ratio=1, justify="center")
+            # Iniciales de "Forced"
+            table.add_column(header=_("For"), ratio=1, justify="center")
+            # Iniciales de "Hearing Impaired"
+            table.add_column(header=_("HI"), ratio=1, justify="center")
+            # Iniciales de "Visual Impaired"
+            table.add_column(header=_("VI"), ratio=1, justify="center")
             for sub in subtitles:
                 if sub.track_index is None:
                     raise MissingParameterError(name="track_index")
 
                 table.add_row(
                     str(sub.track_index),
+                    sub.codec or na,
                     sub.language or na,
                     sub.title or na,
-                    "✓" if sub.forced else "",
                     "✓" if sub.default else "",
+                    "✓" if sub.forced else "",
+                    "✓" if sub.hearing_impaired else "",
+                    "✓" if sub.visual_impaired else "",
                 )
             return table
 
@@ -142,5 +166,30 @@ class InfoService(BaseService[InfoParameters]):
             renderable=Group(*sections),
             title=_("Metadata"),
             border_style="cyan",
-            width=panel_width,
+            width=_PANEL_WIDTH,
         )
+
+    def _estimated_bit_rate(self) -> str:
+        """Devuelve el bit_rate obtenido por ffprobe o lo calcula si no se obtuvo."""
+        if self.params.media is None:
+            raise MissingParameterError(name="media")
+        media = self.params.media
+        if media.size is None:
+            raise MissingParameterError(name="media")
+        if media.duration is None:
+            raise MissingParameterError(name="duration")
+        video = self.params.media.video
+        if video is None:
+            raise MissingParameterError(name="video")
+
+        locale = locale_manager.detect_language()
+
+        if video.bit_rate:
+            bit_rate = video.bit_rate / 1024
+        else:
+            bit_rate = (media.size * 8 / media.duration.total_seconds()) / 1024
+
+        bit_rate = math.floor(bit_rate)
+        bit_rate = parse_quantity(value=bit_rate, locale=locale)
+
+        return _("%(bit_rate)s bps") % {"bit_rate": bit_rate}
