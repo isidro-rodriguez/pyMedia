@@ -4,9 +4,9 @@ from dataclasses import dataclass
 from datetime import timedelta
 from pathlib import Path
 
-from pymedia.models.audio import Audio as Audio
-from pymedia.models.subtitles import Subtitles as Subtitles
-from pymedia.models.video import Video as Video
+from pymedia.models.audio import Audio
+from pymedia.models.subtitles import Subtitles
+from pymedia.models.video import Video
 
 
 @dataclass(frozen=True, kw_only=True, slots=True)

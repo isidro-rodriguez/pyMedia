@@ -5,6 +5,7 @@ subtítulos de `subtitle_tracks`, que deben existir antes de ejecutar este módu
 """
 
 from dataclasses import dataclass
+from itertools import cycle, islice
 from pathlib import Path
 
 from ._common import (
@@ -52,6 +53,12 @@ class VideoSpec:
         subtitle_format: Formato de los subtítulos a incrustar; `None` = ninguno.
         null_metadata: Si es `True`, deja sin title/language/disposition
             todos los streams (para probar vídeos con metadatos ausentes).
+        audio_count: Nº de pistas de audio; `None` = todas las compatibles.
+            Si supera las disponibles, se reutilizan cíclicamente.
+        tags: Pares (language, title) a usar en las pistas de audio en vez de
+            los de `TrackSpec`. Su longitud fija el nº de pistas de audio.
+        truncate_ratio: Fracción del fichero que se conserva tras generarlo
+            (simula una descarga incompleta); `None` = fichero completo.
     """
 
     filename: str
@@ -60,6 +67,22 @@ class VideoSpec:
     output_args: tuple[str, ...] = ()
     subtitle_format: str | None = None
     null_metadata: bool = False
+    audio_count: int | None = None
+    tags: tuple[tuple[str, str], ...] = ()
+    truncate_ratio: float | None = None
+
+
+# Casos límite de idioma y título: emoji, comillas, `=`, salto de línea,
+# espacios en los extremos, códigos no estándar, título largo y vacío.
+HOSTILE_TAGS: tuple[tuple[str, str], ...] = (
+    ("und", "🎵 emoji ñ 日本語"),
+    ("es", "comillas \"dobles\" y 'simples'"),
+    ("fre", "a=b=c"),
+    ("xxx", "línea 1\nlínea 2"),
+    ("eng", "  espacios  "),
+    ("spa", "x" * 500),
+    ("eng", ""),
+)
 
 
 VIDEOS: tuple[VideoSpec, ...] = (
@@ -82,11 +105,41 @@ VIDEOS: tuple[VideoSpec, ...] = (
         subtitle_format="ass",
     ),
     VideoSpec(
-        filename="null.mkv",
+        filename="test_null_metadata.mkv",
         source=_lavfi("testsrc2"),
         video_args=H264,
         subtitle_format="srt",
         null_metadata=True,
+    ),
+    VideoSpec(
+        filename="noaudio.mkv",
+        source=_lavfi("testsrc2"),
+        video_args=H264,
+        audio_count=0,
+    ),
+    VideoSpec(
+        filename="lots.mkv",
+        source=_lavfi("testsrc2"),
+        video_args=H264,
+        audio_count=32,
+    ),
+    VideoSpec(
+        filename="hostile.mkv",
+        source=_lavfi("testsrc2"),
+        video_args=H264,
+        tags=HOSTILE_TAGS,
+    ),
+    VideoSpec(
+        filename="weird ñ [1] 'x'.mkv",
+        source=_lavfi("testsrc2"),
+        video_args=H264,
+    ),
+    # Sin `faststart`, el átomo `moov` queda al final y el recorte lo destruye.
+    VideoSpec(
+        filename="cut.mp4",
+        source=_lavfi("testsrc2"),
+        video_args=H264,
+        truncate_ratio=0.5,
     ),
 )
 
@@ -98,10 +151,15 @@ def select_audio(spec: VideoSpec) -> list[TrackSpec]:
         spec: Especificación del vídeo.
 
     Returns:
-        Pistas de `TRACKS` compatibles con la extensión de `spec.filename`.
+        Pistas de `TRACKS` compatibles con la extensión de `spec.filename`,
+        repetidas cíclicamente si `spec` pide más (`tags` o `audio_count`).
     """
     suffix = Path(spec.filename).suffix
-    return [track for track in TRACKS if suffix in track.compatible_with]
+    compatible = [track for track in TRACKS if suffix in track.compatible_with]
+    count = len(spec.tags) if spec.tags else spec.audio_count
+    if count is None:
+        return compatible
+    return list(islice(cycle(compatible), count))
 
 
 def _subtitle_files(extension: str | None, root: Path) -> list[tuple[str, Path]]:
@@ -137,11 +195,18 @@ def _stream_metadata(kind: str, index: int, **tags: str) -> list[str]:
     return args
 
 
-def _metadata_args(tracks: list[TrackSpec], languages: list[str]) -> list[str]:
+def _audio_tags(spec: VideoSpec, tracks: list[TrackSpec]) -> list[tuple[str, str]]:
+    """Pares (idioma, título) de las pistas de audio: los de `spec` o los propios."""
+    return list(spec.tags) or [(track.language, track.title) for track in tracks]
+
+
+def _metadata_args(
+    audio_tags: list[tuple[str, str]], languages: list[str]
+) -> list[str]:
     """Metadatos de idioma y título de cada pista de audio y subtítulos."""
     args: list[str] = []
-    for i, track in enumerate(tracks):
-        args += _stream_metadata("a", i, language=track.language, title=track.title)
+    for i, (language, title) in enumerate(audio_tags):
+        args += _stream_metadata("a", i, language=language, title=title)
     for i, language in enumerate(languages):
         args += _stream_metadata("s", i, language=language, title=f"Sub {language}")
     return args
@@ -192,8 +257,26 @@ def build_ffmpeg_args(
     if spec.null_metadata:
         args += _null_metadata_args(len(audio_paths), len(subtitle_paths))
     else:
-        args += _metadata_args(tracks, [lang for lang, _ in subtitles])
+        args += _metadata_args(
+            _audio_tags(spec, tracks), [lang for lang, _ in subtitles]
+        )
     return [*args, *spec.output_args, str(output)]
+
+
+def _truncate(path: Path, ratio: float) -> None:
+    """Recorta el fichero a una fracción de su tamaño."""
+    size = path.stat().st_size
+    with path.open("r+b") as file:
+        file.truncate(int(size * ratio))
+
+
+def _generate_one(spec: VideoSpec, output_dir: Path) -> Path:
+    """Genera un vídeo (y lo trunca si `spec` lo pide)."""
+    output = output_dir / spec.filename
+    run_ffmpeg(build_ffmpeg_args(spec, output, output_dir))
+    if spec.truncate_ratio is not None:
+        _truncate(output, spec.truncate_ratio)
+    return output
 
 
 def generate(output_dir: Path = FIXTURES_DIR) -> list[Path]:
@@ -210,12 +293,7 @@ def generate(output_dir: Path = FIXTURES_DIR) -> list[Path]:
     """
     output_dir.mkdir(parents=True, exist_ok=True)
 
-    paths: list[Path] = []
-    for spec in VIDEOS:
-        output = output_dir / spec.filename
-        run_ffmpeg(build_ffmpeg_args(spec, output, output_dir))
-        paths.append(output)
-    return paths
+    return [_generate_one(spec, output_dir) for spec in VIDEOS]
 
 
 def main() -> None:

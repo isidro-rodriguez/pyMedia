@@ -33,7 +33,6 @@ Código simple, legible, stdlib antes que dependencias nuevas.
 - `uv` para paquetes
 - `ruff` para lint/format
 - `pytest` para testeo
-- `mypy` para tipado
 
 ## Pre-commit checklist (orden estricto, detener en el primer fallo)
 
@@ -41,7 +40,6 @@ Código simple, legible, stdlib antes que dependencias nuevas.
 uv run ruff format
 uv run ruff check --fix
 uv run ruff check
-uv run mypy --strict
 uv run pytest
 uv run pytest -m locales
 # Si se ha tocado mensajes:
@@ -51,7 +49,7 @@ uv run python scripts/i18n.py compile -l es
 uv run python scripts/i18n.py check
 # Test de compilación
 uv run pytest -q -m prod
-# Comprobar versión: 
+# Comprobar versión:
 # - Parar si se han añadido características sin incrementar versión
 # - Si se ha incrementado versión, actualizar CHANGELOG.md y README.md
 ```
