@@ -1,0 +1,96 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "CHECK 1 - ruff format",
+            "type": "shell",
+            "command": "uv run ruff format"
+        },
+        {
+            "label": "CHECK 2 - ruff check --fix",
+            "type": "shell",
+            "command": "uv run ruff check --fix"
+        },
+        {
+            "label": "CHECK 3 - ruff check",
+            "type": "shell",
+            "command": "uv run ruff check"
+        },
+        {
+            "label": "CHECK 4 - mypy --strict",
+            "type": "shell",
+            "command": "uv run mypy --strict"
+        },
+        {
+            "label": "CHECK 5 - pytest",
+            "type": "shell",
+            "command": "uv run pytest"
+        },
+        {
+            "label": "CHECK 6 - pytest -m locales",
+            "type": "shell",
+            "command": "uv run pytest -m locales"
+        },
+        {
+            "label": "CHECK 7 - pytest -m binario",
+            "type": "shell",
+            "command": "uv run pytest -m binario"
+        },
+        {
+            "label": "CHECK_LIST",
+            "dependsOn": [
+                "ruff format",
+                "ruff check --fix",
+                "ruff check",
+                "mypy --strict",
+                "pytest",
+                "pytest -m locales"
+            ],
+            "dependsOrder": "sequence",
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
+        },
+        {
+            "label": "I18N 1 - regenera POT",
+            "type": "shell",
+            "command": "uv run python scripts/i18n.py extract"
+        },
+        {
+            "label": "I18N 2 - rehace POs",
+            "type": "shell",
+            "command": "uv run python scripts/i18n.py update -l es"
+        },
+        {
+            "label": "I18N 3 - compila POs",
+            "type": "shell",
+            "command": "uv run python scripts/i18n.py compile -l es"
+        },
+        {
+            "label": "I18N 4 - valida POs",
+            "type": "shell",
+            "command": "uv run python scripts/i18n.py check; uv run pytest tests/test_locales.py tests/test_locale_manager.py"
+        },
+        {
+            "label": "build",
+            "type": "shell",
+            "command": "uv run python ./scripts/build.py"
+        },
+        {
+            "label": "backup",
+            "type": "shell",
+            "command": "uv run python ./scripts/backup.py"
+        },
+        {
+            "label": "code count",
+            "type": "shell",
+            "command": "uv run python ./scripts/code_count.py"
+        },
+        {
+            "label": "genera fixtures",
+            "type": "shell",
+            "command": "uv run python scripts/generate_fixtures.py"
+        }
+    ]
+}

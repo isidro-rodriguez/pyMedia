@@ -22,13 +22,6 @@ repos:
         language: system
         types: [python]
 
-      - id: mypy
-        name: Mypy (tipado estático)
-        entry: uv run mypy
-        language: system
-        types: [python]
-        pass_filenames: false
-
       - id: pytest-development
         name: Pytest (desarrollo)
         entry: uv run pytest
