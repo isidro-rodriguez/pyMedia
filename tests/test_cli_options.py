@@ -536,3 +536,129 @@ def test_track_title(
 
     assert result.exit_code == 0
     assert stream_tag(output, kind, "title", index) == "My Title"
+
+
+# =============================================================================
+#  Rutas de salida (WRITING)
+# =============================================================================
+
+
+@pytest.mark.parametrize("name", WRITING)
+def test_output_unsupported_extension(
+    pymedia: Invoke,
+    request: pytest.FixtureRequest,
+    name: str,
+    tmp_path: Path,
+) -> None:
+    """Salida con extensión no soportada lanza error."""
+    cmd = COMMANDS[name]
+    output = tmp_path / "out.bmp"
+
+    result = pymedia(*build_args(cmd, request, output, "-ov", "yes"))
+
+    assert result.exit_code != 0
+
+
+@pytest.mark.parametrize("name", WRITING)
+def test_output_special_chars(
+    pymedia: Invoke,
+    request: pytest.FixtureRequest,
+    name: str,
+    tmp_path: Path,
+) -> None:
+    """Salida con espacios en la ruta funciona."""
+    cmd = COMMANDS[name]
+    output = tmp_path / "output dir" / f"out{cmd.suffix}"
+
+    result = pymedia(*build_args(cmd, request, output, "-ov", "yes"))
+
+    assert result.exit_code == 0
+
+
+# =============================================================================
+#  --tracks / --track
+# =============================================================================
+
+TRACK_PARSE_CASES = [
+    pytest.param("--tracks", "a,b", id="tracks-malformed"),
+    pytest.param("--tracks", "", id="tracks-empty"),
+]
+
+
+@pytest.mark.parametrize("option,value", TRACK_PARSE_CASES)
+@pytest.mark.parametrize(
+    "name",
+    ["extract-audio", "delete-subs", "edit-audio", "edit-subs"],
+)
+def test_track_malformed(
+    pymedia: Invoke,
+    request: pytest.FixtureRequest,
+    name: str,
+    option: str,
+    value: str,
+    tmp_path: Path,
+) -> None:
+    """`--tracks`/`--track` con valores mal formados lanza error."""
+    cmd = COMMANDS[name]
+    output = tmp_path / "out.mkv"
+
+    result = pymedia(*build_args(cmd, request, output, "-ov", "yes", option, value))
+
+    assert result.exit_code != 0
+
+
+INDEX_OUT_OF_RANGE = [
+    pytest.param("extract-audio", "--tracks", "99", id="extract-audio"),
+    pytest.param("extract-subs", "--tracks", "99", id="extract-subs"),
+    pytest.param("edit-audio", "--track", "99", id="edit-audio"),
+    pytest.param("edit-subs", "--track", "99", id="edit-subs"),
+    pytest.param("delete-subs", "--tracks", "99", id="delete-subs"),
+]
+
+
+@pytest.mark.parametrize("name,option,value", INDEX_OUT_OF_RANGE)
+def test_track_index_out_of_range(
+    pymedia: Invoke,
+    request: pytest.FixtureRequest,
+    name: str,
+    option: str,
+    value: str,
+    tmp_path: Path,
+) -> None:
+    """`--tracks`/`--track` con índice fuera de rango lanza error."""
+    cmd = COMMANDS[name]
+    output = tmp_path / "out.mkv"
+
+    result = pymedia(*build_args(cmd, request, output, "-ov", "yes", option, value))
+
+    assert result.exit_code != 0
+
+
+# =============================================================================
+#  --language inválido
+# =============================================================================
+
+LANGUAGE_CASES = [
+    pytest.param("add-audio", "--language", "xyz", id="add-audio"),
+    pytest.param("edit-audio", "--language", "xyz", id="edit-audio"),
+    pytest.param("add-subs", "--language", "xyz", id="add-subs"),
+    pytest.param("edit-subs", "--language", "xyz", id="edit-subs"),
+]
+
+
+@pytest.mark.parametrize("name,option,value", LANGUAGE_CASES)
+def test_language_invalid(
+    pymedia: Invoke,
+    request: pytest.FixtureRequest,
+    name: str,
+    option: str,
+    value: str,
+    tmp_path: Path,
+) -> None:
+    """`--language` con código ISO 639-2 inválido lanza error."""
+    cmd = COMMANDS[name]
+    output = tmp_path / "out.mkv"
+
+    result = pymedia(*build_args(cmd, request, output, "-ov", "yes", option, value))
+
+    assert result.exit_code != 0

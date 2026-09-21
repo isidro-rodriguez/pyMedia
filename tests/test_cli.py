@@ -35,6 +35,19 @@ def test_info_success_shows_metadata(pymedia: Invoke, video_mp4_a: Path) -> None
     assert "Metadata" in result.output
 
 
+def test_info_with_subtitles(
+    pymedia: Invoke,
+    video_mkv_subs: Path,
+) -> None:
+    """`info` muestra la tabla de subtítulos con idioma y flags."""
+    result = pymedia("info", str(video_mkv_subs))
+
+    assert result.exit_code == 0
+    assert "Metadata" in result.output
+    assert "Subtitles" in result.output
+    assert stream_tag(video_mkv_subs, "subtitle", "language", 0) is not None
+
+
 def test_info_error_nonexistent_input(pymedia: Invoke, tmp_path: Path) -> None:
     """`info` con una ruta inexistente falla en la validación de Typer."""
     result = pymedia("info", str(tmp_path / "missing.mp4"))
@@ -208,6 +221,22 @@ def test_sheet_success_multiple_inputs(
     assert len(generated) == 2
 
 
+def test_sheet_header_truncates_long_track_list(
+    pymedia: Invoke,
+    video_mp4_multi_audio: Path,
+    tmp_path: Path,
+) -> None:
+    """`sheet --preset web` recorta la cabecera con muchas pistas de audio."""
+    output = tmp_path / "sheet.jpg"
+
+    result = pymedia(
+        "sheet", str(video_mp4_multi_audio), "-o", str(output), "--preset", "web"
+    )
+
+    assert result.exit_code == 0
+    assert output.exists()
+
+
 # =============================================================================
 #  join
 # =============================================================================
@@ -259,6 +288,123 @@ def test_join_success_with_overwrite_yes(
     assert result.exit_code == 0
     assert output.exists()
     assert output.read_bytes() != b"existing"
+
+
+# -- Join con vídeos incompatibles -------------------------------------------
+
+JOIN_INCOMPATIBLE_CASES = [
+    pytest.param(
+        "video_mp4_diff_codec",
+        "video.codec differs:",
+        id="codec",
+    ),
+    pytest.param(
+        "video_mp4_diff_res",
+        "video.width differs:",
+        id="resolution",
+    ),
+    pytest.param(
+        "video_mp4_diff_fps",
+        "video.fps differs:",
+        id="fps",
+    ),
+    pytest.param(
+        "video_mp4_diff_pixfmt",
+        "video.pix_fmt differs:",
+        id="pix_fmt",
+    ),
+    pytest.param(
+        "video_mp4_diff_sr",
+        "audio[0].sample_rate differs:",
+        id="sample_rate",
+    ),
+    pytest.param(
+        "video_mp4_diff_audio_codec",
+        "audio[0].codec differs:",
+        id="audio_codec",
+    ),
+]
+
+
+@pytest.mark.parametrize("second_fixture,expected", JOIN_INCOMPATIBLE_CASES)
+def test_join_rejects_incompatible_media(
+    pymedia: Invoke,
+    request: pytest.FixtureRequest,
+    video_mp4_a: Path,
+    second_fixture: str,
+    expected: str,
+    tmp_path: Path,
+) -> None:
+    """`join` rechaza vídeos incompatibles indicando el motivo."""
+    second = request.getfixturevalue(second_fixture)
+    output = tmp_path / "joined.mp4"
+
+    result = pymedia(
+        "join",
+        str(video_mp4_a),
+        str(second),
+        "-o",
+        str(output),
+        "-ov",
+        "yes",
+    )
+
+    assert result.exit_code != 0
+    assert "Incompatible media files" in result.output
+    assert expected in result.output
+    assert output.exists() is False
+
+
+def test_join_rejects_no_audio_first(
+    pymedia: Invoke,
+    video_no_audio: Path,
+    video_mp4_a: Path,
+    tmp_path: Path,
+) -> None:
+    """`join` rechaza si el primero no tiene audio y el segundo sí."""
+    output = tmp_path / "joined.mp4"
+
+    result = pymedia(
+        "join",
+        str(video_no_audio),
+        str(video_mp4_a),
+        "-o",
+        str(output),
+        "-ov",
+        "yes",
+    )
+
+    assert result.exit_code != 0
+    assert "Incompatible media files" in result.output
+    assert "audio presence differs: first has no audio, this has audio" in result.output
+    assert output.exists() is False
+
+
+# -- Join con vídeos compatibles --------------------------------------------
+
+
+def test_join_success_multiple_compatible(
+    pymedia: Invoke,
+    video_mp4_a: Path,
+    video_mp4_b: Path,
+    tmp_path: Path,
+) -> None:
+    """`join` une tres vídeos compatibles."""
+    output = tmp_path / "joined.mp4"
+
+    result = pymedia(
+        "join",
+        str(video_mp4_a),
+        str(video_mp4_b),
+        str(video_mp4_a),
+        "-o",
+        str(output),
+        "-ov",
+        "yes",
+    )
+
+    assert result.exit_code == 0
+    assert ffprobe_duration(output) >= 5.5
 
 
 # =============================================================================
@@ -1389,6 +1535,41 @@ def test_frames_success_multiple_timestamps(
     assert len(list(tmp_path.glob("multi_*.jpg"))) == 2
 
 
+IMAGE_FORMAT_CASES = [
+    pytest.param(".png", "png", id="png"),
+    pytest.param(".webp", "webp", id="webp"),
+]
+
+
+@pytest.mark.parametrize("ext,codec", IMAGE_FORMAT_CASES)
+def test_frames_output_format(
+    pymedia: Invoke,
+    video_mp4_a: Path,
+    tmp_path: Path,
+    ext: str,
+    codec: str,
+) -> None:
+    """`frames` genera imágenes en distintos formatos."""
+    output = tmp_path / f"thumb{ext}"
+
+    result = pymedia(
+        "frames",
+        str(video_mp4_a),
+        "--at",
+        "00:00:01",
+        "-o",
+        str(output),
+        "-ov",
+        "yes",
+    )
+
+    assert result.exit_code == 0
+    generated = list(output.parent.glob(f"thumb_*{ext}"))
+    assert len(generated) == 1
+    codecs = stream_codec_names(generated[0], "video")
+    assert codecs[0] == codec
+
+
 # =============================================================================
 #  interval
 # =============================================================================
@@ -1553,3 +1734,147 @@ def test_main_without_arguments_shows_help(pymedia: Invoke) -> None:
     # El código de salida (0 o 2) depende de la versión de Click.
     assert "Usage:" in result.output
     assert "Traceback" not in result.output
+
+
+def test_hflip_changes_content(
+    pymedia: Invoke,
+    video_mp4_a: Path,
+    tmp_path: Path,
+) -> None:
+    """`--hflip` produce una imagen con contenido espejado."""
+    no_flip_path = tmp_path / "no_flip_h.jpg"
+    hflip_path = tmp_path / "hflip_h.jpg"
+
+    assert (
+        pymedia(
+            "frames",
+            str(video_mp4_a),
+            "--at",
+            "00:00:01",
+            "-o",
+            str(no_flip_path),
+            "-ov",
+            "yes",
+        ).exit_code
+        == 0
+    )
+    assert (
+        pymedia(
+            "frames",
+            str(video_mp4_a),
+            "--at",
+            "00:00:01",
+            "-o",
+            str(hflip_path),
+            "-ov",
+            "yes",
+            "--hflip",
+        ).exit_code
+        == 0
+    )
+
+    generated = list(tmp_path.glob("no_flip_h_*.jpg"))
+    assert generated
+    no_flip_bytes = generated[0].read_bytes()
+    generated = list(tmp_path.glob("hflip_h_*.jpg"))
+    assert generated
+    hflip_bytes = generated[0].read_bytes()
+
+    assert no_flip_bytes != hflip_bytes
+
+
+def test_vflip_changes_content(
+    pymedia: Invoke,
+    video_mp4_a: Path,
+    tmp_path: Path,
+) -> None:
+    """`--vflip` produce una imagen con contenido verticalmente invertido."""
+    no_flip_path = tmp_path / "no_flip_v.jpg"
+    vflip_path = tmp_path / "vflip_v.jpg"
+
+    assert (
+        pymedia(
+            "frames",
+            str(video_mp4_a),
+            "--at",
+            "00:00:01",
+            "-o",
+            str(no_flip_path),
+            "-ov",
+            "yes",
+        ).exit_code
+        == 0
+    )
+    assert (
+        pymedia(
+            "frames",
+            str(video_mp4_a),
+            "--at",
+            "00:00:01",
+            "-o",
+            str(vflip_path),
+            "-ov",
+            "yes",
+            "--vflip",
+        ).exit_code
+        == 0
+    )
+
+    generated = list(tmp_path.glob("no_flip_v_*.jpg"))
+    assert generated
+    no_flip_bytes = generated[0].read_bytes()
+    generated = list(tmp_path.glob("vflip_v_*.jpg"))
+    assert generated
+    vflip_bytes = generated[0].read_bytes()
+
+    assert no_flip_bytes != vflip_bytes
+
+
+def test_rotate_90_differs_from_270(
+    pymedia: Invoke,
+    video_mp4_a: Path,
+    tmp_path: Path,
+) -> None:
+    """`--rotate 90` y `--rotate 270` producen resultados distintos."""
+    r90_path = tmp_path / "rotate90.jpg"
+    r270_path = tmp_path / "rotate270.jpg"
+
+    assert (
+        pymedia(
+            "frames",
+            str(video_mp4_a),
+            "--at",
+            "00:00:01",
+            "-o",
+            str(r90_path),
+            "-ov",
+            "yes",
+            "--rotate",
+            "90",
+        ).exit_code
+        == 0
+    )
+    assert (
+        pymedia(
+            "frames",
+            str(video_mp4_a),
+            "--at",
+            "00:00:01",
+            "-o",
+            str(r270_path),
+            "-ov",
+            "yes",
+            "--rotate",
+            "270",
+        ).exit_code
+        == 0
+    )
+
+    generated = list(tmp_path.glob("rotate90_*.jpg"))
+    assert generated
+    r90_bytes = generated[0].read_bytes()
+    generated = list(tmp_path.glob("rotate270_*.jpg"))
+    assert generated
+    r270_bytes = generated[0].read_bytes()
+
+    assert r90_bytes != r270_bytes

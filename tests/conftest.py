@@ -236,6 +236,252 @@ def video_scenes(inputs_dir: Path) -> Path:
 
 
 @pytest.fixture(scope="session")
+def video_mp4_diff_res(inputs_dir: Path) -> Path:
+    """Vídeo mp4 de 2 s con otra resolución (320x180)."""
+    output = inputs_dir / "video_diff_res.mp4"
+    _run_ffmpeg(
+        [
+            "-f",
+            "lavfi",
+            "-i",
+            "testsrc2=size=320x180:rate=10:duration=2",
+            "-f",
+            "lavfi",
+            "-i",
+            "sine=frequency=440:duration=2",
+            "-c:v",
+            "libx264",
+            "-preset",
+            "ultrafast",
+            "-g",
+            "10",
+            "-pix_fmt",
+            "yuv420p",
+            "-c:a",
+            "aac",
+            str(output),
+        ]
+    )
+    return output
+
+
+@pytest.fixture(scope="session")
+def video_mp4_diff_codec(inputs_dir: Path) -> Path:
+    """Vídeo mp4 de 2 s con otro códec (mpeg4)."""
+    output = inputs_dir / "video_diff_codec.mp4"
+    _run_ffmpeg(
+        [
+            "-f",
+            "lavfi",
+            "-i",
+            "testsrc2=size=160x90:rate=10:duration=2",
+            "-f",
+            "lavfi",
+            "-i",
+            "sine=frequency=440:duration=2",
+            "-c:v",
+            "mpeg4",
+            "-preset",
+            "ultrafast",
+            "-g",
+            "10",
+            "-pix_fmt",
+            "yuv420p",
+            "-c:a",
+            "aac",
+            str(output),
+        ]
+    )
+    return output
+
+
+@pytest.fixture(scope="session")
+def video_mp4_diff_fps(inputs_dir: Path) -> Path:
+    """Vídeo mp4 de 2 s con otro fps (5)."""
+    output = inputs_dir / "video_diff_fps.mp4"
+    _run_ffmpeg(
+        [
+            "-f",
+            "lavfi",
+            "-i",
+            "testsrc2=size=160x90:rate=5:duration=2",
+            "-f",
+            "lavfi",
+            "-i",
+            "sine=frequency=440:duration=2",
+            "-c:v",
+            "libx264",
+            "-preset",
+            "ultrafast",
+            "-g",
+            "10",
+            "-pix_fmt",
+            "yuv420p",
+            "-c:a",
+            "aac",
+            str(output),
+        ]
+    )
+    return output
+
+
+@pytest.fixture(scope="session")
+def video_mp4_diff_pixfmt(inputs_dir: Path) -> Path:
+    """Vídeo mp4 de 2 s con otro pix_fmt (yuv422p)."""
+    output = inputs_dir / "video_diff_pixfmt.mp4"
+    _run_ffmpeg(
+        [
+            "-f",
+            "lavfi",
+            "-i",
+            "testsrc2=size=160x90:rate=10:duration=2",
+            "-f",
+            "lavfi",
+            "-i",
+            "sine=frequency=440:duration=2",
+            "-c:v",
+            "libx264",
+            "-preset",
+            "ultrafast",
+            "-g",
+            "10",
+            "-pix_fmt",
+            "yuv422p",
+            "-c:a",
+            "aac",
+            str(output),
+        ]
+    )
+    return output
+
+
+@pytest.fixture(scope="session")
+def video_mp4_diff_sr(inputs_dir: Path) -> Path:
+    """Vídeo mp4 de 2 s con otra frecuencia de muestreo (48000 Hz)."""
+    output = inputs_dir / "video_diff_sr.mp4"
+    _run_ffmpeg(
+        [
+            "-f",
+            "lavfi",
+            "-i",
+            "testsrc2=size=160x90:rate=10:duration=2",
+            "-f",
+            "lavfi",
+            "-i",
+            "sine=frequency=440:duration=2",
+            "-c:v",
+            "libx264",
+            "-preset",
+            "ultrafast",
+            "-g",
+            "10",
+            "-pix_fmt",
+            "yuv420p",
+            "-c:a",
+            "aac",
+            "-ar",
+            "48000",
+            str(output),
+        ]
+    )
+    return output
+
+
+@pytest.fixture(scope="session")
+def video_mp4_diff_audio_codec(inputs_dir: Path) -> Path:
+    """Vídeo mp4 de 2 s con códec de audio mp3."""
+    output = inputs_dir / "video_diff_audio_codec.mp4"
+    _run_ffmpeg(
+        [
+            "-f",
+            "lavfi",
+            "-i",
+            "testsrc2=size=160x90:rate=10:duration=2",
+            "-f",
+            "lavfi",
+            "-i",
+            "sine=frequency=440:duration=2",
+            "-c:v",
+            "libx264",
+            "-preset",
+            "ultrafast",
+            "-g",
+            "10",
+            "-pix_fmt",
+            "yuv420p",
+            "-c:a",
+            "mp3",
+            str(output),
+        ]
+    )
+    return output
+
+
+@pytest.fixture(scope="session")
+def video_mp4_multi_audio(inputs_dir: Path) -> Path:
+    """Vídeo mp4 de 2 s con 6 pistas de audio (para probar truncado)."""
+    output = inputs_dir / "video_multi_audio.mp4"
+    _run_ffmpeg(
+        [
+            "-f",
+            "lavfi",
+            "-i",
+            "testsrc2=size=160x90:rate=10:duration=2",
+            "-f",
+            "lavfi",
+            "-i",
+            "sine=frequency=440:duration=2",
+            "-f",
+            "lavfi",
+            "-i",
+            "sine=frequency=523:duration=2",
+            "-f",
+            "lavfi",
+            "-i",
+            "sine=frequency=659:duration=2",
+            "-f",
+            "lavfi",
+            "-i",
+            "sine=frequency=784:duration=2",
+            "-f",
+            "lavfi",
+            "-i",
+            "sine=frequency=880:duration=2",
+            "-f",
+            "lavfi",
+            "-i",
+            "sine=frequency=988:duration=2",
+            "-map",
+            "0:v",
+            "-map",
+            "1:a",
+            "-map",
+            "2:a",
+            "-map",
+            "3:a",
+            "-map",
+            "4:a",
+            "-map",
+            "5:a",
+            "-map",
+            "6:a",
+            "-c:v",
+            "libx264",
+            "-preset",
+            "ultrafast",
+            "-g",
+            "10",
+            "-pix_fmt",
+            "yuv420p",
+            "-c:a",
+            "aac",
+            str(output),
+        ]
+    )
+    return output
+
+
+@pytest.fixture(scope="session")
 def audio_m4a(inputs_dir: Path) -> Path:
     """Pista de audio aac de 1 s."""
     output = inputs_dir / "audio.m4a"
