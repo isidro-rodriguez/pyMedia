@@ -472,11 +472,135 @@ def test_timestamp_beyond_duration_is_rejected(
     assert "exceeds video duration" in result.output
 
 
+# Comandos con --start/--end (TimestampStartEndMixin expuesto en CLI)
+# Usamos marcas dentro de la duración del vídeo (2 s).
+START_END_COMMANDS = [
+    pytest.param("animated", id="animated"),
+    pytest.param("interval", id="interval"),
+    pytest.param("scene", id="scene"),
+]
+
+
+@pytest.mark.parametrize("name", START_END_COMMANDS)
+def test_start_after_end_is_rejected(
+    pymedia: Invoke, request: pytest.FixtureRequest, name: str, tmp_path: Path
+) -> None:
+    """`--start` posterior a `--end` se rechaza."""
+    cmd = COMMANDS[name]
+    output = tmp_path / f"out{cmd.suffix}"
+
+    result = pymedia(
+        *build_args(
+            cmd,
+            request,
+            output,
+            "-ov",
+            "yes",
+            "--start",
+            "00:00:01.5",
+            "--end",
+            "00:00:01",
+        )
+    )
+
+    assert result.exit_code != 0
+    assert "Invalid timestamps" in result.output
+    assert "Start" in result.output and "End" in result.output
+
+
+# Test específico para cut con --start/--end (tiene --at por defecto en COMMANDS)
+def test_cut_start_after_end_is_rejected(
+    pymedia: Invoke, request: pytest.FixtureRequest, tmp_path: Path
+) -> None:
+    """`cut --start` posterior a `--end` se rechaza."""
+    cmd = COMMANDS["cut"]
+    output = tmp_path / f"out{cmd.suffix}"
+
+    # build_args incluye --at por defecto; lo llamamos sin él
+    inputs = [str(request.getfixturevalue(n)) for n in cmd.inputs]
+    args = [
+        "cut",
+        *inputs,
+        "--start",
+        "00:00:01.5",
+        "--end",
+        "00:00:01",
+        "-o",
+        str(output),
+        "-ov",
+        "yes",
+    ]
+
+    result = pymedia(*args)
+
+    assert result.exit_code != 0
+    assert "Invalid timestamps" in result.output
+    assert "Start" in result.output and "End" in result.output
+
+
+# Comandos con --at (TimestampAtMixin expuesto en CLI)
+# Usamos marcas dentro de la duración del vídeo (2 s).
+AT_COMMANDS = [
+    pytest.param("cut", id="cut"),
+    pytest.param("frames", id="frames"),
+]
+
+
+@pytest.mark.parametrize("name", AT_COMMANDS)
+def test_at_descending_is_rejected(
+    pymedia: Invoke, request: pytest.FixtureRequest, name: str, tmp_path: Path
+) -> None:
+    """`--at` con marcas en orden descendente se rechaza."""
+    cmd = COMMANDS[name]
+    output = tmp_path / f"out{cmd.suffix}"
+
+    # Para cut, hay que anular el --at por defecto
+    if name == "cut":
+        inputs = [str(request.getfixturevalue(n)) for n in cmd.inputs]
+        args = [
+            "cut",
+            *inputs,
+            "--at",
+            "00:00:01.5,00:00:01",
+            "-o",
+            str(output),
+            "-ov",
+            "yes",
+        ]
+        result = pymedia(*args)
+    else:
+        result = pymedia(
+            *build_args(
+                cmd, request, output, "-ov", "yes", "--at", "00:00:01.5,00:00:01"
+            )
+        )
+
+    assert result.exit_code != 0
+    assert "ascending order" in result.output
+
+
+@pytest.mark.parametrize("name", AT_COMMANDS)
+def test_at_invalid_format_is_rejected(
+    pymedia: Invoke, request: pytest.FixtureRequest, name: str, tmp_path: Path
+) -> None:
+    """`--at` con formato inválido se rechaza."""
+    cmd = COMMANDS[name]
+    output = tmp_path / f"out{cmd.suffix}"
+
+    if name == "cut":
+        inputs = [str(request.getfixturevalue(n)) for n in cmd.inputs]
+        args = ["cut", *inputs, "--at", "abc", "-o", str(output), "-ov", "yes"]
+        result = pymedia(*args)
+    else:
+        result = pymedia(*build_args(cmd, request, output, "-ov", "yes", "--at", "abc"))
+
+    assert result.exit_code != 0
+    assert "Invalid timestamp format" in result.output
+
+
 # =============================================================================
 #  Flags de pista (audio y subtítulos)
 # =============================================================================
-
-# (opción CLI, flag de disposición en ffprobe)
 AUDIO_FLAGS = [
     ("--forced", "forced"),
     ("--default", "default"),
