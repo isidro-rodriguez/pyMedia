@@ -9,7 +9,8 @@ __pycache__/
 build/
 temp/
 *.pyc
+.coverage
 .env
 Thumbs.db
 desktop.ini
-.coverage
+

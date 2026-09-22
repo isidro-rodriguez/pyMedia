@@ -28,20 +28,27 @@ class ImageQualityMixin:
         if self.image_output is None:
             raise MissingParameterError(name="image_output")
         match self.image_output.suffix:
-            case ".jpg":
+            case ".jpg" | ".jpeg":
                 return ImageQuality(
                     format="format=yuv420p",
-                    compression=["-color_range", "2", "-q:v", "2"],
+                    compression=["-c:v", "mjpeg", "-color_range", "2", "-q:v", "2"],
                 )
             case ".png":
                 return ImageQuality(
                     format="format=rgb24",
-                    compression=["-compression_level", "6"],
+                    compression=["-c:v", "png", "-compression_level", "6"],
                 )
             case ".webp":
                 return ImageQuality(
                     format="format=rgb24",
-                    compression=["-lossless", "1"],
+                    compression=[
+                        "-c:v",
+                        "libwebp",
+                        "-lossless",
+                        "1",
+                        "-compression_level",
+                        "6",
+                    ],
                 )
             case _:
                 raise InvalidParameterError(msg=_("Image container not supported."))
@@ -57,7 +64,7 @@ class SceneMixin:
 
     scene: float | None = None
 
-    def create_scene(self, scene: float | int | None) -> None:
+    def create_scene(self, scene: float | None) -> None:
         """Crea el parámetro scene.
 
         Args:
