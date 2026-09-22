@@ -18,6 +18,7 @@ from pymedia.commands.base_cli_options import (
     ScaleModeOption,
     ScaleToOption,
     ScaleUpscaleOption,
+    ShowCmdOption,
     TranscodeAudioOption,
     TranscodeBurnSubtitlesOption,
     TranscodeVideoOption,
@@ -72,7 +73,8 @@ def transcode(
     hflip: FlipHorizontalOption = False,
     vflip: FlipVerticalOption = False,
     debug: DebugOption = False,
-    help_: HelpOption = False,  # noqa
+    show_cmd: ShowCmdOption = False,
+    help_: HelpOption = False,
 ) -> None:
     """Punto de entrada del comando ``transcode``.
 
@@ -93,6 +95,7 @@ def transcode(
         hflip: Invierte la imagen horizontalmente.
         vflip: Invierte la imagen verticalmente.
         debug: Habilita el nivel de log DEBUG.
+        show_cmd: Muestra al usuario el comando ffmpeg compuesto pero no lo ejecuta.
         help_: Helper para mostrar esta línea en distintos idiomas.
 
     Raises:
@@ -147,4 +150,4 @@ def transcode(
             hflip=hflip,
             vflip=vflip,
         )
-        TranscodeService(debug=debug, params=params).start()
+        TranscodeService(debug=debug, show_cmd=show_cmd, params=params).start()

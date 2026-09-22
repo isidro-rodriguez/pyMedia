@@ -9,6 +9,7 @@ from pymedia.commands.base_cli_options import (
     MediaInputArgument,
     OutputOption,
     OverwriteOption,
+    ShowCmdOption,
 )
 from pymedia.commands.extract_audio.parameters import ExtractAudioParameters
 from pymedia.commands.extract_audio.service import ExtractAudioService
@@ -29,7 +30,7 @@ You can consult what audio tracks have a container with `info` command.
     > pymedia extract-audio input.mp4 --tracks 1,2
   Extract audio tracks with custom output:
     > pymedia extract-audio input.mp4 --tracks 1,2 -o input-audio.m4a
-"""  # noqa
+"""
 )
 
 
@@ -45,7 +46,8 @@ def extract_audio(
     audio_output: OutputOption = None,
     overwrite: OverwriteOption = OverwriteMode.ASK,
     debug: DebugOption = False,
-    help_: HelpOption = False,  # noqa
+    show_cmd: ShowCmdOption = False,
+    help_: HelpOption = False,
 ) -> None:
     """Punto de entrada del comando ``extract-audio``.
 
@@ -55,6 +57,7 @@ def extract_audio(
         audio_output: Ruta absoluta del fichero de audio de salida.
         overwrite: Política ante conflicto de salida ya existente.
         debug: Habilita el nivel de log DEBUG.
+        show_cmd: Muestra al usuario el comando ffmpeg compuesto pero no lo ejecuta.
         help_: Helper para mostrar esta línea en distintos idiomas.
 
     Raises:
@@ -74,4 +77,4 @@ def extract_audio(
         audio_stream_tracks=audio_stream_tracks,
         audio_output=audio_output,
     )
-    ExtractAudioService(debug=debug, params=params).start()
+    ExtractAudioService(debug=debug, show_cmd=show_cmd, params=params).start()

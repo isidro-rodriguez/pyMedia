@@ -10,6 +10,7 @@ from pymedia.commands.base_cli_options import (
     MediaInputArgument,
     OutputOption,
     OverwriteOption,
+    ShowCmdOption,
     SubtitlesArgument,
     SubtitlesDefaultOption,
     SubtitlesForcedOption,
@@ -57,7 +58,8 @@ def add_subs(
     hearing_impaired: SubtitlesHearingImpairedOption = None,
     visual_impaired: SubtitlesVisualImpairedOption = None,
     debug: DebugOption = False,
-    help_: HelpOption = False,  # noqa
+    show_cmd: ShowCmdOption = False,
+    help_: HelpOption = False,
 ) -> None:
     """Punto de entrada del comando ``add-subs``.
 
@@ -73,6 +75,7 @@ def add_subs(
         hearing_impaired: Subtítulos adaptados a personas con problemas auditivos.
         visual_impaired: Subtítulos adaptados a personas con problemas de vista.
         debug: Habilita el nivel de log DEBUG.
+        show_cmd: Muestra al usuario el comando ffmpeg compuesto pero no lo ejecuta.
         help_: Helper para mostrar esta línea en distintos idiomas.
 
     Raises:
@@ -95,4 +98,4 @@ def add_subs(
         hearing_impaired=hearing_impaired,
         visual_impaired=visual_impaired,
     )
-    AddSubtitlesService(debug=debug, params=params).start()
+    AddSubtitlesService(debug=debug, show_cmd=show_cmd, params=params).start()

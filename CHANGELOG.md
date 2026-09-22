@@ -6,6 +6,26 @@ Las versiones se han reconstruido a partir del histórico de
 Las versiones intermedias no registradas (0.2–0.4, 0.6–0.8) se agrupan
 con la sección anterior.
 
+## [0.20.0-beta.10] - 2026-09-22
+
+### Añadido
+
+- `feat(info)`: mejorada la visualización de metadatos en la tabla de información con columnas compactas y abreviadas (`Sample`, `Lang`, `Def`, `For`, `HI`, `Com`, `VI`)
+- `test`: ampliada significativamente la cobertura de pruebas para comandos y formatos (tests de CLI, opciones y fixtures de compatibilidad)
+
+### Cambiado
+
+- `refactor(tests)`: reestructurada la suite de pruebas completa con mejor soporte para binarios y fixtures centralizados (`scripts/fixtures/`)
+- `refactor(core)`: limpiadas importaciones y mejoradas validaciones de comandos en `base_service.py` y `base_cli_options.py`
+- `refactor(fixtures)`: reorganizado y centralizado el sistema de generación de archivos de prueba
+- `chore(config)`: eliminada configuración de mypy y actualizado `.gitignore`
+- `docs`: actualizado README a versión 0.20.0
+
+### Corregido
+
+- `fix(i18n)`: corregidos msgids obsoletos en POT (`%(bit_rate)s bps`, `Sample rate`, `Forced`, `Default`) que no existían en código fuente; regenerados `pymedia.pot`, `es.po` y `es.mo`
+- `fix(locales)`: todos los msgids del POT ahora se usan en `src/` (test `test_all_pot_msgids_used_in_src` pasa)
+
 ## [0.19.2-beta.9] - 2026-09-20
 
 ### Añadido

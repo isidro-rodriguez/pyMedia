@@ -16,6 +16,7 @@ from pymedia.commands.base_cli_options import (
     ScaleToOption,
     ScaleUpscaleOption,
     SceneOption,
+    ShowCmdOption,
     TimestampEndThumbnailOption,
     TimestampStartThumbnailOption,
 )
@@ -68,7 +69,8 @@ def scene(
     hflip: FlipHorizontalOption = False,
     vflip: FlipVerticalOption = False,
     debug: DebugOption = False,
-    help_: HelpOption = False,  # noqa
+    show_cmd: ShowCmdOption = False,
+    help_: HelpOption = False,
 ) -> None:
     """Punto de entrada del comando ``scene``.
 
@@ -87,6 +89,7 @@ def scene(
         hflip: Invierte la imagen horizontalmente, intercambia izquierda y derecha.
         vflip: Invierte la imagen verticalmente, intercambiando arriba y abajo.
         debug: Habilita el nivel de log DEBUG.
+        show_cmd: Muestra al usuario el comando ffmpeg compuesto pero no lo ejecuta.
         help_: Helper para mostrar esta línea en distintos idiomas.
 
     Raises:
@@ -117,4 +120,4 @@ def scene(
         hflip=hflip,
         vflip=vflip,
     )
-    SceneService(debug=debug, params=params).start()
+    SceneService(debug=debug, show_cmd=show_cmd, params=params).start()

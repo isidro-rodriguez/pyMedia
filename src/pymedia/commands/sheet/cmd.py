@@ -6,7 +6,6 @@ from pathlib import Path
 
 from pymedia.commands.sheet.parameters import SheetParameters
 from pymedia.errors import (
-    CommandGenerationError,
     MissingParameterError,
     MissingPropertyError,
 )
@@ -45,11 +44,7 @@ class SheetCmd:
             MissingPropertyError: Si falta alguna propiedad técnica requerida
                 en el objeto media (duration, fps, size, video, codec, etc.).
         """
-        snapshots_cmd = self._generate_snapshots()
-        if snapshots_cmd is None:
-            raise CommandGenerationError(name="snapshots_cmd")
-
-        return snapshots_cmd
+        return self._generate_snapshots()
 
     def create_header(self) -> list[str]:
         """Comando ffmpeg para añadir cabecera con metadatos a la hoja de capturas.
@@ -65,11 +60,7 @@ class SheetCmd:
             MissingPropertyError: Si falta alguna propiedad técnica requerida
                 en el objeto media (duration, fps, size, video, codec, etc.).
         """
-        header_cmd = self._generate_header()
-        if header_cmd is None:
-            raise CommandGenerationError(name="header_cmd")
-
-        return header_cmd
+        return self._generate_header()
 
     @property
     def capture_count(self) -> int:

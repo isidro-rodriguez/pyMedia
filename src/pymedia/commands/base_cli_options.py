@@ -89,6 +89,14 @@ HelpOption = Annotated[
     ),
 ]
 
+ShowCmdOption = Annotated[
+    bool,
+    typer.Option(
+        default="--show-cmd",
+        help=_("Print the FFmpeg command without executing it."),
+    ),
+]
+
 VersionOption = Annotated[
     bool,
     typer.Option(

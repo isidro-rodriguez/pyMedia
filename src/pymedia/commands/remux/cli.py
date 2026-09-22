@@ -10,6 +10,7 @@ from pymedia.commands.base_cli_options import (
     OutputOption,
     OverwriteOption,
     RegeneratePtsOption,
+    ShowCmdOption,
     SortTracksOption,
 )
 from pymedia.commands.remux.parameters import RemuxParameters
@@ -35,7 +36,7 @@ Change container and metadata without transcoding.
     > pymedia remux input.mp4 --genpts -o output.mkv
   Sort stream tracks
     > pymedia remux input.mp4 --sort-tracks -o output.mp4
-"""  # noqa
+"""
 )
 
 
@@ -53,7 +54,8 @@ def remux(
     regenerate_pts: RegeneratePtsOption = False,
     sort_tracks: SortTracksOption = False,
     debug: DebugOption = False,
-    help_: HelpOption = False,  # noqa
+    show_cmd: ShowCmdOption = False,
+    help_: HelpOption = False,
 ) -> None:
     """Punto de entrada del comando ``remux``.
 
@@ -65,6 +67,7 @@ def remux(
         regenerate_pts: Regenera los marcadores de tiempo corruptos.
         sort_tracks: Ordena las pistas por tipo y luego alfabéticamente por idioma.
         debug: Habilita el nivel de log DEBUG.
+        show_cmd: Muestra al usuario el comando ffmpeg compuesto pero no lo ejecuta.
         help_: Helper para mostrar esta línea en distintos idiomas.
 
     Raises:
@@ -85,4 +88,4 @@ def remux(
         regenerate_pts=regenerate_pts,
         sort_tracks=sort_tracks,
     )
-    RemuxService(debug=debug, params=params).start()
+    RemuxService(debug=debug, show_cmd=show_cmd, params=params).start()

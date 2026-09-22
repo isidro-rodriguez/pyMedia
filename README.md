@@ -5,7 +5,7 @@ habituales de procesamiento de vídeo: análisis de metadatos, capturas, unión,
 corte y división de contenedores, remux sin transcodificar, transcodificación
 por perfiles y edición de pistas de audio y subtítulos.
 
-> **Versión:** Beta 0.19.2
+> **Versión:** Beta 0.20.0
 
 ## Características
 
@@ -141,6 +141,7 @@ La ayuda de cada comando está localizada y se muestra con `--help`.
 | `-d`, `--directory` | Directorio de salida para procesar lotes de ficheros (con `output` son excluyentes).  |
 | `--overwrite`       | Política ante un fichero de salida existente: `yes`, `no`, `ask` (por defecto `ask`). |
 | `--debug`           | Activa el nivel de log DEBUG.                                                         |
+| `--show-cmd`        | Muestra, sin ejecutar, el comando compuesto y listo para ser ejecutado por ffmpeg.    |
 | `--version`         | Muestra la versión, Python y plataforma en un panel Rich y sale.                      |
 
 ### Filtros disponibles
@@ -316,7 +317,7 @@ pyMedia/
 
 ```mermaid
 flowchart TD
-    USER(["USER"]) --> MAIN{"MAIN"} 
+    USER(["USER"]) --> MAIN{"MAIN"}
     MAIN -.-> LOCALE
     MAIN --> CLI
     CLI -.-> CONFIG
@@ -324,7 +325,7 @@ flowchart TD
     CLI --> PARAMETERS --> SERVICE
     SERVICE <--> CMD
     SERVICE --> FFMPEG
-    
+
     style USER   fill:#d4edda,stroke:#28a745,stroke-width:2px,color:#155724;
     style FFMPEG fill:#d4edda,stroke:#28a745,stroke-width:2px,color:#155724;
     style MAIN   fill:#fff3e0,stroke:#c28525,stroke-width:2px,color:#a86e13;

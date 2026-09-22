@@ -8,6 +8,7 @@ from pymedia.commands.base_cli_options import (
     MediaInputArgument,
     OutputOption,
     OverwriteOption,
+    ShowCmdOption,
     SubtitlesStreamTrackListOption,
 )
 from pymedia.commands.extract_subtitles.parameters import ExtractSubtitlesParameters
@@ -29,7 +30,7 @@ You can consult what subtitles tracks have a container with `info` command.
     > pymedia extract-subs input.mp4 --tracks 3,4,5
   Extract subtitles tracks with custom output:
     > pymedia extract-subs input.mp4 --tracks 3,5 -o input-subtitles.srt
-"""  # noqa
+"""
 )
 
 
@@ -45,7 +46,8 @@ def extract_subs(
     subtitles_output: OutputOption = None,
     overwrite: OverwriteOption = OverwriteMode.ASK,
     debug: DebugOption = False,
-    help_: HelpOption = False,  # noqa
+    show_cmd: ShowCmdOption = False,
+    help_: HelpOption = False,
 ) -> None:
     """Punto de entrada del comando ``extract-subs``.
 
@@ -55,6 +57,7 @@ def extract_subs(
         subtitles_output: Ruta absoluta del fichero de subtítulos de salida.
         overwrite: Política ante conflicto de salida ya existente.
         debug: Habilita el nivel de log DEBUG.
+        show_cmd: Muestra al usuario el comando ffmpeg compuesto pero no lo ejecuta.
         help_: Helper para mostrar esta línea en distintos idiomas.
 
     Raises:
@@ -74,4 +77,4 @@ def extract_subs(
         subtitles_stream_tracks=subtitles_stream_tracks,
         subtitles_output=subtitles_output,
     )
-    ExtractSubtitlesService(debug=debug, params=params).start()
+    ExtractSubtitlesService(debug=debug, show_cmd=show_cmd, params=params).start()

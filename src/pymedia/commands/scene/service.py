@@ -41,7 +41,7 @@ class SceneService(BaseService[SceneParameters]):
         ):
             return
 
-        self.logger.debug(_("FFmpeg command: %(cmd)s"), cmd=cmd)
+        self.display_cmd(cmd=cmd)
 
         self.run_ffmpeg(
             cmd=cmd,

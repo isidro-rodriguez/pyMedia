@@ -47,7 +47,8 @@ class JoinService(BaseService[JoinParameters]):
             self.logger.debug(
                 _("List file:\n%(list_txt)s"), list_txt=list_txt.read_text()
             )
-            self.logger.debug(_("FFmpeg command: %(cmd)s"), cmd=cmd)
+
+            self.display_cmd(cmd=cmd)
 
             self.run_ffmpeg(
                 cmd=cmd,

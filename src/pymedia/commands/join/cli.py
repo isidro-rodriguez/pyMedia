@@ -8,6 +8,7 @@ from pymedia.commands.base_cli_options import (
     MediaInputListArgument,
     OutputOption,
     OverwriteOption,
+    ShowCmdOption,
 )
 from pymedia.commands.join.parameters import JoinParameters
 from pymedia.commands.join.service import JoinService
@@ -28,7 +29,7 @@ Compatible videos must have same codecs, dimensions, tracks, ...
 [bold]Example[/bold]:
   Join videos in the specified order:
     > pymedia join input1.mp4 input2.mp4 input3.mp4 -o output.mp4
-"""  # noqa
+"""
 )
 
 
@@ -43,7 +44,8 @@ def join(
     media_output: OutputOption,
     overwrite: OverwriteOption = OverwriteMode.ASK,
     debug: DebugOption = False,
-    help_: HelpOption = False,  # noqa
+    show_cmd: ShowCmdOption = False,
+    help_: HelpOption = False,
 ) -> None:
     """Punto de entrada del comando ``join``.
 
@@ -52,6 +54,7 @@ def join(
         media_output: Ruta absoluta del fichero de salida procesado.
         overwrite: Política ante conflicto de salida ya existente.
         debug: Habilita el nivel de log DEBUG.
+        show_cmd: Muestra al usuario el comando ffmpeg compuesto pero no lo ejecuta.
         help_: Helper para mostrar esta línea en distintos idiomas.
 
     Raises:
@@ -66,4 +69,4 @@ def join(
         media_input_list=media_input_list,
         media_output=media_output,
     )
-    JoinService(debug=debug, params=params).start()
+    JoinService(debug=debug, show_cmd=show_cmd, params=params).start()

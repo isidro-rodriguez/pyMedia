@@ -22,7 +22,7 @@ Shows information about a video.
 [bold]Example[/bold]:
   Shows video's metadata:
     > pymedia info input.mp4
-"""  # noqa
+"""
 )
 
 
@@ -35,7 +35,7 @@ Shows information about a video.
 def info(
     media_input: MediaInputArgument,
     debug: DebugOption = False,
-    help_: HelpOption = False,  # noqa
+    help_: HelpOption = False,
 ) -> None:
     """Punto de entrada del comando ``info``.
 
@@ -46,4 +46,4 @@ def info(
     """
     Logger.create(debug=debug)
     params = InfoParameters.load(media_input=media_input)
-    InfoService(debug=debug, params=params).start()
+    InfoService(params=params).start()

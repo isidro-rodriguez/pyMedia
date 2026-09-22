@@ -8,6 +8,7 @@ from pymedia.commands.base_cli_options import (
     MediaInputArgument,
     OutputOption,
     OverwriteOption,
+    ShowCmdOption,
     TimestampAtMediaOption,
     TimestampEndMediaOption,
     TimestampStartMediaOption,
@@ -33,7 +34,7 @@ Cut off a video container's section or split it between different media files.
     > pymedia cut input.mp4 --start 01:00 --end 1:30:00
   Split a media file at specific timestamps:
     > pymedia cut input.mp4 --at 10:05,40:30,1:20:00
-"""  # noqa
+"""
 )
 
 
@@ -51,7 +52,8 @@ def cut(
     media_output: OutputOption = None,
     overwrite: OverwriteOption = OverwriteMode.ASK,
     debug: DebugOption = False,
-    help_: HelpOption = False,  # noqa
+    show_cmd: ShowCmdOption = False,
+    help_: HelpOption = False,
 ) -> None:
     """Punto de entrada del comando ``cut``.
 
@@ -63,6 +65,7 @@ def cut(
         media_output: Ruta absoluta del fichero de salida procesado.
         overwrite: Política ante conflicto de salida ya existente.
         debug: Habilita el nivel de log DEBUG.
+        show_cmd: Muestra al usuario el comando ffmpeg compuesto pero no lo ejecuta.
         help_: Helper para mostrar esta línea en distintos idiomas.
 
     Raises:
@@ -88,4 +91,4 @@ def cut(
         timestamp_end=timestamp_end,
         media_output=media_output,
     )
-    CutService(debug=debug, params=params).start()
+    CutService(debug=debug, show_cmd=show_cmd, params=params).start()

@@ -117,6 +117,7 @@ class Logger:
         exc_info: bool = False,
         console: bool = True,
         file: bool = True,
+        markup: bool = True,
         **kwargs: object,
     ) -> None:
         """Muestra log de nivel error.
@@ -126,6 +127,7 @@ class Logger:
             exc_info: Si `True`, añade la traza de la excepción activa.
             console: Si `True`, se muestra por consola.
             file: Si `True`, se escribe en el fichero de log.
+            markup: Si `True`, renderiza marcas de formateo.
             **kwargs: Valores para interpolar en `msg` vía `%`.
         """
         self._log(
@@ -133,6 +135,7 @@ class Logger:
             msg=msg,
             console=console,
             file=file,
+            markup=markup,
             exc_info=exc_info,
             values=kwargs,
         )
@@ -142,6 +145,7 @@ class Logger:
         msg: str,
         console: bool = True,
         file: bool = True,
+        markup: bool = True,
         **kwargs: object,
     ) -> None:
         """Muestra log de nivel aviso (mensaje ya traducido).
@@ -150,10 +154,16 @@ class Logger:
             msg: Mensaje ya traducido a mostrar.
             console: Si `True`, se muestra por consola.
             file: Si `True`, se escribe en el fichero de log.
+            markup: Si `True`, renderiza marcas de formateo.
             **kwargs: Valores para interpolar en `msg` vía `%`.
         """
         self._log(
-            level=logging.WARNING, msg=msg, console=console, file=file, values=kwargs
+            level=logging.WARNING,
+            msg=msg,
+            console=console,
+            file=file,
+            markup=markup,
+            values=kwargs,
         )
 
     def info(
@@ -161,6 +171,7 @@ class Logger:
         msg: str,
         console: bool = True,
         file: bool = True,
+        markup: bool = True,
         **kwargs: object,
     ) -> None:
         """Muestra log de nivel información (mensaje ya traducido).
@@ -169,10 +180,16 @@ class Logger:
             msg: Mensaje ya traducido a mostrar.
             console: Si `True`, se muestra por consola.
             file: Si `True`, se escribe en el fichero de log.
+            markup: Si `True`, renderiza marcas de formateo.
             **kwargs: Valores para interpolar en `msg` vía `%`.
         """
         self._log(
-            level=logging.INFO, msg=msg, console=console, file=file, values=kwargs
+            level=logging.INFO,
+            msg=msg,
+            console=console,
+            file=file,
+            markup=markup,
+            values=kwargs,
         )
 
     def debug(
@@ -180,6 +197,7 @@ class Logger:
         msg: str,
         console: bool = True,
         file: bool = True,
+        markup: bool = False,
         **kwargs: object,
     ) -> None:
         """Muestra log de nivel depuración (mensaje ya traducido).
@@ -188,6 +206,7 @@ class Logger:
             msg: Mensaje ya traducido a mostrar.
             console: Si `True`, se muestra por consola.
             file: Si `True`, se escribe en el fichero de log.
+            markup: Si `True`, renderiza marcas de formateo.
             **kwargs: Valores para interpolar en `msg` vía `%`.
         """
 
@@ -201,16 +220,22 @@ class Logger:
 
         kwargs = {name: _prettify(value) for name, value in kwargs.items()}
         self._log(
-            level=logging.DEBUG, msg=msg, console=console, file=file, values=kwargs
+            level=logging.DEBUG,
+            msg=msg,
+            console=console,
+            file=file,
+            markup=markup,
+            values=kwargs,
         )
 
-    def print(self, renderable: RenderableType) -> None:
+    def print(self, renderable: RenderableType, **kwargs: Any) -> None:
         """Imprime un objeto Rich (Table, Panel, etc.) por consola.
 
         Args:
             renderable: Objeto Rich a imprimir (Table, Panel, texto...).
+            **kwargs: Argumentos adicionales para `Console.print`
         """
-        self._console.print(renderable)
+        self._console.print(renderable, **kwargs)
 
     def _log(
         self,
@@ -218,6 +243,7 @@ class Logger:
         msg: str,
         console: bool,
         file: bool,
+        markup: bool,
         *,
         exc_info: bool = False,
         values: dict[str, object] | None = None,
@@ -227,7 +253,7 @@ class Logger:
             level=level,
             msg=self._render(msg=msg, kwargs=values or {}),
             exc_info=exc_info,
-            extra={"to_console": console, "to_file": file},
+            extra={"to_console": console, "to_file": file, "markup": markup},
         )
 
     @staticmethod

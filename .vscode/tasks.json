@@ -27,9 +27,9 @@
             "command": "uv run pytest -m locales"
         },
         {
-            "label": "CHECK 6 - pytest -m binario",
+            "label": "CHECK 6 - pytest -m binary",
             "type": "shell",
-            "command": "uv run pytest -m binario"
+            "command": "uv run pytest -m binary"
         },
         {
             "label": "CHECK_LIST",

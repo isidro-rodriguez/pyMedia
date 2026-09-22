@@ -3,7 +3,10 @@
 Define los servicios comunes para los comandos.
 """
 
+import os
 import queue
+import re
+import shlex
 import subprocess
 import sys
 import tempfile
@@ -44,6 +47,9 @@ class _AbortMode(Enum):
     TIMEOUT = "timeout"
 
 
+_UNSAFE_CHARS = re.compile(r"[^\w@%+=:,./-]")
+
+
 ParamsT = TypeVar("ParamsT")
 
 
@@ -59,11 +65,14 @@ class BaseService[ParamsT](ABC):
 
     params: ParamsT
 
-    def __init__(self, debug: bool, params: ParamsT) -> None:
+    def __init__(
+        self, params: ParamsT, debug: bool = False, show_cmd: bool = False
+    ) -> None:
         """Inicializa el comando con argumentos de tipo definido y la config cargada.
 
         Args:
             debug: Habilita el nivel de log DEBUG.
+            show_cmd: Si `True`, muestra el comando ffmpeg compuesto al usuario.
             params: Parámetros del comando.
 
         Raises:
@@ -75,6 +84,7 @@ class BaseService[ParamsT](ABC):
         self.command_name = command_name.removesuffix("Service")
         self.config = Config.load()
         self.debug = debug
+        self.show_cmd = show_cmd
         self.logger = Logger.load()
         self.params = params
 
@@ -88,7 +98,7 @@ class BaseService[ParamsT](ABC):
             `True` si se puede sobrescribir o no hay conflicto, `False` si el
             proceso debe omitirse.
         """
-        params = cast(_OverwriteParams, self.params)  # noqa
+        params = cast(_OverwriteParams, self.params)
         if params.overwrite == OverwriteMode.YES:
             return True
 
@@ -107,6 +117,37 @@ class BaseService[ParamsT](ABC):
                 self.logger.warning(process_skip_msg)
                 return False
         return True
+
+    def display_cmd(self, cmd: list[str]) -> None:
+        """Muestra el comando compuesto al usuario si ha activado debug o show-cmd."""
+
+        def _quote_windows(token: str) -> str:
+            """Entrecomilla un token si contiene caracteres especiales."""
+            if not _UNSAFE_CHARS.search(token):
+                return token
+            return '"' + token.replace('"', '\\"') + '"'
+
+        def _format_cmd(cmd: list[str]) -> str:
+            """Format a command list as a copy-pasteable shell string."""
+            if os.name == "nt":
+                return " ".join(_quote_windows(t) for t in cmd)
+            return shlex.join(cmd)
+
+        if self.show_cmd:
+            self.logger.print(
+                renderable=f"\n{_format_cmd(cmd=cmd)}\n",
+                emoji=False,
+                soft_wrap=True,
+            )
+            sys.exit(0)
+
+        self.logger.debug(_("FFmpeg command: %(cmd)s"), cmd=cmd)
+
+        if self.debug and not typer.confirm(
+            text=_("Do you want to run this ffmpeg command?")
+        ):
+            self.logger.warning(msg=_("User decided to abort process."))
+            sys.exit(0)
 
     def run_ffmpeg(
         self,
@@ -190,11 +231,6 @@ class BaseService[ParamsT](ABC):
                     raise CommandError(
                         msg=_("FFmpeg command failed during execution.") + detail
                     )
-
-        if self.debug:
-            if not typer.confirm(text=_("Do you want to run this ffmpeg command?")):
-                self.logger.warning(msg=_("User decided to abort process."))
-                sys.exit(0)
 
         # ffmpeg no debe preguntar por su cuenta (el prompt queda oculto tras la
         # barra de progreso y bloquea): la política ya se resolvió en el servicio.

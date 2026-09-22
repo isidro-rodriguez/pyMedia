@@ -28,6 +28,7 @@ class AnimatedParameters(
     def load(
         cls,
         overwrite: OverwriteMode,
+        show_cmd: bool,
         media_input: Path,
         fps: int,
         scale_mode: ScaleMode,
@@ -45,6 +46,7 @@ class AnimatedParameters(
 
         Args:
             overwrite: Política de conflicto ante fichero de salida existente.
+            show_cmd: Muestra al usuario el comando ffmpeg compuesto pero no lo ejecuta.
             media_input: Ruta del fichero de vídeo a procesar.
             fps: Fotogramas por segundo de la imagen animada generado.
             scale_mode: Política de escalado del vídeo o imagen.

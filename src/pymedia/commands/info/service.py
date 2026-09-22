@@ -192,4 +192,4 @@ class InfoService(BaseService[InfoParameters]):
         bit_rate = math.floor(bit_rate)
         bit_rate = parse_quantity(value=bit_rate, locale=locale)
 
-        return _("%(bit_rate)s bps") % {"bit_rate": bit_rate}
+        return _("%(bit_rate)s kbps") % {"bit_rate": bit_rate}

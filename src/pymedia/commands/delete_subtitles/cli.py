@@ -8,6 +8,7 @@ from pymedia.commands.base_cli_options import (
     MediaInputArgument,
     OutputOption,
     OverwriteOption,
+    ShowCmdOption,
     SubtitlesStreamTrackListOption,
 )
 from pymedia.commands.delete_subtitles.parameters import DeleteSubtitlesParameters
@@ -27,7 +28,7 @@ You can consult what subtitles tracks have a container with `info` command.
 [bold]Examples[/bold]:
   Delete a list of subtitles tracks from a media file:
     > pymedia delete-subs input.mp4 --tracks 3,4,5
-"""  # noqa
+"""
 )
 
 
@@ -43,7 +44,8 @@ def delete_subs(
     media_output: OutputOption = None,
     overwrite: OverwriteOption = OverwriteMode.ASK,
     debug: DebugOption = False,
-    help_: HelpOption = False,  # noqa
+    show_cmd: ShowCmdOption = False,
+    help_: HelpOption = False,
 ) -> None:
     """Punto de entrada del comando ``delete-subs``.
 
@@ -53,6 +55,7 @@ def delete_subs(
         media_output: Ruta absoluta del fichero de salida procesado.
         overwrite: Política ante conflicto de salida ya existente.
         debug: Habilita el nivel de log DEBUG.
+        show_cmd: Muestra al usuario el comando ffmpeg compuesto pero no lo ejecuta.
         help_: Helper para mostrar esta línea en distintos idiomas.
 
     Raises:
@@ -68,4 +71,4 @@ def delete_subs(
         subtitles_stream_tracks=subtitles_stream_tracks,
         media_output=media_output,
     )
-    DeleteSubtitlesService(debug=debug, params=params).start()
+    DeleteSubtitlesService(debug=debug, show_cmd=show_cmd, params=params).start()

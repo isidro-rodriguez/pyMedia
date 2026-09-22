@@ -11,6 +11,7 @@ from pymedia.commands.base_cli_options import (
     OutputOption,
     OverwriteOption,
     PresetSheetOption,
+    ShowCmdOption,
 )
 from pymedia.commands.sheet.parameters import SheetParameters
 from pymedia.commands.sheet.service import SheetService
@@ -30,7 +31,7 @@ Generates a thumbnail grid sheet with metadata information.
     > pymedia sheet input.mp4
   Generates a vcs with different preset and specified output:
     > pymedia sheet input.mp4 --preset fhd -o vcs.webp
-"""  # noqa
+"""
 )
 
 
@@ -47,7 +48,8 @@ def sheet(
     overwrite: OverwriteOption = OverwriteMode.ASK,
     preset_sheet: PresetSheetOption = PresetsSheetMode.HD,
     debug: DebugOption = False,
-    help_: HelpOption = False,  # noqa
+    show_cmd: ShowCmdOption = False,
+    help_: HelpOption = False,
 ) -> None:
     """Punto de entrada del comando ``sheet``.
 
@@ -58,6 +60,7 @@ def sheet(
         overwrite: Política ante conflicto de salida ya existente.
         preset_sheet: Estilo de hoja preajustado.
         debug: Habilita el nivel de log DEBUG.
+        show_cmd: Muestra al usuario el comando ffmpeg compuesto pero no lo ejecuta.
         help_: Helper para mostrar esta línea en distintos idiomas.
     """
     validate_conflict_output_options(
@@ -75,4 +78,4 @@ def sheet(
             output_directory=output_directory,
             preset_sheet=preset_sheet,
         )
-        SheetService(debug=debug, params=params).start()
+        SheetService(debug=debug, show_cmd=show_cmd, params=params).start()

@@ -16,6 +16,7 @@ from pymedia.commands.base_cli_options import (
     ScaleModeOption,
     ScaleToOption,
     ScaleUpscaleOption,
+    ShowCmdOption,
     TimestampEndThumbnailOption,
     TimestampStartThumbnailOption,
 )
@@ -64,7 +65,8 @@ def interval(
     hflip: FlipHorizontalOption = False,
     vflip: FlipVerticalOption = False,
     debug: DebugOption = False,
-    help_: HelpOption = False,  # noqa
+    show_cmd: ShowCmdOption = False,
+    help_: HelpOption = False,
 ) -> None:
     """Punto de entrada del comando ``interval``.
 
@@ -83,6 +85,7 @@ def interval(
         hflip: Invierte la imagen horizontalmente, intercambia izquierda y derecha.
         vflip: Invierte la imagen verticalmente, intercambiando arriba y abajo.
         debug: Habilita el nivel de log DEBUG.
+        show_cmd: Muestra al usuario el comando ffmpeg compuesto pero no lo ejecuta.
         help_: Helper para mostrar esta línea en distintos idiomas.
 
     Raises:
@@ -117,4 +120,4 @@ def interval(
         hflip=hflip,
         vflip=vflip,
     )
-    IntervalService(debug=debug, params=params).start()
+    IntervalService(debug=debug, show_cmd=show_cmd, params=params).start()

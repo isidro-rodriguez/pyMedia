@@ -43,6 +43,14 @@ class SheetService(BaseService[SheetParameters]):
             snapshots_cmd = sheet_instance.create_snapshots()
             header_cmd = sheet_instance.create_header()
 
+            cmd_to_display = (
+                [_("Snapshots command:"), "\n\n"]
+                + snapshots_cmd
+                + ["\n\n", _("Header command:"), "\n\n"]
+                + header_cmd
+            )
+            self.display_cmd(cmd=cmd_to_display)
+
             self.run_ffmpeg(
                 cmd=snapshots_cmd,
                 description=_("Generating sheet snapshots"),

@@ -24,7 +24,7 @@ class ExtractSubtitlesService(BaseService[ExtractSubtitlesParameters]):
         if not self.resolve_overwrite(output_list=outputs):
             return
 
-        self.logger.debug(_("FFmpeg command: %(cmd)s"), cmd=cmd)
+        self.display_cmd(cmd=cmd)
 
         self.run_ffmpeg(
             cmd=cmd,

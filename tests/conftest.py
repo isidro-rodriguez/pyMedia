@@ -646,6 +646,76 @@ def subs_bad(inputs_dir: Path) -> Path:
     return output
 
 
+@pytest.fixture(scope="session")
+def video_audio_only_mkv(inputs_dir: Path) -> Path:
+    """Mkv de 2 s con un solo audio (aac), sin pista de vídeo."""
+    output = inputs_dir / "video_audio_only.mkv"
+    _run_ffmpeg(
+        [
+            "-f",
+            "lavfi",
+            "-i",
+            "sine=frequency=440:duration=2",
+            "-c:a",
+            "aac",
+            "-map",
+            "0:a",
+            str(output),
+        ]
+    )
+    return output
+
+
+@pytest.fixture(scope="session")
+def video_mkv_audio_mono(inputs_dir: Path) -> Path:
+    """Vídeo mkv de 2 s con vídeo h264 y audio mono (aac, 1 canal)."""
+    output = inputs_dir / "video_mkv_audio_mono.mkv"
+    _run_ffmpeg(
+        [
+            "-f",
+            "lavfi",
+            "-i",
+            "testsrc2=size=160x90:rate=10:duration=2",
+            "-f",
+            "lavfi",
+            "-i",
+            "sine=frequency=440:duration=2",
+            *VIDEO_ARGS,
+            "-c:a",
+            "aac",
+            "-ac",
+            "1",
+            str(output),
+        ]
+    )
+    return output
+
+
+@pytest.fixture(scope="session")
+def video_mkv_audio_stereo(inputs_dir: Path) -> Path:
+    """Vídeo mkv de 2 s con vídeo h264 y audio estéreo (aac, 2 canales)."""
+    output = inputs_dir / "video_mkv_audio_stereo.mkv"
+    _run_ffmpeg(
+        [
+            "-f",
+            "lavfi",
+            "-i",
+            "testsrc2=size=160x90:rate=10:duration=2",
+            "-f",
+            "lavfi",
+            "-i",
+            "sine=frequency=440:duration=2",
+            *VIDEO_ARGS,
+            "-c:a",
+            "aac",
+            "-ac",
+            "2",
+            str(output),
+        ]
+    )
+    return output
+
+
 # =============================================================================
 #  Ejecutores de pyMedia (CLI Typer y binario compilado)
 # =============================================================================
