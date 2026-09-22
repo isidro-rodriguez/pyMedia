@@ -67,7 +67,7 @@ pymedia <comando> --help     # ayuda detallada de cada comando
 ```
 
 | Comando         | Ejemplo                                                           |
-| --------------- | ----------------------------------------------------------------- |
+|-----------------|-------------------------------------------------------------------|
 | `info`          | `pymedia info input.mp4`                                          |
 | `sheet`         | `pymedia sheet input.mp4 --preset fhd -o vcs.webp`                |
 | `join`          | `pymedia join part1.mp4 part2.mp4 -o movie.mp4`                   |
@@ -89,34 +89,34 @@ pymedia <comando> --help     # ayuda detallada de cada comando
 ### Análisis
 
 | Comando | Acción                                                                  |
-| ------- | ----------------------------------------------------------------------- |
+|---------|-------------------------------------------------------------------------|
 | `info`  | Muestra los metadatos del fichero multimedia (códecs, pistas, tamaño…). |
 | `sheet` | Genera una cuadrícula de fotogramas con cabecera de metadatos.          |
 
 ### Vídeo
 
-| Comando     | Acción                                                                                                                                                   |
-|-------------|----------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `transcode` | Transcodifica audio (`--audio 1,2`) y/o vídeo (`--video`) con un perfil de `config.toml` (`--preset fast\|even\|slow`), aplicando los filtros indicados. |
-| `remux`     | Cambia de contenedor sin transcodificar. Opciones: `--fast-start` (solo `.mp4`), `--genpts` (regenera marcas corruptas), `--sort-tracks`.                |
-| `join`      | Une varios vídeos consecutivamente en un único contenedor (_mínimo 2_).                                                                                  |
-| `cut`       | Recorta una sección con `--start`/`--end` o divide el vídeo por marcas de tiempo `--at hh:mm:ss[,hh:mm:ss,...]`.                                         |
+| Comando     | Acción                                                                                         |
+|-------------|------------------------------------------------------------------------------------------------|
+| `transcode` | Transcodifica audio y/o vídeo con un perfil de `config.toml`, aplicando los filtros indicados. |
+| `remux`     | Cambia de contenedor sin transcodificar.                                                       |
+| `join`      | Une varios vídeos consecutivamente en un único contenedor (_mínimo 2_).                        |
+| `cut`       | Recorta una sección o divide el vídeo por marcas de tiempo.                                    |
 
 ### Audio
 
-| Comando         | Acción                                                                                                           |
-| --------------- | ---------------------------------------------------------------------------------------------------------------- |
-| `add-audio`     | Añade una pista de audio al contenedor.                                                                          |
-| `delete-audio`  | Elimina pistas (`--tracks 1,2`).                                                                                 |
-| `edit-audio`    | Edita metadatos de la pista `--track N` (idioma, título, _default_, _forced_, _commentary_, _hearing-impaired_). |
-| `extract-audio` | Extrae pistas a fichero de audio independiente (`--tracks por defecto todas`).                                   |
+| Comando         | Acción                                                                                                   |
+|-----------------|----------------------------------------------------------------------------------------------------------|
+| `add-audio`     | Añade una pista de audio al contenedor.                                                                  |
+| `delete-audio`  | Elimina pistas (`--tracks 1,2`).                                                                         |
+| `edit-audio`    | Edita metadatos de la pista `--track N` (idioma, título, default, forced, commentary, hearing-impaired). |
+| `extract-audio` | Extrae pistas a fichero de audio independiente (`--tracks por defecto todas`).                           |
 
 > El idioma se indica con `--language <código ISO 639-2>` (p. ej. `eng`, `spa`).
 
 ### Subtítulos
 
 | Comando        | Acción                                                                |
-| -------------- | --------------------------------------------------------------------- |
+|----------------|-----------------------------------------------------------------------|
 | `add-subs`     | Añade una pista de subtítulos (`.srt`, `.ass`, `.ssa`) al contenedor. |
 | `delete-subs`  | Elimina pistas (`--tracks 3,4,5`), sin `--tracks` elimina todas.      |
 | `edit-subs`    | Edita metadatos de la pista `--track N` (+ `--visual-impaired`).      |
@@ -125,7 +125,7 @@ pymedia <comando> --help     # ayuda detallada de cada comando
 ### Imagen
 
 | Comando    | Acción                                                                                      |
-| ---------- | ------------------------------------------------------------------------------------------- |
+|------------|---------------------------------------------------------------------------------------------|
 | `animated` | Convierte un fragmento de vídeo en imagen animada (`--start`, `--end`, `--fps` 4–20).       |
 | `frames`   | Captura fotogramas en marcas concretas (`--at hh:mm:ss,...`).                               |
 | `interval` | Captura fotogramas a intervalos regulares (`--every N` segundos, opcional `--start/--end`). |
@@ -136,18 +136,18 @@ pymedia <comando> --help     # ayuda detallada de cada comando
 La ayuda de cada comando está localizada y se muestra con `--help`.
 
 | Opción              | Descripción                                                                           |
-| ------------------- | ------------------------------------------------------------------------------------- |
+|---------------------|---------------------------------------------------------------------------------------|
 | `-o`, `--output`    | Ruta del fichero de salida.                                                           |
 | `-d`, `--directory` | Directorio de salida para procesar lotes de ficheros (con `output` son excluyentes).  |
 | `--overwrite`       | Política ante un fichero de salida existente: `yes`, `no`, `ask` (por defecto `ask`). |
 | `--debug`           | Activa el nivel de log DEBUG.                                                         |
-| `--show-cmd`        | Muestra, sin ejecutar, el comando compuesto y listo para ser ejecutado por ffmpeg.    |
+| `--show-cmd`        | Muestra el comando ffmpeg compuesto y sale sin ejecutar                               |
 | `--version`         | Muestra la versión, Python y plataforma en un panel Rich y sale.                      |
 
 ### Filtros disponibles
 
 | Opción              | Descripción                                                               |
-| ------------------- | ------------------------------------------------------------------------- |
+|---------------------|---------------------------------------------------------------------------|
 | `--crop`            | Recorta a `WIDTH,HEIGHT` desde la coordenada `X,Y`: `--crop 640,360,0,0`. |
 | `--rotate`          | Giro ortogonal: `--rotate 90\|180\|270`.                                  |
 | `--size`            | Resolución objetivo: `--size WIDTHxHEIGHT`.                               |
@@ -161,7 +161,7 @@ La configuración persistente se copia al directorio de configuración del
 usuario en el primer arranque y se lee en cada ejecución:
 
 | Plataforma | Ruta                                                |
-| ---------- | --------------------------------------------------- |
+|------------|-----------------------------------------------------|
 | Windows    | `%APPDATA%\pymedia\config.toml`                     |
 | Linux      | `~/.config/pymedia/config.toml`                     |
 | macOS      | `~/Library/Application Support/pymedia/config.toml` |
@@ -205,7 +205,7 @@ audio_bit_rate = "256k"
 ### Perfiles de transcodificación
 
 | Perfil   | Vídeo | CRF |  Preset  | Audio | Bit rate | Contenedor |
-| :------- | :---: | :-: | :------: | :---- | -------: | :--------: |
+|:---------|:-----:|:---:|:--------:|:------|---------:|:----------:|
 | **fast** | H265  | 25  | veryfast | AAC   | 160 kb/s |    MP4     |
 | **even** | H265  | 23  |  medium  | AAC   | 192 kb/s |    MP4     |
 | **slow** | H265  | 20  |  slower  | AAC   | 256 kb/s |    MP4     |

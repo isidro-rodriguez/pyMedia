@@ -1758,6 +1758,32 @@ def test_animated_success_generates_webp(
     assert output.exists()
 
 
+def test_animated_success_with_nonzero_start(
+    pymedia: Invoke,
+    video_mp4_a: Path,
+    tmp_path: Path,
+) -> None:
+    """`animated --show-cmd` con `--start` incluye `-ss` en el comando."""
+    output = tmp_path / "anim_start.gif"
+
+    result = pymedia(
+        "animated",
+        str(video_mp4_a),
+        "-o",
+        str(output),
+        "-ov",
+        "yes",
+        "--fps",
+        "10",
+        "--start",
+        "00:00:01",
+        "--show-cmd",
+    )
+
+    assert result.exit_code == 0
+    assert "-ss" in result.output
+
+
 # =============================================================================
 #  frames
 # =============================================================================
