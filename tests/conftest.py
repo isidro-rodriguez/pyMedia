@@ -716,6 +716,23 @@ def video_mkv_audio_stereo(inputs_dir: Path) -> Path:
     return output
 
 
+@pytest.fixture(scope="session")
+def video_static(inputs_dir: Path) -> Path:
+    """Vídeo mp4 de 2 s completamente estático (sin cambios de escena)."""
+    output = inputs_dir / "video_static.mp4"
+    _run_ffmpeg(
+        [
+            "-f",
+            "lavfi",
+            "-i",
+            "color=c=blue:size=160x90:rate=10:duration=2",
+            *VIDEO_ARGS,
+            str(output),
+        ]
+    )
+    return output
+
+
 # =============================================================================
 #  Ejecutores de pyMedia (CLI Typer y binario compilado)
 # =============================================================================

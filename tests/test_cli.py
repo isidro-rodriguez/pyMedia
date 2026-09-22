@@ -237,6 +237,21 @@ def test_sheet_header_truncates_long_track_list(
     assert output.exists()
 
 
+def test_sheet_success_with_subtitles(
+    pymedia: Invoke,
+    video_mkv_subs: Path,
+    tmp_path: Path,
+) -> None:
+    """`sheet` incluye la línea de pistas de subtítulos en la cabecera."""
+    output = tmp_path / "sheet_subs.jpg"
+
+    result = pymedia("sheet", str(video_mkv_subs), "-o", str(output), "--preset", "web")
+
+    assert result.exit_code == 0
+    assert output.exists()
+    assert stream_codec_names(output, "video") == ["mjpeg"]
+
+
 # =============================================================================
 #  join
 # =============================================================================
@@ -294,54 +309,93 @@ def test_join_success_with_overwrite_yes(
 
 JOIN_INCOMPATIBLE_CASES = [
     pytest.param(
+        "video_mp4_a",
         "video_mp4_diff_codec",
         "video.codec differs:",
         id="codec",
     ),
     pytest.param(
+        "video_mp4_a",
         "video_mp4_diff_res",
         "video.width differs:",
         id="resolution",
     ),
     pytest.param(
+        "video_mp4_a",
         "video_mp4_diff_fps",
         "video.fps differs:",
         id="fps",
     ),
     pytest.param(
+        "video_mp4_a",
         "video_mp4_diff_pixfmt",
         "video.pix_fmt differs:",
         id="pix_fmt",
     ),
     pytest.param(
+        "video_mp4_a",
         "video_mp4_diff_sr",
         "audio[0].sample_rate differs:",
         id="sample_rate",
     ),
     pytest.param(
+        "video_mp4_a",
         "video_mp4_diff_audio_codec",
         "audio[0].codec differs:",
         id="audio_codec",
     ),
+    pytest.param(
+        "video_mp4_a",
+        "video_audio_only_mkv",
+        "video presence differs: first has video, this has no video",
+        id="video_presence_second_missing",
+    ),
+    pytest.param(
+        "video_mp4_a",
+        "video_no_audio",
+        "audio presence differs: first has audio, this has no audio",
+        id="audio_presence_second_missing",
+    ),
+    pytest.param(
+        "video_mkv_audio_stereo",
+        "video_mkv_two_audio",
+        "audio track count differs: 1 vs 2",
+        id="audio_track_count",
+    ),
+    pytest.param(
+        "video_mkv_audio_mono",
+        "video_mkv_audio_stereo",
+        "audio[0].channels differs:",
+        id="audio_channels",
+    ),
+    pytest.param(
+        "video_mkv_audio_mono",
+        "video_mkv_audio_stereo",
+        "audio[0].channel_layout differs:",
+        id="audio_channel_layout",
+    ),
 ]
 
 
-@pytest.mark.parametrize("second_fixture,expected", JOIN_INCOMPATIBLE_CASES)
+@pytest.mark.parametrize(
+    "first_fixture,second_fixture,expected", JOIN_INCOMPATIBLE_CASES
+)
 def test_join_rejects_incompatible_media(
     pymedia: Invoke,
     request: pytest.FixtureRequest,
-    video_mp4_a: Path,
+    first_fixture: str,
     second_fixture: str,
     expected: str,
     tmp_path: Path,
 ) -> None:
     """`join` rechaza vídeos incompatibles indicando el motivo."""
+    first = request.getfixturevalue(first_fixture)
     second = request.getfixturevalue(second_fixture)
     output = tmp_path / "joined.mp4"
 
     result = pymedia(
         "join",
-        str(video_mp4_a),
+        str(first),
         str(second),
         "-o",
         str(output),
@@ -1725,6 +1779,14 @@ def test_frames_success_captures_at_timestamp(
     assert len(list(tmp_path.glob("thumb_*.jpg"))) == 1
 
 
+def test_frames_error_empty_at(pymedia: Invoke, video_mp4_a: Path) -> None:
+    """`frames --at ""` cuenta como opción no informada."""
+    result = pymedia("frames", str(video_mp4_a), "--at", "")
+
+    assert result.exit_code != 0
+    assert "Missing required option: at" in result.output
+
+
 def test_frames_error_invalid_timestamp(
     pymedia: Invoke,
     video_mp4_a: Path,
@@ -1854,6 +1916,14 @@ def test_interval_error_every_too_small(
     assert "Interval must be at least 1 second" in result.output
 
 
+def test_interval_error_missing_every(pymedia: Invoke, video_mp4_a: Path) -> None:
+    """`interval` sin `--every` pide la opción obligatoria."""
+    result = pymedia("interval", str(video_mp4_a))
+
+    assert result.exit_code != 0
+    assert "Missing required option: every" in result.output
+
+
 # =============================================================================
 #  scene
 # =============================================================================
@@ -1909,6 +1979,30 @@ def test_scene_success_with_range(
 
     assert result.exit_code == 0
     assert len(list(tmp_path.glob("scene_range_*.jpg"))) >= 1
+
+
+def test_scene_warns_when_no_scene_changes(
+    pymedia: Invoke,
+    video_static: Path,
+    tmp_path: Path,
+) -> None:
+    """`scene` avisa cuando un vídeo estático no produce ninguna captura."""
+    output = tmp_path / "scene.png"
+
+    result = pymedia(
+        "scene",
+        str(video_static),
+        "--scene",
+        "0.1",
+        "-o",
+        str(output),
+        "-ov",
+        "yes",
+    )
+
+    assert result.exit_code == 0
+    assert "No scene changes detected" in result.output
+    assert len(list(tmp_path.glob("scene_*.png"))) == 0
 
 
 # =============================================================================
