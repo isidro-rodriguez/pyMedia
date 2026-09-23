@@ -109,8 +109,10 @@ class TranscodeMixin:
             se convierten a `mov_text` y los gráficos se descartan, ya que el
             contenedor no los soporta.
         """
-        if self.media is None or not self.media.subtitles:
-            return []
+        if self.media is None:
+            raise MissingParameterError(name="media")
+        if self.media.subtitles is None:
+            raise MissingParameterError(name="subtitles")
 
         is_mp4 = container.lower() in {".mp4", ".m4v", ".mov"}
         args: list[str] = []

@@ -33,6 +33,9 @@ class TranscodeCmd:
         if self.params.media is None:
             raise MissingParameterError(name="media")
 
+        input_container = self.params.media.path.suffix
+        output_container = self.params.media_output.suffix
+
         subtitles_filter = ""
         if self.params.subtitles_input is not None:
             subtitles_filter = self.params.to_burn_subtitles_cmd()
@@ -66,11 +69,14 @@ class TranscodeCmd:
         if self.params.media.audio is not None:
             cmd.extend([*self.params.to_audio_transcode_cmd()])
 
+        if self.params.media.subtitles is not None:
+            cmd.extend([*self.params.to_subtitles_copy_cmd(container=input_container)])
+
+        if output_container == ".mp4":
+            cmd.extend([*self.params.to_mp4_cmd_args()])
+
         cmd.extend(
             [
-                *self.params.to_subtitles_copy_cmd(
-                    container=self.params.media_output.suffix
-                ),
                 *self.params.to_video_transcode_cmd(),
                 "-progress",
                 "pipe:1",

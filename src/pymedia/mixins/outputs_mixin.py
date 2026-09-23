@@ -352,6 +352,19 @@ class MediaOutputMixin:
 
         self.media_output = output
 
+    def to_mp4_cmd_args(self) -> list[str]:
+        """Argumentos específicos de contenedores .mp4."""
+        if self.media is None:
+            raise MissingParameterError(name="media")
+        if self.media.video is None:
+            raise MissingParameterError(name="video")
+
+        mp4_args = ["-movflags", "+faststart"]
+        if self.media.video.codec == "h265":
+            mp4_args.extend(["-tag:v", "hvc1"])
+
+        return mp4_args
+
 
 @dataclass(kw_only=True)
 class SubtitlesOutputMixin:

@@ -6,6 +6,7 @@ from datetime import timedelta
 from json import JSONDecodeError
 from pathlib import Path
 
+from pymedia.data.video_codecs import VIDEO_CODECS
 from pymedia.errors import (
     MissingParameterError,
 )
@@ -128,7 +129,7 @@ def _create_media(media_input: Path, logger: Logger) -> "Media":
                 path=media_input.absolute(),
                 global_index=stream.get("index"),
                 track_index=video_track_index,
-                codec=stream.get("codec_name"),
+                codec=VIDEO_CODECS[stream.get("codec_name")].name,
                 width=stream.get("width"),
                 height=stream.get("height"),
                 duration=tags.get("DURATION"),
