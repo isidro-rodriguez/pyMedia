@@ -4,7 +4,6 @@ import typer
 
 from pymedia.commands.base_cli_options import (
     DebugOption,
-    FastStartOption,
     HelpOption,
     MediaInputArgument,
     OutputOption,
@@ -15,7 +14,7 @@ from pymedia.commands.base_cli_options import (
 )
 from pymedia.commands.remux.parameters import RemuxParameters
 from pymedia.commands.remux.service import RemuxService
-from pymedia.errors import MissingArgumentError, UserError
+from pymedia.errors import MissingArgumentError
 from pymedia.locales import _
 from pymedia.logger import Logger
 from pymedia.types import OverwriteMode
@@ -50,7 +49,6 @@ def remux(
     media_input: MediaInputArgument,
     media_output: OutputOption,
     overwrite: OverwriteOption = OverwriteMode.ASK,
-    fast_start: FastStartOption = False,
     regenerate_pts: RegeneratePtsOption = False,
     sort_tracks: SortTracksOption = False,
     debug: DebugOption = False,
@@ -76,15 +74,12 @@ def remux(
     """
     if media_output is None:
         raise MissingArgumentError(name="media_output")
-    if fast_start and media_output.suffix != ".mp4":
-        raise UserError(msg=_("Fast start only works for '.mp4' remux."))
 
     Logger.create(debug=debug)
     params = RemuxParameters.load(
         overwrite=overwrite,
         media_input=media_input,
         media_output=media_output,
-        fast_start=fast_start,
         regenerate_pts=regenerate_pts,
         sort_tracks=sort_tracks,
     )

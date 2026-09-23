@@ -155,15 +155,6 @@ EveryOption = Annotated[
     ),
 ]
 
-FastStartOption = Annotated[
-    bool,
-    typer.Option(
-        default="--fast-start",
-        rich_help_panel=_("Command options"),
-        help=_("Move metadata index at the start, quickening web streaming."),
-    ),
-]
-
 RegeneratePtsOption = Annotated[
     bool,
     typer.Option(

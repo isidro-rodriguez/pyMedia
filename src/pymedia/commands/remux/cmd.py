@@ -58,9 +58,23 @@ class RemuxCmd:
             ]
         )
 
-        if self.params.fast_start:
-            cmd.extend([*self.params.to_fast_start_cmd()])
+        if container == ".mp4":
+            cmd.extend(self._mp4_args())
 
         cmd.append(str(self.params.media_output))
 
         return cmd
+
+    def _mp4_args(self) -> list[str]:
+        """Argumentos específicos de contenedores .mp4."""
+        if self.params.media is None:
+            raise MissingParameterError(name="media")
+        if self.params.media.video is None:
+            raise MissingParameterError(name="video")
+        video = self.params.media.video
+
+        mp4_args = ["-movflags", "+faststart"]
+        if video.codec == "h265":
+            mp4_args.extend(["-tag:v", "hvc1"])
+
+        return mp4_args

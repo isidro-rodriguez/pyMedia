@@ -481,20 +481,6 @@ def test_remux_success_changes_container(
     assert stream_types(output) == ["video", "audio"]
 
 
-def test_remux_error_fast_start_non_mp4(
-    pymedia: Invoke,
-    video_mp4_a: Path,
-    tmp_path: Path,
-) -> None:
-    """`remux` rechaza `--fast-start` con un contenedor distinto de mp4."""
-    result = pymedia(
-        "remux", str(video_mp4_a), "-o", str(tmp_path / "remuxed.mkv"), "--fast-start"
-    )
-
-    assert result.exit_code != 0
-    assert "Fast start only works" in result.output
-
-
 def test_remux_success_with_genpts(
     pymedia: Invoke,
     video_mp4_a: Path,

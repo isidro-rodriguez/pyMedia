@@ -1,4 +1,4 @@
-# Agent Guidelines — Python
+# Guía de agente Python
 
 Código simple, legible, stdlib antes que dependencias nuevas.
 

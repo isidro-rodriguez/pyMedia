@@ -309,14 +309,7 @@ _VIDEO_CODECS: tuple[VideoCodecData, ...] = (
     ),
 )
 
-
-VIDEO_CODECS: Mapping[str, VideoCodecData] = MappingProxyType(
-    {codec.name: codec for codec in _VIDEO_CODECS}
-)
-"""Códecs de vídeo soportados indexados por nombre."""
-
-
-CODEC_ALIASES: Mapping[str, str] = MappingProxyType(
+_VIDEO_CODECS_ALIASES: Mapping[str, str] = MappingProxyType(
     {
         "avc": "h264",
         "avc1": "h264",
@@ -324,3 +317,14 @@ CODEC_ALIASES: Mapping[str, str] = MappingProxyType(
     }
 )
 """Nombres habituales de FFmpeg normalizados a los nombres del módulo."""
+
+_video_codecs_by_name = {codec.name: codec for codec in _VIDEO_CODECS}
+
+VIDEO_CODECS: Mapping[str, VideoCodecData] = MappingProxyType(
+    _video_codecs_by_name
+    | {
+        alias: _video_codecs_by_name[target]
+        for alias, target in _VIDEO_CODECS_ALIASES.items()
+    }
+)
+"""Códecs de vídeo soportados, incluyendo alias, indexados por nombre."""
