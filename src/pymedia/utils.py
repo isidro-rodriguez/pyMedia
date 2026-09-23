@@ -1,8 +1,82 @@
 """Utilidades compartidas por los modelos de pyMedia."""
 
-from datetime import timedelta
+import re
+from datetime import UTC, datetime, timedelta
+from email.utils import parsedate_to_datetime
 from fractions import Fraction
 from pathlib import Path
+
+
+def parse_date(raw: str | None) -> datetime | None:
+    """Convierte fechas habituales de metadatos multimedia a datetime formato ISO-8601.
+
+    Args:
+        raw: String a ser parseado como fecha.
+
+    Returns:
+        La fecha en formato ISO-8601, o `None` si la conversión falla.
+    """
+    if not raw:
+        return None
+
+    # ISO 8601
+    if raw.endswith(("Z", "z")):
+        raw = raw[:-1] + "+00:00"
+
+    try:
+        dt = datetime.fromisoformat(raw)
+        return datetime(dt.year, dt.month, dt.day)
+    except ValueError:
+        pass
+
+    # RFC 2822 / RFC 5322 / formatos similares
+    try:
+        dt = parsedate_to_datetime(raw)
+        return datetime(dt.year, dt.month, dt.day)
+    except (TypeError, ValueError, OverflowError):
+        pass
+
+    # Formatos con nombres de mes
+    for fmt in (
+        "%a %b %d %H:%M:%S %Y",
+        "%b %d %H:%M:%S %Y",
+        "%b %d %Y",
+        "%d %b %Y",
+        "%d %B %Y",
+        "%B %d %Y",
+    ):
+        try:
+            dt = datetime.strptime(raw, fmt)
+            return datetime(dt.year, dt.month, dt.day)
+        except ValueError:
+            pass
+
+    # Formatos numéricos no ISO.
+    # Evitamos deliberadamente formatos ambiguos como 01/02/2024.
+    for fmt in (
+        "%Y/%m/%d",
+        "%Y.%m.%d",
+        "%d-%m-%Y",
+        "%d/%m/%Y",
+        "%d.%m.%Y",
+    ):
+        try:
+            dt = datetime.strptime(raw, fmt)
+            return datetime(dt.year, dt.month, dt.day)
+        except ValueError:
+            pass
+
+    # Unix timestamp en segundos.
+    if re.fullmatch(r"\d{9,11}", raw):
+        try:
+            timestamp = int(raw)
+            dt = datetime.fromtimestamp(timestamp, tz=UTC)
+            if 1970 <= dt.year <= 2100:
+                return datetime(dt.year, dt.month, dt.day)
+        except (ValueError, OverflowError, OSError):
+            pass
+
+    return None
 
 
 def parse_fraction(value: str | None) -> Fraction | None:

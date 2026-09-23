@@ -1,7 +1,9 @@
 """Genera los vídeos de prueba a partir de las pistas ya generadas.
 
 Los vídeos incrustan (sin recodificar) las pistas de `audio_tracks` y los
-subtítulos de `subtitle_tracks`, que deben existir antes de ejecutar este módulo.
+subtítulos de `subtitle_tracks`, que deben existir antes de ejecutar este
+módulo. Además de los metadatos por stream, cada vídeo lleva metadatos de
+contenedor (title/comment) que describen el propósito de esa fixture.
 """
 
 from dataclasses import dataclass
@@ -52,13 +54,17 @@ class VideoSpec:
         output_args: Opciones adicionales del muxer.
         subtitle_format: Formato de los subtítulos a incrustar; `None` = ninguno.
         null_metadata: Si es `True`, deja sin title/language/disposition
-            todos los streams (para probar vídeos con metadatos ausentes).
+            todos los streams, y sin metadatos de contenedor (para probar
+            vídeos con metadatos ausentes).
         audio_count: Nº de pistas de audio; `None` = todas las compatibles.
             Si supera las disponibles, se reutilizan cíclicamente.
         tags: Pares (language, title) a usar en las pistas de audio en vez de
             los de `TrackSpec`. Su longitud fija el nº de pistas de audio.
         truncate_ratio: Fracción del fichero que se conserva tras generarlo
             (simula una descarga incompleta); `None` = fichero completo.
+        container_tags: Pares (clave, valor) de metadatos de contenedor
+            (`title`, `comment`, `genre`...). Se ignora si `null_metadata`
+            es `True`, ya que `-map_metadata -1` los borra igualmente.
     """
 
     filename: str
@@ -70,6 +76,7 @@ class VideoSpec:
     audio_count: int | None = None
     tags: tuple[tuple[str, str], ...] = ()
     truncate_ratio: float | None = None
+    container_tags: tuple[tuple[str, str], ...] = ()
 
 
 # Casos límite de idioma y título: emoji, comillas, `=`, salto de línea,
@@ -84,6 +91,24 @@ HOSTILE_TAGS: tuple[tuple[str, str], ...] = (
     ("eng", ""),
 )
 
+# Todas las claves de metadatos de contenedor que ffmpeg vuelca tal cual en
+# los "Tags" de Matroska: usadas en metadata.mkv para probar el contenedor
+# con la máxima cobertura de metadatos posible.
+METADATA_MKV_TAGS: tuple[tuple[str, str], ...] = (
+    ("title", "Metadatos completos"),
+    ("comment", "Audio, vídeo y subtítulos ASS con metadatos completos."),
+    ("description", "Fixture con el máximo de metadatos de contenedor soportados."),
+    ("synopsis", "Vídeo de prueba pensado para validar la lectura de tags MKV."),
+    ("genre", "Test"),
+    ("date", "2026-09-24"),
+    ("copyright", "© pyMedia"),
+    ("encoder", "pyMedia fixture generator"),
+    ("artist", "pyMedia"),
+    ("album", "pyMedia fixtures"),
+    ("track", "1"),
+    ("law_rating", "N/A"),
+)
+
 
 VIDEOS: tuple[VideoSpec, ...] = (
     VideoSpec(
@@ -91,18 +116,27 @@ VIDEOS: tuple[VideoSpec, ...] = (
         source=_mandelbrot(),
         video_args=("-c:v", "libsvtav1", "-crf", "30", "-preset", "8"),
         output_args=("-t", str(DURATION_SECONDS), *FASTSTART),
+        container_tags=(
+            ("title", "Fractal simple"),
+            ("comment", "Vídeo AV1 con fractal de Mandelbrot y zoom continuo."),
+        ),
     ),
     VideoSpec(
         filename="portrait.mp4",
         source=_lavfi("testsrc2", size="720x1280"),
         video_args=(*H264, "-crf", "23", "-vf", "setsar=1"),
         output_args=FASTSTART,
+        container_tags=(
+            ("title", "Vídeo vertical"),
+            ("comment", "Formato retrato 720x1280 para pruebas de orientación."),
+        ),
     ),
     VideoSpec(
         filename="metadata.mkv",
         source=_lavfi("testsrc"),
         video_args=H264,
         subtitle_format="ass",
+        container_tags=METADATA_MKV_TAGS,
     ),
     VideoSpec(
         filename="test_null_metadata.mkv",
@@ -116,23 +150,39 @@ VIDEOS: tuple[VideoSpec, ...] = (
         source=_lavfi("testsrc2"),
         video_args=H264,
         audio_count=0,
+        container_tags=(
+            ("title", "Sin audio"),
+            ("comment", "Vídeo sin pistas de audio."),
+        ),
     ),
     VideoSpec(
         filename="lots.mkv",
         source=_lavfi("testsrc2"),
         video_args=H264,
         audio_count=32,
+        container_tags=(
+            ("title", "Muchas pistas de audio"),
+            ("comment", "32 pistas de audio reutilizadas cíclicamente."),
+        ),
     ),
     VideoSpec(
         filename="hostile.mkv",
         source=_lavfi("testsrc2"),
         video_args=H264,
         tags=HOSTILE_TAGS,
+        container_tags=(
+            ("title", "Etiquetas hostiles"),
+            ("comment", "Idiomas y títulos límite: emoji, comillas, saltos de línea."),
+        ),
     ),
     VideoSpec(
         filename="weird ñ [1] 'x'.mkv",
         source=_lavfi("testsrc2"),
         video_args=H264,
+        container_tags=(
+            ("title", "Nombre de fichero raro"),
+            ("comment", "Nombre de fichero con caracteres especiales."),
+        ),
     ),
     # Sin `faststart`, el átomo `moov` queda al final y el recorte lo destruye.
     VideoSpec(
@@ -140,6 +190,10 @@ VIDEOS: tuple[VideoSpec, ...] = (
         source=_lavfi("testsrc2"),
         video_args=H264,
         truncate_ratio=0.5,
+        container_tags=(
+            ("title", "Fichero truncado"),
+            ("comment", "Recortado al 50% tras generarse: simula descarga incompleta."),
+        ),
     ),
 )
 
@@ -200,6 +254,14 @@ def _audio_tags(spec: VideoSpec, tracks: list[TrackSpec]) -> list[tuple[str, str
     return list(spec.tags) or [(track.language, track.title) for track in tracks]
 
 
+def _container_metadata_args(spec: VideoSpec) -> list[str]:
+    """Metadatos de contenedor (`-metadata`) de `spec.container_tags`."""
+    args: list[str] = []
+    for key, value in spec.container_tags:
+        args += ["-metadata", f"{key}={value}"]
+    return args
+
+
 def _metadata_args(
     audio_tags: list[tuple[str, str]], languages: list[str]
 ) -> list[str]:
@@ -213,7 +275,11 @@ def _metadata_args(
 
 
 def _null_metadata_args(n_audio: int, n_subtitles: int) -> list[str]:
-    """Vacía metadatos y disposition de todos los streams, y los capítulos."""
+    """Vacía metadatos y disposition de todos los streams, y los capítulos.
+
+    `-map_metadata -1` ya borra los metadatos de contenedor, por lo que
+    `spec.container_tags` no se aplica cuando `null_metadata` es `True`.
+    """
     args = ["-map_metadata", "-1", "-map_chapters", "-1"]
     # ffmpeg/libx264 inyectan un tag "encoder" y marcan "default" la primera
     # pista de cada tipo: se vacían para que no quede ningún metadato "vivo".
@@ -260,6 +326,7 @@ def build_ffmpeg_args(
         args += _metadata_args(
             _audio_tags(spec, tracks), [lang for lang, _ in subtitles]
         )
+        args += _container_metadata_args(spec)
     return [*args, *spec.output_args, str(output)]
 
 

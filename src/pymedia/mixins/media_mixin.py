@@ -13,10 +13,10 @@ from pymedia.errors import (
 from pymedia.ffprobe import get_media_metadata
 from pymedia.logger import Logger
 from pymedia.models.audio import Audio
-from pymedia.models.media import Media
+from pymedia.models.media import Media, MediaMetadata
 from pymedia.models.subtitles import Subtitles
 from pymedia.models.video import Video
-from pymedia.utils import parse_fraction, to_float, to_int
+from pymedia.utils import parse_date, parse_fraction, to_float, to_int
 
 
 @dataclass(kw_only=True)
@@ -77,10 +77,8 @@ class MediaListMixin:
             logger: Sistema de registro de mensajes.
 
         Raises:
-            InvalidContainerTypeError: Si la extensión de algún fichero no es
-                un contenedor de vídeo soportado.
-            MissingParameterError: Si los metadatos de algún fichero no se
-                pudieron mapear.
+            InvalidContainerTypeError: Si extensión no es de contenedor soportado.
+            MissingParameterError: Si metadatos de algún fichero no se pudieron mapear.
         """
         media_list: list[Media] = []
 
@@ -185,20 +183,36 @@ def _create_media(media_input: Path, logger: Logger) -> "Media":
             )
             subtitles_track_index += 1
 
-    fmt = data.get("format", {})
-    duration_val = to_float(fmt.get("duration"))
+    format = data.get("format", {})
+    tags = format.get("tags", {})
+    duration_val = to_float(format.get("duration"))
 
     try:
+        media_metadata = MediaMetadata(
+            title=tags.get("title"),
+            comment=tags.get("COMMENT"),
+            description=tags.get("DESCRIPTION"),
+            synopsis=tags.get("SYNOPSIS"),
+            genre=tags.get("GENRE"),
+            date=parse_date(raw=tags.get("DATE")),
+            copyright=tags.get("COPYRIGHT"),
+            law_rating=tags.get("LAW_RATING"),
+            artist=tags.get("ARTIST"),
+            album=tags.get("ALBUM"),
+            encoder=tags.get("ENCODER"),
+        )
+
         media = Media(
             path=media_input.absolute(),
             duration=timedelta(seconds=duration_val)
             if duration_val is not None
             else None,
-            size=to_int(fmt.get("size")),
-            format_name=fmt.get("format_name"),
+            size=to_int(format.get("size")),
+            format_name=format.get("format_name"),
             video=video,
             audio=audio,
             subtitles=subtitles,
+            metadata=media_metadata if tags else None,
         )
     except (
         ValueError,

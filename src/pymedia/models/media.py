@@ -1,7 +1,7 @@
 """Modelos de metadatos de medios obtenidos mediante ffprobe."""
 
 from dataclasses import dataclass
-from datetime import timedelta
+from datetime import datetime, timedelta
 from pathlib import Path
 
 from pymedia.models.audio import Audio
@@ -10,8 +10,43 @@ from pymedia.models.video import Video
 
 
 @dataclass(frozen=True, kw_only=True, slots=True)
+class MediaMetadata:
+    """Metadatos globales del contenedor obtenidos mediante ffprobe.
+
+    Estos metadatos se aplican al fichero multimedia completo y no a una
+    pista concreta de vídeo, audio o subtítulos. Los valores disponibles
+    dependen del contenedor y del contenido original.
+
+    Attributes:
+        title: Título del contenido o del contenedor.
+        comment: Comentario asociado al contenido.
+        description: Descripción del contenido.
+        synopsis: Sinopsis o resumen breve del contenido.
+        genre: Género o categoría del contenido.
+        date: Fecha del contenido, con hora y zona ignoradas al parsearla.
+        copyright: Información de copyright o licencia del contenido.
+        law_rating: Clasificación por edad o calificación legal del contenido.
+        artist: Autor, creador o artista asociado al contenido.
+        album: Álbum al que pertenece el contenido.
+        encoder: Aplicación o biblioteca que generó el contenedor.
+    """
+
+    title: str | None = None
+    comment: str | None = None
+    description: str | None = None
+    synopsis: str | None = None
+    genre: str | None = None
+    date: datetime | None = None
+    copyright: str | None = None
+    law_rating: str | None = None
+    artist: str | None = None
+    album: str | None = None
+    encoder: str | None = None
+
+
+@dataclass(frozen=True, kw_only=True, slots=True)
 class Media:
-    """Metadatos agregados de un medio obtenidos de ffprobe.
+    """Información del contenedor obtenida mediante ffprobe.
 
     Attributes:
         path: Ruta absoluta del fichero de media a procesar.
@@ -30,3 +65,4 @@ class Media:
     video: Video | None = None
     audio: list[Audio] | None = None
     subtitles: list[Subtitles] | None = None
+    metadata: MediaMetadata | None = None

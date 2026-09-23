@@ -1,6 +1,7 @@
 """Comando ``info``: service."""
 
 import math
+from dataclasses import astuple
 
 from rich.console import Group
 from rich.panel import Panel
@@ -44,6 +45,24 @@ class InfoService(BaseService[InfoParameters]):
 
         def _build_general_table() -> Table:
             """Construye la tabla de datos generales del vídeo."""
+            if media.metadata is None:
+                raise MissingParameterError(name="media.metadata")
+            metadata = media.metadata
+
+            metadata_fields = (
+                ("Title", metadata.title),
+                ("Comment", metadata.comment),
+                ("Description", metadata.description),
+                ("Synopsis", metadata.synopsis),
+                ("Genre", metadata.genre),
+                ("Date", metadata.date),
+                ("Copyright", metadata.copyright),
+                ("Law rating", metadata.law_rating),
+                ("Artist", metadata.artist),
+                ("Album", metadata.album),
+                ("Encoder", metadata.encoder),
+            )
+
             table = Table(title=f"📁 {_('General')}", show_header=True, expand=True)
             table.add_column(header=_("Field"), style="bold", ratio=1)
             table.add_column(header=_("Value"), ratio=3)
@@ -52,11 +71,20 @@ class InfoService(BaseService[InfoParameters]):
             table.add_row(
                 _("Duration"),
                 parse_timedelta(media.duration) if media.duration else na,
+                end_section=True
+                if any(astuple(metadata)) and media.size is None
+                else False,
             )
             if media.size is not None:
                 table.add_row(
-                    _("Size"), parse_size(size_bytes=media.size, locale=locale)
+                    _("Size"),
+                    parse_size(size_bytes=media.size, locale=locale),
+                    end_section=True if any(astuple(metadata)) else False,
                 )
+            for label, value in metadata_fields:
+                if value is not None:
+                    table.add_row(_(label), str(value) or na)
+
             return table
 
         def _build_video_table(video: Video) -> Table:
