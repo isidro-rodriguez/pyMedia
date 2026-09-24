@@ -28,6 +28,7 @@ dev = [
     "ruff>=0.3.0",
     "zstandard>=0.25.0",
     "pytest-cov>=7.1.0",
+    "pyright>=1.1.414",
 ]
 
 [project.scripts]
@@ -82,3 +83,7 @@ addopts = "-m 'not binary and not locales'"
 
 [tool.coverage.report]
 exclude_also = ["raise MissingParameterError", "raise InvalidParameterError"]
+
+[tool.pyright]
+include = ["src"]
+typeCheckingMode = "strict"

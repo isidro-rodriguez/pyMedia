@@ -17,34 +17,24 @@
             "command": "uv run ruff check"
         },
         {
-            "label": "CHECK 4 - pytest",
+            "label": "CHECK 4 - pyright",
+            "type": "shell",
+            "command": "uv run pyright"
+        },
+        {
+            "label": "CHECK 5 - pytest",
             "type": "shell",
             "command": "uv run pytest"
         },
         {
-            "label": "CHECK 5 - pytest -m locales",
+            "label": "CHECK 6 - pytest -m locales",
             "type": "shell",
             "command": "uv run pytest -m locales"
         },
         {
-            "label": "CHECK 6 - pytest -m binary",
+            "label": "CHECK 7 - pytest -m binary",
             "type": "shell",
             "command": "uv run pytest -m binary"
-        },
-        {
-            "label": "CHECK_LIST",
-            "dependsOn": [
-                "ruff format",
-                "ruff check --fix",
-                "ruff check",
-                "pytest",
-                "pytest -m locales"
-            ],
-            "dependsOrder": "sequence",
-            "group": {
-                "kind": "build",
-                "isDefault": true
-            }
         },
         {
             "label": "I18N 1 - regenera POT",

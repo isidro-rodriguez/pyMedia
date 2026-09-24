@@ -22,6 +22,13 @@ repos:
         language: system
         types: [python]
 
+      - id: pyright
+        name: PyRight
+        entry: uv run pyright
+        language: system
+        types: [python]
+        pass_filenames: false
+
       - id: pytest
         name: Pytest
         entry: uv run pytest

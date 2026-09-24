@@ -75,7 +75,7 @@ class SceneService(BaseService[SceneParameters]):
         directory = output_template.parent
         pattern = re.compile(rf"^{re.escape(base_stem)}_(\d{{3}}){re.escape(suffix)}$")
 
-        existing_files = []
+        existing_files: list[Path] = []
         if directory.exists():
             for item in directory.iterdir():
                 if item.is_file() and pattern.match(item.name):

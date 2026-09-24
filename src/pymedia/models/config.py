@@ -4,7 +4,7 @@ import tomllib
 from dataclasses import dataclass
 from importlib.resources import files
 from pathlib import Path
-from typing import Any
+from typing import Any, cast
 
 import platformdirs
 
@@ -164,9 +164,11 @@ class Config:
 
         # El conjunto de perfiles debe coincidir con el declarado en la aplicación.
         valid_presets = {preset.value for preset in PresetsTranscodeMode}
-        presets = transcode if isinstance(transcode, dict) else {}
+        presets: dict[str, Any] = (
+            cast(dict[str, Any], transcode) if isinstance(transcode, dict) else {}
+        )
         missing_presets = valid_presets - set(presets)
-        unknown_presets = set(presets) - valid_presets
+        unknown_presets: set[str] = set(presets) - valid_presets
         if missing_presets or unknown_presets:
             errors.append(
                 "\n"
@@ -196,8 +198,10 @@ class Config:
             if preset_name not in valid_presets:
                 continue  # ya reportado, evita validar claves ajenas
 
+            preset = cast(dict[str, Any], preset)
+
             # transcode.<preset>.video_codec
-            video_codec = preset["video_codec"]
+            video_codec: str = preset["video_codec"]
             valid_video_codecs = {v.value for v in VideoCodecMode}
             if video_codec not in valid_video_codecs:
                 errors.append(
@@ -213,7 +217,7 @@ class Config:
                 )
 
             # transcode.<preset>.video_preset
-            video_preset = preset["video_preset"]
+            video_preset: str = preset["video_preset"]
             if video_codec in VIDEO_CODECS:
                 codec_presets = VIDEO_CODECS[video_codec].presets
                 if codec_presets is not None and video_preset not in codec_presets:
@@ -230,11 +234,11 @@ class Config:
                     )
 
             # transcode.<preset>.video_crf
-            video_crf = preset["video_crf"]
+            video_crf: int = preset["video_crf"]
             if video_codec in VIDEO_CODECS:
                 crf = VIDEO_CODECS[video_codec].crf
                 if crf is not None and (
-                    not isinstance(video_crf, int) or not crf[0] <= video_crf <= crf[1]
+                    not isinstance(video_crf, int) or not crf[0] <= video_crf <= crf[1]  # type: ignore[unnecessary-isinstance]
                 ):
                     errors.append(
                         "\n"
@@ -246,7 +250,7 @@ class Config:
                     )
 
             # transcode.<preset>.audio_codec
-            audio_codec = preset["audio_codec"]
+            audio_codec: str = preset["audio_codec"]
             valid_audio_codecs = {a.value for a in AudioCodecMode}
             if audio_codec not in valid_audio_codecs:
                 errors.append(
@@ -262,7 +266,7 @@ class Config:
                 )
 
             # transcode.<preset>.audio_bit_rate
-            audio_bit_rate = preset["audio_bit_rate"]
+            audio_bit_rate: str = preset["audio_bit_rate"]
             if audio_codec in AUDIO_CODECS:
                 bit_rates = AUDIO_CODECS[audio_codec].bit_rates
                 if bit_rates is not None and audio_bit_rate not in bit_rates:
@@ -295,8 +299,11 @@ class Config:
         # default_container.audio
         audio_container = default_containers["audio_track"]
         if audio_codecs:
-            supported_audio_containers = set.intersection(
-                *(set(AUDIO_CODECS[codec].containers) for codec in audio_codecs)
+            codec_containers = [
+                set(AUDIO_CODECS[codec].containers) for codec in audio_codecs
+            ]
+            supported_audio_containers: set[str] = codec_containers[0].intersection(
+                *codec_containers[1:]
             )
             if audio_container not in supported_audio_containers:
                 errors.append(
@@ -323,12 +330,13 @@ class Config:
         # default_container.media
         media_container = default_containers["media"]
         if media_pairs:
-            common_containers = set.intersection(
-                *(
-                    set(VIDEO_CODECS[video].containers)
-                    & set(AUDIO_CODECS[audio].containers)
-                    for video, audio in media_pairs
-                )
+            pair_containers = [
+                set(VIDEO_CODECS[video].containers)
+                & set(AUDIO_CODECS[audio].containers)
+                for video, audio in media_pairs
+            ]
+            common_containers: set[str] = pair_containers[0].intersection(
+                *pair_containers[1:]
             )
             if media_container not in common_containers:
                 errors.append(

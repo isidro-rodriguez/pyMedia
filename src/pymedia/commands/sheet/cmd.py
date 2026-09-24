@@ -121,7 +121,7 @@ class SheetCmd:
             """Construye filtros hstack y vstack para miniaturas en la cuadrícula."""
             if preset is None:
                 raise MissingParameterError(name="preset")
-            rows_expr = []
+            rows_expr: list[str] = []
             for row in range(preset.rows):
                 inputs = "".join(f"[t{row}{col}]" for col in range(preset.columns))
                 rows_expr.append(f"{inputs}hstack=inputs={preset.columns}[row{row}]")
@@ -222,7 +222,7 @@ class SheetCmd:
 
             if not tracks:
                 return None
-            formatted_items = []
+            formatted_items: list[str] = []
             for t in tracks:
                 lang_str = t.language or "und"
                 codec_str = t.codec or "audio"
@@ -296,9 +296,9 @@ class SheetCmd:
             video_parts.append(f"{bit_rate_str} kb/s")
 
         # Ensamblado de líneas
-        lines = [f"{_('File')}: {media.path.name}"]
+        lines: list[str] = [f"{_('File')}: {media.path.name}"]
 
-        size_dur_parts = []
+        size_dur_parts: list[str] = []
         if media.size:
             size_dur_parts.append(
                 f"{_('Size')}: {
