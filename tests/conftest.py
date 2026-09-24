@@ -15,7 +15,21 @@ from helpers import CliResult, Invoke
 from typer.testing import CliRunner
 
 from pymedia.locale_manager import locale_manager
-from pymedia.main import app
+
+
+def _english_language() -> str:
+    """Devuelve siempre el idioma base de la aplicación (`en`)."""
+    return "en"
+
+
+# El idioma debe quedar fijado ANTES de importar la aplicación: `pymedia.main`
+# y `pymedia.locales` cargan el catálogo detectado en `config.toml` o en el
+# sistema al importarse, y los módulos de comandos resuelven sus textos con
+# `_()` en tiempo de importación. Sin este parche, la ayuda y los mensajes
+# dependerían de la máquina donde se ejecuten los tests. El idioma base (`en`)
+# es el único que se valida en las suites; los tests de `_LocaleManager`
+# instancian la clase directamente, por lo que no les afecta el parche.
+locale_manager.detect_language = _english_language  # type: ignore[method-assign]
 
 ROOT = Path(__file__).resolve().parents[1]
 BUILD_SCRIPT = ROOT / "scripts" / "build.py"
@@ -770,7 +784,13 @@ def built_binary() -> Path:
 
 
 def _cli_invoker() -> Invoke:
-    """Ejecutor en proceso sobre `pymedia.main.app` (rápido, depurable)."""
+    """Ejecutor en proceso sobre `pymedia.main.app` (rápido, depurable).
+
+    El import se difiere a la llamada para garantizar que el parche de idioma
+    se ha aplicado antes de que la aplicación cargue sus mensajes.
+    """
+    from pymedia.main import app
+
     runner = CliRunner(env={"COLUMNS": "300"})
 
     def invoke(*args: str, input: str | None = None) -> CliResult:
