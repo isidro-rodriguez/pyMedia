@@ -41,6 +41,9 @@ class RemuxCmd:
         if self.params.overwrite == OverwriteMode.YES:
             cmd.append("-y")
 
+        if self.params.rotate_metadata is not None:
+            cmd.extend([*self.params.to_rotate_metadata_cmd()])
+
         if self.params.regenerate_pts:
             cmd.extend(self.params.to_regenerate_pts_cmd())
 
@@ -59,7 +62,7 @@ class RemuxCmd:
         )
 
         if container == ".mp4":
-            cmd.extend([*self.params.to_mp4_args()])
+            cmd.extend(["-movflags", "+faststart"])
 
         cmd.append(str(self.params.media_output))
 

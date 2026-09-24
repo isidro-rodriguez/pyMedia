@@ -22,6 +22,7 @@ from pymedia.types import (
     OverwriteMode,
     PresetsSheetMode,
     PresetsTranscodeMode,
+    RotateMetadataMode,
     RotateMode,
     ScaleMode,
 )
@@ -547,5 +548,19 @@ ScaleUpscaleOption = Annotated[
         default="--upscale",
         rich_help_panel=_("Scale filter options"),
         help=_("Allows upscaling beyond the source dimensions."),
+    ),
+]
+
+# =============================================================================
+#  Opciones de metadatos
+# =============================================================================
+
+
+RotateMetadataOption = Annotated[
+    RotateMetadataMode | None,
+    typer.Option(
+        default="--rotate",
+        rich_help_panel=_("Metadata options"),
+        help=_("Specify an orthogonal arc degree to rotate image through metadata."),
     ),
 ]

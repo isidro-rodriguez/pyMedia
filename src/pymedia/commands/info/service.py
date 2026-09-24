@@ -50,17 +50,17 @@ class InfoService(BaseService[InfoParameters]):
             metadata = media.metadata
 
             metadata_fields = (
-                ("Title", metadata.title),
-                ("Comment", metadata.comment),
-                ("Description", metadata.description),
-                ("Synopsis", metadata.synopsis),
-                ("Genre", metadata.genre),
-                ("Date", metadata.date),
-                ("Copyright", metadata.copyright),
-                ("Law rating", metadata.law_rating),
-                ("Artist", metadata.artist),
-                ("Album", metadata.album),
-                ("Encoder", metadata.encoder),
+                (_("Title"), metadata.title),
+                (_("Comment"), metadata.comment),
+                (_("Description"), metadata.description),
+                (_("Synopsis"), metadata.synopsis),
+                (_("Genre"), metadata.genre),
+                (_("Date"), metadata.date),
+                (_("Copyright"), metadata.copyright),
+                (_("Law rating"), metadata.law_rating),
+                (_("Artist"), metadata.artist),
+                (_("Album"), metadata.album),
+                (_("Encoder"), metadata.encoder),
             )
 
             table = Table(title=f"📁 {_('General')}", show_header=True, expand=True)
@@ -83,7 +83,7 @@ class InfoService(BaseService[InfoParameters]):
                 )
             for label, value in metadata_fields:
                 if value is not None:
-                    table.add_row(_(label), str(value) or na)
+                    table.add_row(label, str(value) or na)
 
             return table
 

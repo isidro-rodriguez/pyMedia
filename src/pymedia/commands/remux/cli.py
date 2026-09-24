@@ -1,5 +1,7 @@
 """Comando ``remux``: cli."""
 
+from typing import cast
+
 import typer
 
 from pymedia.commands.base_cli_options import (
@@ -9,6 +11,7 @@ from pymedia.commands.base_cli_options import (
     OutputOption,
     OverwriteOption,
     RegeneratePtsOption,
+    RotateMetadataOption,
     ShowCmdOption,
     SortTracksOption,
 )
@@ -17,7 +20,7 @@ from pymedia.commands.remux.service import RemuxService
 from pymedia.errors import MissingArgumentError
 from pymedia.locales import _
 from pymedia.logger import Logger
-from pymedia.types import OverwriteMode
+from pymedia.types import OverwriteMode, RotateMetadataMode
 
 remux_cli = typer.Typer()
 
@@ -51,6 +54,7 @@ def remux(
     overwrite: OverwriteOption = OverwriteMode.ASK,
     regenerate_pts: RegeneratePtsOption = False,
     sort_tracks: SortTracksOption = False,
+    rotate_metadata: RotateMetadataOption = None,
     debug: DebugOption = False,
     show_cmd: ShowCmdOption = False,
     help_: HelpOption = False,
@@ -64,6 +68,7 @@ def remux(
         fast_start: Mueve el índice al inicio acelerando su reproducción.
         regenerate_pts: Regenera los marcadores de tiempo corruptos.
         sort_tracks: Ordena las pistas por tipo y luego alfabéticamente por idioma.
+        rotate_metadata: Gira la imagen por especificación de metadados.ter
         debug: Habilita el nivel de log DEBUG.
         show_cmd: Muestra al usuario el comando ffmpeg compuesto pero no lo ejecuta.
         help_: Helper para mostrar esta línea en distintos idiomas.
@@ -80,6 +85,7 @@ def remux(
         overwrite=overwrite,
         media_input=media_input,
         media_output=media_output,
+        rotate_metadata=cast(RotateMetadataMode, rotate_metadata),
         regenerate_pts=regenerate_pts,
         sort_tracks=sort_tracks,
     )

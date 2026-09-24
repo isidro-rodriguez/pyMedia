@@ -4,22 +4,7 @@ from dataclasses import dataclass
 
 from pymedia.errors import MissingParameterError
 from pymedia.models.media import Media
-
-
-@dataclass(kw_only=True)
-class FastStartMixin:
-    """Mixin que mueve el índice del contenedor al inicio de la salida."""
-
-    fast_start: bool
-
-    @staticmethod
-    def to_fast_start_cmd() -> list[str]:
-        """Devuelve los argumentos que habilitan el índice al inicio del fichero.
-
-        Returns:
-            Argumentos `-movflags +faststart` para el consumo de ffmpeg.
-        """
-        return ["-movflags", "+faststart"]
+from pymedia.types import RotateMetadataMode
 
 
 @dataclass(kw_only=True)
@@ -36,6 +21,24 @@ class RegeneratePtsMixin:
             Argumentos `-fflags +genpts` para el consumo de ffmpeg.
         """
         return ["-fflags", "+genpts"]
+
+
+@dataclass(kw_only=True)
+class RotateMetadataMixin:
+    """Mixin para la rotación de imagen por metadatos."""
+
+    rotate_metadata: RotateMetadataMode | None
+
+    def to_rotate_metadata_cmd(self) -> list[str]:
+        """Devuelve los argumentos que provocan el giro de la imagen por metadatos.
+
+        Returns:
+            Argumentos `-metadata:s:v rotate=*` para el consumo de ffmpeg.
+        """
+        if self.rotate_metadata is None:
+            raise MissingParameterError(name="rotate_metadata")
+
+        return ["-display_rotation:v:0", str(self.rotate_metadata.value)]
 
 
 @dataclass(kw_only=True)

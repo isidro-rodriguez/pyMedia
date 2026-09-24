@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-09-22 14:58+0100\n"
+"POT-Creation-Date: 2026-09-24 04:52+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -63,21 +63,26 @@ msgstr "Falta la opción requerida: %(options)s"
 msgid "Missing at least one of these options: %(options)s"
 msgstr "Falta al menos una de estas opciones: %(options)s"
 
-#: pymedia/ffprobe.py:28
+#: pymedia/ffprobe.py:35
 msgid "ffprobe was not found. Install ffmpeg."
 msgstr "ffprobe no se encontró. Instala ffmpeg."
 
-#: pymedia/ffprobe.py:33
+#: pymedia/ffprobe.py:40
 #, python-format
 msgid "ffprobe couldn't read %(path)s: %(err.stderr)s"
 msgstr "ffprobe no pudo leer %(path)s: %(err.stderr)s"
 
-#: pymedia/ffprobe.py:58
+#: pymedia/ffprobe.py:52
+#, python-format
+msgid "ffprobe media data: %(data)s"
+msgstr "Datos de medio de ffprobe: %(data)s"
+
+#: pymedia/ffprobe.py:185
 #, python-format
 msgid "ffprobe audio file data: %(data)s"
 msgstr "Datos de audio del fichero ffprobe: %(data)s"
 
-#: pymedia/ffprobe.py:74
+#: pymedia/ffprobe.py:201
 #, python-format
 msgid ""
 "\"%(path)s\" is not a recognized audio file (detected format: "
@@ -86,22 +91,17 @@ msgstr ""
 "«%(path)s» no es un fichero de audio reconocido (formato detectado: "
 "%(format_name)s)."
 
-#: pymedia/ffprobe.py:86
+#: pymedia/ffprobe.py:213
 #, python-format
 msgid "%(path.suffix)s extension doesn't support %(codec_name)s audio."
 msgstr "La extensión %(path.suffix)s no soporta audio %(codec_name)s."
 
-#: pymedia/ffprobe.py:106
-#, python-format
-msgid "ffprobe media data: %(data)s"
-msgstr "Datos de medio de ffprobe: %(data)s"
-
-#: pymedia/ffprobe.py:124
+#: pymedia/ffprobe.py:232
 #, python-format
 msgid "ffprobe subtitles file data: %(data)s"
 msgstr "Datos de fichero de subtítulos de ffprobe: %(data)s"
 
-#: pymedia/ffprobe.py:137
+#: pymedia/ffprobe.py:245
 #, python-format
 msgid ""
 "\"%(path)s\" is not a recognized subtitles file (detected format: "
@@ -110,7 +110,7 @@ msgstr ""
 "\"%(path)s\" no es un fichero de subtítulos reconocido (formato "
 "detectado: %(format_name)s)."
 
-#: pymedia/ffprobe.py:146
+#: pymedia/ffprobe.py:254
 #, python-format
 msgid "%(path.suffix)s extension doesn't support %(codec_name)s subtitles."
 msgstr "La extensión %(path.suffix)s no admite subtítulos %(codec_name)s."
@@ -201,20 +201,19 @@ msgstr "Acción a usar si el archivo de salida ya existe."
 #: pymedia/commands/base_cli_options.py:162
 #: pymedia/commands/base_cli_options.py:171
 #: pymedia/commands/base_cli_options.py:180
-#: pymedia/commands/base_cli_options.py:189
+#: pymedia/commands/base_cli_options.py:191
 #: pymedia/commands/base_cli_options.py:200
-#: pymedia/commands/base_cli_options.py:209
-#: pymedia/commands/base_cli_options.py:219
-#: pymedia/commands/base_cli_options.py:229
-#: pymedia/commands/base_cli_options.py:239
-#: pymedia/commands/base_cli_options.py:249
-#: pymedia/commands/base_cli_options.py:259
-#: pymedia/commands/base_cli_options.py:269
-#: pymedia/commands/base_cli_options.py:279
-#: pymedia/commands/base_cli_options.py:289
+#: pymedia/commands/base_cli_options.py:210
+#: pymedia/commands/base_cli_options.py:220
+#: pymedia/commands/base_cli_options.py:230
+#: pymedia/commands/base_cli_options.py:240
+#: pymedia/commands/base_cli_options.py:250
+#: pymedia/commands/base_cli_options.py:260
+#: pymedia/commands/base_cli_options.py:270
+#: pymedia/commands/base_cli_options.py:280
+#: pymedia/commands/base_cli_options.py:290
 #: pymedia/commands/base_cli_options.py:299
 #: pymedia/commands/base_cli_options.py:308
-#: pymedia/commands/base_cli_options.py:317
 msgid "Command options"
 msgstr "Opciones de comando"
 
@@ -223,255 +222,251 @@ msgid "Interval between thumbnails, in seconds."
 msgstr "Intervalo entre miniaturas, en segundos."
 
 #: pymedia/commands/base_cli_options.py:163
-msgid "Move metadata index at the start, quickening web streaming."
-msgstr "Mueve el índice de metadatos al inicio, acelerando la transmisión web."
-
-#: pymedia/commands/base_cli_options.py:172
 msgid "Regenerates broken timestamps."
 msgstr "Regenera las marcas de tiempo dañadas."
 
-#: pymedia/commands/base_cli_options.py:181
+#: pymedia/commands/base_cli_options.py:172
 msgid "Preset sheet style."
 msgstr "Estilo de hoja preestablecido."
 
-#: pymedia/commands/base_cli_options.py:190
+#: pymedia/commands/base_cli_options.py:181
 msgid "Transcoding profile from config.toml."
 msgstr "Perfil de transcodificación de config.toml."
 
-#: pymedia/commands/base_cli_options.py:201
+#: pymedia/commands/base_cli_options.py:192
 msgid "Scene-change sensitivity for thumbnail detection."
 msgstr "Sensibilidad de cambio de escena para la detección de miniaturas."
 
-#: pymedia/commands/base_cli_options.py:210
+#: pymedia/commands/base_cli_options.py:201
 msgid "Sort stream track by type and alphabetically by language."
 msgstr "Ordena las pistas de flujo por tipo y alfabéticamente por idioma."
 
-#: pymedia/commands/base_cli_options.py:220
+#: pymedia/commands/base_cli_options.py:211
 msgid "Timestamps list to split a media container."
 msgstr "Lista de marcas de tiempo para dividir un contenedor multimedia."
 
-#: pymedia/commands/base_cli_options.py:230
+#: pymedia/commands/base_cli_options.py:221
 msgid "Timestamp where the output media file ends."
 msgstr "Marca de tiempo donde termina el archivo multimedia de salida."
 
-#: pymedia/commands/base_cli_options.py:240
+#: pymedia/commands/base_cli_options.py:231
 msgid "Timestamp where the output media file starts."
 msgstr "Marca de tiempo donde empieza el archivo multimedia de salida."
 
-#: pymedia/commands/base_cli_options.py:250
+#: pymedia/commands/base_cli_options.py:241
 msgid "Take a thumbnail at specific TIMESTAMP(s)."
 msgstr "Toma una miniatura en TIMESTAMP(s) específicos."
 
-#: pymedia/commands/base_cli_options.py:260
+#: pymedia/commands/base_cli_options.py:251
 msgid "Time point at which the animated image generation ends."
 msgstr "Punto de tiempo en el que termina la generación de la imagen animada."
 
-#: pymedia/commands/base_cli_options.py:270
+#: pymedia/commands/base_cli_options.py:261
 msgid "Time point at which thumbnails generation ends."
 msgstr "Punto de tiempo en el que termina la generación de miniaturas."
 
-#: pymedia/commands/base_cli_options.py:280
+#: pymedia/commands/base_cli_options.py:271
 msgid "Time point at which the animated image generation starts."
 msgstr "Punto de tiempo en el que comienza la generación de la imagen animada."
 
-#: pymedia/commands/base_cli_options.py:290
+#: pymedia/commands/base_cli_options.py:281
 msgid "Time point at which thumbnails generation starts."
 msgstr "Punto de tiempo en el que comienza la generación de miniaturas."
 
-#: pymedia/commands/base_cli_options.py:300
+#: pymedia/commands/base_cli_options.py:291
 msgid "Set to transcode an audio track."
 msgstr "Transcodifica una pista de audio."
 
-#: pymedia/commands/base_cli_options.py:309
+#: pymedia/commands/base_cli_options.py:300
 msgid "Burn subtitles file in video track."
 msgstr "Quema el fichero de subtítulos en la pista de vídeo."
 
-#: pymedia/commands/base_cli_options.py:318
+#: pymedia/commands/base_cli_options.py:309
 msgid "Set to transcode the video track."
 msgstr "Transcodifica la pista de vídeo."
 
+#: pymedia/commands/base_cli_options.py:321
 #: pymedia/commands/base_cli_options.py:330
 #: pymedia/commands/base_cli_options.py:339
 #: pymedia/commands/base_cli_options.py:348
 #: pymedia/commands/base_cli_options.py:357
-#: pymedia/commands/base_cli_options.py:366
-#: pymedia/commands/base_cli_options.py:376
+#: pymedia/commands/base_cli_options.py:367
+#: pymedia/commands/base_cli_options.py:377
 #: pymedia/commands/base_cli_options.py:386
-#: pymedia/commands/base_cli_options.py:395
 msgid "Audio options"
 msgstr "Opciones de audio"
 
-#: pymedia/commands/base_cli_options.py:331
+#: pymedia/commands/base_cli_options.py:322
 msgid "Set as commentary audio track."
 msgstr "Establece la pista de audio como comentario."
 
-#: pymedia/commands/base_cli_options.py:340
+#: pymedia/commands/base_cli_options.py:331
 msgid "Set as default audio track of the container."
 msgstr "Establece la pista de audio como predeterminada del contenedor."
 
-#: pymedia/commands/base_cli_options.py:349
-#: pymedia/commands/base_cli_options.py:418
+#: pymedia/commands/base_cli_options.py:340
+#: pymedia/commands/base_cli_options.py:409
 msgid "Set as forced to be displayed."
 msgstr "Establecer como forzado a mostrarse."
 
-#: pymedia/commands/base_cli_options.py:358
+#: pymedia/commands/base_cli_options.py:349
 msgid "Set audio track as targeted for hearing impaired people."
 msgstr ""
 "Establece la pista de audio como destinada a personas con discapacidad "
 "auditiva."
 
-#: pymedia/commands/base_cli_options.py:367
+#: pymedia/commands/base_cli_options.py:358
 msgid "Set audio language, formatted as ISO 639-2 code."
 msgstr "Establece el idioma de la pista de audio, con código ISO 639-2."
 
-#: pymedia/commands/base_cli_options.py:377
+#: pymedia/commands/base_cli_options.py:368
 msgid "List of audio tracks to process."
 msgstr "Lista de pistas de audio a procesar."
 
-#: pymedia/commands/base_cli_options.py:387
+#: pymedia/commands/base_cli_options.py:378
 msgid "Audio track to edit."
 msgstr "Pista de audio que editar."
 
-#: pymedia/commands/base_cli_options.py:396
+#: pymedia/commands/base_cli_options.py:387
 msgid "Set a custom audio track title for video player."
 msgstr ""
 "Establece un título personalizado de la pista de audio para el "
 "reproductor."
 
+#: pymedia/commands/base_cli_options.py:399
 #: pymedia/commands/base_cli_options.py:408
 #: pymedia/commands/base_cli_options.py:417
 #: pymedia/commands/base_cli_options.py:426
-#: pymedia/commands/base_cli_options.py:435
-#: pymedia/commands/base_cli_options.py:445
+#: pymedia/commands/base_cli_options.py:436
+#: pymedia/commands/base_cli_options.py:446
 #: pymedia/commands/base_cli_options.py:455
 #: pymedia/commands/base_cli_options.py:464
-#: pymedia/commands/base_cli_options.py:473
 msgid "Subtitles options"
 msgstr "Opciones de subtítulos"
 
-#: pymedia/commands/base_cli_options.py:409
+#: pymedia/commands/base_cli_options.py:400
 msgid "Set as default subtitles of the container."
 msgstr "Establecer como subtítulo predeterminado del contenedor."
 
-#: pymedia/commands/base_cli_options.py:427
+#: pymedia/commands/base_cli_options.py:418
 msgid "Set as targeted for hearing impaired people."
 msgstr "Establecer como dirigido a personas con discapacidad auditiva."
 
-#: pymedia/commands/base_cli_options.py:436
+#: pymedia/commands/base_cli_options.py:427
 msgid "Set subtitles language, formatted as ISO 639-2 code."
 msgstr "Establece el idioma de los subtítulos, con formato de código ISO 639-2."
 
-#: pymedia/commands/base_cli_options.py:446
+#: pymedia/commands/base_cli_options.py:437
 msgid "List of subtitles tracks to process."
 msgstr "Lista de pistas de subtítulos a procesar."
 
-#: pymedia/commands/base_cli_options.py:456
+#: pymedia/commands/base_cli_options.py:447
 msgid "Subtitles track to edit."
 msgstr "Pista de subtítulos a editar."
 
-#: pymedia/commands/base_cli_options.py:465
+#: pymedia/commands/base_cli_options.py:456
 msgid "Set a custom title for video player."
 msgstr "Establece un título personalizado para el reproductor de vídeo."
 
-#: pymedia/commands/base_cli_options.py:474
+#: pymedia/commands/base_cli_options.py:465
 msgid "Set as targeted for visual impaired people."
 msgstr "Establecer como dirigido a personas con discapacidad visual."
 
+#: pymedia/commands/base_cli_options.py:478
 #: pymedia/commands/base_cli_options.py:487
 #: pymedia/commands/base_cli_options.py:496
-#: pymedia/commands/base_cli_options.py:505
+#: pymedia/commands/base_cli_options.py:507
 #: pymedia/commands/base_cli_options.py:516
-#: pymedia/commands/base_cli_options.py:525
 msgid "Filter options"
 msgstr "Opciones de filtro"
 
-#: pymedia/commands/base_cli_options.py:488
+#: pymedia/commands/base_cli_options.py:479
 msgid "Crop to WIDTH×HEIGHT at offset X,Y (from top-left)."
 msgstr ""
 "Recorta a ANCHO×ALTO en el desplazamiento X,Y (desde la esquina superior "
 "izquierda)."
 
-#: pymedia/commands/base_cli_options.py:497
+#: pymedia/commands/base_cli_options.py:488
 msgid "Flip the image horizontally, swapping left and right."
 msgstr "Invierte la imagen horizontalmente, intercambiando izquierda y derecha."
 
-#: pymedia/commands/base_cli_options.py:506
+#: pymedia/commands/base_cli_options.py:497
 msgid "Flip the image vertically, swapping top and bottom."
 msgstr "Invierte la imagen verticalmente, intercambiando arriba y abajo."
 
-#: pymedia/commands/base_cli_options.py:517
+#: pymedia/commands/base_cli_options.py:508
 msgid "Set the animated image frame rate in frames per second."
 msgstr ""
 "Establece la velocidad de fotogramas de la imagen animada en fotogramas "
 "por segundo."
 
-#: pymedia/commands/base_cli_options.py:526
+#: pymedia/commands/base_cli_options.py:517
 msgid "Specify an orthogonal arc degree to rotate the image."
 msgstr "Especifica un ángulo de giro ortogonal para rotar la imagen."
 
-#: pymedia/commands/base_cli_options.py:538
+#: pymedia/commands/base_cli_options.py:529
+#: pymedia/commands/base_cli_options.py:539
 #: pymedia/commands/base_cli_options.py:548
-#: pymedia/commands/base_cli_options.py:557
 msgid "Scale filter options"
 msgstr "Opciones de filtro de escala"
 
-#: pymedia/commands/base_cli_options.py:539
+#: pymedia/commands/base_cli_options.py:530
 msgid "Specify different ways to scale the video."
 msgstr "Especifica distintas formas de escalar el vídeo."
 
-#: pymedia/commands/base_cli_options.py:549
+#: pymedia/commands/base_cli_options.py:540
 msgid "Target resolution, in pixels, to resize the video."
 msgstr "Resolución objetivo, en píxeles, para redimensionar el vídeo."
 
-#: pymedia/commands/base_cli_options.py:558
+#: pymedia/commands/base_cli_options.py:549
 msgid "Allows upscaling beyond the source dimensions."
 msgstr "Permite ampliar más allá de las dimensiones de origen."
 
-#: pymedia/commands/base_service.py:82
+#: pymedia/commands/base_service.py:83
 msgid "Invalid class name format!"
 msgstr "¡Formato de nombre de clase no válido!"
 
-#: pymedia/commands/base_service.py:104
+#: pymedia/commands/base_service.py:105
 msgid "Process skipped since output file already exists."
 msgstr "Proceso omitido porque el fichero de salida ya existe."
 
-#: pymedia/commands/base_service.py:111 pymedia/commands/base_service.py:339
+#: pymedia/commands/base_service.py:112 pymedia/commands/base_service.py:342
 #, python-format
 msgid "Output file already exists: %(name)s"
 msgstr "El fichero de salida ya existe: %(name)s"
 
-#: pymedia/commands/base_service.py:113 pymedia/commands/scene/service.py:90
+#: pymedia/commands/base_service.py:114 pymedia/commands/scene/service.py:90
 msgid "Overwrite?"
 msgstr "¿Sobrescribir?"
 
-#: pymedia/commands/base_service.py:141
+#: pymedia/commands/base_service.py:144
 #, python-format
 msgid "FFmpeg command: %(cmd)s"
 msgstr "Comando FFmpeg: %(cmd)s"
 
-#: pymedia/commands/base_service.py:144
+#: pymedia/commands/base_service.py:147
 msgid "Do you want to run this ffmpeg command?"
 msgstr "¿Quieres ejecutar este comando ffmpeg?"
 
-#: pymedia/commands/base_service.py:146
+#: pymedia/commands/base_service.py:149
 msgid "User decided to abort process."
 msgstr "El usuario decidió abortar el proceso."
 
-#: pymedia/commands/base_service.py:217
+#: pymedia/commands/base_service.py:220
 #, python-format
 msgid "FFmpeg command interrupted manually: %(command_name)s"
 msgstr "Comando FFmpeg %(command_name)s interrumpido manualmente."
 
-#: pymedia/commands/base_service.py:222
+#: pymedia/commands/base_service.py:225
 #, python-format
 msgid "FFmpeg command timed out: %(command_name)s"
 msgstr "El comando FFmpeg %(command_name)s agotó el tiempo de espera."
 
-#: pymedia/commands/base_service.py:229
+#: pymedia/commands/base_service.py:232
 msgid "FFmpeg command failed during execution."
 msgstr "El comando FFmpeg falló durante la ejecución."
 
-#: pymedia/commands/base_service.py:345
+#: pymedia/commands/base_service.py:348
 msgid "Output file could not be moved."
 msgstr "No se pudo mover el fichero de salida."
 
@@ -631,7 +626,7 @@ msgstr ""
 "    > pymedia cut input.mp4 --at 10:05,40:30,1:20:00\n"
 
 #: pymedia/commands/cut/cli.py:44 pymedia/commands/join/cli.py:39
-#: pymedia/commands/remux/cli.py:46 pymedia/commands/transcode/cli.py:56
+#: pymedia/commands/remux/cli.py:45 pymedia/commands/transcode/cli.py:56
 msgid "Video commands"
 msgstr "Comandos de vídeo"
 
@@ -907,122 +902,163 @@ msgstr ""
 msgid "Analysis commands"
 msgstr "Comandos de análisis"
 
-#: pymedia/commands/info/service.py:43
+#: pymedia/commands/info/service.py:44
 msgid "-"
 msgstr "-"
 
-#: pymedia/commands/info/service.py:47
+#: pymedia/commands/info/service.py:53 pymedia/commands/info/service.py:124
+#: pymedia/commands/info/service.py:159
+msgid "Title"
+msgstr "Título"
+
+#: pymedia/commands/info/service.py:54
+msgid "Comment"
+msgstr "Comentario"
+
+#: pymedia/commands/info/service.py:55
+msgid "Description"
+msgstr "Descripción"
+
+#: pymedia/commands/info/service.py:56
+msgid "Synopsis"
+msgstr "Sinopsis"
+
+#: pymedia/commands/info/service.py:57
+msgid "Genre"
+msgstr "Género"
+
+#: pymedia/commands/info/service.py:58
+msgid "Date"
+msgstr "Fecha"
+
+#: pymedia/commands/info/service.py:59
+msgid "Copyright"
+msgstr "Copyright"
+
+#: pymedia/commands/info/service.py:60
+msgid "Law rating"
+msgstr "Clasificación legal"
+
+#: pymedia/commands/info/service.py:61
+msgid "Artist"
+msgstr "Artista"
+
+#: pymedia/commands/info/service.py:62
+msgid "Album"
+msgstr "Álbum"
+
+#: pymedia/commands/info/service.py:63
+msgid "Encoder"
+msgstr "Codificador"
+
+#: pymedia/commands/info/service.py:66
 msgid "General"
 msgstr "General"
 
-#: pymedia/commands/info/service.py:48
+#: pymedia/commands/info/service.py:67
 msgid "Field"
 msgstr "Campo"
 
-#: pymedia/commands/info/service.py:49
+#: pymedia/commands/info/service.py:68
 msgid "Value"
 msgstr "Valor"
 
-#: pymedia/commands/info/service.py:50 pymedia/commands/sheet/cmd.py:299
+#: pymedia/commands/info/service.py:69 pymedia/commands/sheet/cmd.py:299
 msgid "File"
 msgstr "Archivo"
 
-#: pymedia/commands/info/service.py:51
+#: pymedia/commands/info/service.py:70
 msgid "Container"
 msgstr "Contenedor"
 
-#: pymedia/commands/info/service.py:53 pymedia/commands/sheet/cmd.py:311
+#: pymedia/commands/info/service.py:72 pymedia/commands/sheet/cmd.py:311
 msgid "Duration"
 msgstr "Duración"
 
-#: pymedia/commands/info/service.py:58 pymedia/commands/sheet/cmd.py:304
+#: pymedia/commands/info/service.py:80 pymedia/commands/sheet/cmd.py:304
 msgid "Size"
 msgstr "Tamaño"
 
-#: pymedia/commands/info/service.py:69 pymedia/mixins/scale_mixin.py:120
+#: pymedia/commands/info/service.py:97 pymedia/mixins/scale_mixin.py:120
 #: pymedia/mixins/scale_mixin.py:136
 msgid "video dimensions"
 msgstr "dimensiones del vídeo"
 
-#: pymedia/commands/info/service.py:71 pymedia/commands/sheet/cmd.py:315
+#: pymedia/commands/info/service.py:99 pymedia/commands/sheet/cmd.py:315
 msgid "Video"
 msgstr "Vídeo"
 
-#: pymedia/commands/info/service.py:72 pymedia/commands/info/service.py:91
-#: pymedia/commands/info/service.py:128
+#: pymedia/commands/info/service.py:100 pymedia/commands/info/service.py:119
+#: pymedia/commands/info/service.py:156
 msgid "Track"
 msgstr "Pista"
 
-#: pymedia/commands/info/service.py:73 pymedia/commands/info/service.py:92
-#: pymedia/commands/info/service.py:129
+#: pymedia/commands/info/service.py:101 pymedia/commands/info/service.py:120
+#: pymedia/commands/info/service.py:157
 msgid "Codec"
 msgstr "Códec"
 
-#: pymedia/commands/info/service.py:74
+#: pymedia/commands/info/service.py:102
 msgid "Resolution"
 msgstr "Resolución"
 
-#: pymedia/commands/info/service.py:75
+#: pymedia/commands/info/service.py:103
 msgid "FPS"
 msgstr "FPS"
 
-#: pymedia/commands/info/service.py:76
+#: pymedia/commands/info/service.py:104
 msgid "Bit rate"
 msgstr "Tasa de bits"
 
-#: pymedia/commands/info/service.py:90
+#: pymedia/commands/info/service.py:118
 msgid "Audio"
 msgstr "Audio"
 
-#: pymedia/commands/info/service.py:93
+#: pymedia/commands/info/service.py:121
 msgid "Sample"
 msgstr "Muestra"
 
-#: pymedia/commands/info/service.py:94
+#: pymedia/commands/info/service.py:122
 msgid "Channels"
 msgstr "Canales"
 
-#: pymedia/commands/info/service.py:95
+#: pymedia/commands/info/service.py:123
 msgid "Lang"
 msgstr "Idioma"
 
-#: pymedia/commands/info/service.py:96 pymedia/commands/info/service.py:131
-msgid "Title"
-msgstr "Título"
-
-#: pymedia/commands/info/service.py:98 pymedia/commands/info/service.py:133
+#: pymedia/commands/info/service.py:126 pymedia/commands/info/service.py:161
 msgid "Def"
 msgstr "Def."
 
-#: pymedia/commands/info/service.py:100 pymedia/commands/info/service.py:135
+#: pymedia/commands/info/service.py:128 pymedia/commands/info/service.py:163
 msgid "For"
 msgstr "Forz."
 
-#: pymedia/commands/info/service.py:102 pymedia/commands/info/service.py:137
+#: pymedia/commands/info/service.py:130 pymedia/commands/info/service.py:165
 msgid "HI"
 msgstr "HI"
 
-#: pymedia/commands/info/service.py:104
+#: pymedia/commands/info/service.py:132
 msgid "Com"
 msgstr "Com."
 
-#: pymedia/commands/info/service.py:127
+#: pymedia/commands/info/service.py:155
 msgid "Subtitles"
 msgstr "Subtítulos"
 
-#: pymedia/commands/info/service.py:130
+#: pymedia/commands/info/service.py:158
 msgid "Language"
 msgstr "Idioma"
 
-#: pymedia/commands/info/service.py:139
+#: pymedia/commands/info/service.py:167
 msgid "VI"
 msgstr "VI"
 
-#: pymedia/commands/info/service.py:167
+#: pymedia/commands/info/service.py:195
 msgid "Metadata"
 msgstr "Metadatos"
 
-#: pymedia/commands/info/service.py:195
+#: pymedia/commands/info/service.py:223
 #, python-format
 msgid "%(bit_rate)s kbps"
 msgstr "%(bit_rate)s kbps"
@@ -1139,7 +1175,7 @@ msgstr ""
 msgid "%(binary)s was not found in PATH. Install ffmpeg first."
 msgstr "%(binary)s no se encontró en el PATH. Instala ffmpeg primero."
 
-#: pymedia/commands/remux/cli.py:27
+#: pymedia/commands/remux/cli.py:26
 msgid ""
 "Change container and metadata without transcoding.\n"
 "\n"
@@ -1164,10 +1200,6 @@ msgstr ""
 "    > pymedia remux input.mp4 --genpts -o output.mkv\n"
 "  Ordena las pistas de flujo\n"
 "    > pymedia remux input.mp4 --sort-tracks -o output.mp4\n"
-
-#: pymedia/commands/remux/cli.py:80
-msgid "Fast start only works for '.mp4' remux."
-msgstr "El modo fast start solo funciona con el remux '.mp4'."
 
 #: pymedia/commands/remux/service.py:31
 msgid "Remuxing media file"
@@ -1371,11 +1403,11 @@ msgstr ""
 msgid "Invalid flip name."
 msgstr "Parámetro de inversión no válido."
 
-#: pymedia/mixins/image_mixin.py:47
+#: pymedia/mixins/image_mixin.py:54
 msgid "Image container not supported."
 msgstr "Contenedor de imagen no soportado."
 
-#: pymedia/mixins/outputs_mixin.py:471
+#: pymedia/mixins/outputs_mixin.py:484
 #, python-format
 msgid ""
 "Cannot remux %(codec)s to %(extension)s. Safe remux targets: "
@@ -1384,17 +1416,17 @@ msgstr ""
 "No se puede hacer remux del códec %(codec)s a %(extension)s. Destinos "
 "seguros para remux: %(supported)s."
 
-#: pymedia/mixins/outputs_mixin.py:495
+#: pymedia/mixins/outputs_mixin.py:508
 #, python-format
 msgid "%(name)s contains invalid characters: < > : \" / \\ | ? *"
 msgstr "%(name)s contiene caracteres no válidos: < > : \" / \\ | ? *"
 
-#: pymedia/mixins/outputs_mixin.py:507
+#: pymedia/mixins/outputs_mixin.py:520
 #, python-format
 msgid "Could not create directory: %(path)s"
 msgstr "No se pudo crear el directorio: %(path)s"
 
-#: pymedia/mixins/outputs_mixin.py:543
+#: pymedia/mixins/outputs_mixin.py:556
 #, python-format
 msgid "Output file must be different from the input file: %(path)s"
 msgstr "El fichero de salida debe ser distinto del de entrada: %(path)s"

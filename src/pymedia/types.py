@@ -66,6 +66,15 @@ class PresetsTranscodeMode(Enum):
     SLOW = "slow"
 
 
+class RotateMetadataMode(Enum):
+    """Ángulos de giro por metadatos disponibles."""
+
+    D0 = 0
+    D90 = 90
+    D180 = 180
+    D270 = 270
+
+
 class RotateMode(Enum):
     """Ángulos de giro disponibles."""
 
