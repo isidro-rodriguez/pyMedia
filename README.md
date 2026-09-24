@@ -242,10 +242,11 @@ prioridad: **PYMEDIA_LANG** → **config.toml** → **idioma del sistema** →
 
 - `app.language` en `config.toml` admite `system`, `spanish` o `english`.
 - Catálogos en `src/pymedia/locales/` (`en` no traduce, `es` usa `.mo`).
-- La variable de entorno `PYMEDIA_LANG` fuerza el idioma (`en`, `es` o los
-  nombres `english`/`spanish`) y tiene prioridad sobre `config.toml` y sobre el
-  sistema; se resuelve antes de cargar la aplicación, por lo que también afecta
-  a los textos de ayuda. Un valor desconocido se ignora.
+- La variable de entorno `PYMEDIA_LANG` fuerza el idioma (códigos ISO 639-2
+  `eng`/`spa`, los mismos que `--language`, o los nombres `english`/`spanish`) y
+  tiene prioridad sobre `config.toml` y sobre el sistema; se resuelve antes de
+  cargar la aplicación, por lo que también afecta a los textos de ayuda. Un
+  valor desconocido se ignora.
 - La variable de entorno `PYMEDIA_LOCALEDIR` permite sobreescribir el
   directorio de catálogos (útil en builds frozen).
 

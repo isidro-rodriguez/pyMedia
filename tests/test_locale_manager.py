@@ -61,14 +61,14 @@ def test_detect_language_usa_config_toml(tmp_path: Path) -> None:
 
 
 def test_detect_language_usa_env_var(tmp_path: Path) -> None:
-    """`PYMEDIA_LANG` tiene prioridad sobre `config.toml` y el sistema."""
+    """`PYMEDIA_LANG` (ISO 639-2) tiene prioridad sobre config.toml y sistema."""
     config_dir = tmp_path / "config"
     config_dir.mkdir()
     (config_dir / "config.toml").write_text(
         '[app]\nlanguage = "spanish"\n', encoding="utf-8"
     )
     mgr = _LocaleManager()
-    with patch.dict(os.environ, {"PYMEDIA_LANG": "en"}, clear=False):
+    with patch.dict(os.environ, {"PYMEDIA_LANG": "eng"}, clear=False):
         with patch("platformdirs.user_config_dir", return_value=str(config_dir)):
             assert mgr.detect_language() == "en"
 
@@ -83,11 +83,11 @@ def test_detect_language_env_var_acepta_nombre_de_idioma() -> None:
 def test_detect_language_env_var_normaliza_el_valor() -> None:
     """Mayúsculas y espacios en `PYMEDIA_LANG` no impiden el override."""
     mgr = _LocaleManager()
-    with patch.dict(os.environ, {"PYMEDIA_LANG": " ES "}, clear=False):
+    with patch.dict(os.environ, {"PYMEDIA_LANG": " SPA "}, clear=False):
         assert mgr.detect_language() == "es"
 
 
-def test_detect_language_env_var_ignora_valor_invalido(tmp_path: Path) -> None:
+def test_detect_language_env_var_ignora_valor_no_soportado(tmp_path: Path) -> None:
     """Un `PYMEDIA_LANG` desconocido no altera la detección normal."""
     config_dir = tmp_path / "config"
     config_dir.mkdir()
@@ -96,6 +96,19 @@ def test_detect_language_env_var_ignora_valor_invalido(tmp_path: Path) -> None:
     )
     mgr = _LocaleManager()
     with patch.dict(os.environ, {"PYMEDIA_LANG": "fr"}, clear=False):
+        with patch("platformdirs.user_config_dir", return_value=str(config_dir)):
+            assert mgr.detect_language() == "en"
+
+
+def test_detect_language_env_var_ignora_iso_639_1(tmp_path: Path) -> None:
+    """El override usa ISO 639-2 (`eng`/`spa`), como `--language`."""
+    config_dir = tmp_path / "config"
+    config_dir.mkdir()
+    (config_dir / "config.toml").write_text(
+        '[app]\nlanguage = "english"\n', encoding="utf-8"
+    )
+    mgr = _LocaleManager()
+    with patch.dict(os.environ, {"PYMEDIA_LANG": "es"}, clear=False):
         with patch("platformdirs.user_config_dir", return_value=str(config_dir)):
             assert mgr.detect_language() == "en"
 

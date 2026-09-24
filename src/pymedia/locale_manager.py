@@ -17,8 +17,8 @@ import platformdirs
 class _LocaleManager:
     """Gestión del idioma activo y del catálogo gettext.
 
-    La detección sigue la prioridad: `PYMEDIA_LANG` > `config.toml` > sistema >
-    `en`.
+    La detección sigue la prioridad: `PYMEDIA_LANG` (ISO 639-2 o nombre de
+    idioma) > `config.toml` > sistema > `en`.
 
     Attributes:
         DOMAIN: Nombre del dominio gettext (ficheros `pymedia.mo`).
@@ -32,6 +32,14 @@ class _LocaleManager:
         "spanish": "es",
     }
     SUPPORTED_LANGUAGES = {"en", "es"}
+    # Valores de `PYMEDIA_LANG` → código de catálogo: el código ISO 639-2 del
+    # estándar de `--language` (`eng`, `spa`) o el nombre usado en config.toml.
+    LANGUAGE_ALIASES = {
+        "eng": "en",
+        "english": "en",
+        "spa": "es",
+        "spanish": "es",
+    }
 
     def __init__(self, localedir: Path | None = None) -> None:
         """Inicializa el servicio con el catálogo `en` (no traduce nada).
@@ -62,13 +70,11 @@ class _LocaleManager:
         """
 
         def _read_env_language() -> str | None:
-            """Lee `PYMEDIA_LANG` (código i18n o nombre de idioma del config)."""
+            """Lee `PYMEDIA_LANG` (ISO 639-2 o nombre de idioma de config)."""
             value = os.environ.get("PYMEDIA_LANG", "").strip().lower()
-            if value in self.SUPPORTED_LANGUAGES:
-                return value
-            # `system` (valor de config.toml) y los valores desconocidos no
-            # fuerzan nada: la detección continúa con config.toml y el sistema.
-            return self.LANGUAGE_MAP.get(value)
+            # `system` y los valores desconocidos devuelven `None`: la detección
+            # continúa con `config.toml` y el idioma del sistema.
+            return self.LANGUAGE_ALIASES.get(value)
 
         def _read_config_language() -> str:
             """Lee [app].language del config.toml sin validar."""

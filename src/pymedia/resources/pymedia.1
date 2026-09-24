@@ -338,12 +338,14 @@ Application log with timestamps, levels and messages.
 .SH ENVIRONMENT
 .TP
 .B PYMEDIA_LANG
-Interface language override:
-.BR en ,
-.BR es ,
-.BR english
-or
-.BR spanish .
+Interface language override: ISO 639\-2 codes as in
+.BR --language
+.RB ( eng ,
+.BR spa )
+or the language names used in
+.BR config.toml
+.RB ( english ,
+.BR spanish ).
 Takes precedence over
 .B [app] language
 and over the system language; unknown values are ignored.

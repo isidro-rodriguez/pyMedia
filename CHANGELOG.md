@@ -11,10 +11,11 @@ con la sección anterior.
 ### Añadido
 
 - `feat(locales)`: la variable de entorno `PYMEDIA_LANG` fuerza el idioma de la
-  interfaz (`en`, `es` o los nombres `english`/`spanish`) con prioridad sobre
-  `app.language` de `config.toml` y sobre el idioma del sistema; al resolverse
-  antes de importar la aplicación también afecta a los textos de ayuda, y los
-  valores desconocidos se ignoran
+  interfaz (códigos ISO 639-2 `eng`/`spa`, los mismos que `--language`, o los
+  nombres `english`/`spanish`) con prioridad sobre `app.language` de
+  `config.toml` y sobre el idioma del sistema; al resolverse antes de importar
+  la aplicación también afecta a los textos de ayuda, y los valores desconocidos
+  se ignoran
 
 ### Cambiado
 
