@@ -6,6 +6,31 @@ Las versiones se han reconstruido a partir del histórico de
 Las versiones intermedias no registradas (0.2–0.4, 0.6–0.8) se agrupan
 con la sección anterior.
 
+## [0.20.1-beta.11] - 2026-09-24
+
+### Añadido
+
+- `feat(locales)`: la variable de entorno `PYMEDIA_LANG` fuerza el idioma de la
+  interfaz (`en`, `es` o los nombres `english`/`spanish`) con prioridad sobre
+  `app.language` de `config.toml` y sobre el idioma del sistema; al resolverse
+  antes de importar la aplicación también afecta a los textos de ayuda, y los
+  valores desconocidos se ignoran
+
+### Cambiado
+
+- `chore(types)`: pyright en modo estricto sobre `src/` como dependencia de
+  desarrollo, hook de pre-commit y tareas de VS Code; tipado explícito en
+  `models/config.py` y en los comandos `scene` y `sheet`
+- `refactor(main)`: `_configure_runtime()` y `_build_app()` sustituyen a los
+  imports diferidos con `# ruff: noqa: E402`
+- `docs`: README y página man documentan `PYMEDIA_LANG`
+
+### Corregido
+
+- `fix(tests)`: el idioma base (`en`) se fija en `tests/conftest.py` antes de
+  importar la aplicación, por lo que los tests dejan de depender del idioma de
+  la máquina (`test_main_help[cli]`)
+
 ## [0.20.0-beta.10] - 2026-09-22
 
 ### Añadido

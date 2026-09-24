@@ -5,7 +5,7 @@ habituales de procesamiento de vídeo: análisis de metadatos, capturas, unión,
 corte y división de contenedores, remux sin transcodificar, transcodificación
 por perfiles y edición de pistas de audio y subtítulos.
 
-> **Versión:** Beta 0.20.0
+> **Versión:** Beta 0.20.1
 
 ## Características
 
@@ -237,10 +237,15 @@ de `transcode` los selecciona por nombre.
 ## Idiomas
 
 Los mensajes utilizan gettext (msgid en inglés) y el idioma se detecta con la
-prioridad: **config.toml** → **idioma del sistema** → **inglés**.
+prioridad: **PYMEDIA_LANG** → **config.toml** → **idioma del sistema** →
+**inglés**.
 
 - `app.language` en `config.toml` admite `system`, `spanish` o `english`.
 - Catálogos en `src/pymedia/locales/` (`en` no traduce, `es` usa `.mo`).
+- La variable de entorno `PYMEDIA_LANG` fuerza el idioma (`en`, `es` o los
+  nombres `english`/`spanish`) y tiene prioridad sobre `config.toml` y sobre el
+  sistema; se resuelve antes de cargar la aplicación, por lo que también afecta
+  a los textos de ayuda. Un valor desconocido se ignora.
 - La variable de entorno `PYMEDIA_LOCALEDIR` permite sobreescribir el
   directorio de catálogos (útil en builds frozen).
 

@@ -337,6 +337,17 @@ User configuration, created on first run from the bundled defaults.
 Application log with timestamps, levels and messages.
 .SH ENVIRONMENT
 .TP
+.B PYMEDIA_LANG
+Interface language override:
+.BR en ,
+.BR es ,
+.BR english
+or
+.BR spanish .
+Takes precedence over
+.B [app] language
+and over the system language; unknown values are ignored.
+.TP
 .B PYMEDIA_LOCALEDIR
 Optional directory containing the gettext catalogs
 .RB ( \fIlang\fP /LC_MESSAGES/pymedia.mo ),
