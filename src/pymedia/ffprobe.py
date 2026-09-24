@@ -2,14 +2,21 @@
 
 import json
 import subprocess
+from datetime import timedelta
 from pathlib import Path
 from typing import Any
 
 from pymedia.data.audio_codecs import AUDIO_CODECS
 from pymedia.data.subtitles_formats import SUBTITLES_FORMATS
-from pymedia.errors import FfprobeError
+from pymedia.data.video_codecs import VIDEO_CODECS
+from pymedia.errors import FfprobeError, MissingParameterError
 from pymedia.locales import _
 from pymedia.logger import Logger
+from pymedia.models.audio import Audio
+from pymedia.models.media import Media, MediaMetadata
+from pymedia.models.subtitles import Subtitles
+from pymedia.models.video import Video
+from pymedia.utils import parse_date, parse_fraction, to_float, to_int
 
 
 def _run_ffprobe(args: list[str], path: Path) -> dict[str, Any]:
@@ -33,8 +40,128 @@ def _run_ffprobe(args: list[str], path: Path) -> dict[str, Any]:
             msg=_("ffprobe couldn't read %(path)s: %(err.stderr)s")
             % {"path": path, "err.stderr": reason}
         ) from err
+
     data: dict[str, Any] = json.loads(result.stdout)
+
     return data
+
+
+def get_media_information(media_input: Path, logger: Logger) -> "Media":
+    """Obtiene información del contenedor media Ffprobe."""
+    data = _run_ffprobe(["-show_format", "-show_streams"], media_input)
+    logger.debug(msg=_("ffprobe media data: %(data)s"), data=data)
+
+    video: Video | None = None
+    audio: list[Audio] | None = None
+    subtitles: list[Subtitles] | None = None
+    video_track_index, audio_track_index, subtitles_track_index = 0, 0, 0
+
+    for stream in data.get("streams", []):
+        codec_type = stream.get("codec_type")
+        tags = stream.get("tags", {})
+        language = tags.get("language")
+
+        if codec_type == "video":
+            video = Video(
+                path=media_input.absolute(),
+                global_index=stream.get("index"),
+                track_index=video_track_index,
+                codec=VIDEO_CODECS[stream.get("codec_name")].name,
+                width=stream.get("width"),
+                height=stream.get("height"),
+                duration=tags.get("DURATION"),
+                fps=parse_fraction(stream.get("avg_frame_rate")),
+                bit_rate=to_int(stream.get("bit_rate")),
+                pix_fmt=stream.get("pix_fmt"),
+                aspect_ratio=stream.get("display_aspect_ratio"),
+                profile=stream.get("profile"),
+            )
+            video_track_index += 1
+        elif codec_type == "audio":
+            if audio is None:
+                audio = []
+            disposition = stream.get("disposition", {})
+            audio.append(
+                Audio(
+                    path=media_input.absolute(),
+                    global_index=stream.get("index"),
+                    track_index=audio_track_index,
+                    codec=stream.get("codec_name"),
+                    duration=tags.get("DURATION"),
+                    sample_rate=to_int(stream.get("sample_rate")),
+                    channels=stream.get("channels"),
+                    channel_layout=stream.get("channel_layout"),
+                    bit_rate=to_int(stream.get("bit_rate")),
+                    language=language,
+                    title=tags.get("title"),
+                    forced=bool(disposition.get("forced", 0)),
+                    default=bool(disposition.get("default", 0)),
+                    hearing_impaired=bool(disposition.get("hearing_impaired", 0)),
+                    commentary=bool(disposition.get("comment", 0)),
+                )
+            )
+            audio_track_index += 1
+        elif codec_type == "subtitle":
+            # ffprobe reporta el valor en singular para las pistas de subtítulos.
+            if subtitles is None:
+                subtitles = []
+            disposition = stream.get("disposition", {})
+            subtitles.append(
+                Subtitles(
+                    path=media_input.absolute(),
+                    global_index=stream.get("index"),
+                    track_index=subtitles_track_index,
+                    codec=stream.get("codec_name"),
+                    language=language,
+                    title=tags.get("title"),
+                    forced=bool(disposition.get("forced", 0)),
+                    default=bool(disposition.get("default", 0)),
+                    hearing_impaired=bool(disposition.get("hearing_impaired", 0)),
+                    visual_impaired=bool(disposition.get("visual_impaired", 0)),
+                )
+            )
+            subtitles_track_index += 1
+
+    format = data.get("format", {})
+    tags = format.get("tags", {})
+    duration_val = to_float(format.get("duration"))
+
+    try:
+        media_metadata = MediaMetadata(
+            title=tags.get("title"),
+            comment=tags.get("COMMENT"),
+            description=tags.get("DESCRIPTION"),
+            synopsis=tags.get("SYNOPSIS"),
+            genre=tags.get("GENRE"),
+            date=parse_date(raw=tags.get("DATE")),
+            copyright=tags.get("COPYRIGHT"),
+            law_rating=tags.get("LAW_RATING"),
+            artist=tags.get("ARTIST"),
+            album=tags.get("ALBUM"),
+            encoder=tags.get("ENCODER"),
+        )
+
+        media = Media(
+            path=media_input.absolute(),
+            duration=timedelta(seconds=duration_val)
+            if duration_val is not None
+            else None,
+            size=to_int(format.get("size")),
+            format_name=format.get("format_name"),
+            video=video,
+            audio=audio,
+            subtitles=subtitles,
+            metadata=media_metadata if tags else None,
+        )
+    except (
+        ValueError,
+        subprocess.CalledProcessError,
+        json.JSONDecodeError,
+        OSError,
+    ) as e:
+        raise MissingParameterError(name="media") from e
+
+    return media
 
 
 def get_audio_codec(audio_input: Path, logger: Logger) -> str:
@@ -87,25 +214,6 @@ def get_audio_codec(audio_input: Path, logger: Logger) -> str:
             % {"path.suffix": audio_input.suffix, "codec_name": codec_name}
         )
     return codec_name
-
-
-def get_media_metadata(path: Path, logger: Logger) -> dict[str, Any]:
-    """Obtiene metadatos del medio a procesar.
-
-    Args:
-        path: Ruta del fichero de vídeo a procesar.
-        logger: Servicio de registro de mensajes.
-
-    Returns:
-        Metadatos del vídeo a procesar.
-
-    Raises:
-        FfprobeError: Si ffprobe no puede leer el fichero indicado.
-    """
-    data = _run_ffprobe(["-show_format", "-show_streams"], path)
-    logger.debug(msg=_("ffprobe media data: %(data)s"), data=data)
-
-    return data
 
 
 def validate_subtitles_file_codec(subtitles_input: Path, logger: Logger) -> None:

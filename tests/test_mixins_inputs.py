@@ -24,8 +24,8 @@ _EMPTY_METADATA: dict[str, Any] = {"streams": [], "format": {}}
 def _fake_probe(monkeypatch: pytest.MonkeyPatch) -> None:
     """Evita ejecutar ffprobe en todos los tests de este módulo."""
     monkeypatch.setattr(
-        "pymedia.mixins.media_mixin.get_media_metadata",
-        lambda path, logger: _EMPTY_METADATA,
+        "pymedia.ffprobe._run_ffprobe",
+        lambda args, path: _EMPTY_METADATA,
     )
 
 
@@ -93,12 +93,10 @@ class TestInputListCreate:
         """Comprueba que un fallo de ffprobe lanza un error."""
         import subprocess
 
-        def _failing_probe(path: Path, logger: Logger) -> None:
+        def _failing_probe(args: list[str], path: Path) -> None:
             raise subprocess.CalledProcessError(1, ["ffprobe"])
 
-        monkeypatch.setattr(
-            "pymedia.mixins.media_mixin.get_media_metadata", _failing_probe
-        )
+        monkeypatch.setattr("pymedia.ffprobe._run_ffprobe", _failing_probe)
         mixin = MediaListMixin()
 
         with pytest.raises(subprocess.CalledProcessError):
@@ -171,8 +169,8 @@ class TestSubtitlesStreamParsing:
     ) -> None:
         """Comprueba que las pistas `subtitle` se parsean y se indexan."""
         monkeypatch.setattr(
-            "pymedia.mixins.media_mixin.get_media_metadata",
-            lambda path, logger: _SUBTITLE_METADATA,
+            "pymedia.ffprobe._run_ffprobe",
+            lambda args, path: _SUBTITLE_METADATA,
         )
         media = self._media_with_streams(tmp_path)
 
@@ -199,8 +197,8 @@ class TestSubtitlesStreamParsing:
     ) -> None:
         """Comprueba que video/audio siguen indexándose en presencia de subtítulos."""
         monkeypatch.setattr(
-            "pymedia.mixins.media_mixin.get_media_metadata",
-            lambda path, logger: _SUBTITLE_METADATA,
+            "pymedia.ffprobe._run_ffprobe",
+            lambda args, path: _SUBTITLE_METADATA,
         )
         media = self._media_with_streams(tmp_path)
 
@@ -225,8 +223,8 @@ class TestSubtitlesStreamParsing:
             "format": {},
         }
         monkeypatch.setattr(
-            "pymedia.mixins.media_mixin.get_media_metadata",
-            lambda path, logger: metadata,
+            "pymedia.ffprobe._run_ffprobe",
+            lambda args, path: metadata,
         )
         media = self._media_with_streams(tmp_path)
 
