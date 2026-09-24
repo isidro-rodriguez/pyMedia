@@ -22,9 +22,9 @@ repos:
         language: system
         types: [python]
 
-      - id: pyright
-        name: PyRight
-        entry: uv run pyright
+      - id: ty-check
+        name: Ty
+        entry: uv run ty check
         language: system
         types: [python]
         pass_filenames: false

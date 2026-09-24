@@ -1,8 +1,9 @@
 """Servicio de detección y carga de idiomas (estándar gettext).
 
 Los msgid se escriben en inglés en el código fuente y se traducen con
-catálogos `.mo` alojados en `localedir/{lang}/LC_MESSAGES/`. Los idiomas sin
-catálogo (caso de `en`) usan los msgid tal cual.
+catálogos `.mo` alojados en `localedir/{lang}/LC_MESSAGES/`, donde `{lang}`
+es el nombre completo en inglés (`spanish`, ...). El idioma base (`english`)
+usa los msgid tal cual.
 """
 
 import gettext
@@ -13,36 +14,28 @@ from pathlib import Path
 
 import platformdirs
 
+from pymedia.data.language_codes import resolve_language
+
 
 class _LocaleManager:
     """Gestión del idioma activo y del catálogo gettext.
 
-    La detección sigue la prioridad: `PYMEDIA_LANG` (ISO 639-2 o nombre de
-    idioma) > `config.toml` > sistema > `en`.
+    La detección sigue la prioridad: `PYMEDIA_LANG` > `config.toml` >
+    sistema > `english`. Todas las vías aceptan código ISO 639-1, código
+    ISO 639-2, nombre nativo o nombre en inglés.
 
     Attributes:
         DOMAIN: Nombre del dominio gettext (ficheros `pymedia.mo`).
         localedir: Directorio con los catálogos `{lang}/LC_MESSAGES/`.
+        SUPPORTED_LANGUAGES: Nombres de idioma con catálogo disponible.
     """
 
     DOMAIN = "pymedia"
-    LANGUAGE_MAP = {
-        "system": None,
-        "english": "en",
-        "spanish": "es",
-    }
-    SUPPORTED_LANGUAGES = {"en", "es"}
-    # Valores de `PYMEDIA_LANG` → código de catálogo: el código ISO 639-2 del
-    # estándar de `--language` (`eng`, `spa`) o el nombre usado en config.toml.
-    LANGUAGE_ALIASES = {
-        "eng": "en",
-        "english": "en",
-        "spa": "es",
-        "spanish": "es",
-    }
+    SUPPORTED_LANGUAGES = frozenset({"english", "spanish"})
+    """Nombres de idioma con catálogo gettext disponible."""
 
     def __init__(self, localedir: Path | None = None) -> None:
-        """Inicializa el servicio con el catálogo `en` (no traduce nada).
+        """Inicializa el servicio con el catálogo `english` (no traduce nada).
 
         Args:
             localedir: Directorio raíz de catálogos. Si es `None`, se usa
@@ -50,7 +43,7 @@ class _LocaleManager:
         """
         self.localedir = Path(localedir) if localedir else self._default_localedir()
         self._translation = gettext.NullTranslations()
-        self.set_language("en")
+        self.set_language("english")
 
     @staticmethod
     def _default_localedir() -> Path:
@@ -60,21 +53,38 @@ class _LocaleManager:
             return Path(override)
         return Path(__file__).resolve().parents[0] / "locales"
 
+    @classmethod
+    def _normalize(cls, raw: str) -> str | None:
+        """Normaliza una especificación de idioma al nombre en inglés.
+
+        Args:
+            raw: Código ISO 639-1, código ISO 639-2, nombre nativo o nombre
+                en inglés.
+
+        Returns:
+            El nombre en inglés si está soportado, o `None` en caso contrario.
+        """
+        lang = resolve_language(raw)
+        if lang is None:
+            return None
+        name = lang.english.casefold()
+        return name if name in cls.SUPPORTED_LANGUAGES else None
+
     def detect_language(self) -> str:
         """Detecta el idioma de la aplicación.
 
-        Prioridad: `PYMEDIA_LANG` > `config.toml` > sistema > `en`.
+        Prioridad: `PYMEDIA_LANG` > `config.toml` > sistema > `english`.
 
         Returns:
-            Código i18n del idioma detectado.
+            Nombre en inglés del idioma detectado.
         """
 
         def _read_env_language() -> str | None:
-            """Lee `PYMEDIA_LANG` (ISO 639-2 o nombre de idioma de config)."""
-            value = os.environ.get("PYMEDIA_LANG", "").strip().lower()
-            # `system` y los valores desconocidos devuelven `None`: la detección
-            # continúa con `config.toml` y el idioma del sistema.
-            return self.LANGUAGE_ALIASES.get(value)
+            """Lee `PYMEDIA_LANG` y lo normaliza, o `None` si no es válido."""
+            value = os.environ.get("PYMEDIA_LANG", "")
+            if not value.strip():
+                return None
+            return self._normalize(value)
 
         def _read_config_language() -> str:
             """Lee [app].language del config.toml sin validar."""
@@ -93,7 +103,7 @@ class _LocaleManager:
             return str(data.get("app", {}).get("language", "system"))
 
         def _detect_system_language() -> str:
-            """Detecta el idioma del sistema (POSIX, locale, fallback 'en')."""
+            """Detecta el idioma del sistema (POSIX, locale, fallback)."""
             # Precedencia POSIX: LANGUAGE > LC_ALL > LC_MESSAGES > LANG.
             lang = next(
                 (
@@ -111,33 +121,42 @@ class _LocaleManager:
                 except (locale.Error, ValueError, TypeError):
                     lang = ""
 
-            lang_code = lang.split("_")[0].lower()
-            return lang_code if lang_code in self.SUPPORTED_LANGUAGES else "en"
+            lang_code = lang.split("_")[0]
+            normalized = self._normalize(lang_code) if lang_code else None
+            return normalized if normalized is not None else "english"
 
         env_lang = _read_env_language()
         if env_lang is not None:
             return env_lang
 
         config_lang = _read_config_language()
-        code = self.LANGUAGE_MAP.get(config_lang)
-        if code is not None:
-            return code
+        if config_lang.strip().casefold() != "system":
+            code = self._normalize(config_lang)
+            if code is not None:
+                return code
         return _detect_system_language()
 
     def set_language(self, lang: str) -> None:
         """Carga el catálogo gettext del idioma indicado.
 
+        Los catálogos viven en `{localedir}/{nombre}/LC_MESSAGES/`, con el
+        nombre completo en inglés. Se cargan por ruta directa porque la
+        normalización interna de `gettext` solo entiende códigos de locale
+        (`es`, `es_ES`, ...) y nunca el literal `spanish`.
+
         Args:
-            lang: Código i18n a cargar. Si no está soportado, se usa `en`.
+            lang: Código ISO 639-1, código ISO 639-2, nombre nativo o nombre
+                en inglés. Si no está soportado, se usa `english`.
         """
-        if lang not in self.SUPPORTED_LANGUAGES:
-            lang = "en"
-        self._translation = gettext.translation(
-            domain=self.DOMAIN,
-            localedir=self.localedir,
-            languages=[lang],
-            fallback=True,
-        )
+        normalized = self._normalize(lang)
+        if normalized is None:
+            normalized = "english"
+        mo_path = self.localedir / normalized / "LC_MESSAGES" / f"{self.DOMAIN}.mo"
+        try:
+            with mo_path.open("rb") as f:
+                self._translation = gettext.GNUTranslations(f)
+        except OSError:
+            self._translation = gettext.NullTranslations()
 
     def get_translation(self) -> gettext.NullTranslations:
         """Devuelve el objeto de traducción activo.

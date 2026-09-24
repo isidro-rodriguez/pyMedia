@@ -13,30 +13,35 @@ classifiers = [
     "Intended Audience :: Developers",
     "License :: OSI Approved :: MIT License",
     "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
     "Programming Language :: Python :: 3.14",
 ]
-dependencies = ["platformdirs==4.11.10", "rich>=15.0.0", "typer==0.27.2"]
+dependencies = [
+    "platformdirs==4.11.12",
+    "rich>=15.0.0",
+    "typer==0.27.2",
+]
 
 [dependency-groups]
 dev = [
     "babel>=2.16.0",
     "pdoc>=16.0.0",
+    "pre-commit>=4.0.0",
     "pyinstaller>=6.22.3",
     "pytest>=8.0.0",
-    "pre-commit>=4.0.0",
-    "ruff>=0.3.0",
-    "zstandard>=0.25.0",
     "pytest-cov>=7.1.0",
-    "pyright>=1.1.414",
+    "ruff>=0.3.0",
+    "ty>=0.0.84",
+    "zstandard>=0.25.0",
 ]
-
-[project.scripts]
-pymedia = "pymedia.main:app"
 
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
+
+[project.scripts]
+pymedia = "pymedia.main:app"
 
 [tool.hatch.version]
 path = "src/pymedia/__init__.py"
@@ -84,6 +89,12 @@ addopts = "-m 'not binary and not locales'"
 [tool.coverage.report]
 exclude_also = ["raise MissingParameterError", "raise InvalidParameterError"]
 
-[tool.pyright]
-include = ["src"]
-typeCheckingMode = "strict"
+[tool.ty.environment]
+python-version = "3.12"
+
+[tool.ty.analysis]
+strict-equality-semantics = true
+strict-generic-narrowing = true
+
+[tool.ty.rules]
+possibly-unresolved-reference = "error"

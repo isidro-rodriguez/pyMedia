@@ -3,7 +3,7 @@
 from dataclasses import dataclass
 from pathlib import Path
 
-from pymedia.data.language_codes import LANGUAGES
+from pymedia.data.language_codes import LANGUAGES, resolve_language
 from pymedia.errors import (
     MissingArgumentError,
     MissingParameterError,
@@ -257,22 +257,15 @@ class AudioInputMixin:
     @staticmethod
     def _parse_language(raw: str) -> str:
         """Resuelve el idioma al código ISO 639-2 correspondiente."""
-        normalized = raw.strip().casefold()
+        lang = resolve_language(raw)
 
-        for language in LANGUAGES.values():
-            candidates = (
-                language.code,
-                language.english_name.casefold(),
-                language.native_name.casefold(),
-            )
-
-            if normalized in candidates:
-                return language.code
+        if lang is not None:
+            return lang.iso_639_2_code
 
         raise UserError(
             msg=_(
                 "Value doesn't match a native language name, "
-                "an English language name, or a standard ISO 639-2 code: "
+                "an English language name, or a standard ISO 639-1/639-2 code: "
                 "[https://www.loc.gov/standards/iso639-2/php/code_list.php]"
             )
         )
@@ -283,7 +276,7 @@ class AudioInputMixin:
         if title is not None:
             return title
 
-        return LANGUAGES[lang].native_name
+        return LANGUAGES[lang].native
 
 
 def _disposition_names(audio: Audio) -> list[str]:

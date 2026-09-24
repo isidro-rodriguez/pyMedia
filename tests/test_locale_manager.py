@@ -36,11 +36,11 @@ def test_localedir_por_defecto() -> None:
 # ─── 2) Detección de idioma ───────────────────────────────────────────────
 
 
-def test_detect_language_devuelve_codigo_valido() -> None:
-    """`detect_language` devuelve un código en `SUPPORTED_LANGUAGES`."""
+def test_detect_language_devuelve_nombre_valido() -> None:
+    """`detect_language` devuelve un nombre en `SUPPORTED_LANGUAGES`."""
     mgr = _LocaleManager()
-    codigo = mgr.detect_language()
-    assert codigo in mgr.SUPPORTED_LANGUAGES
+    nombre = mgr.detect_language()
+    assert nombre in mgr.SUPPORTED_LANGUAGES
 
 
 def test_detect_language_usa_config_toml(tmp_path: Path) -> None:
@@ -57,7 +57,7 @@ def test_detect_language_usa_config_toml(tmp_path: Path) -> None:
         clear=False,
     ):
         with patch("platformdirs.user_config_dir", return_value=str(config_dir)):
-            assert mgr.detect_language() == "es"
+            assert mgr.detect_language() == "spanish"
 
 
 def test_detect_language_usa_env_var(tmp_path: Path) -> None:
@@ -70,21 +70,21 @@ def test_detect_language_usa_env_var(tmp_path: Path) -> None:
     mgr = _LocaleManager()
     with patch.dict(os.environ, {"PYMEDIA_LANG": "eng"}, clear=False):
         with patch("platformdirs.user_config_dir", return_value=str(config_dir)):
-            assert mgr.detect_language() == "en"
+            assert mgr.detect_language() == "english"
 
 
 def test_detect_language_env_var_acepta_nombre_de_idioma() -> None:
     """`PYMEDIA_LANG` acepta los nombres admitidos en `config.toml`."""
     mgr = _LocaleManager()
     with patch.dict(os.environ, {"PYMEDIA_LANG": "spanish"}, clear=False):
-        assert mgr.detect_language() == "es"
+        assert mgr.detect_language() == "spanish"
 
 
 def test_detect_language_env_var_normaliza_el_valor() -> None:
     """Mayúsculas y espacios en `PYMEDIA_LANG` no impiden el override."""
     mgr = _LocaleManager()
     with patch.dict(os.environ, {"PYMEDIA_LANG": " SPA "}, clear=False):
-        assert mgr.detect_language() == "es"
+        assert mgr.detect_language() == "spanish"
 
 
 def test_detect_language_env_var_ignora_valor_no_soportado(tmp_path: Path) -> None:
@@ -97,11 +97,11 @@ def test_detect_language_env_var_ignora_valor_no_soportado(tmp_path: Path) -> No
     mgr = _LocaleManager()
     with patch.dict(os.environ, {"PYMEDIA_LANG": "fr"}, clear=False):
         with patch("platformdirs.user_config_dir", return_value=str(config_dir)):
-            assert mgr.detect_language() == "en"
+            assert mgr.detect_language() == "english"
 
 
-def test_detect_language_env_var_ignora_iso_639_1(tmp_path: Path) -> None:
-    """El override usa ISO 639-2 (`eng`/`spa`), como `--language`."""
+def test_detect_language_env_var_acepta_iso_639_1(tmp_path: Path) -> None:
+    """El override acepta ISO 639-1 (`en`/`es`), como `--language`."""
     config_dir = tmp_path / "config"
     config_dir.mkdir()
     (config_dir / "config.toml").write_text(
@@ -110,10 +110,17 @@ def test_detect_language_env_var_ignora_iso_639_1(tmp_path: Path) -> None:
     mgr = _LocaleManager()
     with patch.dict(os.environ, {"PYMEDIA_LANG": "es"}, clear=False):
         with patch("platformdirs.user_config_dir", return_value=str(config_dir)):
-            assert mgr.detect_language() == "en"
+            assert mgr.detect_language() == "spanish"
 
 
-def test_detect_language_fallback_en() -> None:
+def test_detect_language_env_var_acepta_nombre_nativo() -> None:
+    """El override acepta el nombre nativo (`Español`)."""
+    mgr = _LocaleManager()
+    with patch.dict(os.environ, {"PYMEDIA_LANG": "Español"}, clear=False):
+        assert mgr.detect_language() == "spanish"
+
+
+def test_detect_language_fallback_english() -> None:
     """Sin configuración ni variables de entorno, el resultado es válido."""
     mgr = _LocaleManager()
     env_limpio = {k: v for k, v in os.environ.items() if k not in ("LANG", "LC_ALL")}
@@ -134,28 +141,36 @@ def test_set_language_carga_sin_error() -> None:
 
 
 def test_set_language_fallback_no_soportado() -> None:
-    """Un idioma no soportado recae en `en` (NullTranslations)."""
+    """Un idioma no soportado recae en `english` (NullTranslations)."""
     mgr = _LocaleManager()
-    mgr.set_language("fr")  # no soportado
+    mgr.set_language("french")  # existe pero sin catálogo soportado
     traduccion = mgr.get_translation()
     # NullTranslations.gettext devuelve el msgid sin cambios
     assert traduccion.gettext("Hello") == "Hello"
+
+
+def test_set_language_acepta_alias() -> None:
+    """`set_language` acepta códigos ISO y nombres nativos."""
+    mgr = _LocaleManager()
+    for alias in ("es", "spa", "Español", "spanish", "SPANISH"):
+        mgr.set_language(alias)
+        assert mgr.translate("Channels") == "Canales"
 
 
 # ─── 4) Traducción ────────────────────────────────────────────────────────
 
 
 def test_traduje_idioma_sin_catalogo() -> None:
-    """Con `en` (sin catálogo) el msgid se devuelve intacto."""
+    """Con `english` (sin catálogo) el msgid se devuelve intacto."""
     mgr = _LocaleManager()
-    mgr.set_language("en")
+    mgr.set_language("english")
     assert mgr.translate("Hello, world!") == "Hello, world!"
 
 
-def test_traduje_con_catalgo_es() -> None:
-    """Con `es` cargado, un msgid conocido se traduce."""
+def test_traduje_con_catalogo_spanish() -> None:
+    """Con `spanish` cargado, un msgid conocido se traduce."""
     mgr = _LocaleManager()
-    mgr.set_language("es")
+    mgr.set_language("spanish")
     traduccion = mgr.translate("Channels")
     assert traduccion == "Canales"
 
@@ -163,7 +178,7 @@ def test_traduje_con_catalgo_es() -> None:
 def test_traduccion_con_placeholder() -> None:
     """La interpolación con `%(name)s` funciona tras traducir."""
     mgr = _LocaleManager()
-    mgr.set_language("es")
+    mgr.set_language("spanish")
     traduccion = mgr.translate("Could not create directory: %(path)s")
     resultado = traduccion % {"path": "/tmp/foo"}
     assert "/tmp/foo" in resultado
@@ -175,7 +190,7 @@ def test_traduccion_con_placeholder() -> None:
 def test_ngettext_singular() -> None:
     """`ngettext` devuelve el singular cuando n == 1."""
     mgr = _LocaleManager()
-    mgr.set_language("en")
+    mgr.set_language("english")
     resultado = mgr.ngettext("one file", "many files", 1)
     assert resultado == "one file"
 
@@ -183,6 +198,6 @@ def test_ngettext_singular() -> None:
 def test_ngettext_plural() -> None:
     """`ngettext` devuelve el plural cuando n != 1."""
     mgr = _LocaleManager()
-    mgr.set_language("en")
+    mgr.set_language("english")
     resultado = mgr.ngettext("one file", "many files", 5)
     assert resultado == "many files"

@@ -17,19 +17,22 @@ from typer.testing import CliRunner
 from pymedia.locale_manager import locale_manager
 
 
-def _english_language() -> str:
-    """Devuelve siempre el idioma base de la aplicación (`en`)."""
-    return "en"
+def _english_language(self: object) -> str:
+    """Devuelve siempre el idioma base de la aplicación (`english`)."""
+    return "english"
 
 
 # El idioma debe quedar fijado ANTES de importar la aplicación: `pymedia.main`
 # y `pymedia.locales` cargan el catálogo detectado en `config.toml` o en el
 # sistema al importarse, y los módulos de comandos resuelven sus textos con
 # `_()` en tiempo de importación. Sin este parche, la ayuda y los mensajes
-# dependerían de la máquina donde se ejecuten los tests. El idioma base (`en`)
+# dependerían de la máquina donde se ejecuten los tests. El idioma base
+# (`english`)
 # es el único que se valida en las suites; los tests de `_LocaleManager`
 # instancian la clase directamente, por lo que no les afecta el parche.
-locale_manager.detect_language = _english_language  # type: ignore[method-assign]
+# El parche es a nivel de instancia (no de clase) a propósito: se enlaza
+# explícitamente para que el reemplazo reciba `self` como el método original.
+locale_manager.detect_language = _english_language.__get__(locale_manager)  # type: ignore[method-assign] # ty: ignore[invalid-assignment]
 
 ROOT = Path(__file__).resolve().parents[1]
 BUILD_SCRIPT = ROOT / "scripts" / "build.py"

@@ -6,7 +6,6 @@ de la salida estándar en Windows.
 
 import io
 import sys
-from typing import Any, cast
 
 import typer
 
@@ -23,7 +22,7 @@ def _configure_runtime() -> None:
     locale_manager.set_language(locale_manager.detect_language())
 
     if sys.platform == "win32" and type(sys.stdout) is io.TextIOWrapper:
-        cast("io.TextIOWrapper[Any]", sys.stdout).reconfigure(encoding="utf-8")
+        sys.stdout.reconfigure(encoding="utf-8")
 
 
 def _build_app() -> typer.Typer:

@@ -6,6 +6,16 @@ Las versiones se han reconstruido a partir del histórico de
 Las versiones intermedias no registradas (0.2–0.4, 0.6–0.8) se agrupan
 con la sección anterior.
 
+## [Unreleased]
+
+### Cambiado
+
+- `refactor(locales)`: la aplicación usa nombres completos en inglés como
+  referencia interna de idioma (`english`/`spanish`/`system`); `PYMEDIA_LANG`,
+  `--language` y `app.language` aceptan código ISO 639-1, código ISO 639-2
+  (variantes B y T), nombre nativo o nombre en inglés. Los catálogos pasan a
+  `locales/spanish/` y `--language` admite ahora también ISO 639-1.
+
 ## [0.20.1-beta.11] - 2026-09-24
 
 ### Añadido

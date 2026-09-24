@@ -185,16 +185,20 @@ class BaseService[ParamsT](ABC):
 
         def _read_stdout() -> None:
             """Recepción de la evolución del comando ffmpeg vía -progress."""
-            for line_ in proc.stdout:  # type: ignore[union-attr]
-                events.put(("stdout", line_))
+            stdout = proc.stdout
+            if stdout is not None:
+                for line_ in stdout:
+                    events.put(("stdout", line_))
             events.put(("stdout", None))  # sentinel: fin de stream
 
         def _read_stderr() -> None:
             """Almacena stderr y emite eventos showinfo para el progreso por pasos."""
-            for line_ in proc.stderr:  # type: ignore[union-attr]
-                stderr_lines.append(line_)
-                if total_steps is not None and "pts_time:" in line_:
-                    events.put(("stderr", line_))
+            stderr = proc.stderr
+            if stderr is not None:
+                for line_ in stderr:
+                    stderr_lines.append(line_)
+                    if total_steps is not None and "pts_time:" in line_:
+                        events.put(("stderr", line_))
             events.put(("stderr", None))  # sentinel: fin de stream
 
         def _finish_readers() -> None:

@@ -10,14 +10,14 @@ Uso, ejemplo en español:
     1. Regenera pymedia.pot escaneando `_()` y `ngettext()` de src/
     uv run python scripts/i18n.py extract
 
-    2. Rehace es/LC_MESSAGES/pymedia.po a partir del POT
-    uv run python scripts/i18n.py update -l es
+    2. Rehace spanish/LC_MESSAGES/pymedia.po a partir del POT
+    uv run python scripts/i18n.py update -l spanish
 
-    3. Manual: abrir src/pymedia/locales/es/LC_MESSAGES/pymedia.po y
+    3. Manual: abrir src/pymedia/locales/spanish/LC_MESSAGES/pymedia.po y
        rellenar las msgstr vacía
 
     4. Compila pymedia.po -> pymedia.mo
-    uv run python scripts/i18n.py compile -l es
+    uv run python scripts/i18n.py compile -l spanish
 
     5. Validación
     uv run python scripts/i18n.py check
@@ -39,7 +39,7 @@ PROJECT_ROOT = Path(__file__).resolve().parents[1]
 SRC_DIR = PROJECT_ROOT / "src"
 LOCALEDIR = SRC_DIR / "pymedia" / "locales"
 DOMAIN = "pymedia"
-LANGUAGES = ["es"]
+LANGUAGES = ["spanish"]
 
 
 def _po_path(lang: str) -> Path:
@@ -75,7 +75,7 @@ def cmd_update(lang: str) -> None:
     """Sincroniza `<lang>.po` con el POT.
 
     Args:
-        lang: Código de idioma del catálogo (`es`, `en`...).
+        lang: Nombre de idioma del catálogo (`spanish`, `english`...).
     """
     pot_path = LOCALEDIR / f"{DOMAIN}.pot"
     pot = read_po(pot_path.open("rb"))
@@ -102,7 +102,7 @@ def cmd_compile(lang: str) -> None:
     """Compila `<lang>.po` a `<lang>.mo`.
 
     Args:
-        lang: Código de idioma del catálogo (`es`, `en`...).
+        lang: Nombre de idioma del catálogo (`spanish`, `english`...).
     """
     po_path = _po_path(lang)
     if not po_path.exists():
@@ -181,7 +181,7 @@ def main() -> None:
     sub.add_parser("extract", help="Genera pymedia.pot desde src/")
     for name in ("update", "compile"):
         p = sub.add_parser(name, help=f"{name.capitalize()} de catálogos")
-        p.add_argument("-l", "--lang", default="es")
+        p.add_argument("-l", "--lang", default="spanish")
     sub.add_parser("check", help="Valida los catálogos")
 
     args = parser.parse_args()

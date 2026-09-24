@@ -122,9 +122,9 @@ def get_media_information(media_input: Path, logger: Logger) -> "Media":
             )
             subtitles_track_index += 1
 
-    format = data.get("format", {})
-    tags = format.get("tags", {})
-    duration_val = to_float(format.get("duration"))
+    fmt = data.get("format", {})
+    tags = fmt.get("tags", {})
+    duration_val = to_float(fmt.get("duration"))
 
     try:
         media_metadata = MediaMetadata(
@@ -146,8 +146,8 @@ def get_media_information(media_input: Path, logger: Logger) -> "Media":
             duration=timedelta(seconds=duration_val)
             if duration_val is not None
             else None,
-            size=to_int(format.get("size")),
-            format_name=format.get("format_name"),
+            size=to_int(fmt.get("size")),
+            format_name=fmt.get("format_name"),
             video=video,
             audio=audio,
             subtitles=subtitles,

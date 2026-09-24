@@ -25,7 +25,7 @@ pytestmark = pytest.mark.locales
 _SRC_DIR = Path(__file__).resolve().parents[1] / "src"
 _LOCALEDIR = _SRC_DIR / "pymedia" / "locales"
 _DOMAIN = "pymedia"
-_LANGUAGES = ["es"]
+_LANGUAGES = ["spanish"]
 
 
 def _read_po(path: Path) -> Catalog:

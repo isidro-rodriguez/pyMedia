@@ -240,10 +240,12 @@ Los mensajes utilizan gettext (msgid en inglés) y el idioma se detecta con la
 prioridad: **PYMEDIA_LANG** → **config.toml** → **idioma del sistema** →
 **inglés**.
 
-- `app.language` en `config.toml` admite `system`, `spanish` o `english`.
-- Catálogos en `src/pymedia/locales/` (`en` no traduce, `es` usa `.mo`).
-- La variable de entorno `PYMEDIA_LANG` fuerza el idioma (códigos ISO 639-2
-  `eng`/`spa`, los mismos que `--language`, o los nombres `english`/`spanish`) y
+- `app.language` en `config.toml` admite `system`, `spanish` o `english`
+  (también cualquier alias: códigos ISO 639-1/639-2, nombre nativo).
+- Catálogos en `src/pymedia/locales/` (`english` no traduce, `spanish` usa `.mo`).
+- La variable de entorno `PYMEDIA_LANG` fuerza el idioma (código ISO 639-1
+  `en`/`es`, código ISO 639-2 `eng`/`spa`, nombre nativo `English`/`Español`
+  o nombre `english`/`spanish`) y
   tiene prioridad sobre `config.toml` y sobre el sistema; se resuelve antes de
   cargar la aplicación, por lo que también afecta a los textos de ayuda. Un
   valor desconocido se ignora.

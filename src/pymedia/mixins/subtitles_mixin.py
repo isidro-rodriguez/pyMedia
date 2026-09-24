@@ -3,7 +3,7 @@
 from dataclasses import dataclass
 from pathlib import Path
 
-from pymedia.data.language_codes import LANGUAGES
+from pymedia.data.language_codes import LANGUAGES, resolve_language
 from pymedia.errors import (
     MissingArgumentError,
     MissingParameterError,
@@ -259,18 +259,12 @@ class SubtitlesInputMixin:
     @staticmethod
     def _parse_language(raw: str) -> str:
         """Resuelve el idioma al código ISO 639-2 correspondiente."""
-        normalized = raw.strip().casefold()
-        for language in LANGUAGES.values():
-            candidates = (
-                language.code,
-                language.english_name.casefold(),
-                language.native_name.casefold(),
-            )
-            if normalized in candidates:
-                return language.code
+        lang = resolve_language(raw)
+        if lang is not None:
+            return lang.iso_639_2_code
         raise UserError(
             msg=_(
-                "Value doesn't match with ISO 639-2: "
+                "Value doesn't match with ISO 639-1/639-2: "
                 "Codes for the Representation of Names of Languages."
                 "[https://www.loc.gov/standards/iso639-2/php/code_list.php]"
             )
@@ -281,7 +275,7 @@ class SubtitlesInputMixin:
         """Utiliza el nombre del idioma como título si no lo ha indicado el usuario."""
         if title is not None:
             return title
-        return LANGUAGES[lang].native_name
+        return LANGUAGES[lang].native
 
 
 def _disposition_names(subtitles: Subtitles) -> list[str]:

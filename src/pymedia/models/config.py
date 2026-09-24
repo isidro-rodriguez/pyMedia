@@ -9,6 +9,7 @@ from typing import Any, cast
 import platformdirs
 
 from pymedia.data.audio_codecs import AUDIO_CODECS
+from pymedia.data.language_codes import resolve_language
 from pymedia.data.supported import SUPPORTED
 from pymedia.data.video_codecs import VIDEO_CODECS
 from pymedia.errors import ConfigError
@@ -360,9 +361,13 @@ class Config:
                 % {"expected": ", ".join(SUPPORTED.SUBTITLES)}
             )
 
-        # app.language
+        # app.language: literal soportado o cualquier alias que resuelva a uno.
         language = app["language"]
-        if language not in SUPPORTED.LANGUAGES:
+        resolved = resolve_language(language) if isinstance(language, str) else None
+        language_name = (
+            resolved.english.casefold() if resolved is not None else language
+        )
+        if language_name not in SUPPORTED.LANGUAGES:
             errors.append(
                 "\n"
                 + _(
