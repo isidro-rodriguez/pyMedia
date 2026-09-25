@@ -27,7 +27,7 @@ por perfiles y edición de pistas de audio y subtítulos.
 
 ## Requisitos
 
-- Python **3.13 o superior** para ejecución desde el código fuente.
+- Python **3.12 o superior** para ejecución desde el código fuente.
 - **ffmpeg** y **ffprobe** instalados y disponibles en el `PATH`.
 
   - Windows: `winget install ffmpeg` o <https://ffmpeg.org/download.html>
@@ -40,7 +40,7 @@ por perfiles y edición de pistas de audio y subtítulos.
 ```bash
 git clone https://github.com/isidro-rodriguez/pyMedia.git
 cd pyMedia
-uv sync                 # instala dependencias en .venv
+uv sync
 uv run pymedia --help
 ```
 
@@ -70,14 +70,17 @@ pymedia <comando> --help     # ayuda detallada de cada comando
 |-----------------|-------------------------------------------------------------------|
 | `info`          | `pymedia info input.mp4`                                          |
 | `sheet`         | `pymedia sheet input.mp4 --preset fhd -o vcs.webp`                |
-| `join`          | `pymedia join part1.mp4 part2.mp4 -o movie.mp4`                   |
-| `remux`         | `pymedia remux input.mp4 -o output.mkv`                           |
-| `cut`           | `pymedia cut input.mp4 --at 10:05,40:30,1:20:00`                  |
 | `transcode`     | `pymedia transcode source.mp4 --preset slow --video --audio 1`    |
+| `remux`         | `pymedia remux input.mp4 -o output.mkv`                           |
+| `join`          | `pymedia join part1.mp4 part2.mp4 -o movie.mp4`                   |
+| `cut`           | `pymedia cut input.mp4 --at 10:05,40:30,1:20:00`                  |
 | `add-audio`     | `pymedia add-audio input.mp4 eng_audio.m4a --language eng`        |
 | `delete-audio`  | `pymedia delete-audio input.mp4 --tracks 1,2`                     |
+| `edit-audio`    | `pymedia edit-audio input.mp4 --track 0 --forced --default`       |
 | `extract-audio` | `pymedia extract-audio input.mp4 -o audio.m4a`                    |
 | `add-subs`      | `pymedia add-subs input.mp4 subs_es.srt --language spa --default` |
+| `delete-subs`   | `pymedia delete-subs input.mp4 --tracks 1,2`                      |
+| `edit-subs`     | `pymedia edit-subs input.mp4 --track 0 --forced --default`        |
 | `extract-subs`  | `pymedia extract-subs input.mp4 --tracks 3,5 -o subs.srt`         |
 | `animated`      | `pymedia animated input.mp4 --start 00:00:05 --end 00:00:12`      |
 | `frames`        | `pymedia frames input.mp4 --at 00:01:30,00:05:15`                 |
@@ -260,7 +263,7 @@ prioridad: **PYMEDIA_LANG** → **config.toml** → **idioma del sistema** →
 
 ## Desarrollo
 
-Requisitos: Python 3.13+, `uv` y ffmpeg/ffprobe en `PATH`.
+Requisitos: Python 3.12+, `uv` y ffmpeg/ffprobe en `PATH`.
 
 ```bash
 uv sync                     # instala dependencias y grupo dev
