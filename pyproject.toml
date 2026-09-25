@@ -18,7 +18,7 @@ classifiers = [
     "Programming Language :: Python :: 3.14",
 ]
 dependencies = [
-    "platformdirs==4.11.12",
+    "platformdirs==4.11.13",
     "rich>=15.0.0",
     "typer==0.27.2",
 ]
