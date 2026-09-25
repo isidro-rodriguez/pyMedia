@@ -11,7 +11,7 @@ from pymedia.commands.base_service import BaseService
 from pymedia.commands.info.parameters import InfoParameters
 from pymedia.errors import MissingParameterError
 from pymedia.locale_manager import locale_manager
-from pymedia.locales import _
+from pymedia.locales import translate as _
 from pymedia.models.audio import get_audio_metadata
 from pymedia.models.media import Audio, Subtitles, Video
 from pymedia.models.subtitles import get_subtitles_metadata

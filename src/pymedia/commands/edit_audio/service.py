@@ -4,7 +4,7 @@ from pymedia.commands.base_service import BaseService
 from pymedia.commands.edit_audio.cmd import EditAudioCmd
 from pymedia.commands.edit_audio.parameters import EditAudioParameters
 from pymedia.errors import MissingParameterError
-from pymedia.locales import _
+from pymedia.locales import translate as _
 
 
 class EditAudioService(BaseService[EditAudioParameters]):

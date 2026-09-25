@@ -4,7 +4,7 @@ from pymedia.commands.base_service import BaseService
 from pymedia.commands.extract_subtitles.cmd import ExtractSubtitlesCmd
 from pymedia.commands.extract_subtitles.parameters import ExtractSubtitlesParameters
 from pymedia.errors import MissingParameterError
-from pymedia.locales import _
+from pymedia.locales import translate as _
 
 
 class ExtractSubtitlesService(BaseService[ExtractSubtitlesParameters]):

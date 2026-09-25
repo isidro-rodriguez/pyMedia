@@ -7,16 +7,14 @@ mediante los catálogos `.po`/`.mo` alojados en
 
 Uso típico:
 
-    from pymedia.locales import _
+    from pymedia.locales import translate as _
 
     print(_("Hello, world!"))
 """
 
 from pymedia.locale_manager import locale_manager
 
-__all__ = ["_", "ngettext"]
-
-_ = locale_manager.translate
+translate = locale_manager.translate
 ngettext = locale_manager.ngettext
 
 locale_manager.set_language(locale_manager.detect_language())

@@ -20,7 +20,7 @@ from pymedia.commands.base_cli_options import (
 from pymedia.commands.edit_subtitles.parameters import EditSubtitlesParameters
 from pymedia.commands.edit_subtitles.service import EditSubtitlesService
 from pymedia.errors import MissingRequiredOptionsError
-from pymedia.locales import _
+from pymedia.locales import translate as _
 from pymedia.logger import Logger
 from pymedia.types import OverwriteMode
 

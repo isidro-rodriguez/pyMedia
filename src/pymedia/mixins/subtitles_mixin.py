@@ -10,7 +10,7 @@ from pymedia.errors import (
     UserError,
 )
 from pymedia.ffprobe import validate_subtitles_file_codec
-from pymedia.locales import _
+from pymedia.locales import translate as _
 from pymedia.logger import Logger
 from pymedia.models.media import Media
 from pymedia.models.subtitles import (

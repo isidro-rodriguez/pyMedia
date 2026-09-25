@@ -17,7 +17,7 @@ from pymedia.commands.base_cli_options import (
 from pymedia.commands.cut.parameters import CutParameters
 from pymedia.commands.cut.service import CutService
 from pymedia.errors import MissingRequiredOptionsError, UserError
-from pymedia.locales import _
+from pymedia.locales import translate as _
 from pymedia.logger import Logger
 from pymedia.types import OverwriteMode
 

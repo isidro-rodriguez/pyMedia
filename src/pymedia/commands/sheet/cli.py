@@ -15,7 +15,7 @@ from pymedia.commands.base_cli_options import (
 )
 from pymedia.commands.sheet.parameters import SheetParameters
 from pymedia.commands.sheet.service import SheetService
-from pymedia.locales import _
+from pymedia.locales import translate as _
 from pymedia.logger import Logger
 from pymedia.types import OverwriteMode, PresetsSheetMode
 

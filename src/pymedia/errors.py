@@ -9,7 +9,7 @@ import logging
 
 from typer import BadParameter, TyperException
 
-from pymedia.locales import _
+from pymedia.locales import translate as _
 from pymedia.logger import Logger
 from pymedia.types import MediaType
 

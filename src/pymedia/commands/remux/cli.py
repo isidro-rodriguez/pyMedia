@@ -19,7 +19,7 @@ from pymedia.commands.base_cli_options import (
 from pymedia.commands.remux.parameters import RemuxParameters
 from pymedia.commands.remux.service import RemuxService
 from pymedia.errors import MissingArgumentError
-from pymedia.locales import _
+from pymedia.locales import translate as _
 from pymedia.logger import Logger
 from pymedia.types import OverwriteMode, RotateMetadataMode
 

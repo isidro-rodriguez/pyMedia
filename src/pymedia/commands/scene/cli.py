@@ -22,7 +22,7 @@ from pymedia.commands.base_cli_options import (
 )
 from pymedia.commands.scene.parameters import SceneParameters
 from pymedia.commands.scene.service import SceneService
-from pymedia.locales import _
+from pymedia.locales import translate as _
 from pymedia.logger import Logger
 from pymedia.types import OverwriteMode, ScaleMode
 

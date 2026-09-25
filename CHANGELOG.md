@@ -6,10 +6,15 @@ Las versiones se han reconstruido a partir del histórico de
 Las versiones intermedias no registradas (0.2–0.4, 0.6–0.8) se agrupan
 con la sección anterior.
 
-## [Unreleased]
+## [0.21.0-beta.12] - 2026-09-25
 
 ### Cambiado
 
+- Añadida opción `--strip-metadata` para indicar que no se copian los metadatos
+  del fichero origen. Comandos que la implementan: `add-audio`, ``add-subs``, ``cut``, 
+  ``extract-audio``, ``extract-subs``, ``join``, ``remux``, ``transcode``.
+- Refactorización modelos `Audio` y `Subtitles` separando los métadatos para
+  mejor organización.
 - `refactor(locales)`: la aplicación usa nombres completos en inglés como
   referencia interna de idioma (`english`/`spanish`/`system`); `PYMEDIA_LANG`,
   `--language` y `app.language` aceptan código ISO 639-1, código ISO 639-2

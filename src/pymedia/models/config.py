@@ -13,7 +13,7 @@ from pymedia.data.language_codes import resolve_language
 from pymedia.data.supported import SUPPORTED
 from pymedia.data.video_codecs import VIDEO_CODECS
 from pymedia.errors import ConfigError
-from pymedia.locales import _
+from pymedia.locales import translate as _
 from pymedia.types import AudioCodecMode, PresetsTranscodeMode, VideoCodecMode
 
 

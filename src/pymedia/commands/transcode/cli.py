@@ -27,7 +27,7 @@ from pymedia.commands.base_cli_options import (
 from pymedia.commands.transcode.parameters import TranscodeParameters
 from pymedia.commands.transcode.service import TranscodeService
 from pymedia.errors import MissingRequiredOptionsError
-from pymedia.locales import _
+from pymedia.locales import translate as _
 from pymedia.logger import Logger
 from pymedia.types import OverwriteMode, PresetsTranscodeMode, ScaleMode
 

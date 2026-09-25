@@ -10,7 +10,7 @@ from pymedia.errors import (
     MissingPropertyError,
 )
 from pymedia.locale_manager import locale_manager
-from pymedia.locales import _
+from pymedia.locales import translate as _
 from pymedia.models.audio import get_audio_metadata
 from pymedia.models.media import Audio, Subtitles
 from pymedia.models.subtitles import get_subtitles_metadata

@@ -14,7 +14,7 @@ from pymedia.commands.base_cli_options import (
 )
 from pymedia.commands.extract_subtitles.parameters import ExtractSubtitlesParameters
 from pymedia.commands.extract_subtitles.service import ExtractSubtitlesService
-from pymedia.locales import _
+from pymedia.locales import translate as _
 from pymedia.logger import Logger
 from pymedia.types import OverwriteMode
 

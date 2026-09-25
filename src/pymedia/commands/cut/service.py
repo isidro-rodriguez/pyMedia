@@ -7,7 +7,7 @@ from pymedia.commands.base_service import BaseService
 from pymedia.commands.cut.cmd import CutCmd
 from pymedia.commands.cut.parameters import CutParameters
 from pymedia.errors import MissingParameterError
-from pymedia.locales import _
+from pymedia.locales import translate as _
 
 
 class CutService(BaseService[CutParameters]):

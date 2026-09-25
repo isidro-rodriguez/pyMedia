@@ -14,7 +14,7 @@ from pymedia.data.containers import (
     VIDEO_CONTAINERS,
 )
 from pymedia.errors import InvalidContainerError, UserError
-from pymedia.locales import _
+from pymedia.locales import translate as _
 from pymedia.types import MediaType  # noqa
 
 # =============================================================================

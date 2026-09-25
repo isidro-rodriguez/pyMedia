@@ -20,7 +20,7 @@ from pymedia.commands.base_cli_options import (
     ShowCmdOption,
     StripMetadataOption,
 )
-from pymedia.locales import _
+from pymedia.locales import translate as _
 from pymedia.logger import Logger
 from pymedia.types import OverwriteMode
 

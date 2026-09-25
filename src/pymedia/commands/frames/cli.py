@@ -21,7 +21,7 @@ from pymedia.commands.base_cli_options import (
 from pymedia.commands.frames.parameters import FramesParameters
 from pymedia.commands.frames.service import FramesService
 from pymedia.errors import MissingRequiredOptionsError
-from pymedia.locales import _
+from pymedia.locales import translate as _
 from pymedia.logger import Logger
 from pymedia.types import OverwriteMode, ScaleMode
 

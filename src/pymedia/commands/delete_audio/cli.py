@@ -13,7 +13,7 @@ from pymedia.commands.base_cli_options import (
 )
 from pymedia.commands.delete_audio.parameters import DeleteAudioParameters
 from pymedia.commands.delete_audio.service import DeleteAudioService
-from pymedia.locales import _
+from pymedia.locales import translate as _
 from pymedia.logger import Logger
 from pymedia.types import OverwriteMode
 

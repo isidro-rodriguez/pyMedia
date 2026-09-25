@@ -2,7 +2,7 @@
 
 from pymedia.commands.animated.parameters import AnimatedParameters
 from pymedia.errors import InvalidParameterError, MissingParameterError
-from pymedia.locales import _
+from pymedia.locales import translate as _
 from pymedia.types import OverwriteMode, ScaleFlag
 
 

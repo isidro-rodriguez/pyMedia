@@ -14,7 +14,7 @@ from pymedia.commands.base_cli_options import (
 )
 from pymedia.commands.extract_audio.parameters import ExtractAudioParameters
 from pymedia.commands.extract_audio.service import ExtractAudioService
-from pymedia.locales import _
+from pymedia.locales import translate as _
 from pymedia.logger import Logger
 from pymedia.types import OverwriteMode
 

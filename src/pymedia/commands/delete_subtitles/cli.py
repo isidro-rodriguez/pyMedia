@@ -13,7 +13,7 @@ from pymedia.commands.base_cli_options import (
 )
 from pymedia.commands.delete_subtitles.parameters import DeleteSubtitlesParameters
 from pymedia.commands.delete_subtitles.service import DeleteSubtitlesService
-from pymedia.locales import _
+from pymedia.locales import translate as _
 from pymedia.logger import Logger
 from pymedia.types import OverwriteMode
 

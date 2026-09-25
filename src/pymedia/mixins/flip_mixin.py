@@ -3,7 +3,7 @@
 from dataclasses import dataclass
 
 from pymedia.errors import InvalidParameterError
-from pymedia.locales import _
+from pymedia.locales import translate as _
 
 
 @dataclass(kw_only=True)

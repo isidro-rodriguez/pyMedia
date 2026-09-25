@@ -27,7 +27,7 @@ from pymedia.errors import (
     OsError,
     UserError,
 )
-from pymedia.locales import _
+from pymedia.locales import translate as _
 from pymedia.logger import Logger
 from pymedia.models.config import Config
 from pymedia.types import OverwriteMode

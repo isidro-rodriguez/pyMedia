@@ -10,7 +10,7 @@ from pymedia.errors import (
     UserError,
 )
 from pymedia.ffprobe import get_audio_codec
-from pymedia.locales import _
+from pymedia.locales import translate as _
 from pymedia.logger import Logger
 from pymedia.models.audio import Audio, AudioMetadata, get_audio_metadata
 from pymedia.models.media import Media

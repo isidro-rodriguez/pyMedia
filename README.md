@@ -5,7 +5,7 @@ habituales de procesamiento de vídeo: análisis de metadatos, capturas, unión,
 corte y división de contenedores, remux sin transcodificar, transcodificación
 por perfiles y edición de pistas de audio y subtítulos.
 
-> **Versión:** Beta 0.20.1
+> **Versión:** Beta 0.21.0
 
 ## Características
 
@@ -47,7 +47,7 @@ uv run pymedia --help
 También puedes instalar la aplicación como comando `pymedia`:
 
 ```bash
-uv tool install .       # o: pip install .
+uv tool install .
 ```
 
 ### Ejecutable único (Windows)
@@ -220,9 +220,9 @@ de `transcode` los selecciona por nombre.
 
 |      | AV1 | H.264 | H.265 | AAC | E-AC-3 | Opus | ASS | SRT | SSA |
 |------|:---:|:-----:|:-----:|:---:|:------:|:----:|:---:|:---:|:---:|
-| MKV  | ✓   |  ✓    |  ✓    | ✓   |   ✓    |  ✓   | ✓   | ✓   | ✓   |
-| MP4  | ✓   |  ✓    |  ✓    | ✓   |   ✓    |  ⚠   |     | ⚠   |     |
-| WebM | ✓   |       |       |     |        |  ✓   |     |     |     |
+| MKV  | ✓  |  ✓   |  ✓   | ✓  |   ✓   |  ✓  | ✓  | ✓  | ✓  |
+| MP4  | ✓  |  ✓   |  ✓   | ✓  |   ✓   |  ⚠  |     | ⚠  |     |
+| WebM | ✓  |       |       |     |        |  ✓  |     |     |     |
 
 > ⚠ = Soporte según versión de ffmpeg/reproductor. Para subtítulos, MP4
 > transcodifica `SRT` a `mov_text`.
@@ -231,9 +231,9 @@ de `transcode` los selecciona por nombre.
 
 |     | AAC | ALAC | FLAC | Opus | MP3 |
 |-----|:---:|:----:|:----:|:----:|:---:|
-| MKA | ✓   |  ✓   |  ✓   |  ✓   | ✓   |
-| M4A | ✓   |  ✓   |      |  ⚠   |     |
-| OGG |     |      |  ✓   |  ✓   | ⚠   |
+| MKA | ✓  |  ✓  |  ✓  |  ✓  | ✓  |
+| M4A | ✓  |  ✓  |      |  ⚠  |     |
+| OGG |     |      |  ✓  |  ✓  | ⚠  |
 
 > ⚠ = Soporte parcial/no universal, evitar si buscas compatibilidad amplia.
 
@@ -270,8 +270,7 @@ uv sync                     # instala dependencias y grupo dev
 uv run ruff check .         # lint
 uv run ruff format .        # formato
 uv run pytest               # suite de tests (tests/)
-# Tests contra el binario compilado (build lento):
-uv run pytest -q -m binary
+uv run pytest -q -m binary  # Tests contra el binario compilado (lento)
 ```
 
 La fixture `pymedia` ejecuta cada test como CLI en proceso (`[cli]`) y como binario compilado (`[binary]`). La marca `binary` se excluye por defecto.
@@ -283,22 +282,20 @@ uv run python scripts/i18n.py extract            # regenera pymedia.pot desde sr
 uv run python scripts/i18n.py update -l es       # sincroniza es.po con el POT
 uv run python scripts/i18n.py compile -l es      # compila pymedia.po -> pymedia.mo
 uv run python scripts/i18n.py check              # valida POT y catálogos
-uv run pytest tests/test_locales.py tests/test_locale_manager.py
+uv run pytest -m locales
 ```
 
-### Generadores de media de prueba
+### Scripts
 
-```bash
-uv run python scripts/fixtures/video_simple.py      # simple.mp4 (AV1 1280x720, 30 s)
-uv run python scripts/fixtures/video_metadata.py    # metadata.mkv (6 audio + 6 subtítulos)
-uv run python scripts/fixtures/audio_tracks.py      # pistas de audio
-uv run python scripts/fixtures/subtitles_tracks.py  # pistas de subtítulos
-```
+Scripts utilitarios ubicados en `scripts/`.
 
-### Otros scripts
-
-- `scripts/build.py` — compila `build/pymedia.exe` en Windows y `build/pymedia` en Linux(pyinstaller onefile).
-- `scripts/backup.py` — copia de seguridad de `src/`, `tests/` y `scripts/` en `local`.
+| Script                 | Descripción                                                          |
+|------------------------|----------------------------------------------------------------------|
+| `backup.py`            | Copia de seguridad de `src/`, `tests/` y `scripts/` en `local/`.     |
+| `build.py`             | Compila `build/pymedia.exe` en Windows y `build/pymedia` en Linux.   |
+| `code_count.py`        | Cuenta el número de líneas de código de la aplicación.               |
+| `generate_fixtures.py` | Genera múltiples fixtures de vídeos, audio y subtítulos para testeo. |
+| `i18n.py`              | Utilidades para la compilación de ficheros multi-lenguaje de Babel.  | 
 
 ## Estructura del proyecto
 
