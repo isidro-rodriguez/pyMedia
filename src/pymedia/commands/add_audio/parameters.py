@@ -7,6 +7,7 @@ from typing import Self
 from pymedia.commands.base_parameters import BaseParameters
 from pymedia.mixins.audio_mixin import AudioInputMixin
 from pymedia.mixins.media_mixin import MediaInputMixin
+from pymedia.mixins.metadata_mixin import StripMetadataMixin
 from pymedia.mixins.outputs_mixin import MediaOutputMixin
 from pymedia.types import OverwriteMode
 
@@ -17,6 +18,7 @@ class AddAudioParameters(
     MediaInputMixin,
     MediaOutputMixin,
     AudioInputMixin,
+    StripMetadataMixin,
 ):
     """Parámetros utilizados por el comando AddAudio."""
 
@@ -33,6 +35,7 @@ class AddAudioParameters(
         default: bool | None = None,
         hearing_impaired: bool | None = None,
         commentary: bool | None = None,
+        strip_metadata: bool = False,
     ) -> Self:
         """Valida y parsea los argumentos en parámetros procesados.
 
@@ -47,6 +50,7 @@ class AddAudioParameters(
             default: Se establece como la pista de audio por defecto del contenedor.
             hearing_impaired: Pista orientada a personas con problemas auditivos.
             commentary: Pista de comentarios de audio.
+            strip_metadata: No copiar los metadatos del fichero de entrada.
 
         Returns:
             Parámetros procesados y validados para el comando add-audio.
@@ -57,7 +61,7 @@ class AddAudioParameters(
             MissingParameterError: Si falta el medio o el fichero de audio.
             UserError: Si el idioma no sigue el estándar ISO 639-2.
         """
-        params = cls(overwrite=overwrite)
+        params = cls(overwrite=overwrite, strip_metadata=strip_metadata)
 
         params.create_media_input(
             media_input=media_input,

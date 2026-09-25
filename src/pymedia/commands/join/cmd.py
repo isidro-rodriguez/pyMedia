@@ -50,6 +50,11 @@ class JoinCmd:
                 "0",
                 "-c",
                 "copy",
+                *(
+                    self.params.to_strip_metadata_cmd()
+                    if self.params.strip_metadata
+                    else []
+                ),
                 "-progress",
                 "pipe:1",
                 "-nostats",

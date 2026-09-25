@@ -18,6 +18,7 @@ from pymedia.commands.base_cli_options import (
     OutputOption,
     OverwriteOption,
     ShowCmdOption,
+    StripMetadataOption,
 )
 from pymedia.locales import _
 from pymedia.logger import Logger
@@ -52,6 +53,7 @@ def add_audio(
     language: AudioLanguageOption,
     media_output: OutputOption = None,
     overwrite: OverwriteOption = OverwriteMode.ASK,
+    strip_metadata: StripMetadataOption = False,
     title: AudioTitleOption = None,
     forced: AudioForcedOption = None,
     default: AudioDefaultOption = None,
@@ -69,6 +71,7 @@ def add_audio(
         language: Código de idioma de la pista de audio.
         media_output: Ruta absoluta del fichero de salida procesado.
         overwrite: Política ante conflicto de salida ya existente.
+        strip_metadata: No copiar los metadatos del fichero de entrada.
         title: Título a mostrar para identificar la pista de audio.
         forced: Fuerza al reproductor a usar la pista de audio.
         default: Se establece como la pista de audio por defecto del contenedor.
@@ -91,6 +94,7 @@ def add_audio(
         audio_input=audio_input,
         language=language,
         media_output=media_output,
+        strip_metadata=strip_metadata,
         title=title,
         forced=forced,
         default=default,

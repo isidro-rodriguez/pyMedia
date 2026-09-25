@@ -6,6 +6,7 @@ from typing import Self
 
 from pymedia.commands.base_parameters import BaseParameters
 from pymedia.mixins.media_mixin import MediaInputMixin
+from pymedia.mixins.metadata_mixin import StripMetadataMixin
 from pymedia.mixins.outputs_mixin import AudioOutputMixin
 from pymedia.mixins.streams_mixin import StreamsMixin
 from pymedia.types import OverwriteMode, StreamsMode
@@ -17,6 +18,7 @@ class ExtractAudioParameters(
     MediaInputMixin,
     AudioOutputMixin,
     StreamsMixin,
+    StripMetadataMixin,
 ):
     """Parámetros utilizados por el comando ExtractAudio."""
 
@@ -27,6 +29,7 @@ class ExtractAudioParameters(
         media_input: Path,
         audio_stream_tracks: str | None = None,
         audio_output: Path | None = None,
+        strip_metadata: bool = False,
     ) -> Self:
         """Valida y parsea los argumentos en parámetros procesados.
 
@@ -36,6 +39,7 @@ class ExtractAudioParameters(
             audio_stream_tracks: Lista de índices de pistas en CSV; sin
                 listado se extraen todas las pistas de audio.
             audio_output: Ruta absoluta del fichero de audio de salida.
+            strip_metadata: No copiar los metadatos del fichero de entrada.
 
         Returns:
             Parámetros procesados y validados para el comando extract-audio.
@@ -52,7 +56,7 @@ class ExtractAudioParameters(
             UserError: Si el formato del listado, algún índice o el nombre de
                 salida no son válidos.
         """
-        params = cls(overwrite=overwrite)
+        params = cls(overwrite=overwrite, strip_metadata=strip_metadata)
 
         params.create_media_input(
             media_input=media_input,

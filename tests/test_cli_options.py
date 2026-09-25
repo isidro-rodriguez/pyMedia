@@ -168,6 +168,45 @@ def test_no_arguments_shows_help(pymedia: Invoke, name: str) -> None:
     assert "Traceback" not in result.output
 
 
+@pytest.mark.parametrize(
+    "name",
+    [
+        "transcode",
+        "remux",
+        "join",
+        "cut",
+        "extract-audio",
+        "extract-subs",
+        "add-audio",
+        "add-subs",
+    ],
+)
+def test_strip_metadata_composes_map_metadata(
+    pymedia: Invoke,
+    request: pytest.FixtureRequest,
+    name: str,
+    tmp_path: Path,
+) -> None:
+    """`--strip-metadata` propaga la orden de eliminar metadatos a ffmpeg."""
+    cmd = COMMANDS[name]
+    output = tmp_path / f"output{cmd.suffix}"
+
+    result = pymedia(
+        *build_args(
+            cmd,
+            request,
+            output,
+            "-ov",
+            "yes",
+            "--strip-metadata",
+            "--show-cmd",
+        )
+    )
+
+    assert result.exit_code == 0
+    assert "-map_metadata -1" in result.output
+
+
 # =============================================================================
 #  Política de sobrescritura (--overwrite / -ov)
 # =============================================================================

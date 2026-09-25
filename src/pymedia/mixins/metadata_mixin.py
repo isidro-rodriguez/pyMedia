@@ -2,19 +2,18 @@
 
 from dataclasses import dataclass
 
-from pymedia.types import RotateMetadataMode
-
 
 @dataclass(kw_only=True)
 class StripMetadataMixin:
-    """Mixin para la borrado de  por metadatos."""
+    """Mixin para indicar que no se copian metadatos de fichero origen."""
 
-    rotate_metadata: RotateMetadataMode
+    strip_metadata: bool = False
 
-    def to_rotate_metadata_cmd(self) -> list[str]:
-        """Devuelve los argumentos que provocan el giro de la imagen por metadatos.
+    @staticmethod
+    def to_strip_metadata_cmd() -> list[str]:
+        """Devuelve los argumentos que provocan que no se copie metadatos del origen.
 
         Returns:
-            Argumentos `-metadata:s:v rotate=*` para el consumo de ffmpeg.
+            Argumentos para función ffmpeg para no copiar metadatos del origen.
         """
-        return ["-metadata:s:v", f"rotate={self.rotate_metadata.value}"]
+        return ["-map_metadata", "-1"]

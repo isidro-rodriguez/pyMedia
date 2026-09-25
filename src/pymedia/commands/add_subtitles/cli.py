@@ -11,6 +11,7 @@ from pymedia.commands.base_cli_options import (
     OutputOption,
     OverwriteOption,
     ShowCmdOption,
+    StripMetadataOption,
     SubtitlesArgument,
     SubtitlesDefaultOption,
     SubtitlesForcedOption,
@@ -52,6 +53,7 @@ def add_subs(
     language: SubtitlesLanguageOption,
     media_output: OutputOption = None,
     overwrite: OverwriteOption = OverwriteMode.ASK,
+    strip_metadata: StripMetadataOption = False,
     title: SubtitlesTitleOption = None,
     forced: SubtitlesForcedOption = None,
     default: SubtitlesDefaultOption = None,
@@ -69,6 +71,7 @@ def add_subs(
         language: Código de idioma de la pista de subtítulos.
         media_output: Ruta absoluta del fichero de salida procesado.
         overwrite: Política ante conflicto de salida ya existente.
+        strip_metadata: No copiar los metadatos del fichero de entrada.
         title: Título a mostrar para identificar la pista de subtítulos.
         forced: Fuerza al reproductor a mostrar la pista de subtítulos.
         default: Se establece como la pista de subtítulos por defecto.
@@ -92,6 +95,7 @@ def add_subs(
         subtitles_input=subtitles_input,
         language=language,
         media_output=media_output,
+        strip_metadata=strip_metadata,
         title=title,
         forced=forced,
         default=default,

@@ -9,6 +9,7 @@ from pymedia.errors import MissingParameterError
 from pymedia.ffprobe import validate_subtitles_file_codec
 from pymedia.mixins.filters_mixin import FiltersMixin
 from pymedia.mixins.media_mixin import MediaInputMixin
+from pymedia.mixins.metadata_mixin import StripMetadataMixin
 from pymedia.mixins.outputs_mixin import MediaOutputMixin
 from pymedia.mixins.streams_mixin import StreamsMixin
 from pymedia.mixins.transcode_mixin import TranscodeMixin
@@ -29,6 +30,7 @@ class TranscodeParameters(
     MediaOutputMixin,
     StreamsMixin,
     TranscodeMixin,
+    StripMetadataMixin,
     FiltersMixin,
 ):
     """Parámetros utilizados por el comando Transcode."""
@@ -44,6 +46,7 @@ class TranscodeParameters(
         transcode_audio: str | None = None,
         transcode_video: bool = False,
         subtitles_input: Path | None = None,
+        strip_metadata: bool = False,
         crop: str | None = None,
         scale_to: str | None = None,
         scale_mode: ScaleMode = ScaleMode.FIT,
@@ -63,6 +66,7 @@ class TranscodeParameters(
             transcode_audio: Lista de pistas de audio a transcodificar.
             transcode_video: Transcodifica la pista de vídeo.
             subtitles_input: Subtítulos a quemar en la pista de vídeo.
+            strip_metadata: No copiar los metadatos del fichero input.
             crop: Área y coordenada de la zona a preservar de la imagen.
             scale_to: Dimensión objetivo en píxeles.
             scale_mode: Política de escalado del vídeo o imagen.
@@ -97,6 +101,7 @@ class TranscodeParameters(
             transcode=getattr(Config.load().transcode, preset_transcode.value),
             transcode_video=transcode_video,
             subtitles_input=subtitles_input,
+            strip_metadata=strip_metadata,
         )
 
         params.create_media_input(media_input=media_input, logger=params.logger)

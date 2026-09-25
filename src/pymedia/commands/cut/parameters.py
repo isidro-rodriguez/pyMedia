@@ -7,6 +7,7 @@ from typing import Self
 from pymedia.commands.base_parameters import BaseParameters
 from pymedia.errors import MissingParameterError
 from pymedia.mixins.media_mixin import MediaInputMixin
+from pymedia.mixins.metadata_mixin import StripMetadataMixin
 from pymedia.mixins.outputs_mixin import MediaOutputMixin
 from pymedia.mixins.timestamps_mixin import TimestampAtMixin, TimestampStartEndMixin
 from pymedia.types import OverwriteMode
@@ -19,6 +20,7 @@ class CutParameters(
     MediaOutputMixin,
     TimestampAtMixin,
     TimestampStartEndMixin,
+    StripMetadataMixin,
 ):
     """Parámetros utilizados por el comando Cut."""
 
@@ -31,6 +33,7 @@ class CutParameters(
         timestamp_start: str | None = None,
         timestamp_end: str | None = None,
         media_output: Path | None = None,
+        strip_metadata: bool = False,
     ) -> Self:
         """Valida y parsea los argumentos en parámetros procesados.
 
@@ -41,6 +44,7 @@ class CutParameters(
             timestamp_start: Corte inicial del vídeo de salida.
             timestamp_end: Corte final del vídeo de salida.
             media_output: Ruta absoluta del fichero de salida procesado.
+            strip_metadata: No copiar los metadatos del fichero de entrada.
 
         Returns:
             Parámetros procesados y validados para el comando cut.
@@ -48,7 +52,7 @@ class CutParameters(
         Raises:
             MissingParameterError: Si la salida procesada no se pudo obtener.
         """
-        params = cls(overwrite=overwrite)
+        params = cls(overwrite=overwrite, strip_metadata=strip_metadata)
 
         params.create_media_input(
             media_input=media_input,

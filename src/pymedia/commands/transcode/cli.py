@@ -19,6 +19,7 @@ from pymedia.commands.base_cli_options import (
     ScaleToOption,
     ScaleUpscaleOption,
     ShowCmdOption,
+    StripMetadataOption,
     TranscodeAudioOption,
     TranscodeBurnSubtitlesOption,
     TranscodeVideoOption,
@@ -65,6 +66,7 @@ def transcode(
     transcode_audio: TranscodeAudioOption = None,
     subtitles_input: TranscodeBurnSubtitlesOption = None,
     transcode_video: TranscodeVideoOption = False,
+    strip_metadata: StripMetadataOption = False,
     crop: CropOption = None,
     rotate: RotateOption = None,
     scale_to: ScaleToOption = None,
@@ -74,7 +76,7 @@ def transcode(
     vflip: FlipVerticalOption = False,
     debug: DebugOption = False,
     show_cmd: ShowCmdOption = False,
-    help_: HelpOption = False,
+    help_: HelpOption = False,  # noqa
 ) -> None:
     """Punto de entrada del comando ``transcode``.
 
@@ -87,6 +89,7 @@ def transcode(
         transcode_audio: Lista de pistas de audio a transcodificar.
         subtitles_input: Subtítulos a quemar en la pista de vídeo.
         transcode_video: Transcodifica la pista de vídeo.
+        strip_metadata: No copiar los metadatos del fichero input.
         crop: Área y coordenada de la zona a preservar de la imagen.
         rotate: Ángulo ortogonal con el que se va a rotar la imagen.
         scale_to: Dimensión objetivo en píxeles.
@@ -95,7 +98,7 @@ def transcode(
         hflip: Invierte la imagen horizontalmente.
         vflip: Invierte la imagen verticalmente.
         debug: Habilita el nivel de log DEBUG.
-        show_cmd: Muestra al usuario el comando ffmpeg compuesto pero no lo ejecuta.
+        show_cmd: Muestra al usuario el comando ffmpeg compuesto, pero no lo ejecuta.
         help_: Helper para mostrar esta línea en distintos idiomas.
 
     Raises:
@@ -142,6 +145,7 @@ def transcode(
             transcode_audio=transcode_audio,
             transcode_video=transcode_video,
             subtitles_input=subtitles_input,
+            strip_metadata=strip_metadata,
             crop=crop,
             scale_to=scale_to,
             scale_mode=scale_mode,

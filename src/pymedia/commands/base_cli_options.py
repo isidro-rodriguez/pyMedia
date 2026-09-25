@@ -564,3 +564,12 @@ RotateMetadataOption = Annotated[
         help=_("Specify an orthogonal arc degree to rotate image through metadata."),
     ),
 ]
+
+StripMetadataOption = Annotated[
+    bool,
+    typer.Option(
+        default="--strip-metadata",
+        rich_help_panel=_("Metadata options"),
+        help=_("Output file will not copy metadata from source file."),
+    ),
+]

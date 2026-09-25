@@ -64,6 +64,9 @@ class RemuxCmd:
         if container == ".mp4":
             cmd.extend(["-movflags", "+faststart"])
 
+        if self.params.strip_metadata:
+            cmd.extend(self.params.to_strip_metadata_cmd())
+
         cmd.append(str(self.params.media_output))
 
         return cmd

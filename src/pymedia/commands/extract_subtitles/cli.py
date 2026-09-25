@@ -9,6 +9,7 @@ from pymedia.commands.base_cli_options import (
     OutputOption,
     OverwriteOption,
     ShowCmdOption,
+    StripMetadataOption,
     SubtitlesStreamTrackListOption,
 )
 from pymedia.commands.extract_subtitles.parameters import ExtractSubtitlesParameters
@@ -45,6 +46,7 @@ def extract_subs(
     subtitles_stream_tracks: SubtitlesStreamTrackListOption,
     subtitles_output: OutputOption = None,
     overwrite: OverwriteOption = OverwriteMode.ASK,
+    strip_metadata: StripMetadataOption = False,
     debug: DebugOption = False,
     show_cmd: ShowCmdOption = False,
     help_: HelpOption = False,
@@ -56,6 +58,7 @@ def extract_subs(
         subtitles_stream_tracks: Lista de pistas de subtítulos a extraer.
         subtitles_output: Ruta absoluta del fichero de subtítulos de salida.
         overwrite: Política ante conflicto de salida ya existente.
+        strip_metadata: No copiar los metadatos del fichero de entrada.
         debug: Habilita el nivel de log DEBUG.
         show_cmd: Muestra al usuario el comando ffmpeg compuesto pero no lo ejecuta.
         help_: Helper para mostrar esta línea en distintos idiomas.
@@ -76,5 +79,6 @@ def extract_subs(
         media_input=media_input,
         subtitles_stream_tracks=subtitles_stream_tracks,
         subtitles_output=subtitles_output,
+        strip_metadata=strip_metadata,
     )
     ExtractSubtitlesService(debug=debug, show_cmd=show_cmd, params=params).start()

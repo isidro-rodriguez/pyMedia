@@ -9,6 +9,7 @@ from pymedia.commands.base_cli_options import (
     OutputOption,
     OverwriteOption,
     ShowCmdOption,
+    StripMetadataOption,
 )
 from pymedia.commands.join.parameters import JoinParameters
 from pymedia.commands.join.service import JoinService
@@ -43,6 +44,7 @@ def join(
     media_input_list: MediaInputListArgument,
     media_output: OutputOption,
     overwrite: OverwriteOption = OverwriteMode.ASK,
+    strip_metadata: StripMetadataOption = False,
     debug: DebugOption = False,
     show_cmd: ShowCmdOption = False,
     help_: HelpOption = False,
@@ -53,6 +55,7 @@ def join(
         media_input_list: Lista de rutas de los ficheros de vídeo a procesar.
         media_output: Ruta absoluta del fichero de salida procesado.
         overwrite: Política ante conflicto de salida ya existente.
+        strip_metadata: No copiar los metadatos del fichero de entrada.
         debug: Habilita el nivel de log DEBUG.
         show_cmd: Muestra al usuario el comando ffmpeg compuesto pero no lo ejecuta.
         help_: Helper para mostrar esta línea en distintos idiomas.
@@ -68,5 +71,6 @@ def join(
         overwrite=overwrite,
         media_input_list=media_input_list,
         media_output=media_output,
+        strip_metadata=strip_metadata,
     )
     JoinService(debug=debug, show_cmd=show_cmd, params=params).start()

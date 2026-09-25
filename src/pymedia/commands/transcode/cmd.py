@@ -75,6 +75,9 @@ class TranscodeCmd:
         if output_container == ".mp4":
             cmd.extend([*self.params.to_mp4_cmd_args()])
 
+        if self.params.strip_metadata:
+            cmd.extend([*self.params.to_strip_metadata_cmd()])
+
         cmd.extend(
             [
                 *self.params.to_video_transcode_cmd(),

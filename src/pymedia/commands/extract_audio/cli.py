@@ -10,6 +10,7 @@ from pymedia.commands.base_cli_options import (
     OutputOption,
     OverwriteOption,
     ShowCmdOption,
+    StripMetadataOption,
 )
 from pymedia.commands.extract_audio.parameters import ExtractAudioParameters
 from pymedia.commands.extract_audio.service import ExtractAudioService
@@ -45,6 +46,7 @@ def extract_audio(
     audio_stream_tracks: AudioStreamTrackListOption,
     audio_output: OutputOption = None,
     overwrite: OverwriteOption = OverwriteMode.ASK,
+    strip_metadata: StripMetadataOption = False,
     debug: DebugOption = False,
     show_cmd: ShowCmdOption = False,
     help_: HelpOption = False,
@@ -56,6 +58,7 @@ def extract_audio(
         audio_stream_tracks: Lista de pistas de audio a extraer.
         audio_output: Ruta absoluta del fichero de audio de salida.
         overwrite: Política ante conflicto de salida ya existente.
+        strip_metadata: No copiar los metadatos del fichero de entrada.
         debug: Habilita el nivel de log DEBUG.
         show_cmd: Muestra al usuario el comando ffmpeg compuesto pero no lo ejecuta.
         help_: Helper para mostrar esta línea en distintos idiomas.
@@ -76,5 +79,6 @@ def extract_audio(
         media_input=media_input,
         audio_stream_tracks=audio_stream_tracks,
         audio_output=audio_output,
+        strip_metadata=strip_metadata,
     )
     ExtractAudioService(debug=debug, show_cmd=show_cmd, params=params).start()

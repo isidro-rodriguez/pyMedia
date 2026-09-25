@@ -56,6 +56,9 @@ class ExtractAudioCmd:
         if self.params.overwrite == OverwriteMode.YES:
             cmd.append("-y")
 
+        if self.params.strip_metadata:
+            cmd.extend(self.params.to_strip_metadata_cmd())
+
         cmd.extend(
             [
                 "-i",

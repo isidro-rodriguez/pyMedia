@@ -14,6 +14,7 @@ from pymedia.commands.base_cli_options import (
     RotateMetadataOption,
     ShowCmdOption,
     SortTracksOption,
+    StripMetadataOption,
 )
 from pymedia.commands.remux.parameters import RemuxParameters
 from pymedia.commands.remux.service import RemuxService
@@ -55,6 +56,7 @@ def remux(
     regenerate_pts: RegeneratePtsOption = False,
     sort_tracks: SortTracksOption = False,
     rotate_metadata: RotateMetadataOption = None,
+    strip_metadata: StripMetadataOption = False,
     debug: DebugOption = False,
     show_cmd: ShowCmdOption = False,
     help_: HelpOption = False,
@@ -69,6 +71,7 @@ def remux(
         regenerate_pts: Regenera los marcadores de tiempo corruptos.
         sort_tracks: Ordena las pistas por tipo y luego alfabéticamente por idioma.
         rotate_metadata: Gira la imagen por especificación de metadados.ter
+        strip_metadata: No copiar los metadatos del fichero de entrada.
         debug: Habilita el nivel de log DEBUG.
         show_cmd: Muestra al usuario el comando ffmpeg compuesto pero no lo ejecuta.
         help_: Helper para mostrar esta línea en distintos idiomas.
@@ -88,5 +91,6 @@ def remux(
         rotate_metadata=cast(RotateMetadataMode, rotate_metadata),
         regenerate_pts=regenerate_pts,
         sort_tracks=sort_tracks,
+        strip_metadata=strip_metadata,
     )
     RemuxService(debug=debug, show_cmd=show_cmd, params=params).start()

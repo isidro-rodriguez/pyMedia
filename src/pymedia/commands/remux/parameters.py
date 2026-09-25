@@ -6,6 +6,7 @@ from typing import Self
 
 from pymedia.commands.base_parameters import BaseParameters
 from pymedia.mixins.media_mixin import MediaInputMixin
+from pymedia.mixins.metadata_mixin import StripMetadataMixin
 from pymedia.mixins.outputs_mixin import MediaOutputMixin
 from pymedia.mixins.remux_mixin import (
     RegeneratePtsMixin,
@@ -23,6 +24,7 @@ class RemuxParameters(
     RegeneratePtsMixin,
     SortTracksMixin,
     RotateMetadataMixin,
+    StripMetadataMixin,
 ):
     """Parámetros utilizados por el comando Remux."""
 
@@ -35,6 +37,7 @@ class RemuxParameters(
         regenerate_pts: bool,
         sort_tracks: bool,
         rotate_metadata: RotateMetadataMode,
+        strip_metadata: bool = False,
     ) -> Self:
         """Valida y parsea los argumentos en parámetros procesados.
 
@@ -45,6 +48,7 @@ class RemuxParameters(
             regenerate_pts: Regenera los marcadores de tiempo corruptos.
             sort_tracks: Ordena las pistas por tipo e idioma.
             rotate_metadata: Gira la imagen a través de metadatos.
+            strip_metadata: No copiar los metadatos del fichero de entrada.
 
         Returns:
             Parámetros procesados y validados para el comando remux.
@@ -54,6 +58,7 @@ class RemuxParameters(
             regenerate_pts=regenerate_pts,
             sort_tracks=sort_tracks,
             rotate_metadata=rotate_metadata,
+            strip_metadata=strip_metadata,
         )
 
         params.create_media_input(
