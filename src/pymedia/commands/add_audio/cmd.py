@@ -2,6 +2,7 @@
 
 from pymedia.commands.add_audio.parameters import AddAudioParameters
 from pymedia.errors import MissingParameterError
+from pymedia.models.audio import get_audio_metadata
 from pymedia.types import OverwriteMode
 
 
@@ -36,11 +37,11 @@ class AddAudioCmd:
             raise MissingParameterError(name="audio")
         if audio.codec is None:
             raise MissingParameterError(name="audio.codec")
-        if audio.language is None:
+        if get_audio_metadata(audio).language is None:
             raise MissingParameterError(name="audio.language")
         if audio.track_index is None:
             raise MissingParameterError(name="audio.track_index")
-        if audio.title is None:
+        if get_audio_metadata(audio).title is None:
             raise MissingParameterError(name="audio.title")
 
         cmd = ["ffmpeg"]

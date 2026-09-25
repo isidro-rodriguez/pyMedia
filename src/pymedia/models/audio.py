@@ -6,8 +6,29 @@ from pathlib import Path
 
 
 @dataclass(frozen=True, kw_only=True, slots=True)
+class AudioMetadata:
+    """Metadatos de una pista de audio.
+
+    Attributes:
+        language: Código de idioma de la pista.
+        title: Titulo de la pista.
+        default: Si es la pista de audio por defecto del contenedor.
+        forced: Si es una pista de reproducción forzada.
+        hearing_impaired: Si es una pista orientada a personas con problemas auditivos.
+        commentary: Si es una pista de comentarios de audio.
+    """
+
+    language: str | None = None
+    title: str | None = None
+    default: bool | None = False
+    forced: bool | None = False
+    hearing_impaired: bool | None = False
+    commentary: bool | None = False
+
+
+@dataclass(frozen=True, kw_only=True, slots=True)
 class Audio:
-    """Metadatos de una pista de audio de un medio.
+    """Información de una pista de audio.
 
     Attributes:
         path: Ruta al fichero de pista de audio.
@@ -19,12 +40,6 @@ class Audio:
         channels: Número de canales.
         channel_layout: Distribución de canales (p. ej. "stereo").
         bit_rate: Tasa de bits en bps.
-        language: Código de idioma de la pista.
-        title: Titulo de la pista.
-        default: Si es la pista de audio por defecto del contenedor.
-        forced: Si es una pista de reproducción forzada.
-        hearing_impaired: Si es una pista orientada a personas con problemas auditivos.
-        commentary: Si es una pista de comentarios de audio.
     """
 
     path: Path
@@ -36,9 +51,9 @@ class Audio:
     channels: int | None = None
     channel_layout: str | None = None
     bit_rate: int | None = None
-    language: str | None = None
-    title: str | None = None
-    default: bool | None = False
-    forced: bool | None = False
-    hearing_impaired: bool | None = False
-    commentary: bool | None = False
+    metadata: AudioMetadata | None = None
+
+
+def get_audio_metadata(audio: Audio) -> AudioMetadata:
+    """Devuelve los metadatos de la pista, o unos por defecto si son ``None``."""
+    return audio.metadata or AudioMetadata()

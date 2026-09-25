@@ -3,9 +3,9 @@
 from pathlib import Path
 
 from pymedia.mixins.remux_mixin import SortTracksMixin
-from pymedia.models.audio import Audio
+from pymedia.models.audio import Audio, AudioMetadata
 from pymedia.models.media import Media
-from pymedia.models.subtitles import Subtitles
+from pymedia.models.subtitles import Subtitles, SubtitlesMetadata
 from pymedia.models.video import Video
 
 
@@ -30,12 +30,20 @@ def _media(
 
 def _audio(language: str | None, track_index: int) -> Audio:
     """Pista de audio con idioma e índice de pista dados."""
-    return Audio(path=Path("clip.mkv"), language=language, track_index=track_index)
+    return Audio(
+        path=Path("clip.mkv"),
+        track_index=track_index,
+        metadata=AudioMetadata(language=language),
+    )
 
 
 def _subtitle(language: str | None, track_index: int) -> Subtitles:
     """Pista de subtítulos con idioma e índice de pista dados."""
-    return Subtitles(path=Path("clip.mkv"), language=language, track_index=track_index)
+    return Subtitles(
+        path=Path("clip.mkv"),
+        track_index=track_index,
+        metadata=SubtitlesMetadata(language=language),
+    )
 
 
 class TestToSortTracksCmd:

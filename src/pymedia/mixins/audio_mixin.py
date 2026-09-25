@@ -12,7 +12,7 @@ from pymedia.errors import (
 from pymedia.ffprobe import get_audio_codec
 from pymedia.locales import _
 from pymedia.logger import Logger
-from pymedia.models.audio import Audio
+from pymedia.models.audio import Audio, AudioMetadata, get_audio_metadata
 from pymedia.models.media import Media
 
 
@@ -72,12 +72,14 @@ class AudioInputMixin:
             global_index=self._process_stream_index(media=media),
             track_index=self._process_audio_index(media=media),
             codec=get_audio_codec(audio_input=audio_input, logger=logger),
-            language=language_code,
-            title=self._process_audio_title(title=title, lang=language_code),
-            default=default,
-            forced=forced,
-            hearing_impaired=hearing_impaired,
-            commentary=commentary,
+            metadata=AudioMetadata(
+                language=language_code,
+                title=self._process_audio_title(title=title, lang=language_code),
+                default=default,
+                forced=forced,
+                hearing_impaired=hearing_impaired,
+                commentary=commentary,
+            ),
         )
 
     def create_edit_audio(
@@ -127,7 +129,11 @@ class AudioInputMixin:
         if language is not None:
             language_code = self._parse_language(raw=language)
 
-        if title is None and current.title is None and language_code is not None:
+        if (
+            title is None
+            and get_audio_metadata(current).title is None
+            and language_code is not None
+        ):
             title = self._process_audio_title(
                 title=title,
                 lang=language_code,
@@ -136,12 +142,14 @@ class AudioInputMixin:
         self.audio = Audio(
             path=media.path,
             track_index=track_index,
-            language=language_code,
-            title=title,
-            default=default,
-            forced=forced,
-            hearing_impaired=hearing_impaired,
-            commentary=commentary,
+            metadata=AudioMetadata(
+                language=language_code,
+                title=title,
+                default=default,
+                forced=forced,
+                hearing_impaired=hearing_impaired,
+                commentary=commentary,
+            ),
         )
 
     @staticmethod
@@ -167,23 +175,25 @@ class AudioInputMixin:
 
         metadata: list[str] = []
 
-        if audio.language:
-            metadata.append(f"-metadata:s:a:{audio.track_index}")
-            metadata.append(f"language={audio.language}")
+        meta = get_audio_metadata(audio)
 
-        if audio.title:
+        if meta.language:
             metadata.append(f"-metadata:s:a:{audio.track_index}")
-            metadata.append(f"title={audio.title}")
+            metadata.append(f"language={meta.language}")
+
+        if meta.title:
+            metadata.append(f"-metadata:s:a:{audio.track_index}")
+            metadata.append(f"title={meta.title}")
 
         # Sin flags explícitos no se emiten disposiciones para no borrar
         # las que ya tenga la pista en el contenedor original.
         if any(
             field is not None
             for field in (
-                audio.default,
-                audio.forced,
-                audio.hearing_impaired,
-                audio.commentary,
+                meta.default,
+                meta.forced,
+                meta.hearing_impaired,
+                meta.commentary,
             )
         ):
             names = _disposition_names(audio)
@@ -210,7 +220,7 @@ class AudioInputMixin:
         """
         audio = self.audio
 
-        if audio is None or not audio.default:
+        if audio is None or not get_audio_metadata(audio).default:
             return []
 
         if audio.track_index is None:
@@ -228,7 +238,10 @@ class AudioInputMixin:
             if track.track_index is None:
                 continue
 
-            if track.track_index == audio.track_index or not track.default:
+            if (
+                track.track_index == audio.track_index
+                or not get_audio_metadata(track).default
+            ):
                 continue
 
             remaining = [
@@ -281,13 +294,14 @@ class AudioInputMixin:
 
 def _disposition_names(audio: Audio) -> list[str]:
     """Nombres de disposición activos en el modelo de audio."""
+    meta = get_audio_metadata(audio)
     return [
         name
         for field, name in (
-            (audio.default, "default"),
-            (audio.forced, "forced"),
-            (audio.hearing_impaired, "hearing_impaired"),
-            (audio.commentary, "comment"),
+            (meta.default, "default"),
+            (meta.forced, "forced"),
+            (meta.hearing_impaired, "hearing_impaired"),
+            (meta.commentary, "comment"),
         )
         if field
     ]

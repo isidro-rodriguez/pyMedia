@@ -11,7 +11,7 @@ from pymedia.commands.edit_subtitles.parameters import EditSubtitlesParameters
 from pymedia.commands.extract_subtitles.cmd import ExtractSubtitlesCmd
 from pymedia.commands.extract_subtitles.parameters import ExtractSubtitlesParameters
 from pymedia.models.media import Media
-from pymedia.models.subtitles import Subtitles
+from pymedia.models.subtitles import Subtitles, SubtitlesMetadata
 from pymedia.types import OverwriteMode
 
 
@@ -67,10 +67,12 @@ def test_add_encodes_new_subtitle_with_local_index() -> None:
             path=Path("/tmp/subs.srt"),
             track_index=2,
             codec="srt",
-            language="spa",
-            title="Español",
-            forced=False,
-            default=False,
+            metadata=SubtitlesMetadata(
+                language="spa",
+                title="Español",
+                forced=False,
+                default=False,
+            ),
         ),
     )
 
@@ -90,10 +92,16 @@ def test_edit_default_is_exclusive() -> None:
     """Edit marca `default` en la pista editada y lo retira de las demás."""
     media_subtitles = [
         Subtitles(
-            path=Path("/tmp/input.mkv"), track_index=0, default=True, forced=True
+            path=Path("/tmp/input.mkv"),
+            track_index=0,
+            metadata=SubtitlesMetadata(default=True, forced=True),
         ),
         Subtitles(path=Path("/tmp/input.mkv"), track_index=1),
-        Subtitles(path=Path("/tmp/input.mkv"), track_index=2, default=True),
+        Subtitles(
+            path=Path("/tmp/input.mkv"),
+            track_index=2,
+            metadata=SubtitlesMetadata(default=True),
+        ),
     ]
     params = EditSubtitlesParameters(
         overwrite=OverwriteMode.NO,
@@ -103,7 +111,7 @@ def test_edit_default_is_exclusive() -> None:
         subtitles=Subtitles(
             path=Path("/tmp/input.mkv"),
             track_index=2,
-            default=True,
+            metadata=SubtitlesMetadata(default=True),
         ),
     )
 
@@ -119,7 +127,11 @@ def test_edit_default_is_exclusive() -> None:
 def test_edit_without_default_leaves_others_untouched() -> None:
     """Edit sin `--default` no emite disposiciones sobre las demás pistas."""
     media_subtitles = [
-        Subtitles(path=Path("/tmp/input.mkv"), track_index=0, default=True),
+        Subtitles(
+            path=Path("/tmp/input.mkv"),
+            track_index=0,
+            metadata=SubtitlesMetadata(default=True),
+        ),
         Subtitles(path=Path("/tmp/input.mkv"), track_index=1),
     ]
     params = EditSubtitlesParameters(
@@ -130,7 +142,7 @@ def test_edit_without_default_leaves_others_untouched() -> None:
         subtitles=Subtitles(
             path=Path("/tmp/input.mkv"),
             track_index=1,
-            default=False,
+            metadata=SubtitlesMetadata(default=False),
         ),
     )
 

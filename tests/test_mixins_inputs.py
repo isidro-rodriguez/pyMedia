@@ -9,7 +9,9 @@ import pytest
 from pymedia.errors import MissingParameterError
 from pymedia.logger import Logger
 from pymedia.mixins.media_mixin import MediaInputMixin, MediaListMixin
+from pymedia.models.audio import get_audio_metadata
 from pymedia.models.media import Media
+from pymedia.models.subtitles import get_subtitles_metadata
 
 
 def _logger() -> Logger:
@@ -181,16 +183,16 @@ class TestSubtitlesStreamParsing:
         assert first.global_index == 2
         assert first.track_index == 0
         assert first.codec == "subrip"
-        assert first.language == "spa"
-        assert first.title == "Español"
-        assert first.default is True
-        assert first.forced is False
+        assert get_subtitles_metadata(first).language == "spa"
+        assert get_subtitles_metadata(first).title == "Español"
+        assert get_subtitles_metadata(first).default is True
+        assert get_subtitles_metadata(first).forced is False
 
         assert second.global_index == 3
         assert second.track_index == 1
         assert second.codec == "hdmv_pgs_subtitle"
-        assert second.language == "ita"
-        assert second.forced is True
+        assert get_subtitles_metadata(second).language == "ita"
+        assert get_subtitles_metadata(second).forced is True
 
     def test_video_and_audio_coexist_with_subtitles(
         self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
@@ -210,7 +212,7 @@ class TestSubtitlesStreamParsing:
         assert len(media.audio) == 1
         assert media.audio[0].global_index == 1
         assert media.audio[0].track_index == 0
-        assert media.audio[0].language == "eng"
+        assert get_audio_metadata(media.audio[0]).language == "eng"
 
     def test_singular_codec_type_is_required(
         self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch

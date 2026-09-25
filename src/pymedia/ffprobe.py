@@ -12,9 +12,9 @@ from pymedia.data.video_codecs import VIDEO_CODECS
 from pymedia.errors import FfprobeError, MissingParameterError
 from pymedia.locales import _
 from pymedia.logger import Logger
-from pymedia.models.audio import Audio
+from pymedia.models.audio import Audio, AudioMetadata
 from pymedia.models.media import Media, MediaMetadata
-from pymedia.models.subtitles import Subtitles
+from pymedia.models.subtitles import Subtitles, SubtitlesMetadata
 from pymedia.models.video import Video
 from pymedia.utils import parse_date, parse_fraction, to_float, to_int
 
@@ -92,12 +92,14 @@ def get_media_information(media_input: Path, logger: Logger) -> "Media":
                     channels=stream.get("channels"),
                     channel_layout=stream.get("channel_layout"),
                     bit_rate=to_int(stream.get("bit_rate")),
-                    language=language,
-                    title=tags.get("title"),
-                    forced=bool(disposition.get("forced", 0)),
-                    default=bool(disposition.get("default", 0)),
-                    hearing_impaired=bool(disposition.get("hearing_impaired", 0)),
-                    commentary=bool(disposition.get("comment", 0)),
+                    metadata=AudioMetadata(
+                        language=language,
+                        title=tags.get("title"),
+                        forced=bool(disposition.get("forced", 0)),
+                        default=bool(disposition.get("default", 0)),
+                        hearing_impaired=bool(disposition.get("hearing_impaired", 0)),
+                        commentary=bool(disposition.get("comment", 0)),
+                    ),
                 )
             )
             audio_track_index += 1
@@ -112,12 +114,14 @@ def get_media_information(media_input: Path, logger: Logger) -> "Media":
                     global_index=stream.get("index"),
                     track_index=subtitles_track_index,
                     codec=stream.get("codec_name"),
-                    language=language,
-                    title=tags.get("title"),
-                    forced=bool(disposition.get("forced", 0)),
-                    default=bool(disposition.get("default", 0)),
-                    hearing_impaired=bool(disposition.get("hearing_impaired", 0)),
-                    visual_impaired=bool(disposition.get("visual_impaired", 0)),
+                    metadata=SubtitlesMetadata(
+                        language=language,
+                        title=tags.get("title"),
+                        forced=bool(disposition.get("forced", 0)),
+                        default=bool(disposition.get("default", 0)),
+                        hearing_impaired=bool(disposition.get("hearing_impaired", 0)),
+                        visual_impaired=bool(disposition.get("visual_impaired", 0)),
+                    ),
                 )
             )
             subtitles_track_index += 1

@@ -2,6 +2,7 @@
 
 from pymedia.commands.add_subtitles.parameters import AddSubtitlesParameters
 from pymedia.errors import MissingParameterError
+from pymedia.models.subtitles import get_subtitles_metadata
 from pymedia.types import OverwriteMode
 
 
@@ -36,11 +37,11 @@ class AddSubtitlesCmd:
             raise MissingParameterError(name="subtitles")
         if subtitles.codec is None:
             raise MissingParameterError(name="subtitles.codec")
-        if subtitles.language is None:
+        if get_subtitles_metadata(subtitles).language is None:
             raise MissingParameterError(name="subtitles.language")
         if subtitles.track_index is None:
             raise MissingParameterError(name="subtitles.track_index")
-        if subtitles.title is None:
+        if get_subtitles_metadata(subtitles).title is None:
             raise MissingParameterError(name="subtitles.title")
 
         cmd = ["ffmpeg"]

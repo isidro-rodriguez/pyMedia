@@ -3,7 +3,7 @@
     <toRun name="CHECK 1 - ruff format" type="ShConfigurationType" />
     <toRun name="CHECK 2 - ruff check --fix" type="ShConfigurationType" />
     <toRun name="CHECK 3 - ruff check" type="ShConfigurationType" />
-    <toRun name="CHECK 4 - ty" type="ShConfigurationType" />
+    <toRun name="CHECK 4 - ty check" type="ShConfigurationType" />
     <toRun name="CHECK 5 - pytest" type="ShConfigurationType" />
     <toRun name="CHECK 6 - pytest -m locales" type="ShConfigurationType" />
     <toRun name="CHECK 7 - pytest -m binary" type="ShConfigurationType" />

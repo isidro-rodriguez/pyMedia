@@ -3,7 +3,9 @@
 from dataclasses import dataclass
 
 from pymedia.errors import MissingParameterError
+from pymedia.models.audio import get_audio_metadata
 from pymedia.models.media import Media
+from pymedia.models.subtitles import get_subtitles_metadata
 from pymedia.types import RotateMetadataMode
 
 
@@ -77,18 +79,42 @@ class SortTracksMixin:
             # Solo se soporta una pista de vídeo por contenedor.
             map_args.extend(["-map", f"0:v:{media.video.track_index}"])
 
-        for tracks, kind in (
-            (media.audio, "a"),
-            (media.subtitles, "s"),
-        ):
-            if tracks is None:
-                continue
-
-            with_language = [track for track in tracks if track.language is not None]
-            without_language = [track for track in tracks if track.language is None]
-            with_language.sort(key=lambda track: (track.language or "").casefold())
-
+        # Audio tracks
+        if media.audio is not None:
+            with_language = [
+                track
+                for track in media.audio
+                if get_audio_metadata(track).language is not None
+            ]
+            without_language = [
+                track
+                for track in media.audio
+                if get_audio_metadata(track).language is None
+            ]
+            with_language.sort(
+                key=lambda track: (get_audio_metadata(track).language or "").casefold()
+            )
             for track in with_language + without_language:
-                map_args.extend(["-map", f"0:{kind}:{track.track_index}"])
+                map_args.extend(["-map", f"0:a:{track.track_index}"])
+
+        # Subtitles tracks
+        if media.subtitles is not None:
+            with_language = [
+                track
+                for track in media.subtitles
+                if get_subtitles_metadata(track).language is not None
+            ]
+            without_language = [
+                track
+                for track in media.subtitles
+                if get_subtitles_metadata(track).language is None
+            ]
+            with_language.sort(
+                key=lambda track: (
+                    get_subtitles_metadata(track).language or ""
+                ).casefold()
+            )
+            for track in with_language + without_language:
+                map_args.extend(["-map", f"0:s:{track.track_index}"])
 
         return map_args

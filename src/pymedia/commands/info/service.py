@@ -12,7 +12,9 @@ from pymedia.commands.info.parameters import InfoParameters
 from pymedia.errors import MissingParameterError
 from pymedia.locale_manager import locale_manager
 from pymedia.locales import _
+from pymedia.models.audio import get_audio_metadata
 from pymedia.models.media import Audio, Subtitles, Video
+from pymedia.models.subtitles import get_subtitles_metadata
 from pymedia.utils import parse_quantity, parse_size, parse_timedelta
 
 _PANEL_WIDTH = 120
@@ -135,17 +137,19 @@ class InfoService(BaseService[InfoParameters]):
                 if track.track_index is None:
                     raise MissingParameterError(name="track_index")
 
+                meta = get_audio_metadata(track)
+
                 table.add_row(
                     str(track.track_index),
                     track.codec or na,
                     f"{track.sample_rate} Hz" if track.sample_rate else na,
                     str(track.channels or na),
-                    track.language or na,
-                    track.title or na,
-                    "✓" if track.default else "",
-                    "✓" if track.forced else "",
-                    "✓" if track.hearing_impaired else "",
-                    "✓" if track.commentary else "",
+                    meta.language or na,
+                    meta.title or na,
+                    "✓" if meta.default else "",
+                    "✓" if meta.forced else "",
+                    "✓" if meta.hearing_impaired else "",
+                    "✓" if meta.commentary else "",
                 )
 
             return table
@@ -169,15 +173,17 @@ class InfoService(BaseService[InfoParameters]):
                 if sub.track_index is None:
                     raise MissingParameterError(name="track_index")
 
+                meta = get_subtitles_metadata(sub)
+
                 table.add_row(
                     str(sub.track_index),
                     sub.codec or na,
-                    sub.language or na,
-                    sub.title or na,
-                    "✓" if sub.default else "",
-                    "✓" if sub.forced else "",
-                    "✓" if sub.hearing_impaired else "",
-                    "✓" if sub.visual_impaired else "",
+                    meta.language or na,
+                    meta.title or na,
+                    "✓" if meta.default else "",
+                    "✓" if meta.forced else "",
+                    "✓" if meta.hearing_impaired else "",
+                    "✓" if meta.visual_impaired else "",
                 )
             return table
 

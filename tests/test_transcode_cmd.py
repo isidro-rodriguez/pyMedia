@@ -7,6 +7,7 @@ import pytest
 
 from pymedia.commands.transcode.cmd import TranscodeCmd
 from pymedia.commands.transcode.parameters import TranscodeParameters
+from pymedia.models.audio import AudioMetadata
 from pymedia.models.config import Config, Transcode
 from pymedia.models.media import Audio, Media, Video
 from pymedia.types import OverwriteMode
@@ -43,7 +44,13 @@ def _params(
             path=media_path,
             video=Video(path=media_path, track_index=0),
             audio=(
-                [Audio(path=media_path, language="eng", track_index=0)]
+                [
+                    Audio(
+                        path=media_path,
+                        track_index=0,
+                        metadata=AudioMetadata(language="eng"),
+                    )
+                ]
                 if with_audio
                 else None
             ),
