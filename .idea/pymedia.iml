@@ -5,9 +5,9 @@
       <sourceFolder url="file://$MODULE_DIR$/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/tests" isTestSource="true" />
       <excludeFolder url="file://$MODULE_DIR$/.kilo" />
-      <excludeFolder url="file://$MODULE_DIR$/.local" />
       <excludeFolder url="file://$MODULE_DIR$/.venv" />
       <excludeFolder url="file://$MODULE_DIR$/build" />
+      <excludeFolder url="file://$MODULE_DIR$/local" />
     </content>
     <orderEntry type="jdk" jdkName="D:\Ocio\pyMedia\.venv" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />

@@ -1,7 +1,7 @@
 """Copia de seguridad manual de pyMedia.
 
 Limpia cachés `__pycache__` y comprime el código fuente en un zip
-ubicado en `.local/backup.zip`.
+ubicado en `local/backup.zip`.
 
 Uso:
     uv run python scripts/backup.py
@@ -13,7 +13,7 @@ import zipfile
 from pymedia import version
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
-BACKUP_DIR = ROOT / ".local"
+BACKUP_DIR = ROOT / "local"
 BACKUP_PATH = BACKUP_DIR / f"pyMedia_{version}.zip"
 
 # Directorios cuya estructura se incluye completa.

@@ -1,11 +1,11 @@
 .kilo/
-.local/
 .pytest_cache/
 .ruff_cache/
 .venv/
 __pycache__/
 *.egg-info/
 build/
+local/
 temp/
 *.pyc
 .coverage

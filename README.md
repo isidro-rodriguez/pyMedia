@@ -295,7 +295,7 @@ uv run python scripts/fixtures/subtitles_tracks.py  # pistas de subtítulos
 ### Otros scripts
 
 - `scripts/build.py` — compila `build/pymedia.exe` en Windows y `build/pymedia` en Linux(pyinstaller onefile).
-- `scripts/backup.py` — copia de seguridad de `src/`, `tests/` y `scripts/` en `.local/backup.zip`.
+- `scripts/backup.py` — copia de seguridad de `src/`, `tests/` y `scripts/` en `local`.
 
 ## Estructura del proyecto
 

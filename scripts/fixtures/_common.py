@@ -3,8 +3,8 @@
 import subprocess
 from pathlib import Path
 
-# Raíz de fixtures: <repo>/.local/fixtures (los scripts viven a 2 niveles del repo).
-FIXTURES_DIR = Path(__file__).resolve().parents[2] / ".local" / "fixtures"
+# Raíz de fixtures: <repo>/local/fixtures (los scripts viven a 2 niveles del repo).
+FIXTURES_DIR = Path(__file__).resolve().parents[2] / "local" / "fixtures"
 
 DURATION_SECONDS = 30
 RESOLUTION = "1280x720"
