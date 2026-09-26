@@ -17,6 +17,7 @@ from helpers import (
     ffprobe_duration,
     ffprobe_streams,
     stream_codec_names,
+    stream_disposition,
     stream_tag,
     stream_types,
     video_size,
@@ -62,6 +63,16 @@ def test_info_success_with_debug(pymedia: Invoke, video_mp4_a: Path) -> None:
 
     assert result.exit_code == 0
     assert "Metadata" in result.output
+
+
+def test_info_rejects_media_without_video(
+    pymedia: Invoke, video_audio_only_mkv: Path, tmp_path: Path
+) -> None:
+    """`info` rechaza un fichero de audio sin pista de vídeo."""
+    result = pymedia("info", str(video_audio_only_mkv))
+
+    assert result.exit_code != 0
+    assert "Invalid video container" in result.output
 
 
 # =============================================================================
@@ -343,12 +354,6 @@ JOIN_INCOMPATIBLE_CASES = [
         "video_mp4_diff_audio_codec",
         "audio[0].codec differs:",
         id="audio_codec",
-    ),
-    pytest.param(
-        "video_mp4_a",
-        "video_audio_only_mkv",
-        "video presence differs: first has video, this has no video",
-        id="video_presence_second_missing",
     ),
     pytest.param(
         "video_mp4_a",
@@ -918,18 +923,16 @@ def test_transcode_success_transcode_audio(
 def test_add_audio_success_inserts_track(
     pymedia: Invoke,
     video_mkv: Path,
-    audio_m4a: Path,
+    audio_m4a_tagged: Path,
     tmp_path: Path,
 ) -> None:
-    """`add-audio` añade la pista externa con su idioma al contenedor."""
+    """`add-audio` añade la pista externa heredando metadatos del origen."""
     output = tmp_path / "with_audio.mkv"
 
     result = pymedia(
         "add-audio",
         str(video_mkv),
-        str(audio_m4a),
-        "--language",
-        "eng",
+        str(audio_m4a_tagged),
         "-o",
         str(output),
         "-ov",
@@ -943,26 +946,9 @@ def test_add_audio_success_inserts_track(
         if stream.get("codec_type") == "audio"
     ]
     assert len(audio_streams) == 2
+    # La pista importada (índice 1) hereda language=eng y title=Director
     assert (audio_streams[1].get("tags") or {}).get("language") == "eng"
-
-
-def test_add_audio_error_missing_language(
-    pymedia: Invoke,
-    video_mkv: Path,
-    audio_m4a: Path,
-    tmp_path: Path,
-) -> None:
-    """`add-audio` exige la opción `--language` para la nueva pista."""
-    result = pymedia(
-        "add-audio",
-        str(video_mkv),
-        str(audio_m4a),
-        "-o",
-        str(tmp_path / "with_audio.mkv"),
-    )
-
-    assert result.exit_code != 0
-    assert "Missing option '--language'" in result.output
+    assert (audio_streams[1].get("tags") or {}).get("title") == "Director"
 
 
 def test_add_audio_error_audio_file_missing(
@@ -973,14 +959,133 @@ def test_add_audio_error_audio_file_missing(
         "add-audio",
         str(video_mkv),
         str(tmp_path / "missing.m4a"),
-        "--language",
-        "eng",
         "-o",
         str(tmp_path / "out.mkv"),
     )
 
     assert result.exit_code != 0
     assert "is not a file" in result.output
+
+
+def test_add_audio_invalid_extension(
+    pymedia: Invoke,
+    video_mp4_a: Path,
+    tmp_path: Path,
+) -> None:
+    """`add-audio` rechaza fichero de audio con extensión inválida."""
+    bad_audio = tmp_path / "bad.txt"
+    bad_audio.write_text("dummy", encoding="utf-8")
+
+    result = pymedia(
+        "add-audio",
+        str(video_mp4_a),
+        str(bad_audio),
+        "-o",
+        str(tmp_path / "with_audio.mp4"),
+        "-ov",
+        "yes",
+    )
+
+    assert result.exit_code != 0
+    assert "Invalid extension" in result.output
+
+
+def test_add_audio_inherits_disposition_when_no_previous_audio(
+    pymedia: Invoke,
+    video_no_audio: Path,
+    audio_m4a_default: Path,
+    tmp_path: Path,
+) -> None:
+    """`add-audio` conserva la disposición default del audio origen sin audio previo."""
+    output = tmp_path / "with_audio.mkv"
+
+    result = pymedia(
+        "add-audio",
+        str(video_no_audio),
+        str(audio_m4a_default),
+        "-o",
+        str(output),
+        "-ov",
+        "yes",
+    )
+
+    assert result.exit_code == 0
+    # La única pista de audio (índice 0) debe tener default=1
+    assert stream_disposition(output, "audio", "default", index=0) == 1
+
+
+def test_add_audio_resets_disposition_when_container_has_audio(
+    pymedia: Invoke,
+    video_mkv_default_audio: Path,
+    audio_m4a_default: Path,
+    tmp_path: Path,
+) -> None:
+    """`add-audio` resetea disposiciones del audio importado con audio previo."""
+    output = tmp_path / "with_audio.mkv"
+
+    result = pymedia(
+        "add-audio",
+        str(video_mkv_default_audio),
+        str(audio_m4a_default),
+        "-o",
+        str(output),
+        "-ov",
+        "yes",
+    )
+
+    assert result.exit_code == 0
+    # La pista original (índice 0) conserva default=1
+    assert stream_disposition(output, "audio", "default", index=0) == 1
+    # La pista importada (índice 1) se resetea a default=0
+    assert stream_disposition(output, "audio", "default", index=1) == 0
+
+
+def test_add_audio_rejects_incompatible_codec(
+    pymedia: Invoke,
+    video_mp4_a: Path,
+    audio_mp3: Path,
+    tmp_path: Path,
+) -> None:
+    """`add-audio` rechaza audio con códec incompatible (mp3 en mp4)."""
+    output = tmp_path / "out.mp4"
+
+    result = pymedia(
+        "add-audio",
+        str(video_mp4_a),
+        str(audio_mp3),
+        "-o",
+        str(output),
+        "-ov",
+        "yes",
+    )
+
+    assert result.exit_code != 0
+    assert (
+        "doesn't support" in result.output.lower() or "invalid" in result.output.lower()
+    )
+
+
+def test_add_audio_rejects_file_without_audio_tracks(
+    pymedia: Invoke,
+    video_mkv: Path,
+    video_no_audio: Path,
+    tmp_path: Path,
+) -> None:
+    """`add-audio` rechaza un fichero de entrada que no contiene pistas de audio."""
+    output = tmp_path / "out.mkv"
+
+    result = pymedia(
+        "add-audio",
+        str(video_mkv),
+        str(video_no_audio),  # video_no_audio es mp4 sin pista de audio
+        "-o",
+        str(output),
+        "-ov",
+        "yes",
+    )
+
+    assert result.exit_code != 0
+    assert "doesn't contain any audio track" in result.output.lower()
 
 
 # =============================================================================
@@ -1079,6 +1184,53 @@ def test_edit_audio_error_missing_metadata(
     assert result.exit_code != 0
     normalized = " ".join(result.output.split())
     assert "Missing at least one of these options:" in normalized
+
+
+def test_edit_audio_preserves_untouched_dispositions(
+    pymedia: Invoke,
+    video_mkv_audio_dispositions: Path,
+    tmp_path: Path,
+) -> None:
+    """`edit-audio` preserva disposiciones no tocadas al editar una pista."""
+    output = tmp_path / "edited_audio.mkv"
+
+    # Editar solo el idioma: debe preservar default, comment
+    result = pymedia(
+        "edit-audio",
+        str(video_mkv_audio_dispositions),
+        "--track",
+        "0",
+        "--language",
+        "spa",
+        "-o",
+        str(output),
+        "-ov",
+        "yes",
+    )
+
+    assert result.exit_code == 0
+    assert stream_disposition(output, "audio", "default", index=0) == 1
+    assert stream_disposition(output, "audio", "comment", index=0) == 1
+    assert stream_tag(output, "audio", "language", index=0) == "spa"
+
+    # Editar --no-forced: debe preservar default, comment
+    output2 = tmp_path / "edited_audio2.mkv"
+    result2 = pymedia(
+        "edit-audio",
+        str(video_mkv_audio_dispositions),
+        "--track",
+        "0",
+        "--no-forced",
+        "-o",
+        str(output2),
+        "-ov",
+        "yes",
+    )
+
+    assert result2.exit_code == 0
+    assert stream_disposition(output2, "audio", "default", index=0) == 1
+    assert stream_disposition(output2, "audio", "comment", index=0) == 1
+    assert stream_disposition(output2, "audio", "forced", index=0) == 0
 
 
 def test_delete_audio_error_track_out_of_range(
@@ -1373,31 +1525,6 @@ def test_add_subs_invalid_extension(
         "spa",
         "-o",
         str(tmp_path / "with_subs.mp4"),
-        "-ov",
-        "yes",
-    )
-
-    assert result.exit_code != 0
-    assert "Invalid extension" in result.output
-
-
-def test_add_audio_invalid_extension(
-    pymedia: Invoke,
-    video_mp4_a: Path,
-    tmp_path: Path,
-) -> None:
-    """`add-audio` rechaza fichero de audio con extensión inválida."""
-    bad_audio = tmp_path / "bad.txt"
-    bad_audio.write_text("dummy", encoding="utf-8")
-
-    result = pymedia(
-        "add-audio",
-        str(video_mp4_a),
-        str(bad_audio),
-        "--language",
-        "eng",
-        "-o",
-        str(tmp_path / "with_audio.mp4"),
         "-ov",
         "yes",
     )

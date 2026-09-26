@@ -11,7 +11,6 @@ from pymedia.errors import (
 )
 from pymedia.locale_manager import locale_manager
 from pymedia.locales import translate as _
-from pymedia.models.audio import get_audio_metadata
 from pymedia.models.media import Audio, Subtitles
 from pymedia.models.subtitles import get_subtitles_metadata
 from pymedia.utils import parse_quantity, parse_size, parse_timedelta, to_ffmpeg_value
@@ -226,7 +225,7 @@ class SheetCmd:
                 return None
             formatted_items: list[str] = []
             for t in tracks:
-                lang_str = get_audio_metadata(t).language or "und"
+                lang_str = t.metadata.language or "und"
                 codec_str = t.codec or "audio"
                 ch_str = _format_channels(t.channels)
                 formatted_items.append(f"{lang_str} ({codec_str} {ch_str})")

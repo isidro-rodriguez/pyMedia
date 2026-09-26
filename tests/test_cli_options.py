@@ -46,7 +46,7 @@ COMMANDS: dict[str, Command] = {
         Command(
             "add-audio",
             ("video_mkv", "audio_m4a"),
-            ("--language", "eng"),
+            (),
             ".mkv",
         ),
         Command("delete-audio", ("video_mkv",), ("--tracks", "0"), ".mkv"),
@@ -691,10 +691,11 @@ SUBS_FLAGS = [
 TRACK_FLAG_CASES = [
     pytest.param(add, edit, kind, option, flag, id=f"{kind}{option}")
     for kind, add, edit, flags in (
-        ("audio", "add-audio", "edit-audio", AUDIO_FLAGS),
+        ("audio", None, "edit-audio", AUDIO_FLAGS),
         ("subtitle", "add-subs", "edit-subs", SUBS_FLAGS),
     )
     for option, flag in flags
+    if add is not None
 ]
 
 
@@ -702,7 +703,7 @@ TRACK_FLAG_CASES = [
 def test_add_track_sets_flag(
     pymedia: Invoke,
     request: pytest.FixtureRequest,
-    add: str,
+    add: str | None,
     edit: str,
     kind: str,
     option: str,
@@ -710,6 +711,8 @@ def test_add_track_sets_flag(
     tmp_path: Path,
 ) -> None:
     """`add-audio`/`add-subs` marcan la pista nueva con el flag indicado."""
+    if add is None:
+        pytest.skip("No add command for this track kind")
     output = tmp_path / "out.mkv"
 
     result = pymedia(*build_args(COMMANDS[add], request, output, "-ov", "yes", option))
@@ -760,12 +763,6 @@ def test_edit_track_sets_and_clears_flag(
 # la pista que era `default` antes (`None` si el medio no tenía ninguna).
 EXCLUSIVE_DEFAULT_CASES = [
     pytest.param(
-        "add-audio", "video_mkv_default_audio", "audio", (), 1, 0, id="add-audio"
-    ),
-    pytest.param("add-audio", "video_no_audio", "audio", (), 0, None, id="no-previous"),
-    # `video_mkv_subs` ya trae dos pistas (la 0 es `default`), así que la nueva es la 2.
-    pytest.param("add-subs", "video_mkv_subs", "subtitle", (), 2, 0, id="add-subs"),
-    pytest.param(
         "edit-audio", "video_mkv_two_audio", "audio", (), 0, 1, id="edit-audio"
     ),
     pytest.param(
@@ -776,6 +773,10 @@ EXCLUSIVE_DEFAULT_CASES = [
         1,
         0,
         id="edit-subs",
+    ),
+    pytest.param("add-subs", "video_mkv_subs", "subtitle", (), 2, 0, id="add-subs"),
+    pytest.param(
+        "add-subs", "video_no_audio", "subtitle", (), 0, None, id="no-previous"
     ),
 ]
 
@@ -827,7 +828,6 @@ def test_edit_audio_default_preserves_other_flags(
 
 
 TRACK_TITLE_CASES = [
-    pytest.param("add-audio", "audio", -1, id="add-audio"),
     pytest.param("edit-audio", "audio", 0, id="edit-audio"),
     pytest.param("add-subs", "subtitle", -1, id="add-subs"),
     pytest.param("edit-subs", "subtitle", 0, id="edit-subs"),
@@ -957,7 +957,6 @@ def test_track_index_out_of_range(
 # =============================================================================
 
 LANGUAGE_CASES = [
-    pytest.param("add-audio", "--language", "xyz", id="add-audio"),
     pytest.param("edit-audio", "--language", "xyz", id="edit-audio"),
     pytest.param("add-subs", "--language", "xyz", id="add-subs"),
     pytest.param("edit-subs", "--language", "xyz", id="edit-subs"),

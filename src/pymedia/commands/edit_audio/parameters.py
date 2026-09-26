@@ -6,7 +6,7 @@ from typing import Self
 
 from pymedia.commands.base_parameters import BaseParameters
 from pymedia.errors import MissingParameterError
-from pymedia.mixins.audio_mixin import AudioInputMixin
+from pymedia.mixins.audio_mixin import AudioMetadataMixin
 from pymedia.mixins.media_mixin import MediaInputMixin
 from pymedia.mixins.outputs_mixin import MediaOutputMixin
 from pymedia.mixins.streams_mixin import StreamsMixin
@@ -19,7 +19,7 @@ class EditAudioParameters(
     MediaInputMixin,
     MediaOutputMixin,
     StreamsMixin,
-    AudioInputMixin,
+    AudioMetadataMixin,
 ):
     """Parámetros utilizados por el comando EditAudio."""
 

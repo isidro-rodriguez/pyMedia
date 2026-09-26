@@ -31,47 +31,29 @@ Código simple, legible, stdlib antes que dependencias nuevas.
 
 ## Tasking
 
-El agente trabaja en **espacio aislado** (worktree), de forma que cualquier error, experimento o 
-fallo del agente no afecte al árbol principal (`main`). El worktree es **desechable**: si el agente 
-muere o se cancela la tarea, se elimina sin consecuencias en `main`.
+General:
 
-### PLAN (planificación)
+- Usar `.kilo/temp/` para alojar ficheros temporales de tarea (scripts, tests, ...).
 
-- Solo leer. Bajo ninguna circunstancia modificar ficheros del repositorio, ni crear ramas, ni crear
-  worktrees, ni escribir fuera de `.kilo/temp/`.
-- Si la tarea es clara, pasar directamente a ACT.
+En modo `PLAN`:
 
-### ACT (ejecución)
+- Solo leer, **NO MODIFICAR** ficheros del repositorio fuera de `.kilo/temp/`.
+- Presenta informe de planificación y esperar por confirmación.
 
-1. Preparar el worktree en `.kilo/worktrees/<task-id>` sobre una rama `<task-id>`
-   recreada desde `main` (`git checkout -B <task-id> main`).
-   - El worktree es una copia de trabajo de `main`; todos los cambios del agente se hacen aquí.
-   - `.kilo/temp/` es para scripts, tests y artefactos temporales de la tarea. Limpiarlo al final.
-2. **Desarrollo y validación**, pre-commit, dentro del worktree:
+En modo `ACT`:
+
+1. Implementar la planificación confirmada.
+2. Validar la implementación:
    - `uv run ruff format`
    - `uv run ruff check --fix`
    - `uv run ruff check`
    - `uv run ty check`
    - `uv run pytest`
    - `uv run pytest -m locales`
-   - Si se han tocado mensajes de i18n:
+   - Si `pytest -m locales` falla:
      - `uv run python scripts/i18n.py extract`
      - `uv run python scripts/i18n.py update -l es`
      - `uv run python scripts/i18n.py compile -l es`
      - `uv run python scripts/i18n.py check`
      - `uv run pytest -m locales`
-3. **Al completar**, redactar en informe diff en `.kilo/plans/<task-id>_diff` y presentar un 
-   resumen de 
-   los cambios y **solicitar aprobación explícita** al desarrollador. No integrar en `main` sin
-   aprobación.
-4. **Una vez aprobada** la tarea:
-   - Integrar los cambios en `main` (fast-forward o merge según se indique).
-   - Eliminar el worktree temporal.
-   - Eliminar la rama `<task-id>` (`git branch -D <task-id>`)
-   - Limpiar `.kilo/temp/` (si existían ficheros previos a la tarea, borrarlos).
-
-### Seguridad del worktree
-
-- Si el agente falla o se cancela, `main` queda intacto; el worktree se puede eliminar sin más.
-- Los comandos de integración (`merge` / `fast-forward`) se ejecutan desde el repositorio principal,
-  no desde el worktree.
+3. **Al completar**, presentar un resumen de cambios y limpiar `.kilo/temp/`.

@@ -74,7 +74,7 @@ pymedia <comando> --help     # ayuda detallada de cada comando
 | `remux`         | `pymedia remux input.mp4 -o output.mkv`                           |
 | `join`          | `pymedia join part1.mp4 part2.mp4 -o movie.mp4`                   |
 | `cut`           | `pymedia cut input.mp4 --at 10:05,40:30,1:20:00`                  |
-| `add-audio`     | `pymedia add-audio input.mp4 eng_audio.m4a --language eng`        |
+| `add-audio`     | `pymedia add-audio input.mp4 audio.m4a`                           |
 | `delete-audio`  | `pymedia delete-audio input.mp4 --tracks 1,2`                     |
 | `edit-audio`    | `pymedia edit-audio input.mp4 --track 0 --forced --default`       |
 | `extract-audio` | `pymedia extract-audio input.mp4 -o audio.m4a`                    |
@@ -109,12 +109,12 @@ pymedia <comando> --help     # ayuda detallada de cada comando
 
 | Comando         | Acción                                                                                                   |
 |-----------------|----------------------------------------------------------------------------------------------------------|
-| `add-audio`     | Añade una pista de audio al contenedor.                                                                  |
+| `add-audio`     | Añade una pista de audio al contenedor (hereda metadatos y disposiciones del archivo origen).            |
 | `delete-audio`  | Elimina pistas (`--tracks 1,2`).                                                                         |
 | `edit-audio`    | Edita metadatos de la pista `--track N` (idioma, título, default, forced, commentary, hearing-impaired). |
-| `extract-audio` | Extrae pistas a fichero de audio independiente (`--tracks por defecto todas`).                           |
+| `extract-audio` | Extrae pistas a fichero de audio independiente (`--tracks` por defecto todas).                           |
 
-> El idioma se indica con `--language <código ISO 639-2>` (p. ej. `eng`, `spa`).
+> El idioma se indica con `--language <código ISO 639-2>` (p. ej. `eng`, `spa`) solo en `edit-audio`.
 
 ### Subtítulos
 

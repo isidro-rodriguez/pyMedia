@@ -6,10 +6,9 @@ from datetime import timedelta
 from pathlib import Path
 from typing import Any
 
-from pymedia.data.audio_codecs import AUDIO_CODECS
 from pymedia.data.subtitles_formats import SUBTITLES_FORMATS
 from pymedia.data.video_codecs import VIDEO_CODECS
-from pymedia.errors import FfprobeError, MissingParameterError
+from pymedia.errors import FfprobeError, MissingParameterError, UserError
 from pymedia.locales import translate as _
 from pymedia.logger import Logger
 from pymedia.models.audio import Audio, AudioMetadata
@@ -46,8 +45,35 @@ def _run_ffprobe(args: list[str], path: Path) -> dict[str, Any]:
     return data
 
 
+def _build_audio_metadata(
+    tags: dict[str, Any], disposition: dict[str, Any]
+) -> AudioMetadata:
+    """Construye AudioMetadata a partir de tags y disposition de ffprobe."""
+    language = tags.get("language")
+    return AudioMetadata(
+        language=language,
+        title=tags.get("title"),
+        forced=bool(disposition.get("forced", 0)),
+        default=bool(disposition.get("default", 0)),
+        hearing_impaired=bool(disposition.get("hearing_impaired", 0)),
+        commentary=bool(disposition.get("comment", 0)),
+        dubbed=bool(disposition.get("dub", 0)),
+        original=bool(disposition.get("original", 0)),
+        lyrics=bool(disposition.get("lyrics", 0)),
+        karaoke=bool(disposition.get("karaoke", 0)),
+        visual_impaired=bool(disposition.get("visual_impaired", 0)),
+        clean_effects=bool(disposition.get("clean_effects", 0)),
+    )
+
+
 def get_media_information(media_input: Path, logger: Logger) -> "Media":
-    """Obtiene información del contenedor media Ffprobe."""
+    """Obtiene información del contenedor multimedia.
+
+    Raises:
+        UserError: Si el contenedor no tiene pista de vídeo.
+        FfprobeError: Si ffprobe no puede leer el archivo.
+        MissingParameterError: Si faltan parámetros requeridos.
+    """
     data = _run_ffprobe(["-show_format", "-show_streams"], media_input)
     logger.debug(msg=_("ffprobe media data: %(data)s"), data=data)
 
@@ -59,7 +85,7 @@ def get_media_information(media_input: Path, logger: Logger) -> "Media":
     for stream in data.get("streams", []):
         codec_type = stream.get("codec_type")
         tags = stream.get("tags", {})
-        language = tags.get("language")
+        disposition = stream.get("disposition", {})
 
         if codec_type == "video":
             video = Video(
@@ -80,7 +106,6 @@ def get_media_information(media_input: Path, logger: Logger) -> "Media":
         elif codec_type == "audio":
             if audio is None:
                 audio = []
-            disposition = stream.get("disposition", {})
             audio.append(
                 Audio(
                     path=media_input.absolute(),
@@ -92,14 +117,7 @@ def get_media_information(media_input: Path, logger: Logger) -> "Media":
                     channels=stream.get("channels"),
                     channel_layout=stream.get("channel_layout"),
                     bit_rate=to_int(stream.get("bit_rate")),
-                    metadata=AudioMetadata(
-                        language=language,
-                        title=tags.get("title"),
-                        forced=bool(disposition.get("forced", 0)),
-                        default=bool(disposition.get("default", 0)),
-                        hearing_impaired=bool(disposition.get("hearing_impaired", 0)),
-                        commentary=bool(disposition.get("comment", 0)),
-                    ),
+                    metadata=_build_audio_metadata(tags, disposition),
                 )
             )
             audio_track_index += 1
@@ -115,7 +133,7 @@ def get_media_information(media_input: Path, logger: Logger) -> "Media":
                     track_index=subtitles_track_index,
                     codec=stream.get("codec_name"),
                     metadata=SubtitlesMetadata(
-                        language=language,
+                        language=tags.get("language"),
                         title=tags.get("title"),
                         forced=bool(disposition.get("forced", 0)),
                         default=bool(disposition.get("default", 0)),
@@ -125,6 +143,11 @@ def get_media_information(media_input: Path, logger: Logger) -> "Media":
                 )
             )
             subtitles_track_index += 1
+
+    if video is None:
+        raise UserError(
+            msg=_("Invalid video container: %(path)s") % {"path": str(media_input)}
+        )
 
     fmt = data.get("format", {})
     tags = fmt.get("tags", {})
@@ -168,8 +191,8 @@ def get_media_information(media_input: Path, logger: Logger) -> "Media":
     return media
 
 
-def get_audio_codec(audio_input: Path, logger: Logger) -> str:
-    """Verifica que el archivo de audio externo sea realmente audio.
+def get_audio_information(audio_input: Path, logger: Logger) -> list[Audio]:
+    """Obtiene información del fichero de audio.
 
     Args:
         audio_input: Ruta del archivo de audio a verificar.
@@ -179,45 +202,64 @@ def get_audio_codec(audio_input: Path, logger: Logger) -> str:
         FfprobeError: Si ffprobe no puede leer el archivo, no detecta un
             formato de audio conocido, o el formato detectado no es
             compatible con la extensión del archivo.
+        UserError: Si el archivo no contiene pistas de audio.
 
     Returns:
-        Nombre del códec de audio detectado y validado.
+        Lista de pistas de audio con sus metadatos.
     """
     data = _run_ffprobe(
-        ["-show_format", "-show_streams", "-select_streams", "a:0"], audio_input
+        args=["-show_format", "-show_streams"],
+        path=audio_input,
     )
     logger.debug(msg=_("ffprobe audio file data: %(data)s"), data=data)
 
-    streams = data.get("streams", [])
-    codec_name: str | None = streams[0].get("codec_name") if streams else None
-    if codec_name not in AUDIO_CODECS:
-        format_name = data.get("format", {}).get("format_name", "")
-        detected_codecs: set[str] = {
-            token.strip() for token in format_name.split(",") if token.strip()
-        }
-        codec_name = next(
-            (c for c in detected_codecs if c in AUDIO_CODECS),
-            None,
-        )
-    if codec_name is None:
-        raise FfprobeError(
-            msg=_(
-                '"%(path)s" is not a recognized audio file '
-                "(detected format: %(format_name)s)."
+    audio: list[Audio] = []
+    audio_track_index, video_tracks, subtitles_tracks = 0, 0, 0
+
+    for stream in data.get("streams", []):
+        codec_type = stream.get("codec_type")
+        tags = stream.get("tags", {})
+        disposition = stream.get("disposition", {})
+
+        if codec_type == "audio":
+            audio.append(
+                Audio(
+                    path=audio_input.absolute(),
+                    global_index=stream.get("index"),
+                    track_index=audio_track_index,
+                    codec=stream.get("codec_name"),
+                    duration=tags.get("DURATION"),
+                    sample_rate=to_int(stream.get("sample_rate")),
+                    channels=stream.get("channels"),
+                    channel_layout=stream.get("channel_layout"),
+                    bit_rate=to_int(stream.get("bit_rate")),
+                    metadata=_build_audio_metadata(tags, disposition),
+                )
             )
-            % {
-                "path": audio_input,
-                "format_name": data.get("format", {}).get("format_name", "unknown"),
-            }
+            audio_track_index += 1
+        elif codec_type == "video":
+            video_tracks += 1
+        elif codec_type == "subtitle":
+            subtitles_tracks += 1
+
+    if len(audio) == 0:
+        raise UserError(
+            msg=_("It doesn't contain any audio track. Invalid audio file: %(file)s")
+            % {"file": audio_input}
         )
 
-    fmt = AUDIO_CODECS.get(codec_name)
-    if fmt is None or audio_input.suffix.lower() not in fmt.containers:
-        raise FfprobeError(
-            msg=_("%(path.suffix)s extension doesn't support %(codec_name)s audio.")
-            % {"path.suffix": audio_input.suffix, "codec_name": codec_name}
+    if video_tracks > 0:
+        logger.warning(
+            msg=_("Audio file contains video tracks: %(tracks)s")
+            % {"tracks": video_tracks}
         )
-    return codec_name
+    if subtitles_tracks > 0:
+        logger.warning(
+            msg=_("Audio file contains subtitles tracks: %(tracks)s")
+            % {"tracks": subtitles_tracks}
+        )
+
+    return audio
 
 
 def validate_subtitles_file_codec(subtitles_input: Path, logger: Logger) -> None:

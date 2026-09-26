@@ -6,12 +6,6 @@ from pymedia.commands.add_audio.parameters import AddAudioParameters
 from pymedia.commands.add_audio.service import AddAudioService
 from pymedia.commands.base_cli_options import (
     AudioArgument,
-    AudioCommentaryOption,
-    AudioDefaultOption,
-    AudioForcedOption,
-    AudioHearingImpairedOption,
-    AudioLanguageOption,
-    AudioTitleOption,
     DebugOption,
     HelpOption,
     MediaInputArgument,
@@ -32,11 +26,15 @@ Add an audio track to a media file.
 
 You can consult what audio tracks have a container with `info` command.
 
+The audio track's metadata (language, title, dispositions) are inherited from
+the source audio file. Use `edit-audio` to modify them after insertion.
+
 [bold]Examples[/bold]:
-  Add english audio to a media container:
-    > pymedia add-audio input.mp4 eng_audio.aac --language eng
-  Add default commentary spanish audio with custom title:
-    > pymedia add-audio input.mp4 spa_audio.aac --language spa --title "Comentario director" --default --commentary
+  Add audio track from a file (metadata inherited from source):
+    > pymedia add-audio input.mp4 audio.m4a
+  Add audio and override default disposition:
+    > pymedia add-audio input.mp4 audio.m4a
+    Then: pymedia edit-audio output.mp4 --track 1 --default
 """  # noqa
 )
 
@@ -50,15 +48,9 @@ You can consult what audio tracks have a container with `info` command.
 def add_audio(
     media_input: MediaInputArgument,
     audio_input: AudioArgument,
-    language: AudioLanguageOption,
     media_output: OutputOption = None,
     overwrite: OverwriteOption = OverwriteMode.ASK,
     strip_metadata: StripMetadataOption = False,
-    title: AudioTitleOption = None,
-    forced: AudioForcedOption = None,
-    default: AudioDefaultOption = None,
-    hearing_impaired: AudioHearingImpairedOption = None,
-    commentary: AudioCommentaryOption = None,
     debug: DebugOption = False,
     show_cmd: ShowCmdOption = False,
     help_: HelpOption = False,
@@ -68,37 +60,25 @@ def add_audio(
     Args:
         media_input: Ruta del fichero de vídeo a procesar.
         audio_input: Ruta del fichero de audio a insertar.
-        language: Código de idioma de la pista de audio.
         media_output: Ruta absoluta del fichero de salida procesado.
         overwrite: Política ante conflicto de salida ya existente.
         strip_metadata: No copiar los metadatos del fichero de entrada.
-        title: Título a mostrar para identificar la pista de audio.
-        forced: Fuerza al reproductor a usar la pista de audio.
-        default: Se establece como la pista de audio por defecto del contenedor.
-        hearing_impaired: Pista orientada a personas con problemas auditivos.
-        commentary: Pista de comentarios de audio.
         debug: Habilita el nivel de log DEBUG.
         show_cmd: Muestra al usuario el comando ffmpeg compuesto pero no lo ejecuta.
         help_: Helper para mostrar esta línea en distintos idiomas.
 
     Raises:
         FfprobeError: Si ffprobe no puede leer el fichero de audio externo.
-        MissingArgumentError: Si no se indica el idioma de la pista.
         MissingParameterError: Si falta el medio o el fichero de audio.
-        UserError: Si el idioma no sigue el estándar ISO 639-2.
+        InvalidCodecContainerError: Si el códec del audio no es
+            compatible con el contenedor de salida.
     """
     Logger.create(debug=debug)
     params = AddAudioParameters.load(
         overwrite=overwrite,
         media_input=media_input,
         audio_input=audio_input,
-        language=language,
         media_output=media_output,
         strip_metadata=strip_metadata,
-        title=title,
-        forced=forced,
-        default=default,
-        hearing_impaired=hearing_impaired,
-        commentary=commentary,
     )
     AddAudioService(debug=debug, show_cmd=show_cmd, params=params).start()

@@ -632,6 +632,91 @@ def audio_opus(inputs_dir: Path) -> Path:
 
 
 @pytest.fixture(scope="session")
+def audio_m4a_tagged(inputs_dir: Path) -> Path:
+    """Pista de audio aac de 1 s con metadatos language=eng y title=Director."""
+    output = inputs_dir / "audio_tagged.mka"
+    _run_ffmpeg(
+        [
+            "-f",
+            "lavfi",
+            "-i",
+            "sine=frequency=440:duration=1",
+            "-c:a",
+            "aac",
+            "-metadata:s:a:0",
+            "language=eng",
+            "-metadata:s:a:0",
+            "title=Director",
+            str(output),
+        ]
+    )
+    return output
+
+
+@pytest.fixture(scope="session")
+def audio_m4a_default(inputs_dir: Path) -> Path:
+    """Pista de audio aac de 1 s marcada como default."""
+    output = inputs_dir / "audio_default.m4a"
+    _run_ffmpeg(
+        [
+            "-f",
+            "lavfi",
+            "-i",
+            "sine=frequency=440:duration=1",
+            "-c:a",
+            "aac",
+            "-disposition:a:0",
+            "default",
+            str(output),
+        ]
+    )
+    return output
+
+
+@pytest.fixture(scope="session")
+def audio_mp3(inputs_dir: Path) -> Path:
+    """Pista de audio mp3 de 1 s (libmp3lame) - incompatible con contenedor mp4."""
+    output = inputs_dir / "audio.mp3"
+    _run_ffmpeg(
+        [
+            "-f",
+            "lavfi",
+            "-i",
+            "sine=frequency=440:duration=1",
+            "-c:a",
+            "libmp3lame",
+            str(output),
+        ]
+    )
+    return output
+
+
+@pytest.fixture(scope="session")
+def video_mkv_audio_dispositions(inputs_dir: Path) -> Path:
+    """Vídeo mkv de 2 s con audio default+lyrics+comment (disposiciones a preservar)."""
+    output = inputs_dir / "video_audio_dispositions.mkv"
+    _run_ffmpeg(
+        [
+            "-f",
+            "lavfi",
+            "-i",
+            "testsrc2=size=160x90:rate=10:duration=2",
+            "-f",
+            "lavfi",
+            "-i",
+            "sine=frequency=440:duration=2",
+            *VIDEO_ARGS,
+            "-c:a",
+            "aac",
+            "-disposition:a:0",
+            "default+lyrics+comment",
+            str(output),
+        ]
+    )
+    return output
+
+
+@pytest.fixture(scope="session")
 def subs_spa(inputs_dir: Path) -> Path:
     """Fichero srt válido con un evento de subtítulo."""
     output = inputs_dir / "subs_spa.srt"

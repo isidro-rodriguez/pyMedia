@@ -6,6 +6,34 @@ Las versiones se han reconstruido a partir del histórico de
 Las versiones intermedias no registradas (0.2–0.4, 0.6–0.8) se agrupan
 con la sección anterior.
 
+## [0.21.0-beta.13] - 2026-09-26
+
+### Cambiado
+
+- `add-audio` hereda ahora los metadatos (idioma, título, disposiciones) del
+  archivo de audio origen; se eliminan las opciones `--language`, `--title`,
+  `--default`, `--forced`, `--hearing-impaired`, `--commentary`. Usar
+  `edit-audio` para modificarlos tras la inserción.
+- `Audio` y `AudioMetadata` son `frozen=True, slots=True`; se añaden 6
+  disposiciones nuevas (`dubbed`, `original`, `lyrics`, `karaoke`,
+  `visual_impaired`, `clean_effects`) mapeadas a flags ffmpeg.
+- `edit-audio` preserva las disposiciones no tocadas al editar (reconstruye
+  el conjunto completo de 10 flags).
+- Validación de compatibilidad códec↔contenedor en `add-audio` usando
+  `AUDIO_CODECS[codec].containers` (`InvalidCodecContainerError`).
+- `ffprobe.get_audio_information` valida que el archivo contenga audio y avisa
+  de pistas de vídeo/subtítulos en archivos de audio.
+
+### Corregido
+
+- `edit-audio --title` ahora se respeta (antes se ignoraba).
+- `edit-audio --default/--no-default` ahora funciona correctamente (antes
+  siempre se evaluaba como `False`).
+- Indexación por `track_index` en lugar de posición de lista en
+  `AudioMetadataMixin` y `edit-audio`.
+- `to_exclusive_default_cmd` filtra solo pistas con `default=True` (antes
+  reescribía todas).
+
 ## [0.21.0-beta.12] - 2026-09-25
 
 ### Cambiado

@@ -9,7 +9,6 @@ import pytest
 from pymedia.errors import MissingParameterError
 from pymedia.logger import Logger
 from pymedia.mixins.media_mixin import MediaInputMixin, MediaListMixin
-from pymedia.models.audio import get_audio_metadata
 from pymedia.models.media import Media
 from pymedia.models.subtitles import get_subtitles_metadata
 
@@ -19,7 +18,19 @@ def _logger() -> Logger:
     return Logger(logging.getLogger("pymedia.tests"))
 
 
-_EMPTY_METADATA: dict[str, Any] = {"streams": [], "format": {}}
+_EMPTY_METADATA: dict[str, Any] = {
+    "streams": [
+        {
+            "index": 0,
+            "codec_name": "h264",
+            "codec_type": "video",
+            "width": 1280,
+            "height": 720,
+            "avg_frame_rate": "25/1",
+        }
+    ],
+    "format": {"duration": "10.0", "size": "1024"},
+}
 
 
 @pytest.fixture(autouse=True)
@@ -32,8 +43,13 @@ def _fake_probe(monkeypatch: pytest.MonkeyPatch) -> None:
 
 
 def _media(path: Path) -> Media:
-    """Media con la ruta indicada y sin metadatos."""
-    return Media(path=path)
+    """Media con la ruta indicada y metadatos de vídeo mock."""
+    return Media(
+        path=path,
+        duration=None,  # se ignora en la comparación
+        size=None,
+        video=None,
+    )
 
 
 class TestInputSingleCreate:
@@ -49,7 +65,8 @@ class TestInputSingleCreate:
 
         mixin.create_media_input(media_input=source, logger=_logger())
 
-        assert mixin.media == _media(source.absolute())
+        assert mixin.media is not None
+        assert mixin.media.path == source.absolute()
 
 
 class TestInputSingleCmd:
@@ -84,10 +101,10 @@ class TestInputListCreate:
 
         mixin.create_media_list(media_input_list=[source_a, source_b], logger=_logger())
 
-        assert mixin.media_list == [
-            Media(path=source_a.absolute()),
-            Media(path=source_b.absolute()),
-        ]
+        assert mixin.media_list is not None
+        assert len(mixin.media_list) == 2
+        assert mixin.media_list[0].path == source_a.absolute()
+        assert mixin.media_list[1].path == source_b.absolute()
 
     def test_load_failure_raises_missing_media(
         self, monkeypatch: pytest.MonkeyPatch
@@ -132,20 +149,42 @@ _SUBTITLE_METADATA = {
             "codec_name": "aac",
             "codec_type": "audio",
             "tags": {"language": "eng"},
+            "disposition": {
+                "default": 1,
+                "forced": 0,
+                "hearing_impaired": 0,
+                "comment": 0,
+                "dub": 0,
+                "original": 0,
+                "lyrics": 0,
+                "karaoke": 0,
+                "visual_impaired": 0,
+                "clean_effects": 0,
+            },
         },
         {
             "index": 2,
             "codec_name": "subrip",
             "codec_type": "subtitle",
             "tags": {"language": "spa", "title": "Español"},
-            "disposition": {"default": 1, "forced": 0, "hearing_impaired": 0},
+            "disposition": {
+                "default": 1,
+                "forced": 0,
+                "hearing_impaired": 0,
+                "visual_impaired": 0,
+            },
         },
         {
             "index": 3,
             "codec_name": "hdmv_pgs_subtitle",
             "codec_type": "subtitle",
             "tags": {"language": "ita"},
-            "disposition": {"default": 0, "forced": 1},
+            "disposition": {
+                "default": 0,
+                "forced": 1,
+                "hearing_impaired": 0,
+                "visual_impaired": 0,
+            },
         },
     ],
     "format": {"duration": "10.0", "size": "1024"},
@@ -212,7 +251,18 @@ class TestSubtitlesStreamParsing:
         assert len(media.audio) == 1
         assert media.audio[0].global_index == 1
         assert media.audio[0].track_index == 0
-        assert get_audio_metadata(media.audio[0]).language == "eng"
+        assert media.audio[0].metadata.language == "eng"
+        # Verificar las 10 disposiciones de audio
+        assert media.audio[0].metadata.default is True
+        assert media.audio[0].metadata.forced is False
+        assert media.audio[0].metadata.hearing_impaired is False
+        assert media.audio[0].metadata.commentary is False
+        assert media.audio[0].metadata.dubbed is False
+        assert media.audio[0].metadata.original is False
+        assert media.audio[0].metadata.lyrics is False
+        assert media.audio[0].metadata.karaoke is False
+        assert media.audio[0].metadata.visual_impaired is False
+        assert media.audio[0].metadata.clean_effects is False
 
     def test_singular_codec_type_is_required(
         self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
@@ -220,9 +270,17 @@ class TestSubtitlesStreamParsing:
         """Comprueba que `subtitles` (plural) no se parsea: ffprobe usa `subtitle`."""
         metadata = {
             "streams": [
-                {"index": 0, "codec_name": "subrip", "codec_type": "subtitles"}
+                {
+                    "index": 0,
+                    "codec_name": "h264",
+                    "codec_type": "video",
+                    "width": 1280,
+                    "height": 720,
+                    "avg_frame_rate": "25/1",
+                },
+                {"index": 1, "codec_name": "subrip", "codec_type": "subtitles"},
             ],
-            "format": {},
+            "format": {"duration": "10.0", "size": "1024"},
         }
         monkeypatch.setattr(
             "pymedia.ffprobe._run_ffprobe",

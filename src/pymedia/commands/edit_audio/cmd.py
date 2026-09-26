@@ -30,8 +30,13 @@ class EditAudioCmd:
             raise MissingParameterError(name="media")
         if self.params.media_output is None:
             raise MissingParameterError(name="media_output")
-        if self.params.audio is None:
+        if self.params.stream_tracks is None:
+            raise MissingParameterError(name="stream_tracks")
+        if self.params.media.audio is None:
             raise MissingParameterError(name="audio")
+
+        track_number = self.params.stream_tracks[0]
+        audio = self.params._find_audio_track(track_number)
 
         cmd = ["ffmpeg"]
 
@@ -46,8 +51,15 @@ class EditAudioCmd:
                 "0",
                 "-c",
                 "copy",
-                *self.params.to_audio_metadata_cmd(self.params.audio),
-                *self.params.to_exclusive_default_cmd(),
+                *self.params.to_audio_metadata_cmd(audio),
+            ]
+        )
+
+        if self.params.default is not None:
+            cmd.extend([*self.params.to_exclusive_default_cmd()])
+
+        cmd.extend(
+            [
                 str(self.params.media_output),
             ]
         )

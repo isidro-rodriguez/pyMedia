@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-09-24 20:11+0100\n"
+"POT-Creation-Date: 2026-09-26 20:58+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -59,50 +59,58 @@ msgstr ""
 msgid "Missing at least one of these options: %(options)s"
 msgstr ""
 
-#: pymedia/ffprobe.py:35
+#: pymedia/ffprobe.py:34
 msgid "ffprobe was not found. Install ffmpeg."
 msgstr ""
 
-#: pymedia/ffprobe.py:40
+#: pymedia/ffprobe.py:39
 #, python-format
 msgid "ffprobe couldn't read %(path)s: %(err.stderr)s"
 msgstr ""
 
-#: pymedia/ffprobe.py:52
+#: pymedia/ffprobe.py:78
 #, python-format
 msgid "ffprobe media data: %(data)s"
 msgstr ""
 
-#: pymedia/ffprobe.py:185
+#: pymedia/ffprobe.py:149
+#, python-format
+msgid "Invalid video container: %(path)s"
+msgstr ""
+
+#: pymedia/ffprobe.py:214
 #, python-format
 msgid "ffprobe audio file data: %(data)s"
 msgstr ""
 
-#: pymedia/ffprobe.py:201
+#: pymedia/ffprobe.py:247
 #, python-format
-msgid ""
-"\"%(path)s\" is not a recognized audio file (detected format: "
-"%(format_name)s)."
+msgid "It doesn't contain any audio track. Invalid audio file: %(file)s"
 msgstr ""
 
-#: pymedia/ffprobe.py:213
+#: pymedia/ffprobe.py:253
 #, python-format
-msgid "%(path.suffix)s extension doesn't support %(codec_name)s audio."
+msgid "Audio file contains video tracks: %(tracks)s"
 msgstr ""
 
-#: pymedia/ffprobe.py:232
+#: pymedia/ffprobe.py:258
+#, python-format
+msgid "Audio file contains subtitles tracks: %(tracks)s"
+msgstr ""
+
+#: pymedia/ffprobe.py:278
 #, python-format
 msgid "ffprobe subtitles file data: %(data)s"
 msgstr ""
 
-#: pymedia/ffprobe.py:245
+#: pymedia/ffprobe.py:291
 #, python-format
 msgid ""
 "\"%(path)s\" is not a recognized subtitles file (detected format: "
 "%(format_name)s)."
 msgstr ""
 
-#: pymedia/ffprobe.py:254
+#: pymedia/ffprobe.py:300
 #, python-format
 msgid "%(path.suffix)s extension doesn't support %(codec_name)s subtitles."
 msgstr ""
@@ -403,11 +411,16 @@ msgid "Allows upscaling beyond the source dimensions."
 msgstr ""
 
 #: pymedia/commands/base_cli_options.py:563
+#: pymedia/commands/base_cli_options.py:572
 msgid "Metadata options"
 msgstr ""
 
 #: pymedia/commands/base_cli_options.py:564
 msgid "Specify an orthogonal arc degree to rotate image through metadata."
+msgstr ""
+
+#: pymedia/commands/base_cli_options.py:573
+msgid "Output file will not copy metadata from source file."
 msgstr ""
 
 #: pymedia/commands/base_service.py:83
@@ -458,23 +471,27 @@ msgstr ""
 msgid "Output file could not be moved."
 msgstr ""
 
-#: pymedia/commands/add_audio/cli.py:29
+#: pymedia/commands/add_audio/cli.py:24
 msgid ""
 "Add an audio track to a media file.\n"
 "\n"
 "You can consult what audio tracks have a container with `info` command.\n"
 "\n"
+"The audio track's metadata (language, title, dispositions) are inherited "
+"from\n"
+"the source audio file. Use `edit-audio` to modify them after insertion.\n"
+"\n"
 "[bold]Examples[/bold]:\n"
-"  Add english audio to a media container:\n"
-"    > pymedia add-audio input.mp4 eng_audio.aac --language eng\n"
-"  Add default commentary spanish audio with custom title:\n"
-"    > pymedia add-audio input.mp4 spa_audio.aac --language spa --title "
-"\"Comentario director\" --default --commentary\n"
+"  Add audio track from a file (metadata inherited from source):\n"
+"    > pymedia add-audio input.mp4 audio.m4a\n"
+"  Add audio and override default disposition:\n"
+"    > pymedia add-audio input.mp4 audio.m4a\n"
+"    Then: pymedia edit-audio output.mp4 --track 1 --default\n"
 msgstr ""
 
-#: pymedia/commands/add_audio/cli.py:46 pymedia/commands/delete_audio/cli.py:38
+#: pymedia/commands/add_audio/cli.py:45 pymedia/commands/delete_audio/cli.py:38
 #: pymedia/commands/edit_audio/cli.py:47
-#: pymedia/commands/extract_audio/cli.py:40
+#: pymedia/commands/extract_audio/cli.py:41
 msgid "Audio commands"
 msgstr ""
 
@@ -487,7 +504,7 @@ msgstr ""
 msgid "Audio added successfully: %(output)s"
 msgstr ""
 
-#: pymedia/commands/add_subtitles/cli.py:29
+#: pymedia/commands/add_subtitles/cli.py:30
 msgid ""
 "Add subtitles to a media file.\n"
 "\n"
@@ -502,10 +519,10 @@ msgid ""
 "\"Español (forced)\" --default --forced\n"
 msgstr ""
 
-#: pymedia/commands/add_subtitles/cli.py:46
+#: pymedia/commands/add_subtitles/cli.py:47
 #: pymedia/commands/delete_subtitles/cli.py:38
 #: pymedia/commands/edit_subtitles/cli.py:47
-#: pymedia/commands/extract_subtitles/cli.py:40
+#: pymedia/commands/extract_subtitles/cli.py:41
 msgid "Subtitles commands"
 msgstr ""
 
@@ -551,7 +568,7 @@ msgstr ""
 msgid "Animated image generated successfully: %(output)s"
 msgstr ""
 
-#: pymedia/commands/cut/cli.py:27
+#: pymedia/commands/cut/cli.py:28
 msgid ""
 "Cut off a video container's section or split it between different media "
 "files.\n"
@@ -566,12 +583,12 @@ msgid ""
 "    > pymedia cut input.mp4 --at 10:05,40:30,1:20:00\n"
 msgstr ""
 
-#: pymedia/commands/cut/cli.py:44 pymedia/commands/join/cli.py:39
-#: pymedia/commands/remux/cli.py:48 pymedia/commands/transcode/cli.py:56
+#: pymedia/commands/cut/cli.py:45 pymedia/commands/join/cli.py:40
+#: pymedia/commands/remux/cli.py:49 pymedia/commands/transcode/cli.py:57
 msgid "Video commands"
 msgstr ""
 
-#: pymedia/commands/cut/cli.py:82
+#: pymedia/commands/cut/cli.py:85
 msgid "Ambiguous options: You can't select --at with --start or --end."
 msgstr ""
 
@@ -682,7 +699,7 @@ msgstr ""
 msgid "Subtitles metadata edited successfully: %(output)s"
 msgstr ""
 
-#: pymedia/commands/extract_audio/cli.py:23
+#: pymedia/commands/extract_audio/cli.py:24
 msgid ""
 "Extract audio tracks from a media file.\n"
 "\n"
@@ -704,7 +721,7 @@ msgstr ""
 msgid "Audio extracted successfully: %(output)s"
 msgstr ""
 
-#: pymedia/commands/extract_subtitles/cli.py:23
+#: pymedia/commands/extract_subtitles/cli.py:24
 msgid ""
 "Extract subtitles from a media file.\n"
 "\n"
@@ -769,163 +786,163 @@ msgstr ""
 msgid "Analysis commands"
 msgstr ""
 
-#: pymedia/commands/info/service.py:44
+#: pymedia/commands/info/service.py:45
 msgid "-"
 msgstr ""
 
-#: pymedia/commands/info/service.py:53 pymedia/commands/info/service.py:124
-#: pymedia/commands/info/service.py:159
+#: pymedia/commands/info/service.py:54 pymedia/commands/info/service.py:125
+#: pymedia/commands/info/service.py:162
 msgid "Title"
 msgstr ""
 
-#: pymedia/commands/info/service.py:54
+#: pymedia/commands/info/service.py:55
 msgid "Comment"
 msgstr ""
 
-#: pymedia/commands/info/service.py:55
+#: pymedia/commands/info/service.py:56
 msgid "Description"
 msgstr ""
 
-#: pymedia/commands/info/service.py:56
+#: pymedia/commands/info/service.py:57
 msgid "Synopsis"
 msgstr ""
 
-#: pymedia/commands/info/service.py:57
+#: pymedia/commands/info/service.py:58
 msgid "Genre"
 msgstr ""
 
-#: pymedia/commands/info/service.py:58
+#: pymedia/commands/info/service.py:59
 msgid "Date"
 msgstr ""
 
-#: pymedia/commands/info/service.py:59
+#: pymedia/commands/info/service.py:60
 msgid "Copyright"
 msgstr ""
 
-#: pymedia/commands/info/service.py:60
+#: pymedia/commands/info/service.py:61
 msgid "Law rating"
 msgstr ""
 
-#: pymedia/commands/info/service.py:61
+#: pymedia/commands/info/service.py:62
 msgid "Artist"
 msgstr ""
 
-#: pymedia/commands/info/service.py:62
+#: pymedia/commands/info/service.py:63
 msgid "Album"
 msgstr ""
 
-#: pymedia/commands/info/service.py:63
+#: pymedia/commands/info/service.py:64
 msgid "Encoder"
 msgstr ""
 
-#: pymedia/commands/info/service.py:66
+#: pymedia/commands/info/service.py:67
 msgid "General"
 msgstr ""
 
-#: pymedia/commands/info/service.py:67
+#: pymedia/commands/info/service.py:68
 msgid "Field"
 msgstr ""
 
-#: pymedia/commands/info/service.py:68
+#: pymedia/commands/info/service.py:69
 msgid "Value"
 msgstr ""
 
-#: pymedia/commands/info/service.py:69 pymedia/commands/sheet/cmd.py:299
+#: pymedia/commands/info/service.py:70 pymedia/commands/sheet/cmd.py:301
 msgid "File"
 msgstr ""
 
-#: pymedia/commands/info/service.py:70
+#: pymedia/commands/info/service.py:71
 msgid "Container"
 msgstr ""
 
-#: pymedia/commands/info/service.py:72 pymedia/commands/sheet/cmd.py:311
+#: pymedia/commands/info/service.py:73 pymedia/commands/sheet/cmd.py:313
 msgid "Duration"
 msgstr ""
 
-#: pymedia/commands/info/service.py:80 pymedia/commands/sheet/cmd.py:304
+#: pymedia/commands/info/service.py:81 pymedia/commands/sheet/cmd.py:306
 msgid "Size"
 msgstr ""
 
-#: pymedia/commands/info/service.py:97 pymedia/mixins/scale_mixin.py:120
+#: pymedia/commands/info/service.py:98 pymedia/mixins/scale_mixin.py:120
 #: pymedia/mixins/scale_mixin.py:136
 msgid "video dimensions"
 msgstr ""
 
-#: pymedia/commands/info/service.py:99 pymedia/commands/sheet/cmd.py:315
+#: pymedia/commands/info/service.py:100 pymedia/commands/sheet/cmd.py:317
 msgid "Video"
 msgstr ""
 
-#: pymedia/commands/info/service.py:100 pymedia/commands/info/service.py:119
-#: pymedia/commands/info/service.py:156
+#: pymedia/commands/info/service.py:101 pymedia/commands/info/service.py:120
+#: pymedia/commands/info/service.py:159
 msgid "Track"
 msgstr ""
 
-#: pymedia/commands/info/service.py:101 pymedia/commands/info/service.py:120
-#: pymedia/commands/info/service.py:157
+#: pymedia/commands/info/service.py:102 pymedia/commands/info/service.py:121
+#: pymedia/commands/info/service.py:160
 msgid "Codec"
 msgstr ""
 
-#: pymedia/commands/info/service.py:102
+#: pymedia/commands/info/service.py:103
 msgid "Resolution"
 msgstr ""
 
-#: pymedia/commands/info/service.py:103
+#: pymedia/commands/info/service.py:104
 msgid "FPS"
 msgstr ""
 
-#: pymedia/commands/info/service.py:104
+#: pymedia/commands/info/service.py:105
 msgid "Bit rate"
 msgstr ""
 
-#: pymedia/commands/info/service.py:118
+#: pymedia/commands/info/service.py:119
 msgid "Audio"
 msgstr ""
 
-#: pymedia/commands/info/service.py:121
+#: pymedia/commands/info/service.py:122
 msgid "Sample"
 msgstr ""
 
-#: pymedia/commands/info/service.py:122
+#: pymedia/commands/info/service.py:123
 msgid "Channels"
 msgstr ""
 
-#: pymedia/commands/info/service.py:123
+#: pymedia/commands/info/service.py:124
 msgid "Lang"
 msgstr ""
 
-#: pymedia/commands/info/service.py:126 pymedia/commands/info/service.py:161
+#: pymedia/commands/info/service.py:127 pymedia/commands/info/service.py:164
 msgid "Def"
 msgstr ""
 
-#: pymedia/commands/info/service.py:128 pymedia/commands/info/service.py:163
+#: pymedia/commands/info/service.py:129 pymedia/commands/info/service.py:166
 msgid "For"
 msgstr ""
 
-#: pymedia/commands/info/service.py:130 pymedia/commands/info/service.py:165
+#: pymedia/commands/info/service.py:131 pymedia/commands/info/service.py:168
 msgid "HI"
 msgstr ""
 
-#: pymedia/commands/info/service.py:132
+#: pymedia/commands/info/service.py:133
 msgid "Com"
 msgstr ""
 
-#: pymedia/commands/info/service.py:155
+#: pymedia/commands/info/service.py:158
 msgid "Subtitles"
 msgstr ""
 
-#: pymedia/commands/info/service.py:158
+#: pymedia/commands/info/service.py:161
 msgid "Language"
 msgstr ""
 
-#: pymedia/commands/info/service.py:167
+#: pymedia/commands/info/service.py:170
 msgid "VI"
 msgstr ""
 
-#: pymedia/commands/info/service.py:195
+#: pymedia/commands/info/service.py:200
 msgid "Metadata"
 msgstr ""
 
-#: pymedia/commands/info/service.py:223
+#: pymedia/commands/info/service.py:228
 #, python-format
 msgid "%(bit_rate)s kbps"
 msgstr ""
@@ -948,7 +965,7 @@ msgstr ""
 msgid "Interval must be at least 1 second."
 msgstr ""
 
-#: pymedia/commands/join/cli.py:24
+#: pymedia/commands/join/cli.py:25
 msgid ""
 "Concatenate different compatible videos into a single media container.\n"
 "\n"
@@ -959,7 +976,7 @@ msgid ""
 "    > pymedia join input1.mp4 input2.mp4 input3.mp4 -o output.mp4\n"
 msgstr ""
 
-#: pymedia/commands/join/cli.py:64
+#: pymedia/commands/join/cli.py:67
 msgid "It's required to provide at least 2 videos."
 msgstr ""
 
@@ -1007,7 +1024,7 @@ msgstr ""
 msgid "%(binary)s was not found in PATH. Install ffmpeg first."
 msgstr ""
 
-#: pymedia/commands/remux/cli.py:29
+#: pymedia/commands/remux/cli.py:30
 msgid ""
 "Change container and metadata without transcoding.\n"
 "\n"
@@ -1100,7 +1117,7 @@ msgstr ""
 msgid "Sheet generated successfully: %(output)s"
 msgstr ""
 
-#: pymedia/commands/transcode/cli.py:36
+#: pymedia/commands/transcode/cli.py:37
 msgid ""
 "Transcode video container changing its codecs and compression.\n"
 "\n"
@@ -1126,23 +1143,11 @@ msgstr ""
 msgid "Container transcoded successfully: %(output)s"
 msgstr ""
 
-#: pymedia/mixins/audio_mixin.py:62
-msgid "audio language"
-msgstr ""
-
-#: pymedia/mixins/audio_mixin.py:109 pymedia/mixins/subtitles_mixin.py:111
-msgid "stream tracks"
-msgstr ""
-
-#: pymedia/mixins/audio_mixin.py:114
-msgid "media audio"
-msgstr ""
-
-#: pymedia/mixins/audio_mixin.py:123 pymedia/mixins/streams_mixin.py:87
+#: pymedia/mixins/audio_mixin.py:148 pymedia/mixins/streams_mixin.py:87
 msgid "Audio index not included."
 msgstr ""
 
-#: pymedia/mixins/audio_mixin.py:267
+#: pymedia/mixins/audio_mixin.py:319
 msgid ""
 "Value doesn't match a native language name, an English language name, or "
 "a standard ISO 639-1/639-2 code: "
@@ -1227,7 +1232,7 @@ msgstr ""
 msgid "Stream index must be greater than 0."
 msgstr ""
 
-#: pymedia/mixins/streams_mixin.py:95 pymedia/mixins/subtitles_mixin.py:124
+#: pymedia/mixins/streams_mixin.py:95 pymedia/mixins/subtitles_mixin.py:130
 msgid "Subtitles index not included."
 msgstr ""
 
@@ -1235,19 +1240,23 @@ msgstr ""
 msgid "Incorrect stream type."
 msgstr ""
 
-#: pymedia/mixins/subtitles_mixin.py:65
+#: pymedia/mixins/subtitles_mixin.py:69
 msgid "subtitles language"
 msgstr ""
 
-#: pymedia/mixins/subtitles_mixin.py:116
+#: pymedia/mixins/subtitles_mixin.py:117
+msgid "stream tracks"
+msgstr ""
+
+#: pymedia/mixins/subtitles_mixin.py:122
 msgid "media subtitles"
 msgstr ""
 
-#: pymedia/mixins/subtitles_mixin.py:243
+#: pymedia/mixins/subtitles_mixin.py:260
 msgid "Subtitles codec not supported."
 msgstr ""
 
-#: pymedia/mixins/subtitles_mixin.py:267
+#: pymedia/mixins/subtitles_mixin.py:284
 msgid ""
 "Value doesn't match with ISO 639-1/639-2: Codes for the Representation of"
 " Names of "

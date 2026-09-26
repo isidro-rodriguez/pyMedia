@@ -12,7 +12,6 @@ from pymedia.commands.info.parameters import InfoParameters
 from pymedia.errors import MissingParameterError
 from pymedia.locale_manager import locale_manager
 from pymedia.locales import translate as _
-from pymedia.models.audio import get_audio_metadata
 from pymedia.models.media import Audio, Subtitles, Video
 from pymedia.models.subtitles import get_subtitles_metadata
 from pymedia.utils import parse_quantity, parse_size, parse_timedelta
@@ -137,7 +136,7 @@ class InfoService(BaseService[InfoParameters]):
                 if track.track_index is None:
                     raise MissingParameterError(name="track_index")
 
-                meta = get_audio_metadata(track)
+                meta = track.metadata
 
                 table.add_row(
                     str(track.track_index),

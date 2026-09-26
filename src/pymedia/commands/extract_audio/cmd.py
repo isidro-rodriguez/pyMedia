@@ -40,11 +40,17 @@ class ExtractAudioCmd:
             output = self.params.audio_output
             str_list: list[str] = []
             for stream in self.params.stream_tracks:
-                str_list.append("-map")
-                str_list.append(f"0:a:{stream}")
                 final_output = output.with_stem(f"{output.stem}_audio_track_{stream}")
-                str_list.append(str(final_output))
                 output_list.append(final_output)
+                str_list.extend(
+                    [
+                        "-map",
+                        f"0:a:{stream}",
+                        "-c:a",
+                        "copy",
+                        str(final_output),
+                    ]
+                )
             return str_list
 
         if self.params.media is None:
@@ -56,15 +62,11 @@ class ExtractAudioCmd:
         if self.params.overwrite == OverwriteMode.YES:
             cmd.append("-y")
 
+        cmd.extend(["-i", str(self.params.media.path)])
+
         if self.params.strip_metadata:
             cmd.extend(self.params.to_strip_metadata_cmd())
 
-        cmd.extend(
-            [
-                "-i",
-                str(self.params.media.path),
-                *_build_streams_list(),
-            ]
-        )
+        cmd.extend([*_build_streams_list()])
 
         return cmd, output_list
