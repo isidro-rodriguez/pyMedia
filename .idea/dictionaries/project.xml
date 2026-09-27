@@ -2,10 +2,12 @@
   <dictionary name="project">
     <words>
       <w>Ffprobe</w>
+      <w>Tupla</w>
       <w>WIDTHxHEIGHT</w>
       <w>arrasta</w>
       <w>bycicle</w>
       <w>comilla</w>
+      <w>dvdsub</w>
       <w>fflags</w>
       <w>filtergraph</w>
       <w>fontfile</w>
@@ -14,6 +16,8 @@
       <w>hflip</w>
       <w>hstack</w>
       <w>lavfi</w>
+      <w>loudnorm</w>
+      <w>pgssub</w>
       <w>refactorizar</w>
       <w>remultiplexación</w>
       <w>remultiplexado</w>
