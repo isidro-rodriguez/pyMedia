@@ -304,7 +304,7 @@ class MediaOutputMixin:
 
         if media.video is None:
             raise MissingPropertyError(name="video")
-        if media.video.codec is None:
+        if media.video.format.codec is None:
             raise MissingPropertyError(name="video codec")
 
         if output.suffix not in SUPPORTED.CONTAINERS:
@@ -314,14 +314,14 @@ class MediaOutputMixin:
                 supported=SUPPORTED.CONTAINERS,
             )
 
-        if output.suffix not in VIDEO_CODECS[media.video.codec].containers:
+        if output.suffix not in VIDEO_CODECS[media.video.format.codec].containers:
             raise InvalidCodecContainerError(
                 extension=output.suffix,
-                codec=VIDEO_CODECS[media.video.codec].name,
-                supported=VIDEO_CODECS[media.video.codec].containers,
+                codec=VIDEO_CODECS[media.video.format.codec].name,
+                supported=VIDEO_CODECS[media.video.format.codec].containers,
             )
         if remux:
-            codec = media.video.codec
+            codec = media.video.format.codec
             _validate_remux(
                 suffix=output.suffix,
                 source_suffix=media.path.suffix,
@@ -363,7 +363,7 @@ class MediaOutputMixin:
             raise MissingParameterError(name="video")
 
         mp4_args = ["-movflags", "+faststart"]
-        if self.media.video.codec == "h265":
+        if self.media.video.format.codec == "h265":
             mp4_args.extend(["-tag:v", "hvc1"])
 
         return mp4_args

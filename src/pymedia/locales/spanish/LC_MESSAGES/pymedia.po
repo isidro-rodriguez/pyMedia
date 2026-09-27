@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-09-27 16:02+0100\n"
+"POT-Creation-Date: 2026-09-27 16:48+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -63,52 +63,51 @@ msgstr "Falta la opción requerida: %(options)s"
 msgid "Missing at least one of these options: %(options)s"
 msgstr "Falta al menos una de estas opciones: %(options)s"
 
-#: pymedia/ffprobe.py:39
+#: pymedia/ffprobe.py:44
 msgid "ffprobe was not found. Install ffmpeg."
 msgstr "ffprobe no se encontró. Instala ffmpeg."
 
-#: pymedia/ffprobe.py:44
+#: pymedia/ffprobe.py:49
 #, python-format
 msgid "ffprobe couldn't read %(path)s: %(err.stderr)s"
 msgstr "ffprobe no pudo leer %(path)s: %(err.stderr)s"
 
-#: pymedia/ffprobe.py:99
+#: pymedia/ffprobe.py:136
 #, python-format
 msgid "ffprobe media data: %(data)s"
 msgstr "Datos de medio de ffprobe: %(data)s"
 
-#: pymedia/ffprobe.py:167
+#: pymedia/ffprobe.py:196
 #, python-format
 msgid "Invalid video container: %(path)s"
 msgstr "Contenedor de vídeo no válido: %(path)s"
 
-#: pymedia/ffprobe.py:232
+#: pymedia/ffprobe.py:261
 #, python-format
 msgid "ffprobe audio file data: %(data)s"
 msgstr "Datos de audio del fichero ffprobe: %(data)s"
 
-#: pymedia/ffprobe.py:265
+#: pymedia/ffprobe.py:291
 #, python-format
 msgid "It doesn't contain any audio track. Invalid audio file: %(file)s"
-msgstr ""
-"No contiene ninguna pista de audio. Fichero de audio no válido: %(file)s"
+msgstr "No contiene ninguna pista de audio. Fichero de audio no válido: %(file)s"
 
-#: pymedia/ffprobe.py:271
+#: pymedia/ffprobe.py:297
 #, python-format
 msgid "Audio file contains video tracks: %(tracks)s"
 msgstr "El fichero de audio contiene pistas de vídeo: %(tracks)s"
 
-#: pymedia/ffprobe.py:276
+#: pymedia/ffprobe.py:302
 #, python-format
 msgid "Audio file contains subtitles tracks: %(tracks)s"
 msgstr "El fichero de audio contiene pistas de subtítulos: %(tracks)s"
 
-#: pymedia/ffprobe.py:296
+#: pymedia/ffprobe.py:322
 #, python-format
 msgid "ffprobe subtitles file data: %(data)s"
 msgstr "Datos de fichero de subtítulos de ffprobe: %(data)s"
 
-#: pymedia/ffprobe.py:309
+#: pymedia/ffprobe.py:335
 #, python-format
 msgid ""
 "\"%(path)s\" is not a recognized subtitles file (detected format: "
@@ -117,7 +116,7 @@ msgstr ""
 "\"%(path)s\" no es un fichero de subtítulos reconocido (formato "
 "detectado: %(format_name)s)."
 
-#: pymedia/ffprobe.py:318
+#: pymedia/ffprobe.py:344
 #, python-format
 msgid "%(path.suffix)s extension doesn't support %(codec_name)s subtitles."
 msgstr "La extensión %(path.suffix)s no admite subtítulos %(codec_name)s."
@@ -430,18 +429,17 @@ msgid "Allows upscaling beyond the source dimensions."
 msgstr "Permite ampliar más allá de las dimensiones de origen."
 
 #: pymedia/commands/base_cli_options.py:563
-#: pymedia/commands/base_cli_options.py:574
+#: pymedia/commands/base_cli_options.py:572
 msgid "Metadata options"
 msgstr "Opciones de metadatos"
 
-#: pymedia/commands/base_cli_options.py:565
+#: pymedia/commands/base_cli_options.py:564
 msgid "Specify an orthogonal arc degree to rotate image through disposition."
 msgstr "Especifica un ángulo de giro ortogonal para rotar la imagen vía metadatos."
 
-#: pymedia/commands/base_cli_options.py:575
+#: pymedia/commands/base_cli_options.py:573
 msgid "Output file will not copy disposition from source file."
-msgstr ""
-"El fichero de salida no copiará las disposiciones del fichero de origen."
+msgstr "El fichero de salida no copiará las disposiciones del fichero de origen."
 
 #: pymedia/commands/base_service.py:83
 msgid "Invalid class name format!"
@@ -513,8 +511,8 @@ msgstr ""
 "Puedes consultar qué pistas de audio tiene un contenedor con el comando "
 "`info`.\n"
 "\n"
-"Las disposiciones de la pista de audio (idioma, título, disposiciones) se "
-"heredan del\n"
+"Las disposiciones de la pista de audio (idioma, título, disposiciones) se"
+" heredan del\n"
 "fichero de audio de origen. Usa `edit-audio` para modificarlas tras la "
 "inserción.\n"
 "\n"
@@ -994,7 +992,7 @@ msgstr "Campo"
 msgid "Value"
 msgstr "Valor"
 
-#: pymedia/commands/info/service.py:69 pymedia/commands/sheet/cmd.py:299
+#: pymedia/commands/info/service.py:69 pymedia/commands/sheet/cmd.py:301
 msgid "File"
 msgstr "Archivo"
 
@@ -1002,20 +1000,20 @@ msgstr "Archivo"
 msgid "Container"
 msgstr "Contenedor"
 
-#: pymedia/commands/info/service.py:72 pymedia/commands/sheet/cmd.py:311
+#: pymedia/commands/info/service.py:72 pymedia/commands/sheet/cmd.py:313
 msgid "Duration"
 msgstr "Duración"
 
-#: pymedia/commands/info/service.py:80 pymedia/commands/sheet/cmd.py:304
+#: pymedia/commands/info/service.py:80 pymedia/commands/sheet/cmd.py:306
 msgid "Size"
 msgstr "Tamaño"
 
-#: pymedia/commands/info/service.py:97 pymedia/mixins/scale_mixin.py:120
-#: pymedia/mixins/scale_mixin.py:136
+#: pymedia/commands/info/service.py:97 pymedia/mixins/scale_mixin.py:124
+#: pymedia/mixins/scale_mixin.py:140
 msgid "video dimensions"
 msgstr "dimensiones del vídeo"
 
-#: pymedia/commands/info/service.py:99 pymedia/commands/sheet/cmd.py:315
+#: pymedia/commands/info/service.py:99 pymedia/commands/sheet/cmd.py:317
 msgid "Video"
 msgstr "Vídeo"
 
@@ -1164,7 +1162,7 @@ msgstr "Uniendo archivos multimedia"
 msgid "Containers joined successfully: %(output)s"
 msgstr "Contenedores unidos correctamente: %(output)s"
 
-#: pymedia/commands/join/service.py:179
+#: pymedia/commands/join/service.py:181
 #, python-format
 msgid ""
 "Incompatible media files for join output %(output)s.\n"
@@ -1394,13 +1392,13 @@ msgstr ""
 msgid "Invalid crop %(crop_str)s. Expected: WIDTH,HEIGHT,X,Y"
 msgstr "Crop no válido %(crop_str)s. Se esperaba: WIDTH,HEIGHT,X,Y"
 
-#: pymedia/mixins/crop_mixin.py:95
+#: pymedia/mixins/crop_mixin.py:99
 msgid "Invalid crop dimensions: width and height must be greater than 0."
 msgstr ""
 "Dimensiones de recorte no válidas: la anchura y la altura deben ser "
 "mayores que 0."
 
-#: pymedia/mixins/crop_mixin.py:103
+#: pymedia/mixins/crop_mixin.py:107
 #, python-format
 msgid ""
 "Invalid crop area. Area width (%(area_width)s) and coordinate X "
@@ -1409,7 +1407,7 @@ msgstr ""
 "Área de recorte no válida. La anchura del área (%(area_width)s) y la "
 "coordenada X (%(area_x)s) superan la anchura del vídeo (%(video_width)s)"
 
-#: pymedia/mixins/crop_mixin.py:116
+#: pymedia/mixins/crop_mixin.py:120
 #, python-format
 msgid ""
 "Invalid crop area. Area height (%(area_height)s) and coordinate Y "
@@ -1455,15 +1453,15 @@ msgstr "El fichero de salida debe ser distinto del de entrada: %(path)s"
 msgid "Invalid dimensions %(value)s. Expected: WIDTHxHEIGHT"
 msgstr "Dimensiones inválidas %(value)s. Se esperaba: WIDTHxHEIGHT"
 
-#: pymedia/mixins/scale_mixin.py:132
+#: pymedia/mixins/scale_mixin.py:136
 msgid "Scale mode not supported."
 msgstr "Modo de escala no soportado."
 
-#: pymedia/mixins/scale_mixin.py:143
+#: pymedia/mixins/scale_mixin.py:147
 msgid "Target dimensions must be even."
 msgstr "Las dimensiones objetivo deben ser pares."
 
-#: pymedia/mixins/scale_mixin.py:148
+#: pymedia/mixins/scale_mixin.py:152
 msgid "Ignored scale. Target scale > video resolution, it requires upscale."
 msgstr ""
 "Escala ignorada. La escala objetivo supera la resolución del vídeo y "
@@ -1653,3 +1651,4 @@ msgstr ""
 #, python-format
 msgid "Invalid configuration: %(msg)s"
 msgstr "Configuración no válida: %(msg)s"
+

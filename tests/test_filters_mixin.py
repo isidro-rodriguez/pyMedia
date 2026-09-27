@@ -8,6 +8,7 @@ import pytest
 from pymedia.commands.frames.parameters import FramesParameters
 from pymedia.mixins.filters_mixin import FiltersMixin
 from pymedia.models.media import Media, Video
+from pymedia.models.video import VideoFormat
 from pymedia.types import OverwriteMode, RotateMode, ScaleMode
 
 
@@ -19,7 +20,10 @@ def _mixin(video: Video | None = None) -> FiltersMixin:
         video=(
             video
             if video is not None
-            else Video(path=Path("clip.mp4"), width=1920, height=1080)
+            else Video(
+                path=Path("clip.mp4"),
+                format=VideoFormat(width=1920, height=1080),
+            )
         ),
     )
     return mixin
@@ -184,7 +188,10 @@ class TestFiltersIntegration:
         params = FramesParameters(overwrite=OverwriteMode.NO)
         params.media = Media(
             path=Path("clip.mp4"),
-            video=Video(path=Path("clip.mp4"), width=1920, height=1080),
+            video=Video(
+                path=Path("clip.mp4"),
+                format=VideoFormat(width=1920, height=1080),
+            ),
         )
 
         params.create_filters(

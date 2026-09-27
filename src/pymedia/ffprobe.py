@@ -4,7 +4,7 @@ import json
 import subprocess
 from datetime import timedelta
 from pathlib import Path
-from typing import Any
+from typing import Any, cast
 
 from pymedia.data.subtitles_formats import SUBTITLES_FORMATS
 from pymedia.data.video_codecs import VIDEO_CODECS
@@ -19,7 +19,12 @@ from pymedia.models.audio import (
 )
 from pymedia.models.media import Media, MediaMetadata
 from pymedia.models.subtitles import Subtitles, SubtitlesDispositions, SubtitlesMetadata
-from pymedia.models.video import Video
+from pymedia.models.video import (
+    Video,
+    VideoDispositions,
+    VideoFormat,
+    VideoMetadata,
+)
 from pymedia.utils import parse_date, parse_fraction, to_float, to_int
 
 
@@ -83,6 +88,42 @@ def _build_audio_dispositions(disposition: dict[str, Any]) -> AudioDispositions:
     )
 
 
+def _build_video_format(stream: dict[str, Any]) -> VideoFormat:
+    """Construye VideoFormat a partir del stream de vídeo de ffprobe."""
+    return VideoFormat(
+        codec=VIDEO_CODECS[cast(str, stream.get("codec_name"))].name,
+        width=stream.get("width"),
+        height=stream.get("height"),
+        fps=parse_fraction(stream.get("avg_frame_rate")),
+        bit_rate=to_int(stream.get("bit_rate")),
+        pix_fmt=stream.get("pix_fmt"),
+        aspect_ratio=stream.get("display_aspect_ratio"),
+        profile=stream.get("profile"),
+        pixel_aspect_ratio=stream.get("sample_aspect_ratio"),
+    )
+
+
+def _build_video_metadata(tags: dict[str, Any]) -> VideoMetadata:
+    """Construye VideoMetadata a partir de las etiquetas del stream de vídeo."""
+    return VideoMetadata(
+        language=tags.get("language"),
+        title=tags.get("title"),
+        encoder=tags.get("encoder"),
+    )
+
+
+def _build_video_dispositions(disposition: dict[str, Any]) -> VideoDispositions:
+    """Construye VideoDispositions a partir del disposition dict de ffprobe."""
+    return VideoDispositions(
+        default=bool(disposition.get("default", 0)),
+        forced=bool(disposition.get("forced", 0)),
+        original=bool(disposition.get("original", 0)),
+        commentary=bool(disposition.get("comment", 0)),
+        attached_pic=bool(disposition.get("attached_pic", 0)),
+        captions=bool(disposition.get("captions", 0)),
+    )
+
+
 def get_media_information(media_input: Path, logger: Logger) -> "Media":
     """Obtiene información del contenedor multimedia.
 
@@ -109,15 +150,10 @@ def get_media_information(media_input: Path, logger: Logger) -> "Media":
                 path=media_input.absolute(),
                 global_index=stream.get("index"),
                 track_index=video_track_index,
-                codec=VIDEO_CODECS[stream.get("codec_name")].name,
-                width=stream.get("width"),
-                height=stream.get("height"),
                 duration=tags.get("DURATION"),
-                fps=parse_fraction(stream.get("avg_frame_rate")),
-                bit_rate=to_int(stream.get("bit_rate")),
-                pix_fmt=stream.get("pix_fmt"),
-                aspect_ratio=stream.get("display_aspect_ratio"),
-                profile=stream.get("profile"),
+                format=_build_video_format(stream=stream),
+                metadata=_build_video_metadata(tags=tags),
+                dispositions=_build_video_dispositions(disposition=disposition),
             )
             video_track_index += 1
         elif codec_type == "audio":

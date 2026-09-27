@@ -93,7 +93,7 @@ class InfoService(BaseService[InfoParameters]):
                 raise MissingParameterError(name="global_index")
             if video.track_index is None:
                 raise MissingParameterError(name="track_index")
-            if video.width is None or video.height is None:
+            if video.format.width is None or video.format.height is None:
                 raise MissingParameterError(name=_("video dimensions"))
 
             table = Table(title=f"🎬 {_('Video')}", show_header=True, expand=True)
@@ -104,11 +104,11 @@ class InfoService(BaseService[InfoParameters]):
             table.add_column(header=_("Bit rate"), ratio=1, justify="center")
             table.add_row(
                 str(video.track_index),
-                f"{video.codec} ({video.profile})"
-                if video.codec and video.profile
-                else video.codec or na,
-                f"{video.width}x{video.height}",
-                str(video.fps) if video.fps else na,
+                f"{video.format.codec} ({video.format.profile})"
+                if video.format.codec and video.format.profile
+                else video.format.codec or na,
+                f"{video.format.width}x{video.format.height}",
+                str(video.format.fps) if video.format.fps else na,
                 self._estimated_bit_rate(),
             )
             return table
@@ -219,8 +219,8 @@ class InfoService(BaseService[InfoParameters]):
 
         locale = locale_manager.detect_language()
 
-        if video.bit_rate:
-            bit_rate = video.bit_rate / 1024
+        if video.format.bit_rate:
+            bit_rate = video.format.bit_rate / 1024
         else:
             bit_rate = (media.size * 8 / media.duration.total_seconds()) / 1024
 

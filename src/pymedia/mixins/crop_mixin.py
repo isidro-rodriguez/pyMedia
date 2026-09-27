@@ -86,7 +86,11 @@ class CropMixin:
         def _validate_crop_area() -> None:
             """Comprueba que los valores aportados puedan resultar en un crop válido."""
             video = media.video
-            if video is None or video.width is None or video.height is None:
+            if (
+                video is None
+                or video.format.width is None
+                or video.format.height is None
+            ):
                 raise MissingPropertyError(name="video")
 
             if crop_area.width == 0 or crop_area.height == 0:
@@ -97,7 +101,7 @@ class CropMixin:
                     )
                 )
 
-            if crop_area.width + crop_area.x >= video.width:
+            if crop_area.width + crop_area.x >= video.format.width:
                 raise UserError(
                     msg=_(
                         "Invalid crop area. Area width (%(area_width)s) and coordinate "
@@ -106,11 +110,11 @@ class CropMixin:
                     % {
                         "area_width": crop_area.width,
                         "area_x": crop_area.x,
-                        "video_width": video.width,
+                        "video_width": video.format.width,
                     }
                 )
 
-            if crop_area.height + crop_area.y > video.height:
+            if crop_area.height + crop_area.y > video.format.height:
                 raise UserError(
                     msg=_(
                         "Invalid crop area. Area height (%(area_height)s) and "
@@ -120,7 +124,7 @@ class CropMixin:
                     % {
                         "area_height": crop_area.height,
                         "area_y": crop_area.y,
-                        "video_height": video.height,
+                        "video_height": video.format.height,
                     }
                 )
 

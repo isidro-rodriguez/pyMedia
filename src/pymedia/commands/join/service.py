@@ -93,30 +93,32 @@ class JoinService(BaseService[JoinParameters]):
                 v_media = media.video
                 if prop := _prop(
                     label="video.codec",
-                    first_value=v_first.codec,
-                    value=v_media.codec,
+                    first_value=v_first.format.codec,
+                    value=v_media.format.codec,
                 ):
                     issues.append(prop)
                 if prop := _prop(
                     label="video.width",
-                    first_value=v_first.width,
-                    value=v_media.width,
+                    first_value=v_first.format.width,
+                    value=v_media.format.width,
                 ):
                     issues.append(prop)
                 if prop := _prop(
                     label="video.height",
-                    first_value=v_first.height,
-                    value=v_media.height,
+                    first_value=v_first.format.height,
+                    value=v_media.format.height,
                 ):
                     issues.append(prop)
                 if prop := _prop(
-                    label="video.fps", first_value=v_first.fps, value=v_media.fps
+                    label="video.fps",
+                    first_value=v_first.format.fps,
+                    value=v_media.format.fps,
                 ):
                     issues.append(prop)
                 if prop := _prop(
                     label="video.pix_fmt",
-                    first_value=v_first.pix_fmt,
-                    value=v_media.pix_fmt,
+                    first_value=v_first.format.pix_fmt,
+                    value=v_media.format.pix_fmt,
                 ):
                     issues.append(prop)
 

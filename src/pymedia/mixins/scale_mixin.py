@@ -116,10 +116,14 @@ class ScaleMixin:
 
         def _get_target_increment() -> tuple[float, _Dimension]:
             """Devuelve el incremento proporcional y la dimensión dominante."""
-            if video is None or video.width is None or video.height is None:
+            if (
+                video is None
+                or video.format.width is None
+                or video.format.height is None
+            ):
                 raise MissingPropertyError(name=_("video dimensions"))
-            width_proportion = target.width / video.width
-            height_proportion = target.height / video.height
+            width_proportion = target.width / video.format.width
+            height_proportion = target.height / video.format.height
             if self.scale_mode == ScaleMode.FIT:
                 if width_proportion <= height_proportion:
                     return width_proportion, _Dimension.WIDTH
@@ -132,7 +136,7 @@ class ScaleMixin:
                 raise InvalidParameterError(msg=_("Scale mode not supported."))
 
         video = media.video
-        if video is None or video.width is None or video.height is None:
+        if video is None or video.format.width is None or video.format.height is None:
             raise MissingPropertyError(name=_("video dimensions"))
 
         target = _parse_dimensions(scale_str)
@@ -142,7 +146,7 @@ class ScaleMixin:
             if target.width % 2 != 0 or target.height % 2 != 0:
                 raise UserError(msg=_("Target dimensions must be even."))
 
-        if video.width == target.width and video.height == target.height:
+        if video.format.width == target.width and video.format.height == target.height:
             return None
 
         msg = _("Ignored scale. Target scale > video resolution, it requires upscale.")
@@ -150,7 +154,10 @@ class ScaleMixin:
             case ScaleMode.STRETCH:
                 if self.scale_upscale:
                     return target
-                if video.width < target.width or video.height < target.height:
+                if (
+                    video.format.width < target.width
+                    or video.format.height < target.height
+                ):
                     logger.warning(msg=msg)
                     return None
                 return target

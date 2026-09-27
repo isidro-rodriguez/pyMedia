@@ -11,6 +11,7 @@ from pymedia.errors import (
 )
 from pymedia.mixins.scale_mixin import ScaleMixin
 from pymedia.models.media import Media, Video
+from pymedia.models.video import VideoFormat
 from pymedia.types import Dimensions, ScaleMode
 
 _IGNORED_MSG = "Ignored scale. Target scale > video resolution, it requires upscale."
@@ -27,7 +28,10 @@ def _mixin(
         video=(
             video
             if video is not None
-            else Video(path=Path("clip.mp4"), width=1920, height=1080)
+            else Video(
+                path=Path("clip.mp4"),
+                format=VideoFormat(width=1920, height=1080),
+            )
         ),
     )
     return mixin

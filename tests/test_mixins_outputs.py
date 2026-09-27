@@ -16,11 +16,15 @@ from pymedia.mixins.outputs_mixin import (
 )
 from pymedia.models.audio import AudioFormat
 from pymedia.models.media import Audio, Media, Subtitles, Video
+from pymedia.models.video import VideoFormat
 
 
 def _video(codec: str | None = "h264") -> Video:
     """Vídeo de ayuda con códec h264 por defecto."""
-    return Video(path=Path("clip.mp4"), codec=codec, width=1920, height=1080)
+    return Video(
+        path=Path("clip.mp4"),
+        format=VideoFormat(codec=codec, width=1920, height=1080),
+    )
 
 
 def _audio(codec: str | None = "aac") -> Audio:

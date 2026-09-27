@@ -140,10 +140,10 @@ class SheetCmd:
             raise MissingParameterError(name="media")
         if media.duration is None:
             raise MissingPropertyError(name="duration")
-        if media.video is None or media.video.fps is None:
+        if media.video is None or media.video.format.fps is None:
             raise MissingPropertyError(name="fps")
 
-        total_frames = int(media.duration.total_seconds() * media.video.fps)
+        total_frames = int(media.duration.total_seconds() * media.video.format.fps)
         n_captures = preset.columns * preset.rows
         frames = _calculate_capture_frames()
 
@@ -153,7 +153,9 @@ class SheetCmd:
         for i, frame_n in enumerate(frames):
             r, c = divmod(i, preset.columns)
             seconds = timedelta(
-                microseconds=round((Fraction(frame_n) / media.video.fps) * 1_000_000)
+                microseconds=round(
+                    (Fraction(frame_n) / media.video.format.fps) * 1_000_000
+                )
             )
             timestamp_str = parse_timedelta(seconds)
 
@@ -261,26 +263,26 @@ class SheetCmd:
             raise MissingParameterError(name="preset")
 
         video = media.video
-        if video is None or video.width is None or video.height is None:
+        if video is None or video.format.width is None or video.format.height is None:
             raise MissingPropertyError(name="width/height")
 
         # Construcción dinámica de detalles de vídeo (manejando opcionales)
-        video_parts = [f"{video.width}x{video.height}"]
+        video_parts = [f"{video.format.width}x{video.format.height}"]
 
-        if video.codec:
-            codec_info = video.codec
-            if video.profile:
-                codec_info += f" ({video.profile})"
+        if video.format.codec:
+            codec_info = video.format.codec
+            if video.format.profile:
+                codec_info += f" ({video.format.profile})"
             video_parts.append(codec_info)
 
-        if video.pix_fmt:
-            video_parts.append(video.pix_fmt)
+        if video.format.pix_fmt:
+            video_parts.append(video.format.pix_fmt)
 
-        if video.fps:
-            video_parts.append(f"{video.fps} fps")
+        if video.format.fps:
+            video_parts.append(f"{video.format.fps} fps")
 
         # Bitrate: Usar el explícito, o calcularlo aproximadamente por tamaño/duración
-        bit_rate_val: float | None = video.bit_rate
+        bit_rate_val: float | None = video.format.bit_rate
         if (
             bit_rate_val is None
             and media.size
