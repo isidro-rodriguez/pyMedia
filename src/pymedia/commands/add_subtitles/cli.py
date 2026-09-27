@@ -13,13 +13,10 @@ from pymedia.commands.base_cli_options import (
     ShowCmdOption,
     StripMetadataOption,
     SubtitlesArgument,
-    SubtitlesDefaultOption,
-    SubtitlesForcedOption,
-    SubtitlesHearingImpairedOption,
     SubtitlesLanguageOption,
     SubtitlesTitleOption,
-    SubtitlesVisualImpairedOption,
 )
+from pymedia.errors import MissingArgumentError
 from pymedia.locales import translate as _
 from pymedia.logger import Logger
 from pymedia.types import OverwriteMode
@@ -51,14 +48,10 @@ def add_subs(
     media_input: MediaInputArgument,
     subtitles_input: SubtitlesArgument,
     language: SubtitlesLanguageOption,
+    title: SubtitlesTitleOption = None,
     media_output: OutputOption = None,
     overwrite: OverwriteOption = OverwriteMode.ASK,
     strip_metadata: StripMetadataOption = False,
-    title: SubtitlesTitleOption = None,
-    forced: SubtitlesForcedOption = None,
-    default: SubtitlesDefaultOption = None,
-    hearing_impaired: SubtitlesHearingImpairedOption = None,
-    visual_impaired: SubtitlesVisualImpairedOption = None,
     debug: DebugOption = False,
     show_cmd: ShowCmdOption = False,
     help_: HelpOption = False,
@@ -69,14 +62,10 @@ def add_subs(
         media_input: Ruta del fichero de vídeo a procesar.
         subtitles_input: Ruta del fichero de subtítulos a insertar.
         language: Código de idioma de la pista de subtítulos.
+        title: Título a mostrar para identificar la pista de subtítulos.
         media_output: Ruta absoluta del fichero de salida procesado.
         overwrite: Política ante conflicto de salida ya existente.
         strip_metadata: No copiar los metadatos del fichero de entrada.
-        title: Título a mostrar para identificar la pista de subtítulos.
-        forced: Fuerza al reproductor a mostrar la pista de subtítulos.
-        default: Se establece como la pista de subtítulos por defecto.
-        hearing_impaired: Subtítulos adaptados a personas con problemas auditivos.
-        visual_impaired: Subtítulos adaptados a personas con problemas de vista.
         debug: Habilita el nivel de log DEBUG.
         show_cmd: Muestra al usuario el comando ffmpeg compuesto pero no lo ejecuta.
         help_: Helper para mostrar esta línea en distintos idiomas.
@@ -88,18 +77,17 @@ def add_subs(
         UserError: Si el idioma no sigue el estándar ISO 639-2 o el contenedor
             de salida no soporta ningún códec de subtítulos.
     """
+    if language is None:
+        raise MissingArgumentError(name="language")
+
     Logger.create(debug=debug)
     params = AddSubtitlesParameters.load(
         overwrite=overwrite,
         media_input=media_input,
         subtitles_input=subtitles_input,
         language=language,
+        title=title,
         media_output=media_output,
         strip_metadata=strip_metadata,
-        title=title,
-        forced=forced,
-        default=default,
-        hearing_impaired=hearing_impaired,
-        visual_impaired=visual_impaired,
     )
     AddSubtitlesService(debug=debug, show_cmd=show_cmd, params=params).start()

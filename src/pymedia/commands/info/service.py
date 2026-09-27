@@ -13,7 +13,6 @@ from pymedia.errors import MissingParameterError
 from pymedia.locale_manager import locale_manager
 from pymedia.locales import translate as _
 from pymedia.models.media import Audio, Subtitles, Video
-from pymedia.models.subtitles import get_subtitles_metadata
 from pymedia.utils import parse_quantity, parse_size, parse_timedelta
 
 _PANEL_WIDTH = 120
@@ -47,7 +46,7 @@ class InfoService(BaseService[InfoParameters]):
         def _build_general_table() -> Table:
             """Construye la tabla de datos generales del vídeo."""
             if media.metadata is None:
-                raise MissingParameterError(name="media.metadata")
+                raise MissingParameterError(name="media.disposition")
             metadata = media.metadata
 
             metadata_fields = (
@@ -136,19 +135,22 @@ class InfoService(BaseService[InfoParameters]):
                 if track.track_index is None:
                     raise MissingParameterError(name="track_index")
 
-                meta = track.metadata
+                metadata = track.metadata
+                dispositions = track.dispositions
 
                 table.add_row(
                     str(track.track_index),
-                    track.codec or na,
-                    f"{track.sample_rate} Hz" if track.sample_rate else na,
-                    str(track.channels or na),
-                    meta.language or na,
-                    meta.title or na,
-                    "✓" if meta.default else "",
-                    "✓" if meta.forced else "",
-                    "✓" if meta.hearing_impaired else "",
-                    "✓" if meta.commentary else "",
+                    track.format.codec or na,
+                    f"{track.format.sample_rate} Hz"
+                    if track.format.sample_rate
+                    else na,
+                    str(track.format.channels or na),
+                    metadata.language or na,
+                    metadata.title or na,
+                    "✓" if dispositions.default else "",
+                    "✓" if dispositions.forced else "",
+                    "✓" if dispositions.hearing_impaired else "",
+                    "✓" if dispositions.commentary else "",
                 )
 
             return table
@@ -172,17 +174,17 @@ class InfoService(BaseService[InfoParameters]):
                 if sub.track_index is None:
                     raise MissingParameterError(name="track_index")
 
-                meta = get_subtitles_metadata(sub)
+                dispositions = sub.dispositions
 
                 table.add_row(
                     str(sub.track_index),
                     sub.codec or na,
-                    meta.language or na,
-                    meta.title or na,
-                    "✓" if meta.default else "",
-                    "✓" if meta.forced else "",
-                    "✓" if meta.hearing_impaired else "",
-                    "✓" if meta.visual_impaired else "",
+                    sub.metadata.language or na,
+                    sub.metadata.title or na,
+                    "✓" if dispositions.default else "",
+                    "✓" if dispositions.forced else "",
+                    "✓" if dispositions.hearing_impaired else "",
+                    "✓" if dispositions.visual_impaired else "",
                 )
             return table
 

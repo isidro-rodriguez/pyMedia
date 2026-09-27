@@ -14,6 +14,7 @@ from pymedia.mixins.outputs_mixin import (
     _process_output,
     _validate_name,
 )
+from pymedia.models.audio import AudioFormat
 from pymedia.models.media import Audio, Media, Subtitles, Video
 
 
@@ -24,7 +25,10 @@ def _video(codec: str | None = "h264") -> Video:
 
 def _audio(codec: str | None = "aac") -> Audio:
     """Pista de audio de ayuda con códec aac por defecto."""
-    return Audio(path=Path("clip.mp4"), codec=codec, sample_rate=48000, channels=2)
+    return Audio(
+        path=Path("clip.mp4"),
+        format=AudioFormat(codec=codec, sample_rate=48000, channels=2),
+    )
 
 
 def _media_with_path(
@@ -59,9 +63,7 @@ def _audio_track(codec: str, track_index: int) -> Audio:
     return Audio(
         path=Path("clip.mkv"),
         track_index=track_index,
-        codec=codec,
-        sample_rate=48000,
-        channels=2,
+        format=AudioFormat(codec=codec, sample_rate=48000, channels=2),
     )
 
 

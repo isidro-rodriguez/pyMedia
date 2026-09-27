@@ -11,7 +11,7 @@ from pymedia.commands.edit_subtitles.parameters import EditSubtitlesParameters
 from pymedia.commands.extract_subtitles.cmd import ExtractSubtitlesCmd
 from pymedia.commands.extract_subtitles.parameters import ExtractSubtitlesParameters
 from pymedia.models.media import Media
-from pymedia.models.subtitles import Subtitles, SubtitlesMetadata
+from pymedia.models.subtitles import Subtitles, SubtitlesDispositions, SubtitlesMetadata
 from pymedia.types import OverwriteMode
 
 
@@ -70,6 +70,8 @@ def test_add_encodes_new_subtitle_with_local_index() -> None:
             metadata=SubtitlesMetadata(
                 language="spa",
                 title="Español",
+            ),
+            dispositions=SubtitlesDispositions(
                 forced=False,
                 default=False,
             ),
@@ -80,12 +82,14 @@ def test_add_encodes_new_subtitle_with_local_index() -> None:
 
     assert "-c:s:2" in cmd
     assert "srt" in cmd
-    # La metadata exige la forma `s:s:N` (tipo + índice local): con `s:N`
+    # La disposition exige la forma `s:s:N` (tipo + índice local): con `s:N`
     # el índice se interpreta como global y etiqueta la pista equivocada.
     assert "-metadata:s:s:2" in cmd
     assert "language=spa" in cmd
     assert "title=Español" in cmd
     assert "-metadata:s:2" not in cmd
+    # add-subs no debe emitir disposiciones (se dejan para edit-subs)
+    assert "-disposition:s:2" not in cmd
 
 
 def test_edit_default_is_exclusive() -> None:
@@ -94,13 +98,13 @@ def test_edit_default_is_exclusive() -> None:
         Subtitles(
             path=Path("/tmp/input.mkv"),
             track_index=0,
-            metadata=SubtitlesMetadata(default=True, forced=True),
+            dispositions=SubtitlesDispositions(default=True, forced=True),
         ),
         Subtitles(path=Path("/tmp/input.mkv"), track_index=1),
         Subtitles(
             path=Path("/tmp/input.mkv"),
             track_index=2,
-            metadata=SubtitlesMetadata(default=True),
+            dispositions=SubtitlesDispositions(default=True),
         ),
     ]
     params = EditSubtitlesParameters(
@@ -111,9 +115,11 @@ def test_edit_default_is_exclusive() -> None:
         subtitles=Subtitles(
             path=Path("/tmp/input.mkv"),
             track_index=2,
-            metadata=SubtitlesMetadata(default=True),
+            dispositions=SubtitlesDispositions(default=True),
         ),
     )
+    # Simular que el usuario pasó --default (disposition_touched = True)
+    params.disposition_touched = True
 
     cmd = EditSubtitlesCmd(params=params).create()
 
@@ -130,7 +136,7 @@ def test_edit_without_default_leaves_others_untouched() -> None:
         Subtitles(
             path=Path("/tmp/input.mkv"),
             track_index=0,
-            metadata=SubtitlesMetadata(default=True),
+            dispositions=SubtitlesDispositions(default=True),
         ),
         Subtitles(path=Path("/tmp/input.mkv"), track_index=1),
     ]
@@ -142,10 +148,51 @@ def test_edit_without_default_leaves_others_untouched() -> None:
         subtitles=Subtitles(
             path=Path("/tmp/input.mkv"),
             track_index=1,
-            metadata=SubtitlesMetadata(default=False),
+            dispositions=SubtitlesDispositions(default=False),
         ),
     )
+    # Sin disposition_touched, no se emiten disposiciones
+    # params.disposition_touched = False (por defecto)
 
     cmd = EditSubtitlesCmd(params=params).create()
 
     assert "-disposition:s:0" not in cmd
+
+
+def test_edit_preserves_existing_dispositions() -> None:
+    """Edit preserva disposiciones existentes cuando solo se modifica alguna."""
+    media_subtitles = [
+        Subtitles(
+            path=Path("/tmp/input.mkv"),
+            track_index=0,
+            dispositions=SubtitlesDispositions(
+                default=True, forced=True, hearing_impaired=True
+            ),
+        ),
+    ]
+    params = EditSubtitlesParameters(
+        overwrite=OverwriteMode.NO,
+        media=_media(media_subtitles),
+        media_output=Path("/tmp/out.mkv"),
+        stream_tracks=[0],
+        subtitles=Subtitles(
+            path=Path("/tmp/input.mkv"),
+            track_index=0,
+            dispositions=SubtitlesDispositions(
+                default=False, forced=True, hearing_impaired=True
+            ),
+        ),
+    )
+    # Simular que el usuario pasó --no-default (disposition_touched = True)
+    params.disposition_touched = True
+
+    cmd = EditSubtitlesCmd(params=params).create()
+
+    # Solo se emite disposition si disposition_touched es True
+    # Como solo se pasó default=False, se debe emitir disposition
+    assert "-disposition:s:0" in cmd
+    # Debe preservar forced y hearing_impaired, quitar default
+    disp_value = _disposition_value(cmd, "-disposition:s:0")
+    assert "forced" in disp_value
+    assert "hearing_impaired" in disp_value
+    assert "default" not in disp_value

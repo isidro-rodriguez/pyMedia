@@ -10,7 +10,6 @@ from pymedia.errors import MissingParameterError
 from pymedia.logger import Logger
 from pymedia.mixins.media_mixin import MediaInputMixin, MediaListMixin
 from pymedia.models.media import Media
-from pymedia.models.subtitles import get_subtitles_metadata
 
 
 def _logger() -> Logger:
@@ -112,7 +111,7 @@ class TestInputListCreate:
         """Comprueba que un fallo de ffprobe lanza un error."""
         import subprocess
 
-        def _failing_probe(args: list[str], path: Path) -> None:
+        def _failing_probe(_args: list[str], _path: Path) -> None:
             raise subprocess.CalledProcessError(1, ["ffprobe"])
 
         monkeypatch.setattr("pymedia.ffprobe._run_ffprobe", _failing_probe)
@@ -194,7 +193,8 @@ _SUBTITLE_METADATA = {
 class TestSubtitlesStreamParsing:
     """Regresión: ffprobe reporta `codec_type == "subtitle"` en singular."""
 
-    def _media_with_streams(self, tmp_path: Path) -> Media:
+    @staticmethod
+    def _media_with_streams(tmp_path: Path) -> Media:
         """Media parseado con metadatos ffprobe simulados."""
         mixin = MediaInputMixin()
         source = tmp_path / "clip.mkv"
@@ -222,16 +222,16 @@ class TestSubtitlesStreamParsing:
         assert first.global_index == 2
         assert first.track_index == 0
         assert first.codec == "subrip"
-        assert get_subtitles_metadata(first).language == "spa"
-        assert get_subtitles_metadata(first).title == "Español"
-        assert get_subtitles_metadata(first).default is True
-        assert get_subtitles_metadata(first).forced is False
+        assert first.metadata.language == "spa"
+        assert first.metadata.title == "Español"
+        assert first.dispositions.default is True
+        assert first.dispositions.forced is False
 
         assert second.global_index == 3
         assert second.track_index == 1
         assert second.codec == "hdmv_pgs_subtitle"
-        assert get_subtitles_metadata(second).language == "ita"
-        assert get_subtitles_metadata(second).forced is True
+        assert second.metadata.language == "ita"
+        assert second.dispositions.forced is True
 
     def test_video_and_audio_coexist_with_subtitles(
         self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
@@ -253,16 +253,16 @@ class TestSubtitlesStreamParsing:
         assert media.audio[0].track_index == 0
         assert media.audio[0].metadata.language == "eng"
         # Verificar las 10 disposiciones de audio
-        assert media.audio[0].metadata.default is True
-        assert media.audio[0].metadata.forced is False
-        assert media.audio[0].metadata.hearing_impaired is False
-        assert media.audio[0].metadata.commentary is False
-        assert media.audio[0].metadata.dubbed is False
-        assert media.audio[0].metadata.original is False
-        assert media.audio[0].metadata.lyrics is False
-        assert media.audio[0].metadata.karaoke is False
-        assert media.audio[0].metadata.visual_impaired is False
-        assert media.audio[0].metadata.clean_effects is False
+        assert media.audio[0].dispositions.default is True
+        assert media.audio[0].dispositions.forced is False
+        assert media.audio[0].dispositions.hearing_impaired is False
+        assert media.audio[0].dispositions.commentary is False
+        assert media.audio[0].dispositions.dubbed is False
+        assert media.audio[0].dispositions.original is False
+        assert media.audio[0].dispositions.lyrics is False
+        assert media.audio[0].dispositions.karaoke is False
+        assert media.audio[0].dispositions.visual_impaired is False
+        assert media.audio[0].dispositions.clean_effects is False
 
     def test_singular_codec_type_is_required(
         self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch

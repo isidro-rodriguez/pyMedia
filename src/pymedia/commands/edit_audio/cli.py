@@ -28,12 +28,12 @@ edit_audio_cli = typer.Typer()
 
 EDIT_AUDIO_HELP = _(
     """\
-Edit audio track metadata from a media file.
+Edit audio track disposition from a media file.
 
 You can consult what audio tracks have a container with `info` command.
 
 [bold]Examples[/bold]:
-  Edit language metadata of audio stream track 1 from a media container:
+  Edit language disposition of audio stream track 1 from a media container:
     > pymedia edit-audio input.mp4 --track 1 --language eng
   Edit multiple tags in a single call:
     > pymedia edit-audio input.mp4 --track 1 --language spa --title "Comentario director" --default --commentary

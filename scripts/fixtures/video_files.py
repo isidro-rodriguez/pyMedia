@@ -92,7 +92,7 @@ HOSTILE_TAGS: tuple[tuple[str, str], ...] = (
 )
 
 # Todas las claves de metadatos de contenedor que ffmpeg vuelca tal cual en
-# los "Tags" de Matroska: usadas en metadata.mkv para probar el contenedor
+# los "Tags" de Matroska: usadas en disposition.mkv para probar el contenedor
 # con la máxima cobertura de metadatos posible.
 METADATA_MKV_TAGS: tuple[tuple[str, str], ...] = (
     ("title", "Metadatos completos"),
@@ -132,7 +132,7 @@ VIDEOS: tuple[VideoSpec, ...] = (
         ),
     ),
     VideoSpec(
-        filename="metadata.mkv",
+        filename="disposition.mkv",
         source=_lavfi("testsrc"),
         video_args=H264,
         subtitle_format="ass",

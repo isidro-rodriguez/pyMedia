@@ -9,7 +9,7 @@ from pymedia.errors import MissingParameterError
 from pymedia.mixins.media_mixin import MediaInputMixin
 from pymedia.mixins.outputs_mixin import MediaOutputMixin
 from pymedia.mixins.streams_mixin import StreamsMixin
-from pymedia.mixins.subtitles_mixin import SubtitlesInputMixin
+from pymedia.mixins.subtitles_mixin import SubtitlesMetadataMixin
 from pymedia.types import OverwriteMode, StreamsMode
 
 
@@ -19,7 +19,7 @@ class EditSubtitlesParameters(
     MediaInputMixin,
     MediaOutputMixin,
     StreamsMixin,
-    SubtitlesInputMixin,
+    SubtitlesMetadataMixin,
 ):
     """Parámetros utilizados por el comando EditSubtitles."""
 

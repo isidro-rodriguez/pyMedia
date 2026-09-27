@@ -28,13 +28,9 @@ class AddSubtitlesParameters(
         overwrite: OverwriteMode,
         media_input: Path,
         subtitles_input: Path,
-        language: str | None,
-        media_output: Path | None = None,
+        language: str,
         title: str | None = None,
-        forced: bool | None = None,
-        default: bool | None = None,
-        hearing_impaired: bool | None = None,
-        visual_impaired: bool | None = None,
+        media_output: Path | None = None,
         strip_metadata: bool = False,
     ) -> Self:
         """Valida y parsea los argumentos en parámetros procesados.
@@ -46,12 +42,6 @@ class AddSubtitlesParameters(
             language: Código ISO 639-2 del idioma de la pista.
             media_output: Ruta absoluta del fichero de salida procesado.
             title: Título descriptivo de la pista.
-            forced: Fuerza al reproductor a mostrar la pista de subtítulos.
-            default: Se establece como la pista de subtítulos por defecto.
-            hearing_impaired: Subtítulos adaptados a personas con problemas
-                auditivos.
-            visual_impaired: Subtítulos adaptados a personas con problemas de
-                vista.
             strip_metadata: No copiar los metadatos del fichero de entrada.
 
         Returns:
@@ -80,12 +70,8 @@ class AddSubtitlesParameters(
         params.create_add_subtitles(
             subtitles_input=subtitles_input.absolute(),
             language=language,
-            logger=params.logger,
             title=title,
-            forced=forced,
-            default=default,
-            hearing_impaired=hearing_impaired,
-            visual_impaired=visual_impaired,
+            logger=params.logger,
         )
 
         return params

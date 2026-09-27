@@ -2,7 +2,7 @@
 
 Cada familia (overwrite, `--debug`, filtros de imagen, flags de pista...) se
 escribe una sola vez y se ejecuta contra todos los comandos que la exponen.
-Como el resto de la suite CLI, usan la fixture `pymedia`, así que cada caso
+Como el resto de la suite CLI, usan fixture `pymedia`, así que cada caso
 corre como CLI en proceso (`[cli]`) y como binario compilado (`[binary]`).
 """
 
@@ -23,7 +23,7 @@ class Command:
 
     Attributes:
         name: Nombre del subcomando.
-        inputs: Nombres de las fixtures de entrada, en orden posicional.
+        inputs: Nombres de fixtures de entrada, en orden posicional.
         args: Opciones obligatorias del comando para que la ejecución sea válida.
         suffix: Extensión de la salida, o `None` si el comando no escribe ficheros.
     """
@@ -94,7 +94,7 @@ def build_args(
 
     Args:
         cmd: Comando del catálogo.
-        request: Request del test, para resolver las fixtures de entrada.
+        request: Request del test, para resolver fixtures de entrada.
         output: Ruta de salida (`-o`); se omite si es `None`.
         *extra: Opciones adicionales a añadir al final.
 
@@ -187,7 +187,7 @@ def test_strip_metadata_composes_map_metadata(
     name: str,
     tmp_path: Path,
 ) -> None:
-    """`--strip-metadata` propaga la orden de eliminar metadatos a ffmpeg."""
+    """`--strip-disposition` propaga la orden de eliminar metadatos a ffmpeg."""
     cmd = COMMANDS[name]
     output = tmp_path / f"output{cmd.suffix}"
 
@@ -198,7 +198,7 @@ def test_strip_metadata_composes_map_metadata(
             output,
             "-ov",
             "yes",
-            "--strip-metadata",
+            "--strip-disposition",
             "--show-cmd",
         )
     )
@@ -688,11 +688,12 @@ SUBS_FLAGS = [
     ("--hearing-impaired", "hearing_impaired"),
     ("--visual-impaired", "visual_impaired"),
 ]
+# add-subs no emite disposiciones (como add-audio); solo edit-subs lo hace
 TRACK_FLAG_CASES = [
     pytest.param(add, edit, kind, option, flag, id=f"{kind}{option}")
     for kind, add, edit, flags in (
         ("audio", None, "edit-audio", AUDIO_FLAGS),
-        ("subtitle", "add-subs", "edit-subs", SUBS_FLAGS),
+        ("subtitle", None, "edit-subs", SUBS_FLAGS),  # add-subs no emite flags
     )
     for option, flag in flags
     if add is not None
@@ -761,6 +762,7 @@ def test_edit_track_sets_and_clears_flag(
 # mismo tipo de stream lo pierde. Campos de cada caso: comando, fixture de
 # entrada, tipo de pista, opciones extra, índice de la pista marcada e índice de
 # la pista que era `default` antes (`None` si el medio no tenía ninguna).
+# add-subs no emite disposiciones (como add-audio); solo edit-subs lo hace
 EXCLUSIVE_DEFAULT_CASES = [
     pytest.param(
         "edit-audio", "video_mkv_two_audio", "audio", (), 0, 1, id="edit-audio"
@@ -773,10 +775,6 @@ EXCLUSIVE_DEFAULT_CASES = [
         1,
         0,
         id="edit-subs",
-    ),
-    pytest.param("add-subs", "video_mkv_subs", "subtitle", (), 2, 0, id="add-subs"),
-    pytest.param(
-        "add-subs", "video_no_audio", "subtitle", (), 0, None, id="no-previous"
     ),
 ]
 
@@ -916,7 +914,7 @@ def test_track_malformed(
     value: str,
     tmp_path: Path,
 ) -> None:
-    """`--tracks`/`--track` con valores mal formados lanza error."""
+    """`--tracks`/`--track` con valores inválidos lanza error."""
     cmd = COMMANDS[name]
     output = tmp_path / "out.mkv"
 

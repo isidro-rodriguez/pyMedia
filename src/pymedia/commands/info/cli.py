@@ -20,7 +20,7 @@ INFO_HELP = _(
 Shows information about a video.
 
 [bold]Example[/bold]:
-  Shows video's metadata:
+  Shows video's disposition:
     > pymedia info input.mp4
 """
 )

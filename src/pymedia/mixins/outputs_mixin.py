@@ -164,9 +164,9 @@ class AudioOutputMixin:
                 if track.track_index in self.stream_tracks
             ]
         for audio_track in audio_tracks:
-            if audio_track.codec is None:
+            if audio_track.format.codec is None:
                 raise MissingPropertyError(name="audio codec")
-            codec_data = AUDIO_CODECS[audio_track.codec]
+            codec_data = AUDIO_CODECS[audio_track.format.codec]
             _validate_remux(
                 suffix=output.suffix,
                 source_suffix=media.path.suffix,
@@ -332,16 +332,19 @@ class MediaOutputMixin:
 
         if media.audio is not None:
             for audio_track in media.audio:
-                if audio_track.codec is None:
+                if audio_track.format.codec is None:
                     raise MissingPropertyError(name="audio codec")
-                if output.suffix not in AUDIO_CODECS[audio_track.codec].containers:
+                if (
+                    output.suffix
+                    not in AUDIO_CODECS[audio_track.format.codec].containers
+                ):
                     raise InvalidCodecContainerError(
                         extension=output.suffix,
-                        codec=AUDIO_CODECS[audio_track.codec].name,
-                        supported=AUDIO_CODECS[audio_track.codec].containers,
+                        codec=AUDIO_CODECS[audio_track.format.codec].name,
+                        supported=AUDIO_CODECS[audio_track.format.codec].containers,
                     )
                 if remux:
-                    codec = audio_track.codec
+                    codec = audio_track.format.codec
                     _validate_remux(
                         suffix=output.suffix,
                         source_suffix=media.path.suffix,

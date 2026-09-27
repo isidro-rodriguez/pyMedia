@@ -140,26 +140,26 @@ class JoinService(BaseService[JoinParameters]):
                     ):
                         if prop := _prop(
                             label=f"audio[{idx}].codec",
-                            first_value=a_first.codec,
-                            value=a_media.codec,
+                            first_value=a_first.format.codec,
+                            value=a_media.format.codec,
                         ):
                             issues.append(prop)
                         if prop := _prop(
                             label=f"audio[{idx}].sample_rate",
-                            first_value=a_first.sample_rate,
-                            value=a_media.sample_rate,
+                            first_value=a_first.format.sample_rate,
+                            value=a_media.format.sample_rate,
                         ):
                             issues.append(prop)
                         if prop := _prop(
                             label=f"audio[{idx}].channels",
-                            first_value=a_first.channels,
-                            value=a_media.channels,
+                            first_value=a_first.format.channels,
+                            value=a_media.format.channels,
                         ):
                             issues.append(prop)
                         if prop := _prop(
                             label=f"audio[{idx}].channel_layout",
-                            first_value=a_first.channel_layout,
-                            value=a_media.channel_layout,
+                            first_value=a_first.format.channel_layout,
+                            value=a_media.format.channel_layout,
                         ):
                             issues.append(prop)
 

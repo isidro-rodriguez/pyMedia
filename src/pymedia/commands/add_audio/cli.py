@@ -26,11 +26,11 @@ Add an audio track to a media file.
 
 You can consult what audio tracks have a container with `info` command.
 
-The audio track's metadata (language, title, dispositions) are inherited from
+The audio track's disposition (language, title, disposition) are inherited from
 the source audio file. Use `edit-audio` to modify them after insertion.
 
 [bold]Examples[/bold]:
-  Add audio track from a file (metadata inherited from source):
+  Add audio track from a file (disposition inherited from source):
     > pymedia add-audio input.mp4 audio.m4a
   Add audio and override default disposition:
     > pymedia add-audio input.mp4 audio.m4a

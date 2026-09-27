@@ -28,12 +28,12 @@ edit_subs_cli = typer.Typer()
 
 EDIT_SUBS_HELP = _(
     """\
-Edit subtitles metadata from a media file.
+Edit subtitles disposition from a media file.
 
 You can consult what subtitles tracks have a container with `info` command.
 
 [bold]Examples[/bold]:
-  Edit language metadata to subtitles stream track 2 from a media container:
+  Edit language disposition to subtitles stream track 2 from a media container:
     > pymedia edit-subs input.mp4 --track 2 --language eng
   Edit multiple tags in a single call:
     > pymedia edit-subs input.mp4 --track 2 --language spa --title "Español (forced)" --default --forced

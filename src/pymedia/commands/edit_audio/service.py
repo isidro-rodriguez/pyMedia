@@ -30,11 +30,11 @@ class EditAudioService(BaseService[EditAudioParameters]):
 
         self.run_ffmpeg(
             cmd=cmd,
-            description=_("Editing audio metadata"),
+            description=_("Editing audio disposition"),
             output_list=[self.params.media_output],
         )
 
         self.logger.info(
-            msg=_("Audio metadata edited successfully: %(output)s"),
+            msg=_("Audio disposition edited successfully: %(output)s"),
             output=self.params.media_output,
         )

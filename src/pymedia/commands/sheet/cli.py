@@ -24,7 +24,7 @@ sheet_cli = typer.Typer()
 
 SHEET_HELP = _(
     """\
-Generates a thumbnail grid sheet with metadata information.
+Generates a thumbnail grid sheet with disposition information.
 
 [bold]Examples[/bold]:
   Generate a vcs with default HD preset:

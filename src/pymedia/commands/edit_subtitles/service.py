@@ -30,11 +30,11 @@ class EditSubtitlesService(BaseService[EditSubtitlesParameters]):
 
         self.run_ffmpeg(
             cmd=cmd,
-            description=_("Editing subtitles metadata"),
+            description=_("Editing subtitles disposition"),
             output_list=[self.params.media_output],
         )
 
         self.logger.info(
-            msg=_("Subtitles metadata edited successfully: %(output)s"),
+            msg=_("Subtitles disposition edited successfully: %(output)s"),
             output=self.params.media_output,
         )

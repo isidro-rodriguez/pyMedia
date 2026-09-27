@@ -1,3 +1,4 @@
+.idea
 .kilo/
 .pytest_cache/
 .ruff_cache/
@@ -12,4 +13,3 @@ temp/
 .env
 Thumbs.db
 desktop.ini
-

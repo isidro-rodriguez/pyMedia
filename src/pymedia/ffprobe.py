@@ -11,9 +11,14 @@ from pymedia.data.video_codecs import VIDEO_CODECS
 from pymedia.errors import FfprobeError, MissingParameterError, UserError
 from pymedia.locales import translate as _
 from pymedia.logger import Logger
-from pymedia.models.audio import Audio, AudioMetadata
+from pymedia.models.audio import (
+    Audio,
+    AudioDispositions,
+    AudioFormat,
+    AudioMetadata,
+)
 from pymedia.models.media import Media, MediaMetadata
-from pymedia.models.subtitles import Subtitles, SubtitlesMetadata
+from pymedia.models.subtitles import Subtitles, SubtitlesDispositions, SubtitlesMetadata
 from pymedia.models.video import Video
 from pymedia.utils import parse_date, parse_fraction, to_float, to_int
 
@@ -45,14 +50,26 @@ def _run_ffprobe(args: list[str], path: Path) -> dict[str, Any]:
     return data
 
 
-def _build_audio_metadata(
-    tags: dict[str, Any], disposition: dict[str, Any]
-) -> AudioMetadata:
-    """Construye AudioMetadata a partir de tags y disposition de ffprobe."""
+def _build_audio_format(stream: dict[str, Any]) -> AudioFormat:
+    """Construye AudioFormat a partir del stream de audio de ffprobe."""
+    return AudioFormat(
+        codec=stream.get("codec_name"),
+        sample_rate=to_int(stream.get("sample_rate")),
+        channels=stream.get("channels"),
+        channel_layout=stream.get("channel_layout"),
+        bit_rate=to_int(stream.get("bit_rate")),
+    )
+
+
+def _build_audio_metadata(tags: dict[str, Any]) -> AudioMetadata:
+    """Construye los metadatos y disposiciones de audio desde ffprobe."""
     language = tags.get("language")
-    return AudioMetadata(
-        language=language,
-        title=tags.get("title"),
+
+    return AudioMetadata(language=language, title=tags.get("title"))
+
+
+def _build_audio_dispositions(disposition: dict[str, Any]) -> AudioDispositions:
+    return AudioDispositions(
         forced=bool(disposition.get("forced", 0)),
         default=bool(disposition.get("default", 0)),
         hearing_impaired=bool(disposition.get("hearing_impaired", 0)),
@@ -78,8 +95,8 @@ def get_media_information(media_input: Path, logger: Logger) -> "Media":
     logger.debug(msg=_("ffprobe media data: %(data)s"), data=data)
 
     video: Video | None = None
-    audio: list[Audio] | None = None
-    subtitles: list[Subtitles] | None = None
+    audio: list[Audio] = []
+    subtitles: list[Subtitles] = []
     video_track_index, audio_track_index, subtitles_track_index = 0, 0, 0
 
     for stream in data.get("streams", []):
@@ -104,27 +121,19 @@ def get_media_information(media_input: Path, logger: Logger) -> "Media":
             )
             video_track_index += 1
         elif codec_type == "audio":
-            if audio is None:
-                audio = []
             audio.append(
                 Audio(
                     path=media_input.absolute(),
                     global_index=stream.get("index"),
                     track_index=audio_track_index,
-                    codec=stream.get("codec_name"),
                     duration=tags.get("DURATION"),
-                    sample_rate=to_int(stream.get("sample_rate")),
-                    channels=stream.get("channels"),
-                    channel_layout=stream.get("channel_layout"),
-                    bit_rate=to_int(stream.get("bit_rate")),
-                    metadata=_build_audio_metadata(tags, disposition),
+                    format=_build_audio_format(stream=stream),
+                    metadata=_build_audio_metadata(tags=tags),
+                    dispositions=_build_audio_dispositions(disposition=disposition),
                 )
             )
             audio_track_index += 1
         elif codec_type == "subtitle":
-            # ffprobe reporta el valor en singular para las pistas de subtítulos.
-            if subtitles is None:
-                subtitles = []
             disposition = stream.get("disposition", {})
             subtitles.append(
                 Subtitles(
@@ -135,6 +144,8 @@ def get_media_information(media_input: Path, logger: Logger) -> "Media":
                     metadata=SubtitlesMetadata(
                         language=tags.get("language"),
                         title=tags.get("title"),
+                    ),
+                    dispositions=SubtitlesDispositions(
                         forced=bool(disposition.get("forced", 0)),
                         default=bool(disposition.get("default", 0)),
                         hearing_impaired=bool(disposition.get("hearing_impaired", 0)),
@@ -176,8 +187,8 @@ def get_media_information(media_input: Path, logger: Logger) -> "Media":
             size=to_int(fmt.get("size")),
             format_name=fmt.get("format_name"),
             video=video,
-            audio=audio,
-            subtitles=subtitles,
+            audio=audio or None,
+            subtitles=subtitles or None,
             metadata=media_metadata if tags else None,
         )
     except (
@@ -227,13 +238,10 @@ def get_audio_information(audio_input: Path, logger: Logger) -> list[Audio]:
                     path=audio_input.absolute(),
                     global_index=stream.get("index"),
                     track_index=audio_track_index,
-                    codec=stream.get("codec_name"),
                     duration=tags.get("DURATION"),
-                    sample_rate=to_int(stream.get("sample_rate")),
-                    channels=stream.get("channels"),
-                    channel_layout=stream.get("channel_layout"),
-                    bit_rate=to_int(stream.get("bit_rate")),
-                    metadata=_build_audio_metadata(tags, disposition),
+                    format=_build_audio_format(stream=stream),
+                    metadata=_build_audio_metadata(tags=tags),
+                    dispositions=_build_audio_dispositions(disposition),
                 )
             )
             audio_track_index += 1

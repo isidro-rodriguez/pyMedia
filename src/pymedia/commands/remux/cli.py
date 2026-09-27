@@ -28,7 +28,7 @@ remux_cli = typer.Typer()
 
 REMUX_HELP = _(
     """\
-Change container and metadata without transcoding.
+Change container and disposition without transcoding.
 
 [bold]Examples[/bold]:
   Change video container:
@@ -67,10 +67,9 @@ def remux(
         media_input: Ruta del fichero de vídeo a procesar.
         media_output: Ruta absoluta del fichero de salida procesado.
         overwrite: Política ante conflicto de salida ya existente.
-        fast_start: Mueve el índice al inicio acelerando su reproducción.
         regenerate_pts: Regenera los marcadores de tiempo corruptos.
         sort_tracks: Ordena las pistas por tipo y luego alfabéticamente por idioma.
-        rotate_metadata: Gira la imagen por especificación de metadados.ter
+        rotate_metadata: Gira la imagen por especificación de metadatos.
         strip_metadata: No copiar los metadatos del fichero de entrada.
         debug: Habilita el nivel de log DEBUG.
         show_cmd: Muestra al usuario el comando ffmpeg compuesto pero no lo ejecuta.

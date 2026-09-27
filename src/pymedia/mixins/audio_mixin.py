@@ -10,7 +10,7 @@ from pymedia.errors import InvalidCodecContainerError, MissingParameterError, Us
 from pymedia.ffprobe import get_audio_information
 from pymedia.locales import translate as _
 from pymedia.logger import Logger
-from pymedia.models.audio import Audio, AudioMetadata
+from pymedia.models.audio import Audio, AudioDispositions, AudioMetadata
 from pymedia.models.media import Media
 
 
@@ -67,9 +67,9 @@ class AudioInputMixin:
             return
 
         for track in self.audio:
-            if track.codec is None:
+            if track.format.codec is None:
                 continue
-            codec_data = AUDIO_CODECS.get(track.codec)
+            codec_data = AUDIO_CODECS.get(track.format.codec)
             if codec_data is None:
                 continue
             if extension not in codec_data.containers:
@@ -94,7 +94,7 @@ class AudioInputMixin:
         return len(media.audio) if media.audio is not None else 0
 
 
-# Mapping de campos de AudioMetadata a flags de disposición de ffmpeg
+# Mapping de campos de AudioDispositions a flags de disposición de ffmpeg
 _DISPOSITION_FIELD_TO_FLAG = {
     "default": "default",
     "forced": "forced",
@@ -181,6 +181,7 @@ class AudioMetadataMixin:
         track_index: int = self.stream_tracks[0]
         audio_track = self._find_audio_track(track_index)
         metadata: AudioMetadata = audio_track.metadata
+        dispositions: AudioDispositions = audio_track.dispositions
 
         user_passed_title = title is not None
 
@@ -197,19 +198,19 @@ class AudioMetadataMixin:
             metadata.title = title
 
         if default is not None:
-            metadata.default = default
+            dispositions.default = default
             self.default = default
             self.disposition_touched = True
         if forced is not None:
-            metadata.forced = forced
+            dispositions.forced = forced
             self.forced = forced
             self.disposition_touched = True
         if hearing_impaired is not None:
-            metadata.hearing_impaired = hearing_impaired
+            dispositions.hearing_impaired = hearing_impaired
             self.hearing_impaired = hearing_impaired
             self.disposition_touched = True
         if commentary is not None:
-            metadata.commentary = commentary
+            dispositions.commentary = commentary
             self.commentary = commentary
             self.disposition_touched = True
 
@@ -279,7 +280,7 @@ class AudioMetadataMixin:
         stream_track = self.stream_tracks[0]
         audio = self._find_audio_track(stream_track)
 
-        if not audio.metadata.default:
+        if not audio.dispositions.default:
             return []
 
         flags: list[str] = []
@@ -292,13 +293,13 @@ class AudioMetadataMixin:
                 continue
 
             # Solo afectar a pistas que tengan default=True
-            if not track.metadata.default:
+            if not track.dispositions.default:
                 continue
 
             remaining = [
                 flag
                 for field, flag in _DISPOSITION_FIELD_TO_FLAG.items()
-                if getattr(track.metadata, field) and flag != "default"
+                if getattr(track.dispositions, field) and flag != "default"
             ]
 
             flags.append(f"-disposition:a:{track.track_index}")
@@ -322,9 +323,10 @@ class AudioMetadataMixin:
             )
         )
 
-    def _disposition_names(self, audio: Audio) -> list[str]:
+    @staticmethod
+    def _disposition_names(audio: Audio) -> list[str]:
         """Nombres de disposición activos en el modelo de audio (10 campos)."""
-        meta = audio.metadata
+        meta = audio.dispositions
         return [
             flag
             for field, flag in _DISPOSITION_FIELD_TO_FLAG.items()

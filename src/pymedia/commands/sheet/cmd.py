@@ -12,7 +12,6 @@ from pymedia.errors import (
 from pymedia.locale_manager import locale_manager
 from pymedia.locales import translate as _
 from pymedia.models.media import Audio, Subtitles
-from pymedia.models.subtitles import get_subtitles_metadata
 from pymedia.utils import parse_quantity, parse_size, parse_timedelta, to_ffmpeg_value
 
 
@@ -226,8 +225,8 @@ class SheetCmd:
             formatted_items: list[str] = []
             for t in tracks:
                 lang_str = t.metadata.language or "und"
-                codec_str = t.codec or "audio"
-                ch_str = _format_channels(t.channels)
+                codec_str = t.format.codec or "audio"
+                ch_str = _format_channels(t.format.channels)
                 formatted_items.append(f"{lang_str} ({codec_str} {ch_str})")
             prefix = f"Audio: {len(tracks)} tracks"
             return _truncate_list_display(prefix, formatted_items, max_len)
@@ -242,8 +241,7 @@ class SheetCmd:
             subs: list[str] = []
             for sub in subtitles:
                 # Usar 'und' (undefined) si sub.language es None o está vacío
-                meta = get_subtitles_metadata(sub)
-                lang = meta.language if meta.language else "und"
+                lang = sub.metadata.language if sub.metadata.language else "und"
                 subs.append(lang)
 
             prefix = f"Subtitles: {len(subtitles)} tracks"

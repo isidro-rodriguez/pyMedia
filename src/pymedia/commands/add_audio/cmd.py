@@ -59,39 +59,6 @@ class AddAudioCmd:
             ]
         )
 
-        # Copiar metadatos de la pista de audio origen (idioma, título)
-        # estableciéndolos explícitamente en el output, ya que -c copy con -map
-        # no siempre preserva todos los tags de stream.
-        if audio and media.audio is not None:
-            # El índice de la primera pista importada en el output es:
-            # 1 (video) + len(media.audio) (audio streams from input 0)
-            output_audio_index = (1 if media.video is not None else 0) + len(
-                media.audio
-            )
-            for track in audio:
-                if track.track_index is not None:
-                    meta = track.metadata
-                    if meta.language:
-                        cmd.extend(
-                            [
-                                f"-metadata:s:a:{output_audio_index}",
-                                f"language={meta.language}",
-                            ]
-                        )
-                    if meta.title:
-                        cmd.extend(
-                            [
-                                f"-metadata:s:a:{output_audio_index}",
-                                f"title={meta.title}",
-                            ]
-                        )
-                    output_audio_index += 1
-
-        # Resetear disposiciones de las pistas importadas solo si el contenedor
-        # ya tenía audio previo. En ese caso, ffmpeg hereda las disposiciones
-        # del archivo origen, y queremos empezar en 0 para que el usuario decida
-        # con edit-audio. Si no había audio previo, las disposiciones del
-        # archivo origen se conservan (comportamiento heredado).
         if media.audio:
             cmd.extend([*self._reset_imported_defaults_args()])
 
