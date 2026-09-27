@@ -35,14 +35,14 @@ Shows information about a video.
 def info(
     media_input: MediaInputArgument,
     debug: DebugOption = False,
-    help_: HelpOption = False,
+    _help: HelpOption = False,
 ) -> None:
     """Punto de entrada del comando ``info``.
 
     Args:
         media_input: Ruta del fichero de vídeo a procesar.
         debug: Habilita el nivel de log DEBUG.
-        help_: Helper para mostrar esta línea en distintos idiomas.
+        _help: Helper para mostrar esta línea en distintos idiomas.
     """
     Logger.create(debug=debug)
     params = InfoParameters.load(media_input=media_input)

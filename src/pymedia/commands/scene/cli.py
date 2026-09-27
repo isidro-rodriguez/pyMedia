@@ -58,7 +58,7 @@ def scene(
     media_input: MediaInputArgument,
     output: OutputOption = None,
     overwrite: OverwriteOption = OverwriteMode.ASK,
-    scene: SceneOption = 0.3,
+    scene_umbral: SceneOption = 0.3,
     timestamp_start: TimestampStartThumbnailOption = None,
     timestamp_end: TimestampEndThumbnailOption = None,
     crop: CropOption = None,
@@ -70,7 +70,7 @@ def scene(
     vflip: FlipVerticalOption = False,
     debug: DebugOption = False,
     show_cmd: ShowCmdOption = False,
-    help_: HelpOption = False,
+    _help: HelpOption = False,
 ) -> None:
     """Punto de entrada del comando ``scene``.
 
@@ -78,7 +78,7 @@ def scene(
         media_input: Ruta del fichero de vídeo a procesar.
         output: Ruta absoluta del fichero de salida procesado.
         overwrite: Política ante conflicto de salida ya existente.
-        scene: Umbral de sensibilidad para detección de cambio de escena.
+        scene_umbral: Umbral de sensibilidad para detección de cambio de escena.
         timestamp_start: Marca de tiempo que indica el punto inicial.
         timestamp_end: Marca de tiempo que indica el punto final.
         crop: Área y coordenada de la zona a preservar de la imagen.
@@ -90,7 +90,7 @@ def scene(
         vflip: Invierte la imagen verticalmente, intercambiando arriba y abajo.
         debug: Habilita el nivel de log DEBUG.
         show_cmd: Muestra al usuario el comando ffmpeg compuesto pero no lo ejecuta.
-        help_: Helper para mostrar esta línea en distintos idiomas.
+        _help: Helper para mostrar esta línea en distintos idiomas.
 
     Raises:
         InvalidContainerError: Si la extensión no es una imagen soportada.
@@ -109,7 +109,7 @@ def scene(
         overwrite=overwrite,
         media_input=media_input,
         output=output,
-        scene=scene,
+        scene=scene_umbral,
         timestamp_start=timestamp_start,
         timestamp_end=timestamp_end,
         crop=crop,

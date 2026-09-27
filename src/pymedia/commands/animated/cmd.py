@@ -92,8 +92,6 @@ class AnimatedCmd:
         if self.params.animated_output is None:
             raise MissingParameterError(name="animated_output")
 
-        args: list[str] = []
-
         match self.params.animated_output.suffix:
             case ".apng":
                 return [
@@ -126,5 +124,3 @@ class AnimatedCmd:
                 raise InvalidParameterError(
                     msg=_("Animated image output not supported")
                 )
-
-        return args

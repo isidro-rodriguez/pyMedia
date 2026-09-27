@@ -36,7 +36,7 @@ class EditAudioCmd:
             raise MissingParameterError(name="audio")
 
         track_number = self.params.stream_tracks[0]
-        audio = self.params._find_audio_track(track_number)
+        audio = self.params.find_audio_track(track_number)
 
         cmd = ["ffmpeg"]
 

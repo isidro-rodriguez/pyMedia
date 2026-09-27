@@ -49,7 +49,7 @@ def sheet(
     preset_sheet: PresetSheetOption = PresetsSheetMode.HD,
     debug: DebugOption = False,
     show_cmd: ShowCmdOption = False,
-    help_: HelpOption = False,
+    _help: HelpOption = False,
 ) -> None:
     """Punto de entrada del comando ``sheet``.
 
@@ -61,7 +61,7 @@ def sheet(
         preset_sheet: Estilo de hoja preajustado.
         debug: Habilita el nivel de log DEBUG.
         show_cmd: Muestra al usuario el comando ffmpeg compuesto pero no lo ejecuta.
-        help_: Helper para mostrar esta línea en distintos idiomas.
+        _help: Helper para mostrar esta línea en distintos idiomas.
     """
     validate_conflict_output_options(
         media_input_list=media_input_list,

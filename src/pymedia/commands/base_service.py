@@ -127,7 +127,7 @@ class BaseService[ParamsT](ABC):
                 return token
             return '"' + token.replace('"', '\\"') + '"'
 
-        def _format_cmd(cmd: list[str]) -> str:
+        def _format_cmd() -> str:
             """Format a command list as a copy-pasteable shell string."""
             if os.name == "nt":
                 return " ".join(_quote_windows(t) for t in cmd)
@@ -135,7 +135,7 @@ class BaseService[ParamsT](ABC):
 
         if self.show_cmd:
             self.logger.print(
-                renderable=f"\n{_format_cmd(cmd=cmd)}\n",
+                renderable=f"\n{_format_cmd()}\n",
                 emoji=False,
                 soft_wrap=True,
             )

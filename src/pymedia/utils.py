@@ -179,7 +179,7 @@ def to_ffmpeg_value(value: str | Path) -> str:
     text = value.as_posix() if isinstance(value, Path) else value  # \ a / en rutas
     meta_chars = "\\':,;[]= "  # el espacio va incluido: ffmpeg recorta los extremos
 
-    # ffmpeg desescapa el valor dos veces (token del filtergraph y valor de la
+    # ffmpeg des-escapa el valor dos veces (token del filtergraph y valor de la
     # opción), así que el escape se aplica una vez por nivel.
     for _ in range(2):
         text = "".join(f"\\{char}" if char in meta_chars else char for char in text)

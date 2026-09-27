@@ -134,19 +134,6 @@ class AudioMetadataMixin:
     commentary: bool | None = None
     disposition_touched: bool = False
 
-    def _find_audio_track(self, track_index: int) -> Audio:
-        """Busca una pista de audio por su track_index local."""
-        if self.media is None:
-            raise MissingParameterError(name="media")
-        if self.media.audio is None:
-            raise MissingParameterError(name="media.audio")
-
-        for track in self.media.audio:
-            if track.track_index == track_index:
-                return track
-
-        raise UserError(msg=_("Audio index not included."))
-
     def create_edit_audio(
         self,
         language: str | None = None,
@@ -179,7 +166,7 @@ class AudioMetadataMixin:
             raise MissingParameterError(name="media.audio")
 
         track_index: int = self.stream_tracks[0]
-        audio_track = self._find_audio_track(track_index)
+        audio_track = self.find_audio_track(track_index)
         metadata: AudioMetadata = audio_track.metadata
         dispositions: AudioDispositions = audio_track.dispositions
 
@@ -278,7 +265,7 @@ class AudioMetadataMixin:
             raise MissingParameterError(name="media.audio")
 
         stream_track = self.stream_tracks[0]
-        audio = self._find_audio_track(stream_track)
+        audio = self.find_audio_track(stream_track)
 
         if not audio.dispositions.default:
             return []
@@ -306,6 +293,19 @@ class AudioMetadataMixin:
             flags.append("+".join(remaining) if remaining else "0")
 
         return flags
+
+    def find_audio_track(self, track_index: int) -> Audio:
+        """Busca una pista de audio por su track_index local."""
+        if self.media is None:
+            raise MissingParameterError(name="media")
+        if self.media.audio is None:
+            raise MissingParameterError(name="media.audio")
+
+        for track in self.media.audio:
+            if track.track_index == track_index:
+                return track
+
+        raise UserError(msg=_("Audio index not included."))
 
     @staticmethod
     def _parse_language(raw: str) -> str:

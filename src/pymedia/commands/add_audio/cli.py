@@ -53,7 +53,7 @@ def add_audio(
     strip_metadata: StripMetadataOption = False,
     debug: DebugOption = False,
     show_cmd: ShowCmdOption = False,
-    help_: HelpOption = False,
+    _help: HelpOption = False,
 ) -> None:
     """Punto de entrada del comando ``add-audio``.
 
@@ -65,7 +65,7 @@ def add_audio(
         strip_metadata: No copiar los metadatos del fichero de entrada.
         debug: Habilita el nivel de log DEBUG.
         show_cmd: Muestra al usuario el comando ffmpeg compuesto pero no lo ejecuta.
-        help_: Helper para mostrar esta línea en distintos idiomas.
+        _help: Helper para mostrar esta línea en distintos idiomas.
 
     Raises:
         FfprobeError: Si ffprobe no puede leer el fichero de audio externo.

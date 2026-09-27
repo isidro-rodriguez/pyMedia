@@ -76,7 +76,7 @@ def transcode(
     vflip: FlipVerticalOption = False,
     debug: DebugOption = False,
     show_cmd: ShowCmdOption = False,
-    help_: HelpOption = False,  # noqa
+    _help: HelpOption = False,
 ) -> None:
     """Punto de entrada del comando ``transcode``.
 
@@ -99,7 +99,7 @@ def transcode(
         vflip: Invierte la imagen verticalmente.
         debug: Habilita el nivel de log DEBUG.
         show_cmd: Muestra al usuario el comando ffmpeg compuesto, pero no lo ejecuta.
-        help_: Helper para mostrar esta línea en distintos idiomas.
+        _help: Helper para mostrar esta línea en distintos idiomas.
 
     Raises:
         MissingRequiredOptionsError: Si no se aporta ninguna opción de

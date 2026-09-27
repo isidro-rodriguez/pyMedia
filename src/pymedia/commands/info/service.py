@@ -122,7 +122,7 @@ class InfoService(BaseService[InfoParameters]):
             table.add_column(header=_("Channels"), ratio=1, justify="center")
             table.add_column(header=_("Lang"), ratio=1, justify="center")
             table.add_column(header=_("Title"), ratio=2, justify="center")
-            # Inciales de "Default" para mantener tabla compacta
+            # Iniciales de "Default" para mantener tabla compacta
             table.add_column(header=_("Def"), ratio=1, justify="center")
             # Iniciales de "Forced"
             table.add_column(header=_("For"), ratio=1, justify="center")
