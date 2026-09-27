@@ -46,7 +46,6 @@ def _media(path: Path) -> Media:
     return Media(
         path=path,
         duration=None,  # se ignora en la comparación
-        size=None,
         video=None,
     )
 

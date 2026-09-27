@@ -285,11 +285,13 @@ class SheetCmd:
         bit_rate_val: float | None = video.format.bit_rate
         if (
             bit_rate_val is None
-            and media.size
+            and media.format.size
             and media.duration
             and media.duration.total_seconds() > 0
         ):
-            bit_rate_val = (media.size * 8) / (media.duration.total_seconds() * 1000)
+            bit_rate_val = (media.format.size * 8) / (
+                media.duration.total_seconds() * 1000
+            )
 
         if bit_rate_val:
             bit_rate_str = parse_quantity(
@@ -301,11 +303,12 @@ class SheetCmd:
         lines: list[str] = [f"{_('File')}: {media.path.name}"]
 
         size_dur_parts: list[str] = []
-        if media.size:
+        if media.format.size:
             size_dur_parts.append(
                 f"{_('Size')}: {
                     parse_size(
-                        size_bytes=media.size, locale=locale_manager.detect_language()
+                        size_bytes=media.format.size,
+                        locale=locale_manager.detect_language(),
                     )
                 }"
             )

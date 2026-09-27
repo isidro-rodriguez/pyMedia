@@ -67,18 +67,18 @@ class InfoService(BaseService[InfoParameters]):
             table.add_column(header=_("Field"), style="bold", ratio=1)
             table.add_column(header=_("Value"), ratio=3)
             table.add_row(_("File"), media_input.name)
-            table.add_row(_("Container"), media.format_name or na)
+            table.add_row(_("Container"), media.format.name or na)
             table.add_row(
                 _("Duration"),
                 parse_timedelta(media.duration) if media.duration else na,
                 end_section=True
-                if any(astuple(metadata)) and media.size is None
+                if any(astuple(metadata)) and media.format.size is None
                 else False,
             )
-            if media.size is not None:
+            if media.format.size is not None:
                 table.add_row(
                     _("Size"),
-                    parse_size(size_bytes=media.size, locale=locale),
+                    parse_size(size_bytes=media.format.size, locale=locale),
                     end_section=True if any(astuple(metadata)) else False,
                 )
             for label, value in metadata_fields:
@@ -209,7 +209,7 @@ class InfoService(BaseService[InfoParameters]):
         if self.params.media is None:
             raise MissingParameterError(name="media")
         media = self.params.media
-        if media.size is None:
+        if media.format.size is None:
             raise MissingParameterError(name="media")
         if media.duration is None:
             raise MissingParameterError(name="duration")
@@ -222,7 +222,7 @@ class InfoService(BaseService[InfoParameters]):
         if video.format.bit_rate:
             bit_rate = video.format.bit_rate / 1024
         else:
-            bit_rate = (media.size * 8 / media.duration.total_seconds()) / 1024
+            bit_rate = (media.format.size * 8 / media.duration.total_seconds()) / 1024
 
         bit_rate = math.floor(bit_rate)
         bit_rate = parse_quantity(value=bit_rate, locale=locale)

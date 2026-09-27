@@ -17,7 +17,7 @@ from pymedia.models.audio import (
     AudioFormat,
     AudioMetadata,
 )
-from pymedia.models.media import Media, MediaMetadata
+from pymedia.models.media import Media, MediaFormat, MediaMetadata
 from pymedia.models.subtitles import (
     Subtitles,
     SubtitlesDispositions,
@@ -58,6 +58,36 @@ def _run_ffprobe(args: list[str], path: Path) -> dict[str, Any]:
     data: dict[str, Any] = json.loads(result.stdout)
 
     return data
+
+
+def _build_media_format(fmt: dict[str, Any]) -> MediaFormat:
+    """Construye MediaFormat a partir del dict 'format' de ffprobe."""
+    return MediaFormat(
+        name=fmt.get("format_name"),
+        long_name=fmt.get("format_long_name"),
+        size=to_int(fmt.get("size")),
+        bit_rate=to_int(fmt.get("bit_rate")),
+        probe_score=to_int(fmt.get("probe_score")),
+        nb_streams=to_int(fmt.get("nb_streams")),
+        nb_programs=to_int(fmt.get("nb_programs")),
+    )
+
+
+def _build_media_metadata(tags: dict[str, Any]) -> MediaMetadata:
+    """Construye MediaMetadata a partir del dict 'tags' de ffprobe."""
+    return MediaMetadata(
+        title=tags.get("title"),
+        comment=tags.get("COMMENT"),
+        description=tags.get("DESCRIPTION"),
+        synopsis=tags.get("SYNOPSIS"),
+        genre=tags.get("GENRE"),
+        date=parse_date(raw=tags.get("DATE")),
+        copyright=tags.get("COPYRIGHT"),
+        law_rating=tags.get("LAW_RATING"),
+        artist=tags.get("ARTIST"),
+        album=tags.get("ALBUM"),
+        encoder=tags.get("ENCODER"),
+    )
 
 
 def _build_audio_format(stream: dict[str, Any]) -> AudioFormat:
@@ -211,31 +241,16 @@ def get_media_information(media_input: Path, logger: Logger) -> "Media":
     duration_val = to_float(fmt.get("duration"))
 
     try:
-        media_metadata = MediaMetadata(
-            title=tags.get("title"),
-            comment=tags.get("COMMENT"),
-            description=tags.get("DESCRIPTION"),
-            synopsis=tags.get("SYNOPSIS"),
-            genre=tags.get("GENRE"),
-            date=parse_date(raw=tags.get("DATE")),
-            copyright=tags.get("COPYRIGHT"),
-            law_rating=tags.get("LAW_RATING"),
-            artist=tags.get("ARTIST"),
-            album=tags.get("ALBUM"),
-            encoder=tags.get("ENCODER"),
-        )
-
         media = Media(
             path=media_input.absolute(),
             duration=timedelta(seconds=duration_val)
             if duration_val is not None
             else None,
-            size=to_int(fmt.get("size")),
-            format_name=fmt.get("format_name"),
+            format=_build_media_format(fmt=fmt),
             video=video,
             audio=audio or None,
             subtitles=subtitles or None,
-            metadata=media_metadata if tags else None,
+            metadata=_build_media_metadata(tags=tags),
         )
     except (
         ValueError,
