@@ -6,6 +6,57 @@ Las versiones se han reconstruido a partir del histórico de
 Las versiones intermedias no registradas (0.2–0.4, 0.6–0.8) se agrupan
 con la sección anterior.
 
+## [0.21.1-beta.13] - 2026-09-27
+
+### Añadido
+
+- Nuevos modelos `Chapter`, `ChapterFormat` y `ChapterMetadata`. `Media.chapters`
+  recoge los capítulos del contenedor mediante `-show_chapters` (id, tiempo inicial
+  y final, `time_base` y título).
+- `MediaFormat` agrupa las propiedades técnicas del contenedor (`name`, `long_name`,
+  `size`, `bit_rate`, `probe_score`, `nb_streams`, `nb_programs`) en lugar de los
+  campos planos `Media.size` y `Media.format_name`.
+- `AudioLoudness` con las métricas de sonoridad y normalización: `integrated` (LUFS
+  calculada desde `R128_TRACK_GAIN`), `replaygain_gain`, `replaygain_peak`, `range` y
+  `true_peak`.
+- `SubtitlesFormat` incorpora `mimetype` e `is_text_based`; `SubtitlesFormatData`
+  declara ahora el `mimetype` de cada formato de subtítulos.
+- Campo `tags` en los metadatos de `Media`, `Audio`, `Video`, `Subtitles` y
+  `Chapter` para conservar cualquier etiqueta no estandarizada del contenedor.
+- `Subtitles.duration` y 8 disposiciones nuevas en `SubtitlesDispositions`:
+  `original`, `dub`, `commentary`, `lyrics`, `karaoke`, `captions`, `descriptions`
+  y `metadata`.
+- `AudioMetadata` se amplía con `artist`, `comment` y `encoder`; `VideoMetadata` con
+  `encoder`.
+
+### Cambiado
+
+- `Video` y `Subtitles` adoptan la estructura anidada `format` / `metadata` /
+  `dispositions` (12 disposiciones en subtítulos, antes 4); se elimina el helper
+  `get_subtitles_metadata`.
+- ffprobe resuelve las etiquetas probando variantes de mayúsculas/minúsculas
+  (`title`, `TITLE`, ...) y almacena las no mapeadas en `tags`.
+- La duración de cada pista prioriza el campo `duration` del stream sobre la etiqueta
+  `DURATION`, y se parsean duraciones en formato `HH:MM:SS.ffffff`.
+- `add-subs`: se eliminan las opciones `--forced`, `--default`,
+  `--hearing-impaired` y `--visual-impaired`; `--language` pasa a ser obligatorio
+  (`MissingArgumentError`). Las disposiciones se modifican con `edit-subs`.
+- `add-audio` deja de emitir `-metadata:s:a:N` manualmente: ffmpeg hereda idioma y
+  título de la pista de audio origen.
+- `edit-subs` y `to_exclusive_default_cmd` localizan la pista por `stream_tracks` y
+  solo reconstruyen las disposiciones de las pistas marcadas como `default`.
+- `remux` deja de exponer la opción `--fast_start` (se aplica automáticamente en
+  contenedores MP4).
+
+### Corregido
+
+- `add-subs` ya no borra las disposiciones heredadas del contenedor cuando el usuario
+  no modifica ninguna: `-disposition` solo se emite si se ha tocado alguna.
+- `to_exclusive_default_cmd` reescribe únicamente las pistas con `default=True`,
+  conservando el resto de sus disposiciones.
+- `info` y `sheet` leen los datos desde la nueva estructura anidada de los modelos
+  (`format`, `metadata`, `dispositions`).
+
 ## [0.21.0-beta.13] - 2026-09-26
 
 ### Cambiado
