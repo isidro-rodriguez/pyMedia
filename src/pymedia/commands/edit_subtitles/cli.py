@@ -60,7 +60,7 @@ def edit_subs(
     visual_impaired: SubtitlesVisualImpairedOption = None,
     debug: DebugOption = False,
     show_cmd: ShowCmdOption = False,
-    help_: HelpOption = False,
+    _help: HelpOption = False,
 ) -> None:
     """Punto de entrada del comando ``edit-subs``.
 
@@ -77,7 +77,7 @@ def edit_subs(
         visual_impaired: Subtítulos adaptados a personas con problemas de vista.
         debug: Habilita el nivel de log DEBUG.
         show_cmd: Muestra al usuario el comando ffmpeg compuesto pero no lo ejecuta.
-        help_: Helper para mostrar esta línea en distintos idiomas.
+        _help: Helper para mostrar esta línea en distintos idiomas.
 
     Raises:
         MissingParameterError: Si falta la pista a editar, el medio, las pistas

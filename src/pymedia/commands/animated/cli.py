@@ -67,7 +67,7 @@ def animated(
     vflip: FlipVerticalOption = False,
     debug: DebugOption = False,
     show_cmd: ShowCmdOption = False,
-    help_: HelpOption = False,
+    _help: HelpOption = False,
 ) -> None:
     """Punto de entrada del comando ``animated``.
 
@@ -87,7 +87,7 @@ def animated(
         vflip: Invierte la imagen verticalmente, intercambiando arriba y abajo.
         debug: Habilita el nivel de log DEBUG.
         show_cmd: Muestra al usuario el comando ffmpeg compuesto pero no lo ejecuta.
-        help_: Helper para mostrar esta línea en distintos idiomas.
+        _help: Helper para mostrar esta línea en distintos idiomas.
     """
     Logger.create(debug=debug)
     params = AnimatedParameters.load(
@@ -104,6 +104,5 @@ def animated(
         scale_upscale=scale_upscale,
         hflip=hflip,
         vflip=vflip,
-        show_cmd=show_cmd,
     )
     AnimatedService(debug=debug, show_cmd=show_cmd, params=params).start()

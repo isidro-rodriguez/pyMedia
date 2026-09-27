@@ -70,7 +70,7 @@ def _extract_docstring_range(node: ast.AST) -> range | None:
     if not isinstance(first_stmt, ast.Expr):
         return None
 
-    # Comprobación estricta para satisfaces el type-checker de Mypy
+    # Comprobación estricta para satisfacer el type-checker de Mypy
     if isinstance(first_stmt.value, ast.Constant) and isinstance(
         first_stmt.value.value, str
     ):

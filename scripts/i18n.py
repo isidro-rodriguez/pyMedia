@@ -81,15 +81,16 @@ def cmd_update(lang: str) -> None:
     pot = read_po(pot_path.open("rb"))
     po_path = _po_path(lang)
 
-    old = {}
+    old: dict[str, str] = {}
     if po_path.exists():
         for msg in read_po(po_path.open("rb")):
-            if msg.id:
-                old[msg.id] = msg.string
+            # las formas plurales tienen id tuple/list: no hashable, fuera de alcance
+            if isinstance(msg.id, str) and msg.id:
+                old[msg.id] = msg.string if isinstance(msg.string, str) else ""
 
     new_catalog = Catalog(domain=DOMAIN)
     for message in pot:
-        if not message.id:
+        if not isinstance(message.id, str) or not message.id:
             continue
         msgstr = old.get(message.id, "")
         new_catalog.add(message.id, string=msgstr, locations=list(message.locations))

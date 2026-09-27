@@ -45,7 +45,7 @@ def delete_subs(
     overwrite: OverwriteOption = OverwriteMode.ASK,
     debug: DebugOption = False,
     show_cmd: ShowCmdOption = False,
-    help_: HelpOption = False,
+    _help: HelpOption = False,
 ) -> None:
     """Punto de entrada del comando ``delete-subs``.
 
@@ -56,7 +56,7 @@ def delete_subs(
         overwrite: Política ante conflicto de salida ya existente.
         debug: Habilita el nivel de log DEBUG.
         show_cmd: Muestra al usuario el comando ffmpeg compuesto pero no lo ejecuta.
-        help_: Helper para mostrar esta línea en distintos idiomas.
+        _help: Helper para mostrar esta línea en distintos idiomas.
 
     Raises:
         MissingParameterError: Si falta el medio, las pistas de subtítulos del
