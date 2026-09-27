@@ -16,6 +16,7 @@ from pymedia.mixins.outputs_mixin import (
 )
 from pymedia.models.audio import AudioFormat
 from pymedia.models.media import Audio, Media, Subtitles, Video
+from pymedia.models.subtitles import SubtitlesFormat
 from pymedia.models.video import VideoFormat
 
 
@@ -78,7 +79,11 @@ def _media_tracks(*audio_tracks: Audio) -> Media:
 
 def _subtitles_track(codec: str, track_index: int) -> Subtitles:
     """Pista de subtítulos de ayuda con códec e índice concretos."""
-    return Subtitles(path=Path("clip.mkv"), track_index=track_index, codec=codec)
+    return Subtitles(
+        path=Path("clip.mkv"),
+        track_index=track_index,
+        format=SubtitlesFormat(codec=codec),
+    )
 
 
 def _media_sub_tracks(*subtitles_tracks: Subtitles) -> Media:

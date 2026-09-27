@@ -32,8 +32,8 @@ class AddSubtitlesCmd:
             raise MissingParameterError(name="media")
         if subtitles is None:
             raise MissingParameterError(name="subtitles")
-        if subtitles.codec is None:
-            raise MissingParameterError(name="subtitles.codec")
+        if subtitles.format.codec is None:
+            raise MissingParameterError(name="subtitles.format.codec")
 
         cmd = ["ffmpeg"]
 
@@ -53,7 +53,7 @@ class AddSubtitlesCmd:
                 "-c",
                 "copy",
                 f"-c:s:{subtitles.track_index}",
-                subtitles.codec,
+                subtitles.format.codec,
             ]
         )
 

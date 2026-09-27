@@ -221,7 +221,7 @@ class TestSubtitlesStreamParsing:
 
         assert first.global_index == 2
         assert first.track_index == 0
-        assert first.codec == "subrip"
+        assert first.format.codec == "subrip"
         assert first.metadata.language == "spa"
         assert first.metadata.title == "Español"
         assert first.dispositions.default is True
@@ -229,7 +229,7 @@ class TestSubtitlesStreamParsing:
 
         assert second.global_index == 3
         assert second.track_index == 1
-        assert second.codec == "hdmv_pgs_subtitle"
+        assert second.format.codec == "hdmv_pgs_subtitle"
         assert second.metadata.language == "ita"
         assert second.dispositions.forced is True
 

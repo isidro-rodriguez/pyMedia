@@ -178,7 +178,7 @@ class InfoService(BaseService[InfoParameters]):
 
                 table.add_row(
                     str(sub.track_index),
-                    sub.codec or na,
+                    sub.format.codec or na,
                     sub.metadata.language or na,
                     sub.metadata.title or na,
                     "✓" if dispositions.default else "",

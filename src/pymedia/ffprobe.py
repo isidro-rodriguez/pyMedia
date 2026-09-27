@@ -18,7 +18,12 @@ from pymedia.models.audio import (
     AudioMetadata,
 )
 from pymedia.models.media import Media, MediaMetadata
-from pymedia.models.subtitles import Subtitles, SubtitlesDispositions, SubtitlesMetadata
+from pymedia.models.subtitles import (
+    Subtitles,
+    SubtitlesDispositions,
+    SubtitlesFormat,
+    SubtitlesMetadata,
+)
 from pymedia.models.video import (
     Video,
     VideoDispositions,
@@ -124,6 +129,11 @@ def _build_video_dispositions(disposition: dict[str, Any]) -> VideoDispositions:
     )
 
 
+def _build_subtitles_format(stream: dict[str, Any]) -> SubtitlesFormat:
+    """Construye SubtitlesFormat a partir del stream de subtítulos de ffprobe."""
+    return SubtitlesFormat(codec=stream.get("codec_name"))
+
+
 def get_media_information(media_input: Path, logger: Logger) -> "Media":
     """Obtiene información del contenedor multimedia.
 
@@ -176,7 +186,7 @@ def get_media_information(media_input: Path, logger: Logger) -> "Media":
                     path=media_input.absolute(),
                     global_index=stream.get("index"),
                     track_index=subtitles_track_index,
-                    codec=stream.get("codec_name"),
+                    format=_build_subtitles_format(stream=stream),
                     metadata=SubtitlesMetadata(
                         language=tags.get("language"),
                         title=tags.get("title"),

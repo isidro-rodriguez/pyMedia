@@ -118,9 +118,11 @@ class TranscodeMixin:
         args: list[str] = []
         output_index = 0
         for track in self.media.subtitles:
-            if is_mp4 and track.codec not in _TEXT_SUBTITLES:
+            if is_mp4 and track.format.codec not in _TEXT_SUBTITLES:
                 continue
-            codec = "mov_text" if is_mp4 and track.codec != "mov_text" else "copy"
+            codec = (
+                "mov_text" if is_mp4 and track.format.codec != "mov_text" else "copy"
+            )
             args.extend(
                 ["-map", f"0:s:{track.track_index}", f"-c:s:{output_index}", codec]
             )

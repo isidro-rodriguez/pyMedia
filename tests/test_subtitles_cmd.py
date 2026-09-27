@@ -11,7 +11,12 @@ from pymedia.commands.edit_subtitles.parameters import EditSubtitlesParameters
 from pymedia.commands.extract_subtitles.cmd import ExtractSubtitlesCmd
 from pymedia.commands.extract_subtitles.parameters import ExtractSubtitlesParameters
 from pymedia.models.media import Media
-from pymedia.models.subtitles import Subtitles, SubtitlesDispositions, SubtitlesMetadata
+from pymedia.models.subtitles import (
+    Subtitles,
+    SubtitlesDispositions,
+    SubtitlesFormat,
+    SubtitlesMetadata,
+)
 from pymedia.types import OverwriteMode
 
 
@@ -66,7 +71,7 @@ def test_add_encodes_new_subtitle_with_local_index() -> None:
         subtitles=Subtitles(
             path=Path("/tmp/subs.srt"),
             track_index=2,
-            codec="srt",
+            format=SubtitlesFormat(codec="srt"),
             metadata=SubtitlesMetadata(
                 language="spa",
                 title="Español",

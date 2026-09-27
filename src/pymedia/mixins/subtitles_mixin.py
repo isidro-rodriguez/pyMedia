@@ -12,7 +12,12 @@ from pymedia.ffprobe import validate_subtitles_file_codec
 from pymedia.locales import translate as _
 from pymedia.logger import Logger
 from pymedia.models.media import Media
-from pymedia.models.subtitles import Subtitles, SubtitlesDispositions, SubtitlesMetadata
+from pymedia.models.subtitles import (
+    Subtitles,
+    SubtitlesDispositions,
+    SubtitlesFormat,
+    SubtitlesMetadata,
+)
 
 
 @dataclass(kw_only=True)
@@ -73,7 +78,7 @@ class SubtitlesInputMixin:
             path=subtitles_input.absolute(),
             global_index=_process_stream_index(),
             track_index=len(subtitles) if subtitles is not None else 0,
-            codec=self._process_codec(),
+            format=SubtitlesFormat(codec=self._process_codec()),
             metadata=SubtitlesMetadata(
                 language=language_code,
                 title=_process_subtitles_title(title=title, lang=language_code),

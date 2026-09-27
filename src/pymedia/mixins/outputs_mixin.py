@@ -449,9 +449,9 @@ class SubtitlesOutputMixin:
                 if track.track_index in self.stream_tracks
             ]
         for subtitles_track in subtitles_tracks:
-            if subtitles_track.codec is None:
+            if subtitles_track.format.codec is None:
                 raise MissingPropertyError(name="subtitles codec")
-            codec = subtitles_track.codec
+            codec = subtitles_track.format.codec
             fmt_data = SUBTITLES_FORMATS[
                 MappingProxyType({"subrip": "srt"}).get(codec, codec)
             ]
