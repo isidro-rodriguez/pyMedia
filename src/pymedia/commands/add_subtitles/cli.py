@@ -29,11 +29,15 @@ Add subtitles to a media file.
 
 You can consult what subtitles tracks have a container with `info` command.
 
+The new subtitles track is added without disposition flags. Use `edit-subs` to
+mark it as default or forced after insertion.
+
 [bold]Examples[/bold]:
   Add english subtitles to a media container:
     > pymedia add-subs input.mp4 eng_subs.srt --language eng
-  Add default forced spanish subtitles with custom title:
-    > pymedia add-subs input.mp4 spa_subs.srt --language spa --title "Español (forced)" --default --forced
+  Add spanish subtitles with custom title:
+    > pymedia add-subs input.mp4 spa_subs.srt --language spa --title "Español"
+    Then: pymedia edit-subs output.mp4 --track 1 --default --forced
 """  # noqa
 )
 

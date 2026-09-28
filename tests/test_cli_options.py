@@ -688,45 +688,45 @@ SUBS_FLAGS = [
     ("--hearing-impaired", "hearing_impaired"),
     ("--visual-impaired", "visual_impaired"),
 ]
-# add-subs no emite disposiciones (como add-audio); solo edit-subs lo hace
+# Los comandos `add-*` no exponen flags de disposición: la pista insertada se
+# ajusta después con `edit-*` (herencia cubierta en `test_cli.py`).
 TRACK_FLAG_CASES = [
-    pytest.param(add, edit, kind, option, flag, id=f"{kind}{option}")
-    for kind, add, edit, flags in (
-        ("audio", None, "edit-audio", AUDIO_FLAGS),
-        ("subtitle", None, "edit-subs", SUBS_FLAGS),  # add-subs no emite flags
+    pytest.param(edit, kind, option, flag, id=f"{kind}{option}")
+    for kind, edit, flags in (
+        ("audio", "edit-audio", AUDIO_FLAGS),
+        ("subtitle", "edit-subs", SUBS_FLAGS),
     )
     for option, flag in flags
-    if add is not None
+]
+# Parejas (comando, opción) de flags que los comandos `add-*` no admiten.
+UNSUPPORTED_ADD_FLAG_CASES = [
+    pytest.param(add, option, id=f"{add}{option}")
+    for add, flags in (("add-audio", AUDIO_FLAGS), ("add-subs", SUBS_FLAGS))
+    for option, _flag in flags
 ]
 
 
-@pytest.mark.parametrize(("add", "edit", "kind", "option", "flag"), TRACK_FLAG_CASES)
-def test_add_track_sets_flag(
+@pytest.mark.parametrize(("add", "option"), UNSUPPORTED_ADD_FLAG_CASES)
+def test_add_track_rejects_disposition_flags(
     pymedia: Invoke,
     request: pytest.FixtureRequest,
-    add: str | None,
-    edit: str,
-    kind: str,
+    add: str,
     option: str,
-    flag: str,
     tmp_path: Path,
 ) -> None:
-    """`add-audio`/`add-subs` marcan la pista nueva con el flag indicado."""
-    if add is None:
-        pytest.skip("No add command for this track kind")
+    """`add-audio`/`add-subs` no admiten flags de disposición."""
     output = tmp_path / "out.mkv"
 
     result = pymedia(*build_args(COMMANDS[add], request, output, "-ov", "yes", option))
 
-    assert result.exit_code == 0
-    assert stream_disposition(output, kind, flag) == 1
+    assert result.exit_code != 0
+    assert f"No such option: {option}" in result.output
 
 
-@pytest.mark.parametrize(("add", "edit", "kind", "option", "flag"), TRACK_FLAG_CASES)
+@pytest.mark.parametrize(("edit", "kind", "option", "flag"), TRACK_FLAG_CASES)
 def test_edit_track_sets_and_clears_flag(
     pymedia: Invoke,
     request: pytest.FixtureRequest,
-    add: str,
     edit: str,
     kind: str,
     option: str,
@@ -734,14 +734,13 @@ def test_edit_track_sets_and_clears_flag(
     tmp_path: Path,
 ) -> None:
     """`edit-*` activa un flag y `--no-<flag>` lo vuelve a desactivar."""
-    cmd = COMMANDS[edit]
     marked = tmp_path / "marked.mkv"
     cleared = tmp_path / "cleared.mkv"
     negated = option.replace("--", "--no-", 1)
 
-    first = pymedia(*build_args(cmd, request, marked, "-ov", "yes", option))
+    first = pymedia(*build_args(COMMANDS[edit], request, marked, "-ov", "yes", option))
     second = pymedia(
-        "edit-audio" if kind == "audio" else "edit-subs",
+        edit,
         str(marked),
         "--track",
         "0",
@@ -762,7 +761,6 @@ def test_edit_track_sets_and_clears_flag(
 # mismo tipo de stream lo pierde. Campos de cada caso: comando, fixture de
 # entrada, tipo de pista, opciones extra, índice de la pista marcada e índice de
 # la pista que era `default` antes (`None` si el medio no tenía ninguna).
-# add-subs no emite disposiciones (como add-audio); solo edit-subs lo hace
 EXCLUSIVE_DEFAULT_CASES = [
     pytest.param(
         "edit-audio", "video_mkv_two_audio", "audio", (), 0, 1, id="edit-audio"
