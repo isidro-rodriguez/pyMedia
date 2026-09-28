@@ -46,7 +46,7 @@ class InfoService(BaseService[InfoParameters]):
         def _build_general_table() -> Table:
             """Construye la tabla de datos generales del vídeo."""
             if media.metadata is None:
-                raise MissingParameterError(name="media.disposition")
+                raise MissingParameterError(name="media.metadata")
             metadata = media.metadata
 
             metadata_fields = (

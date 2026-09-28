@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-09-27 16:48+0100\n"
+"POT-Creation-Date: 2026-09-28 05:22+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -59,58 +59,58 @@ msgstr ""
 msgid "Missing at least one of these options: %(options)s"
 msgstr ""
 
-#: pymedia/ffprobe.py:44
+#: pymedia/ffprobe.py:52
 msgid "ffprobe was not found. Install ffmpeg."
 msgstr ""
 
-#: pymedia/ffprobe.py:49
+#: pymedia/ffprobe.py:57
 #, python-format
 msgid "ffprobe couldn't read %(path)s: %(err.stderr)s"
 msgstr ""
 
-#: pymedia/ffprobe.py:136
+#: pymedia/ffprobe.py:349
 #, python-format
 msgid "ffprobe media data: %(data)s"
 msgstr ""
 
-#: pymedia/ffprobe.py:196
+#: pymedia/ffprobe.py:402
 #, python-format
 msgid "Invalid video container: %(path)s"
 msgstr ""
 
-#: pymedia/ffprobe.py:261
+#: pymedia/ffprobe.py:454
 #, python-format
 msgid "ffprobe audio file data: %(data)s"
 msgstr ""
 
-#: pymedia/ffprobe.py:291
+#: pymedia/ffprobe.py:485
 #, python-format
 msgid "It doesn't contain any audio track. Invalid audio file: %(file)s"
 msgstr ""
 
-#: pymedia/ffprobe.py:297
+#: pymedia/ffprobe.py:491
 #, python-format
 msgid "Audio file contains video tracks: %(tracks)s"
 msgstr ""
 
-#: pymedia/ffprobe.py:302
+#: pymedia/ffprobe.py:496
 #, python-format
 msgid "Audio file contains subtitles tracks: %(tracks)s"
 msgstr ""
 
-#: pymedia/ffprobe.py:322
+#: pymedia/ffprobe.py:516
 #, python-format
 msgid "ffprobe subtitles file data: %(data)s"
 msgstr ""
 
-#: pymedia/ffprobe.py:335
+#: pymedia/ffprobe.py:529
 #, python-format
 msgid ""
 "\"%(path)s\" is not a recognized subtitles file (detected format: "
 "%(format_name)s)."
 msgstr ""
 
-#: pymedia/ffprobe.py:344
+#: pymedia/ffprobe.py:538
 #, python-format
 msgid "%(path.suffix)s extension doesn't support %(codec_name)s subtitles."
 msgstr ""
@@ -431,7 +431,7 @@ msgstr ""
 msgid "Process skipped since output file already exists."
 msgstr ""
 
-#: pymedia/commands/base_service.py:112 pymedia/commands/base_service.py:346
+#: pymedia/commands/base_service.py:112 pymedia/commands/base_service.py:347
 #, python-format
 msgid "Output file already exists: %(name)s"
 msgstr ""
@@ -440,34 +440,34 @@ msgstr ""
 msgid "Overwrite?"
 msgstr ""
 
-#: pymedia/commands/base_service.py:144
+#: pymedia/commands/base_service.py:145
 #, python-format
 msgid "FFmpeg command: %(cmd)s"
 msgstr ""
 
-#: pymedia/commands/base_service.py:147
+#: pymedia/commands/base_service.py:148
 msgid "Do you want to run this ffmpeg command?"
 msgstr ""
 
-#: pymedia/commands/base_service.py:149
+#: pymedia/commands/base_service.py:150
 msgid "User decided to abort process."
 msgstr ""
 
-#: pymedia/commands/base_service.py:224
+#: pymedia/commands/base_service.py:225
 #, python-format
 msgid "FFmpeg command interrupted manually: %(command_name)s"
 msgstr ""
 
-#: pymedia/commands/base_service.py:229
+#: pymedia/commands/base_service.py:230
 #, python-format
 msgid "FFmpeg command timed out: %(command_name)s"
 msgstr ""
 
-#: pymedia/commands/base_service.py:236
+#: pymedia/commands/base_service.py:237
 msgid "FFmpeg command failed during execution."
 msgstr ""
 
-#: pymedia/commands/base_service.py:352
+#: pymedia/commands/base_service.py:353
 msgid "Output file could not be moved."
 msgstr ""
 
@@ -555,7 +555,7 @@ msgstr ""
 msgid "Image commands"
 msgstr ""
 
-#: pymedia/commands/animated/cmd.py:127
+#: pymedia/commands/animated/cmd.py:125
 msgid "Animated image output not supported"
 msgstr ""
 
@@ -602,7 +602,7 @@ msgstr ""
 
 #: pymedia/commands/cut/service.py:44
 #, python-format
-msgid "Container split successfully: %(count)d files."
+msgid "Container split successfully: %(count)s files."
 msgstr ""
 
 #: pymedia/commands/cut/service.py:49
@@ -848,7 +848,7 @@ msgstr ""
 msgid "Value"
 msgstr ""
 
-#: pymedia/commands/info/service.py:69 pymedia/commands/sheet/cmd.py:301
+#: pymedia/commands/info/service.py:69 pymedia/commands/sheet/cmd.py:303
 msgid "File"
 msgstr ""
 
@@ -856,11 +856,11 @@ msgstr ""
 msgid "Container"
 msgstr ""
 
-#: pymedia/commands/info/service.py:72 pymedia/commands/sheet/cmd.py:313
+#: pymedia/commands/info/service.py:72 pymedia/commands/sheet/cmd.py:316
 msgid "Duration"
 msgstr ""
 
-#: pymedia/commands/info/service.py:80 pymedia/commands/sheet/cmd.py:306
+#: pymedia/commands/info/service.py:80 pymedia/commands/sheet/cmd.py:308
 msgid "Size"
 msgstr ""
 
@@ -869,7 +869,7 @@ msgstr ""
 msgid "video dimensions"
 msgstr ""
 
-#: pymedia/commands/info/service.py:99 pymedia/commands/sheet/cmd.py:317
+#: pymedia/commands/info/service.py:99 pymedia/commands/sheet/cmd.py:320
 msgid "Video"
 msgstr ""
 
@@ -1144,7 +1144,7 @@ msgstr ""
 msgid "Container transcoded successfully: %(output)s"
 msgstr ""
 
-#: pymedia/mixins/audio_mixin.py:148 pymedia/mixins/streams_mixin.py:87
+#: pymedia/mixins/audio_mixin.py:308 pymedia/mixins/streams_mixin.py:87
 msgid "Audio index not included."
 msgstr ""
 
@@ -1233,7 +1233,7 @@ msgstr ""
 msgid "Stream index must be greater than 0."
 msgstr ""
 
-#: pymedia/mixins/streams_mixin.py:95 pymedia/mixins/subtitles_mixin.py:345
+#: pymedia/mixins/streams_mixin.py:95 pymedia/mixins/subtitles_mixin.py:350
 msgid "Subtitles index not included."
 msgstr ""
 
@@ -1241,11 +1241,11 @@ msgstr ""
 msgid "Incorrect stream type."
 msgstr ""
 
-#: pymedia/mixins/subtitles_mixin.py:127
+#: pymedia/mixins/subtitles_mixin.py:132
 msgid "Subtitles codec not supported."
 msgstr ""
 
-#: pymedia/mixins/subtitles_mixin.py:355
+#: pymedia/mixins/subtitles_mixin.py:360
 msgid ""
 "Value doesn't match with ISO 639-1/639-2: Codes for the Representation of"
 " Names of "

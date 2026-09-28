@@ -138,6 +138,7 @@ class BaseService[ParamsT](ABC):
                 renderable=f"\n{_format_cmd()}\n",
                 emoji=False,
                 soft_wrap=True,
+                markup=False,
             )
             sys.exit(0)
 

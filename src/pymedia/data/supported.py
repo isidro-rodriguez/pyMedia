@@ -21,12 +21,6 @@ class SUPPORTED:
         ".wav",
     )
 
-    AUDIO_CODECS: tuple[str, ...] = (
-        "aac",
-        "eac3",
-        "opus",
-    )
-
     IMAGES: tuple[str, ...] = (
         ".jpeg",
         ".jpg",
@@ -50,16 +44,4 @@ class SUPPORTED:
         ".ass",
         ".srt",
         ".ssa",
-    )
-
-    SUBTITLES_CODECS: tuple[str, ...] = (
-        "ass",
-        "srt",
-        "ssa",
-    )
-
-    VIDEO_CODECS: tuple[str, ...] = (
-        "av1",
-        "h264",
-        "h265",
     )

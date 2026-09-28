@@ -3,9 +3,8 @@
 import json
 import subprocess
 from datetime import timedelta
-from fractions import Fraction
 from pathlib import Path
-from typing import Any, cast
+from typing import Any
 
 from pymedia.data.subtitles_formats import SUBTITLES_FORMATS, SubtitlesType
 from pymedia.data.video_codecs import VIDEO_CODECS
@@ -33,7 +32,21 @@ from pymedia.models.video import (
     VideoFormat,
     VideoMetadata,
 )
-from pymedia.utils import parse_date, parse_fraction, to_float, to_int
+from pymedia.utils import (
+    parse_date,
+    parse_duration,
+    parse_fraction,
+    parse_r128_gain,
+    parse_replaygain_gain,
+    ticks_to_timedelta,
+    to_bool,
+    to_dict,
+    to_dict_list,
+    to_float,
+    to_int,
+    to_text,
+    to_timedelta,
+)
 
 
 def _run_ffprobe(args: list[str], path: Path) -> dict[str, Any]:
@@ -58,7 +71,13 @@ def _run_ffprobe(args: list[str], path: Path) -> dict[str, Any]:
             % {"path": path, "err.stderr": reason}
         ) from err
 
-    data: dict[str, Any] = json.loads(result.stdout)
+    invalid = _("ffprobe returned invalid output for %(path)s") % {"path": path}
+    try:
+        data = json.loads(result.stdout)
+    except json.JSONDecodeError as err:
+        raise FfprobeError(msg=invalid) from err
+    if not isinstance(data, dict):
+        raise FfprobeError(msg=invalid)
 
     return data
 
@@ -68,7 +87,8 @@ def _get_tag(tags: dict[str, Any], *names: str) -> str | None:
     for name in names:
         for variant in (name, name.upper(), name.lower(), name.capitalize()):
             if variant in tags:
-                return cast(str, tags[variant])
+                value = tags[variant]
+                return None if value is None else str(value)
     return None
 
 
@@ -80,43 +100,11 @@ def _collect_tags(tags: dict[str, Any], *known: str) -> dict[str, str]:
     }
 
 
-def _parse_duration(value: str | None) -> timedelta | None:
-    """Convierte una duración de ffprobe ("segundos" o "HH:MM:SS.ffffff")."""
-    if not value:
-        return None
-    if ":" in value:
-        hours, minutes, seconds = value.split(":")
-        return timedelta(hours=int(hours), minutes=int(minutes), seconds=float(seconds))
-    seconds_val = to_float(value)
-    return timedelta(seconds=seconds_val) if seconds_val is not None else None
-
-
 def _stream_duration(stream: dict[str, Any], tags: dict[str, Any]) -> timedelta | None:
     """Duración de un stream: prioriza 'duration' sobre la etiqueta DURATION."""
-    return _parse_duration(stream.get("duration")) or _parse_duration(
+    return parse_duration(stream.get("duration")) or parse_duration(
         _get_tag(tags, "duration")
     )
-
-
-def _parse_replaygain_gain(raw: str | None) -> float | None:
-    """Extrae el valor en dB de una etiqueta ReplayGain (p. ej. "-3.50 dB")."""
-    return None if raw is None else to_float(raw.split()[0])
-
-
-def _parse_r128_gain(raw: str | None) -> float | None:
-    """Convierte R128_TRACK_GAIN (Q7.8, referido a -23 LUFS) en LUFS integradas."""
-    value = to_int(raw)
-    return None if value is None else -23.0 + value / 256
-
-
-def _parse_time_base(raw: str | None) -> Fraction | None:
-    """Convierte un time_base "num/den" de ffprobe en Fraction (None si es inválido)."""
-    if raw is None:
-        return None
-    num, _sep, den = raw.partition("/")
-    if not den or not num.lstrip("-").isdigit() or not den.isdigit():
-        return None
-    return Fraction(int(num), int(den))
 
 
 def _build_media_format(fmt: dict[str, Any]) -> MediaFormat:
@@ -168,9 +156,9 @@ def _build_media_metadata(tags: dict[str, Any]) -> MediaMetadata:
 def _build_audio_format(stream: dict[str, Any]) -> AudioFormat:
     """Construye AudioFormat a partir del stream de audio de ffprobe."""
     return AudioFormat(
-        codec=stream.get("codec_name"),
+        codec=to_text(stream.get("codec_name")),
         sample_rate=to_int(stream.get("sample_rate")),
-        channels=stream.get("channels"),
+        channels=to_int(stream.get("channels")),
         channel_layout=stream.get("channel_layout"),
         bit_rate=to_int(stream.get("bit_rate")),
     )
@@ -196,8 +184,8 @@ def _build_audio_loudness(tags: dict[str, Any]) -> AudioLoudness:
     con el filtro `loudnorm` de ffmpeg y no están disponibles vía ffprobe.
     """
     return AudioLoudness(
-        integrated=_parse_r128_gain(_get_tag(tags, "r128_track_gain")),
-        replaygain_gain=_parse_replaygain_gain(_get_tag(tags, "replaygain_track_gain")),
+        integrated=parse_r128_gain(_get_tag(tags, "r128_track_gain")),
+        replaygain_gain=parse_replaygain_gain(_get_tag(tags, "replaygain_track_gain")),
         replaygain_peak=to_float(_get_tag(tags, "replaygain_track_peak")),
     )
 
@@ -205,25 +193,28 @@ def _build_audio_loudness(tags: dict[str, Any]) -> AudioLoudness:
 def _build_audio_dispositions(disposition: dict[str, Any]) -> AudioDispositions:
     """Construye AudioDispositions a partir del disposition dict de ffprobe."""
     return AudioDispositions(
-        forced=bool(disposition.get("forced", 0)),
-        default=bool(disposition.get("default", 0)),
-        hearing_impaired=bool(disposition.get("hearing_impaired", 0)),
-        commentary=bool(disposition.get("comment", 0)),
-        dubbed=bool(disposition.get("dub", 0)),
-        original=bool(disposition.get("original", 0)),
-        lyrics=bool(disposition.get("lyrics", 0)),
-        karaoke=bool(disposition.get("karaoke", 0)),
-        visual_impaired=bool(disposition.get("visual_impaired", 0)),
-        clean_effects=bool(disposition.get("clean_effects", 0)),
+        forced=to_bool(disposition.get("forced")),
+        default=to_bool(disposition.get("default")),
+        hearing_impaired=to_bool(disposition.get("hearing_impaired")),
+        commentary=to_bool(disposition.get("comment")),
+        dubbed=to_bool(disposition.get("dub")),
+        original=to_bool(disposition.get("original")),
+        lyrics=to_bool(disposition.get("lyrics")),
+        karaoke=to_bool(disposition.get("karaoke")),
+        visual_impaired=to_bool(disposition.get("visual_impaired")),
+        clean_effects=to_bool(disposition.get("clean_effects")),
     )
 
 
 def _build_video_format(stream: dict[str, Any]) -> VideoFormat:
     """Construye VideoFormat a partir del stream de vídeo de ffprobe."""
+    codec = to_text(stream.get("codec_name"))
+    known = VIDEO_CODECS.get(codec) if codec else None
     return VideoFormat(
-        codec=VIDEO_CODECS[cast(str, stream.get("codec_name"))].name,
-        width=stream.get("width"),
-        height=stream.get("height"),
+        # Un códec ausente del catálogo no invalida el fichero: se usa el nombre crudo.
+        codec=known.name if known else codec,
+        width=to_int(stream.get("width")),
+        height=to_int(stream.get("height")),
         fps=parse_fraction(stream.get("avg_frame_rate")),
         bit_rate=to_int(stream.get("bit_rate")),
         pix_fmt=stream.get("pix_fmt"),
@@ -247,20 +238,20 @@ def _build_video_metadata(tags: dict[str, Any]) -> VideoMetadata:
 def _build_video_dispositions(disposition: dict[str, Any]) -> VideoDispositions:
     """Construye VideoDispositions a partir del disposition dict de ffprobe."""
     return VideoDispositions(
-        default=bool(disposition.get("default", 0)),
-        forced=bool(disposition.get("forced", 0)),
-        original=bool(disposition.get("original", 0)),
-        commentary=bool(disposition.get("comment", 0)),
-        attached_pic=bool(disposition.get("attached_pic", 0)),
-        captions=bool(disposition.get("captions", 0)),
+        default=to_bool(disposition.get("default")),
+        forced=to_bool(disposition.get("forced")),
+        original=to_bool(disposition.get("original")),
+        commentary=to_bool(disposition.get("comment")),
+        attached_pic=to_bool(disposition.get("attached_pic")),
+        captions=to_bool(disposition.get("captions")),
     )
 
 
 def _build_subtitles_format(stream: dict[str, Any]) -> SubtitlesFormat:
     """Construye SubtitlesFormat a partir del stream de subtítulos de ffprobe."""
-    codec = cast(str, stream.get("codec_name"))
+    codec = to_text(stream.get("codec_name"))
     known = SUBTITLES_FORMATS.get(codec) if codec else None
-    mimetype = _get_tag(stream.get("tags", {}), "mimetype") or (
+    mimetype = _get_tag(to_dict(stream.get("tags")), "mimetype") or (
         known.mimetype if known else None
     )
     return SubtitlesFormat(
@@ -284,44 +275,35 @@ def _build_subtitles_metadata(tags: dict[str, Any]) -> SubtitlesMetadata:
 def _build_subtitles_dispositions(disposition: dict[str, Any]) -> SubtitlesDispositions:
     """Construye SubtitlesDispositions a partir del disposition dict de ffprobe."""
     return SubtitlesDispositions(
-        default=bool(disposition.get("default", 0)),
-        forced=bool(disposition.get("forced", 0)),
-        hearing_impaired=bool(disposition.get("hearing_impaired", 0)),
-        visual_impaired=bool(disposition.get("visual_impaired", 0)),
-        original=bool(disposition.get("original", 0)),
-        dub=bool(disposition.get("dub", 0)),
-        commentary=bool(disposition.get("comment", 0)),
-        lyrics=bool(disposition.get("lyrics", 0)),
-        karaoke=bool(disposition.get("karaoke", 0)),
-        captions=bool(disposition.get("captions", 0)),
-        descriptions=bool(disposition.get("descriptions", 0)),
-        metadata=bool(disposition.get("metadata", 0)),
+        default=to_bool(disposition.get("default")),
+        forced=to_bool(disposition.get("forced")),
+        hearing_impaired=to_bool(disposition.get("hearing_impaired")),
+        visual_impaired=to_bool(disposition.get("visual_impaired")),
+        original=to_bool(disposition.get("original")),
+        dub=to_bool(disposition.get("dub")),
+        commentary=to_bool(disposition.get("comment")),
+        lyrics=to_bool(disposition.get("lyrics")),
+        karaoke=to_bool(disposition.get("karaoke")),
+        captions=to_bool(disposition.get("captions")),
+        descriptions=to_bool(disposition.get("descriptions")),
+        metadata=to_bool(disposition.get("metadata")),
     )
-
-
-def _scale_chapter_time(
-    raw: int | None, time_base: Fraction | None
-) -> timedelta | None:
-    """Convierte un instante crudo de capítulo (en unidades time_base) a timedelta."""
-    if raw is None or time_base is None:
-        return None
-    return timedelta(seconds=float(raw * time_base))
 
 
 def _build_chapter(chapter: dict[str, Any]) -> Chapter:
     """Construye un Chapter a partir de una entrada 'chapters' de ffprobe."""
-    tags = chapter.get("tags", {})
-    time_base = chapter.get("time_base")
-    fraction = _parse_time_base(time_base)
+    tags = to_dict(chapter.get("tags"))
+    time_base = to_text(chapter.get("time_base"))
+    fraction = parse_fraction(time_base)
 
     return Chapter(
-        id=chapter.get("id"),
-        start_time=_parse_duration(chapter.get("start_time")),
-        end_time=_parse_duration(chapter.get("end_time")),
+        id=to_int(chapter.get("id")),
+        start_time=parse_duration(chapter.get("start_time")),
+        end_time=parse_duration(chapter.get("end_time")),
         format=ChapterFormat(
             time_base=time_base,
-            start=_scale_chapter_time(chapter.get("start"), fraction),
-            end=_scale_chapter_time(chapter.get("end"), fraction),
+            start=ticks_to_timedelta(chapter.get("start"), fraction),
+            end=ticks_to_timedelta(chapter.get("end"), fraction),
         ),
         metadata=ChapterMetadata(
             title=_get_tag(tags, "title"),
@@ -348,15 +330,15 @@ def get_media_information(media_input: Path, logger: Logger) -> "Media":
     subtitles: list[Subtitles] = []
     video_track_index, audio_track_index, subtitles_track_index = 0, 0, 0
 
-    for stream in data.get("streams", []):
+    for stream in to_dict_list(data.get("streams")):
         codec_type = stream.get("codec_type")
-        tags = stream.get("tags", {})
-        disposition = stream.get("disposition", {})
+        tags = to_dict(stream.get("tags"))
+        disposition = to_dict(stream.get("disposition"))
 
         if codec_type == "video":
             video = Video(
                 path=media_input.absolute(),
-                global_index=stream.get("index"),
+                global_index=to_int(stream.get("index")),
                 track_index=video_track_index,
                 duration=_stream_duration(stream=stream, tags=tags),
                 format=_build_video_format(stream=stream),
@@ -368,7 +350,7 @@ def get_media_information(media_input: Path, logger: Logger) -> "Media":
             audio.append(
                 Audio(
                     path=media_input.absolute(),
-                    global_index=stream.get("index"),
+                    global_index=to_int(stream.get("index")),
                     track_index=audio_track_index,
                     duration=_stream_duration(stream=stream, tags=tags),
                     format=_build_audio_format(stream=stream),
@@ -382,7 +364,7 @@ def get_media_information(media_input: Path, logger: Logger) -> "Media":
             subtitles.append(
                 Subtitles(
                     path=media_input.absolute(),
-                    global_index=stream.get("index"),
+                    global_index=to_int(stream.get("index")),
                     track_index=subtitles_track_index,
                     duration=_stream_duration(stream=stream, tags=tags),
                     format=_build_subtitles_format(stream=stream),
@@ -397,17 +379,15 @@ def get_media_information(media_input: Path, logger: Logger) -> "Media":
             msg=_("Invalid video container: %(path)s") % {"path": str(media_input)}
         )
 
-    fmt = data.get("format", {})
-    tags = fmt.get("tags", {})
-    duration_val = to_float(fmt.get("duration"))
-    chapters = [_build_chapter(chapter=ch) for ch in data.get("chapters", [])]
+    fmt = to_dict(data.get("format"))
+    tags = to_dict(fmt.get("tags"))
+    duration = to_timedelta(to_float(fmt.get("duration")))
+    chapters = [_build_chapter(chapter=ch) for ch in to_dict_list(data.get("chapters"))]
 
     try:
         media = Media(
             path=media_input.absolute(),
-            duration=timedelta(seconds=duration_val)
-            if duration_val is not None
-            else None,
+            duration=duration,
             format=_build_media_format(fmt=fmt),
             video=video,
             audio=audio or None,
@@ -451,16 +431,16 @@ def get_audio_information(audio_input: Path, logger: Logger) -> list[Audio]:
     audio: list[Audio] = []
     audio_track_index, video_tracks, subtitles_tracks = 0, 0, 0
 
-    for stream in data.get("streams", []):
+    for stream in to_dict_list(data.get("streams")):
         codec_type = stream.get("codec_type")
-        tags = stream.get("tags", {})
-        disposition = stream.get("disposition", {})
+        tags = to_dict(stream.get("tags"))
+        disposition = to_dict(stream.get("disposition"))
 
         if codec_type == "audio":
             audio.append(
                 Audio(
                     path=audio_input.absolute(),
-                    global_index=stream.get("index"),
+                    global_index=to_int(stream.get("index")),
                     track_index=audio_track_index,
                     duration=_stream_duration(stream=stream, tags=tags),
                     format=_build_audio_format(stream=stream),
@@ -510,7 +490,7 @@ def validate_subtitles_file_codec(subtitles_input: Path, logger: Logger) -> None
     data = _run_ffprobe(["-show_format"], subtitles_input)
     logger.debug(msg=_("ffprobe subtitles file data: %(data)s"), data=data)
 
-    format_name = data.get("format", {}).get("format_name", "")
+    format_name = to_text(to_dict(data.get("format")).get("format_name")) or ""
     detected_codecs: set[str] = {
         token.strip() for token in format_name.split(",") if token.strip()
     }

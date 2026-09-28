@@ -7,13 +7,23 @@ from pathlib import Path
 import pytest
 
 from pymedia.utils import (
+    parse_date,
+    parse_duration,
     parse_fraction,
     parse_quantity,
+    parse_r128_gain,
+    parse_replaygain_gain,
     parse_size,
     parse_timedelta,
+    ticks_to_timedelta,
+    to_bool,
+    to_dict,
+    to_dict_list,
     to_ffmpeg_value,
     to_float,
     to_int,
+    to_text,
+    to_timedelta,
 )
 
 
@@ -214,3 +224,325 @@ class TestToInt:
     def test_none_is_none(self) -> None:
         """Comprueba que `None` devuelve `None`."""
         assert to_int(None) is None
+
+
+class TestParseDate:
+    """Pruebas de `pymedia.utils.parse_date`."""
+
+    @pytest.mark.parametrize(
+        ("raw", "year", "month", "day"),
+        [
+            # ISO 8601 con Z
+            ("2024-01-15T12:00:00Z", 2024, 1, 15),
+            ("2024-01-15T12:00:00+00:00", 2024, 1, 15),
+            ("2024-06-30", 2024, 6, 30),
+            ("2024-12-31T23:59:59", 2024, 12, 31),
+            # RFC 2822 / RFC 5322
+            ("Wed, 15 Jan 2024 12:00:00 +0000", 2024, 1, 15),
+            ("Wed, 15 Jan 2024 12:00:00 GMT", 2024, 1, 15),
+            # Nombres de mes (cortos y largos)
+            ("Mon Jan 15 12:00:00 2024", 2024, 1, 15),
+            ("Jan 15 12:00:00 2024", 2024, 1, 15),
+            ("Jan 15 2024", 2024, 1, 15),
+            ("15 Jan 2024", 2024, 1, 15),
+            ("15 January 2024", 2024, 1, 15),
+            ("January 15 2024", 2024, 1, 15),
+            # Formatos numéricos no ISO
+            ("2024/01/15", 2024, 1, 15),
+            ("2024.01.15", 2024, 1, 15),
+            ("15-01-2024", 2024, 1, 15),
+            ("15/01/2024", 2024, 1, 15),
+            ("15.01.2024", 2024, 1, 15),
+            # Unix timestamp en segundos
+            ("1705315200", 2024, 1, 15),
+        ],
+    )
+    def test_valid_dates_return_midnight_utc(
+        self, raw: str, year: int, month: int, day: int
+    ) -> None:
+        """Comprueba que las fechas válidas se parsean a medianoche UTC."""
+        from datetime import datetime
+
+        result = parse_date(raw)
+
+        assert result is not None
+        assert result == datetime(year, month, day)
+
+    @pytest.mark.parametrize(
+        "raw",
+        [
+            "",
+            "not-a-date",
+            "2024-13-01",
+            "2024-02-30",
+            "2024-02-31",
+            "2024-00-01",
+            "12/31/2024",
+            "32/01/2024",
+            "2024/13/01",
+            "2024/00/01",
+            "2024-01-32",
+            "31 Feb 2024",
+        ],
+    )
+    def test_invalid_dates_return_none(self, raw: str) -> None:
+        """Comprueba que las fechas inválidas o ambiguas devuelven None."""
+        assert parse_date(raw) is None
+
+    def test_none_returns_none(self) -> None:
+        """Comprueba que `None` devuelve `None`."""
+        assert parse_date(None) is None
+
+    def test_empty_string_returns_none(self) -> None:
+        """Comprueba que una cadena vacía devuelve `None`."""
+        assert parse_date("") is None
+
+
+class TestParseDuration:
+    """Pruebas de `parse_duration`."""
+
+    @pytest.mark.parametrize(
+        ("value", "expected"),
+        [
+            ("01:02:03.456", timedelta(hours=1, minutes=2, seconds=3.456)),
+            ("00:00:01", timedelta(seconds=1)),
+            ("123.45", timedelta(seconds=123.45)),
+            ("42", timedelta(seconds=42)),
+            ("0", timedelta(0)),
+            ("  02:03:04.005  ", timedelta(hours=2, minutes=3, seconds=4.005)),
+        ],
+    )
+    def test_valid_values(self, value: str, expected: timedelta) -> None:
+        """Comprueba que las duraciones válidas se parsean correctamente."""
+        assert parse_duration(value) == expected
+
+    @pytest.mark.parametrize(
+        "value",
+        [
+            123,
+            None,
+            "",
+            "abcd",
+            "12:34",  # missing seconds?
+            "12:34:56.78.90",  # extra dot
+            "-01:00:00",
+            "-5.5",
+            "1e13",  # exceeds _MAX_SECONDS
+        ],
+    )
+    def test_invalid_values_are_none(self, value: object) -> None:
+        """Comprueba que los valores inválidos devuelven `None`."""
+        assert parse_duration(value) is None
+
+
+class TestParseR128Gain:
+    """Pruebas de `parse_r128_gain`."""
+
+    @pytest.mark.parametrize(
+        ("value", "expected"),
+        [
+            ("0", -23.0),
+            ("256", -22.0),
+            ("-256", -24.0),
+            ("128", -22.5),
+        ],
+    )
+    def test_valid_values(self, value: str, expected: float) -> None:
+        """Comprueba que los valores de ganancia válidos se convierten correctamente."""
+        assert parse_r128_gain(value) == expected
+
+    @pytest.mark.parametrize(
+        "value",
+        [
+            "",
+            None,
+            "abc",
+        ],
+    )
+    def test_invalid_values_are_none(self, value: str | None) -> None:
+        """Comprueba que los valores inválidos devuelven `None`."""
+        assert parse_r128_gain(value) is None
+
+
+class TestParseReplaygainGain:
+    """Pruebas de `parse_replaygain_gain`."""
+
+    @pytest.mark.parametrize(
+        ("value", "expected"),
+        [
+            ("-3.50 dB", -3.5),
+            ("3.5", 3.5),
+            ("  -3.50 dB  ", -3.5),
+            ("0", 0.0),
+            ("-0.0", 0.0),
+        ],
+    )
+    def test_valid_values(self, value: str, expected: float) -> None:
+        """Comprueba que la ganancia ReplayGain válidos se convierten correctamente."""
+        assert parse_replaygain_gain(value) == expected
+
+    @pytest.mark.parametrize(
+        "value",
+        [
+            "",
+            None,
+            "abc dB",
+            "abc",
+        ],
+    )
+    def test_invalid_values_are_none(self, value: str | None) -> None:
+        """Comprueba que los valores inválidos devuelven `None`."""
+        assert parse_replaygain_gain(value) is None
+
+
+class TestTicksToTimedelta:
+    """Pruebas de `ticks_to_timedelta`."""
+
+    @pytest.mark.parametrize(
+        ("ticks", "time_base", "expected"),
+        [
+            ("1000", Fraction(1, 1000), timedelta(seconds=1)),
+            ("0", Fraction(1, 1000), timedelta(0)),
+            ("-500", Fraction(1, 1000), timedelta(seconds=-0.5)),
+            ("10", Fraction(1, 1), timedelta(seconds=10)),
+        ],
+    )
+    def test_valid_values(
+        self, ticks: str | int, time_base: Fraction, expected: timedelta
+    ) -> None:
+        """Comprueba que los valores válidos se convierten correctamente."""
+        assert ticks_to_timedelta(ticks, time_base) == expected
+
+    @pytest.mark.parametrize(
+        ("ticks", "time_base"),
+        [
+            ("abc", Fraction(1, 1000)),
+            (None, Fraction(1, 1000)),
+            ("10", None),
+        ],
+    )
+    def test_invalid_values_are_none(
+        self, ticks: str | int | None, time_base: Fraction | None
+    ) -> None:
+        """Comprueba que los valores inválidos devuelven `None`."""
+        assert ticks_to_timedelta(ticks, time_base) is None
+
+    def test_large_product_exceeds_max(self) -> None:
+        """Comprueba que un producto demasiado grande devuelve None."""
+        # _MAX_SECONDS = 1e12
+        large_ticks = 10**15
+        time_base = Fraction(1, 1)
+        assert ticks_to_timedelta(large_ticks, time_base) is None
+
+
+class TestToBool:
+    """Pruebas de `to_bool`."""
+
+    @pytest.mark.parametrize(
+        ("value", "expected"),
+        [
+            ("1", True),
+            ("0", False),
+            (1, True),
+            (0, False),
+            (-1, True),
+            ("-5", True),
+            ("", False),
+            (None, False),
+            ("abc", False),
+        ],
+    )
+    def test_values(self, value: str | int | None, expected: bool) -> None:
+        """Comprueba la conversión a booleano."""
+        assert to_bool(value) == expected
+
+
+class TestToDict:
+    """Pruebas de `to_dict`."""
+
+    @pytest.mark.parametrize(
+        ("value", "expected"),
+        [
+            ({"a": 1}, {"a": 1}),
+            ({}, {}),
+            ([], {}),
+            ("", {}),
+            (None, {}),
+            (123, {}),
+        ],
+    )
+    def test_values(self, value: object, expected: dict[str, object]) -> None:
+        """Comprueba que se devuelve el diccionario o uno vacío."""
+        assert to_dict(value) == expected
+
+
+class TestToDictList:
+    """Pruebas de `to_dict_list`."""
+
+    @pytest.mark.parametrize(
+        ("value", "expected"),
+        [
+            ([{"a": 1}, {"b": 2}], [{"a": 1}, {"b": 2}]),
+            ([{"a": 1}, "b", 2], [{"a": 1}]),
+            ([], []),
+            (None, []),
+            ("", []),
+            (123, []),
+        ],
+    )
+    def test_values(self, value: object, expected: list[dict[str, object]]) -> None:
+        """Comprueba que se devuelven los diccionarios de la lista o una lista vacía."""
+        assert to_dict_list(value) == expected
+
+
+class TestToText:
+    """Pruebas de `to_text`."""
+
+    @pytest.mark.parametrize(
+        ("value", "expected"),
+        [
+            ("hola", "hola"),
+            (" ", " "),
+            ("", None),
+            (None, None),
+            (123, None),
+            ([], None),
+        ],
+    )
+    def test_values(self, value: object, expected: str | None) -> None:
+        """Comprueba que se devuelve el texto no vacío o None."""
+        assert to_text(value) == expected
+
+
+class TestToTimedelta:
+    """Pruebas de `to_timedelta`."""
+
+    @pytest.mark.parametrize(
+        ("seconds", "expected"),
+        [
+            (1.5, timedelta(seconds=1.5)),
+            (0, timedelta(0)),
+            (-2.5, timedelta(seconds=-2.5)),
+        ],
+    )
+    def test_valid_values(self, seconds: float | None, expected: timedelta) -> None:
+        """Comprueba que los valores válidos se convierten correctamente."""
+        assert to_timedelta(seconds) == expected
+
+    @pytest.mark.parametrize(
+        "seconds",
+        [
+            None,
+            float("inf"),
+            float("-inf"),
+            float("nan"),
+        ],
+    )
+    def test_non_finite_returns_none(self, seconds: float | None) -> None:
+        """Comprueba that the non-finite values return None."""
+        assert to_timedelta(seconds) is None
+
+    def test_exceeds_max_returns_none(self) -> None:
+        """Comprueba que un valor demasiado grande devuelve `None`."""
+        # _MAX_SECONDS = 1e12
+        assert to_timedelta(1e13) is None
