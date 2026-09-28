@@ -17,7 +17,7 @@ from unittest.mock import MagicMock, patch
 import pytest
 
 from pymedia.commands.base.service import BaseService
-from pymedia.errors import CommandError, OsError, UserError
+from pymedia.errors import CommandError, OperativeSystemError, UserError
 from pymedia.models.config import App, Config
 from pymedia.types import OverwriteMode
 
@@ -195,13 +195,13 @@ def test_existing_output_is_replaced_only_when_allowed(
 
 
 def test_move_failure_is_reported_as_os_error(tmp_path: Path) -> None:
-    """Un fallo al mover la salida se informa como OsError."""
+    """Un fallo al mover la salida se informa como OperativeSystemError."""
     output = tmp_path / "out.mp4"
     pipeline = _service(OverwriteMode.YES)
 
     with (
         patch.object(Path, "replace", side_effect=PermissionError),
-        pytest.raises(OsError, match="could not be moved"),
+        pytest.raises(OperativeSystemError, match="could not be moved"),
     ):
         pipeline.run_ffmpeg(_writer_command(output), "Test", [output])
 

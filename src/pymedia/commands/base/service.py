@@ -156,7 +156,7 @@ class BaseService[ParamsT: _OverwriteParams](ABC):
         Raises:
             CommandError: Si falla el cmd o se bloquea.
             UserError: Si el usuario interrumpe la ejecución.
-            OsError: Si no se puede mover una salida a su destino final.
+            OperativeSystemError: Si no se puede mover una salida a su destino final.
         """
         overwrite = True if self.params.overwrite == OverwriteMode.YES else False
         run_ffmpeg(

@@ -16,7 +16,7 @@ from typing import Self, TextIO
 
 from rich.progress import Progress
 
-from pymedia.errors import CommandError, OsError, UserError
+from pymedia.errors import CommandError, OperativeSystemError, UserError
 from pymedia.locales import translate as _
 
 STDOUT, STDERR = "stdout", "stderr"
@@ -77,7 +77,7 @@ def commit_outputs(staging: Path, dest_dir: Path, overwrite: bool) -> None:
 
     Raises:
         CommandError: Si una salida ya existe y no se puede sobrescribir.
-        OsError: Si no se puede mover una salida a su destino final.
+        OperativeSystemError: Si no se puede mover una salida a su destino final.
     """
     staged = sorted(staging.iterdir())
     for file in staged:
@@ -89,7 +89,7 @@ def commit_outputs(staging: Path, dest_dir: Path, overwrite: bool) -> None:
         for file in staged:
             file.replace(dest_dir / file.name)
     except OSError as e:
-        raise OsError(msg=_("Output file could not be moved.")) from e
+        raise OperativeSystemError(msg=_("Output file could not be moved.")) from e
 
 
 @dataclass(slots=True)
@@ -270,7 +270,7 @@ def run_ffmpeg(
     Raises:
         CommandError: Si ffmpeg falla, se bloquea o una salida ya existe.
         UserError: Si el usuario interrumpe la ejecución.
-        OsError: Si no se puede mover una salida a su destino final.
+        OperativeSystemError: Si no se puede mover una salida a su destino final.
     """
     dest_dir = Path(cmd[-1]).parent
     tracker = ProgressTracker(progress_time, total_steps)

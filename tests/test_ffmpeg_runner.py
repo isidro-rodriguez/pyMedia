@@ -24,7 +24,7 @@ from pymedia.commands.base.ffmpeg_runner import (
     run_ffmpeg,
     stage_outputs,
 )
-from pymedia.errors import CommandError, OsError, UserError
+from pymedia.errors import CommandError, OperativeSystemError, UserError
 
 _MODULE = "pymedia.commands.base.ffmpeg_runner"
 _WRITE = (
@@ -195,12 +195,12 @@ def test_commit_outputs_refuses_existing_without_overwrite(tmp_path: Path) -> No
 
 
 def test_commit_outputs_reports_move_failure_as_os_error(tmp_path: Path) -> None:
-    """Un `replace` fallido se informa como OsError conservando la causa."""
+    """Un `replace` fallido se informa como OperativeSystemError conservando causa."""
     staging, dest = _staged(tmp_path, "out.mkv")
 
     with (
         patch.object(Path, "replace", side_effect=PermissionError),
-        pytest.raises(OsError, match="could not be moved") as exc,
+        pytest.raises(OperativeSystemError, match="could not be moved") as exc,
     ):
         commit_outputs(staging=staging, dest_dir=dest, overwrite=True)
 
@@ -621,12 +621,12 @@ def test_existing_output_is_replaced_only_when_allowed(
 
 
 def test_move_failure_is_reported_as_os_error(tmp_path: Path) -> None:
-    """Un fallo al mover la salida se informa como OsError."""
+    """Un fallo al mover la salida se informa como OperativeSystemError."""
     output = tmp_path / "out.mp4"
 
     with (
         patch.object(Path, "replace", side_effect=PermissionError),
-        pytest.raises(OsError, match="could not be moved"),
+        pytest.raises(OperativeSystemError, match="could not be moved"),
     ):
         _run(cmd=_command(_WRITE, output), outputs=[output])
 
