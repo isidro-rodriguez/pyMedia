@@ -56,7 +56,7 @@ packages = ["src/pymedia"]
 # Configuración de Ruff (Linter + Formatter)
 [tool.ruff]
 line-length = 88
-target-version = "py313"
+target-version = "py312"
 
 [tool.ruff.format]
 quote-style = "double"

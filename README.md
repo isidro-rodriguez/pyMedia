@@ -5,7 +5,7 @@ habituales de procesamiento de vídeo: análisis de metadatos, capturas, unión,
 corte y división de contenedores, remux sin transcodificar, transcodificación
 por perfiles y edición de pistas de audio y subtítulos.
 
-> **Versión:** Beta 0.21.0
+> **Versión:** 0.21.1-beta.13
 
 ## Características
 
@@ -53,7 +53,7 @@ uv tool install .
 ### Ejecutable único (Windows)
 
 ```bash
-uv run python scripts/build_windows.py
+uv run python scripts/build.py
 ```
 
 Compila con pyInstaller un único `build/pymedia.exe` con icono incluido.
