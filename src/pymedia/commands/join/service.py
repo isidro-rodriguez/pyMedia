@@ -1,6 +1,5 @@
 """Comando ``join``: service."""
 
-import sys
 import tempfile
 from pathlib import Path
 from typing import Any
@@ -31,7 +30,7 @@ class JoinService(BaseService[JoinParameters]):
         self._check_media_compatibility()
 
         if not self.resolve_overwrite(output_list=[self.params.media_output]):
-            sys.exit(0)
+            return
 
         with tempfile.TemporaryDirectory() as tmp_dir:
             list_txt = Path(tmp_dir) / "list.txt"

@@ -1,6 +1,5 @@
 """Comando ``cut``: service."""
 
-import sys
 from pathlib import Path
 
 from pymedia.commands.base_service import BaseService
@@ -24,7 +23,7 @@ class CutService(BaseService[CutParameters]):
             raise MissingParameterError(name="media")
 
         if not self.resolve_overwrite(output_list=self._expected_outputs()):
-            sys.exit(0)
+            return
 
         self.logger.warning(msg=_("Remux cut may be imprecise."))
 
