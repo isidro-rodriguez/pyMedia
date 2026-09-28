@@ -1,4 +1,4 @@
-"""Build a single-file pyMedia executable with PyInstaller.
+"""Compila un binario en fichero único mediante PyInstaller.
 
 Uso:
     uv run python scripts/build.py
