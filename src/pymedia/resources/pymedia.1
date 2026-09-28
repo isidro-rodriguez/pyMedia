@@ -44,13 +44,17 @@ Concatenate two or more video files into a single media container. The output
 file is required.
 .TP
 .B remux
-Change the container and metadata without transcoding.
-.B --fast-start
-moves the index to the beginning of the file (MP4 output only),
+Change the container, metadata and dispositions without transcoding.
 .B --genpts
-regenerates broken timestamps and
+regenerates broken timestamps,
 .B --sort-tracks
-orders the stream tracks by type and language.
+orders the stream tracks by type and language,
+.B --rotate
+.I 0/90/180/270
+updates the display rotation metadata and
+.B --strip-disposition
+drops the dispositions of the source file. For MP4 output the fast-start
+index is moved to the beginning of the file automatically.
 .TP
 .B cut
 Cut a section of a media file with
@@ -61,7 +65,9 @@ and
 .B --at
 (comma-separated,
 .I hh:mm:ss
-). Segments are written as
+with optional fractional seconds such as
+.IR 00:00:00.500 ).
+Segments are written as
 .I name_000.ext
 ,
 .I name_001.ext
@@ -79,20 +85,23 @@ Transcode the video track and/or selected audio tracks
 .I even
 /
 .I slow
-and applying the requested filters. At least one transcoding option or filter
-is required.
+and applying the requested filters. A subtitles file can be burned into the
+video track with
+.B --burn-subtitles
+.IR file .
+At least one transcoding option or filter is required.
 .SS Audio
 .TP
 .B add-audio
-Add an audio track to a media file. The language is set with
-.B --language
-.I code
-(ISO 639-2).
+Add an audio track to a media file. Language, title and dispositions are
+inherited from the source audio file; change them afterwards with
+.BR edit-audio .
 .TP
 .B delete-audio
-Delete audio tracks. Without
+Delete audio tracks. The tracks are selected with the required
 .B --tracks
-(comma-separated indices) all audio tracks are removed.
+.I int,int,...
+(comma-separated indices).
 .TP
 .B edit-audio
 Edit the metadata of an audio track selected with
@@ -108,22 +117,25 @@ or
 .BR --hearing-impaired .
 .TP
 .B extract-audio
-Extract audio tracks to standalone audio files. Without
+Extract audio tracks to standalone audio files. The tracks are selected with
+the required
 .B --tracks
-all audio tracks are extracted.
+.I int,int,...
+(comma-separated indices).
 .SS Subtitles
 .TP
 .B add-subs
-Add a subtitles track (SRT, ASS, SSA) to a media file. The language is set
-with
+Add a subtitles track (SRT, ASS, SSA) to a media file.
 .B --language
 .I code
-(ISO 639-2).
+(ISO 639-2) is required; adjust title and dispositions afterwards with
+.BR edit-subs .
 .TP
 .B delete-subs
-Delete subtitles tracks. Without
+Delete subtitles tracks. The tracks are selected with the required
 .B --tracks
-(comma-separated indices) all subtitles are removed.
+.I int,int,...
+(comma-separated indices).
 .TP
 .B edit-subs
 Edit the metadata of a subtitles track selected with
@@ -139,9 +151,11 @@ or
 .BR --visual-impaired .
 .TP
 .B extract-subs
-Extract subtitles tracks to standalone files. Without
+Extract subtitles tracks to standalone files. The tracks are selected with
+the required
 .B --tracks
-all subtitles are extracted.
+.I int,int,...
+(comma-separated indices).
 .SS Image
 .TP
 .B animated
@@ -174,7 +188,17 @@ Capture thumbnails at scene changes using a sensitivity threshold set with
 .B --scene
 (0.1\-0.5).
 .SH OPTIONS
-The common options are accepted by every command:
+The following options are accepted by most commands (see the help of each
+command for the exact set: for instance
+.B --output
+is not accepted by
+.B info
+and
+.B --directory
+is limited to
+.B sheet
+and
+.BR transcode ):
 .TP
 .B --help
 Display the localized help of the application or of the selected command and
@@ -189,7 +213,7 @@ Output file path.
 Output directory for batch processing. Mutually exclusive with
 .BR --output .
 .TP
-.B --overwrite
+.BR -ov ", " --overwrite
 .I mode
 Policy when the output file already exists:
 .BR yes ,
@@ -201,6 +225,9 @@ or
 .TP
 .B --debug
 Enable DEBUG log level.
+.TP
+.B --show-cmd
+Print the composed FFmpeg command without executing it.
 
 Image and video commands also accept the following filters:
 .TP
@@ -234,6 +261,13 @@ Allow upscaling beyond the source dimensions.
 .TP
 .BR --hflip ", " --vflip
 Flip the image horizontally or vertically.
+
+The commands that write a new media file also accept:
+.TP
+.B --strip-disposition
+Do not copy the dispositions of the source file. Available in
+.BR add-audio ", " add-subs ", " cut ", " extract-audio ", " extract-subs ", "
+.BR join ", " remux " and " transcode .
 .SH OUTPUT CONFLICTS
 When an output file already exists, pyMedia resolves the conflict according
 to the selected overwrite mode:
@@ -282,11 +316,11 @@ Split a media file into three segments.
 .B pymedia transcode source.mp4 --preset slow --video --audio 1
 Transcode the video track and audio track 1 using the "slow" profile.
 .TP
-.B pymedia add-audio input.mp4 audio.m4a --language eng
-Add an English audio track.
+.B pymedia add-audio input.mp4 audio.m4a
+Add an audio track; language and title are inherited from the source file.
 .TP
-.B pymedia add-subs input.mp4 subs_es.srt --language spa --default
-Add Spanish subtitles as the default track.
+.B pymedia add-subs input.mp4 subs_es.srt --language spa
+Add Spanish subtitles (ISO 639-2 language code: spa).
 .TP
 .B pymedia animated input.mp4 --start 00:00:05 --end 00:00:12
 Create an animated image from a time range.

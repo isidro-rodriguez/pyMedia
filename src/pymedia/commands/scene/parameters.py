@@ -70,7 +70,6 @@ class SceneParameters(
             MissingParameterError: Si falta el medio, el umbral de escena o la
                 propiedad indicada.
             MissingPropertyError: Si el medio no declara alguna propiedad técnica.
-            PermissionDeniedError: Si no se puede crear el directorio de salida.
             UserError: Si una marca supera la duración del vídeo o el nombre de
                 salida contiene caracteres no permitidos.
         """

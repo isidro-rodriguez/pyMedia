@@ -5,7 +5,7 @@ habituales de procesamiento de vídeo: análisis de metadatos, capturas, unión,
 corte y división de contenedores, remux sin transcodificar, transcodificación
 por perfiles y edición de pistas de audio y subtítulos.
 
-> **Versión:** 0.21.1-beta.13
+> **Versión:** 0.21.2-beta.14
 
 ## Características
 
@@ -50,13 +50,14 @@ También puedes instalar la aplicación como comando `pymedia`:
 uv tool install .
 ```
 
-### Ejecutable único (Windows)
+### Ejecutable único
 
 ```bash
 uv run python scripts/build.py
 ```
 
-Compila con pyInstaller un único `build/pymedia.exe` con icono incluido.
+Compila con pyInstaller un único `build/pymedia.exe`, o `build/pymedia` en Linux, con icono 
+incluido.
 
 ## Uso rápido
 
@@ -77,8 +78,8 @@ pymedia <comando> --help     # ayuda detallada de cada comando
 | `add-audio`     | `pymedia add-audio input.mp4 audio.m4a`                           |
 | `delete-audio`  | `pymedia delete-audio input.mp4 --tracks 1,2`                     |
 | `edit-audio`    | `pymedia edit-audio input.mp4 --track 0 --forced --default`       |
-| `extract-audio` | `pymedia extract-audio input.mp4 -o audio.m4a`                    |
-| `add-subs`      | `pymedia add-subs input.mp4 subs_es.srt --language spa --default` |
+| `extract-audio` | `pymedia extract-audio input.mp4 --tracks 1,2 -o audio.m4a`        |
+| `add-subs`      | `pymedia add-subs input.mp4 subs_es.srt --language spa`            |
 | `delete-subs`   | `pymedia delete-subs input.mp4 --tracks 1,2`                      |
 | `edit-subs`     | `pymedia edit-subs input.mp4 --track 0 --forced --default`        |
 | `extract-subs`  | `pymedia extract-subs input.mp4 --tracks 3,5 -o subs.srt`         |
@@ -100,7 +101,7 @@ pymedia <comando> --help     # ayuda detallada de cada comando
 
 | Comando     | Acción                                                                                         |
 |-------------|------------------------------------------------------------------------------------------------|
-| `transcode` | Transcodifica audio y/o vídeo con un perfil de `config.toml`, aplicando los filtros indicados. |
+| `transcode` | Transcodifica audio y/o vídeo con un perfil de `config.toml`, aplicando los filtros indicados y, opcionalmente, `--burn-subtitles`. |
 | `remux`     | Cambia de contenedor sin transcodificar.                                                       |
 | `join`      | Une varios vídeos consecutivamente en un único contenedor (_mínimo 2_).                        |
 | `cut`       | Recorta una sección o divide el vídeo por marcas de tiempo.                                    |
@@ -110,20 +111,20 @@ pymedia <comando> --help     # ayuda detallada de cada comando
 | Comando         | Acción                                                                                                   |
 |-----------------|----------------------------------------------------------------------------------------------------------|
 | `add-audio`     | Añade una pista de audio al contenedor (hereda metadatos y disposiciones del archivo origen).            |
-| `delete-audio`  | Elimina pistas (`--tracks 1,2`).                                                                         |
+| `delete-audio`  | Elimina las pistas indicadas (`--tracks` es obligatorio).                           |
 | `edit-audio`    | Edita metadatos de la pista `--track N` (idioma, título, default, forced, commentary, hearing-impaired). |
-| `extract-audio` | Extrae pistas a fichero de audio independiente (`--tracks` por defecto todas).                           |
+| `extract-audio` | Extrae pistas a fichero de audio independiente (`--tracks` es obligatorio).                             |
 
-> El idioma se indica con `--language <código ISO 639-2>` (p. ej. `eng`, `spa`) solo en `edit-audio`.
+> `--language <código ISO 639-2>` (p. ej. `eng`, `spa`) es obligatorio en `add-subs` y opcional en `edit-audio` y `edit-subs`. En `add-audio` la pista hereda idioma y título del fichero origen.
 
 ### Subtítulos
 
 | Comando        | Acción                                                                |
 |----------------|-----------------------------------------------------------------------|
-| `add-subs`     | Añade una pista de subtítulos (`.srt`, `.ass`, `.ssa`) al contenedor. |
-| `delete-subs`  | Elimina pistas (`--tracks 3,4,5`), sin `--tracks` elimina todas.      |
+| `add-subs`     | Añade una pista de subtítulos (`.srt`, `.ass`, `.ssa`) con `--language` obligatorio; el resto de metadatos se ajustan con `edit-subs`. |
+| `delete-subs`  | Elimina las pistas indicadas (`--tracks` es obligatorio).                            |
 | `edit-subs`    | Edita metadatos de la pista `--track N` (+ `--visual-impaired`).      |
-| `extract-subs` | Extrae pistas a fichero de subtítulos independiente.                  |
+| `extract-subs` | Extrae pistas a fichero de subtítulos independiente (`--tracks` es obligatorio). |
 
 ### Imagen
 
@@ -136,16 +137,20 @@ pymedia <comando> --help     # ayuda detallada de cada comando
 
 ### Opciones comunes
 
-La ayuda de cada comando está localizada y se muestra con `--help`.
+La ayuda de cada comando está localizada y se muestra con `--help`. No todos
+los comandos aceptan todas las opciones: `info` solo admite `--debug` y
+`-d`/`--directory` se limita a `sheet` y `transcode` (consulta el `--help` de
+cada comando).
 
-| Opción              | Descripción                                                                           |
-|---------------------|---------------------------------------------------------------------------------------|
-| `-o`, `--output`    | Ruta del fichero de salida.                                                           |
-| `-d`, `--directory` | Directorio de salida para procesar lotes de ficheros (con `output` son excluyentes).  |
-| `--overwrite`       | Política ante un fichero de salida existente: `yes`, `no`, `ask` (por defecto `ask`). |
-| `--debug`           | Activa el nivel de log DEBUG.                                                         |
-| `--show-cmd`        | Muestra el comando ffmpeg compuesto y sale sin ejecutar                               |
-| `--version`         | Muestra la versión, Python y plataforma en un panel Rich y sale.                      |
+| Opción                | Descripción                                                                                                             |
+|-----------------------|-------------------------------------------------------------------------------------------------------------------------|
+| `-o`, `--output`      | Ruta del fichero de salida.                                                                                             |
+| `-d`, `--directory`   | Directorio de salida para procesar lotes de ficheros (con `output` son excluyentes).                                    |
+| `-ov`, `--overwrite`  | Política ante un fichero de salida existente: `yes`, `no`, `ask` (por defecto `ask`).                                   |
+| `--strip-disposition` | No copia las disposiciones del origen (`add-audio`, `add-subs`, `cut`, `extract-audio`, `extract-subs`, `join`, `remux`, `transcode`). |
+| `--debug`             | Activa el nivel de log DEBUG.                                                                                           |
+| `--show-cmd`          | Muestra el comando ffmpeg compuesto y sale sin ejecutar.                                                                |
+| `--version`           | Muestra la versión, Python y plataforma en un panel Rich y sale.                                                        |
 
 ### Filtros disponibles
 
@@ -302,12 +307,11 @@ Scripts utilitarios ubicados en `scripts/`.
 ```shell
 pyMedia/
 ├── src/pymedia/
-│   ├── commands/         # Lógica de subcomandos de pyMedia
+│   ├── commands/         # Un paquete por comando: cli, parameters, cmd, service (+ base/)
 │   ├── data/             # Catálogos de códecs, contenedores, formatos y lenguas
-│   ├── mixins/           # Mixins utilizados por los parámetros de los comandos
-│   ├── models/           # Dataclasses de parámetros y mixins de validación
-│   ├── commands/         # Cada comando CLI: cli, parameters, cmd, service
-│   ├── locales/          # Catálogos gettext (pymedia.pot, es/)
+│   ├── mixins/           # Mixins reutilizables por los parámetros de los comandos
+│   ├── models/           # Modelos de datos (Media, Audio, Video, Subtitles, config…)
+│   ├── locales/          # Catálogos gettext (pymedia.pot, spanish/)
 │   ├── resources/        # config.toml, iconos, man page y .desktop
 │   ├── ffprobe.py        # Herramienta Ffprobe para consulta de metadatos
 │   ├── locale_manager.py # Detección/carga del idioma gettext

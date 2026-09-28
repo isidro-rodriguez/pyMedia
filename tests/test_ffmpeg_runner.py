@@ -24,13 +24,24 @@ from pymedia.commands.base.ffmpeg_runner import (
     run_ffmpeg,
     stage_outputs,
 )
-from pymedia.errors import CommandError, OperativeSystemError, UserError
+from pymedia.errors import (
+    CommandError,
+    InvalidParameterError,
+    OperativeSystemError,
+    UserError,
+)
 
 _MODULE = "pymedia.commands.base.ffmpeg_runner"
 _WRITE = (
     "import pathlib, sys\n"
     "for name in sys.argv[1:]:\n"
     " pathlib.Path(name).write_text('new')\n"
+)
+_PROBE = (
+    "import pathlib, sys\n"
+    "target = pathlib.Path(sys.argv[1])\n"
+    "pathlib.Path(sys.argv[2]).write_text(str(target))\n"
+    "target.write_text('new')\n"
 )
 
 
@@ -153,6 +164,32 @@ def test_stage_outputs_never_redirects_the_binary(tmp_path: Path) -> None:
 
     assert staged[0] == "ffmpeg"
     assert staged[-1] == str(staging / "ffmpeg")
+
+
+def test_stage_outputs_rejects_duplicate_names(tmp_path: Path) -> None:
+    """Dos salidas homónimas en directorios distintos se rechazan."""
+    first = tmp_path / "a" / "out.mkv"
+    second = tmp_path / "b" / "out.mkv"
+
+    with pytest.raises(InvalidParameterError, match="same file name: out.mkv"):
+        stage_outputs(
+            cmd=["ffmpeg", "-i", "in.mkv", str(first), str(second)],
+            outputs=[str(first)],
+            staging=tmp_path / ".pymedia-test",
+        )
+
+
+def test_stage_outputs_returns_a_copy_of_the_command(tmp_path: Path) -> None:
+    """El comando y las salidas originales no se mutan."""
+    output = tmp_path / "out.mkv"
+    cmd = ["ffmpeg", "-i", "in.mkv", str(output)]
+    outputs = [str(output)]
+
+    staged = stage_outputs(cmd=cmd, outputs=outputs, staging=tmp_path / "stage")
+
+    assert cmd == ["ffmpeg", "-i", "in.mkv", str(output)]
+    assert outputs == [str(output)]
+    assert staged[-1] != str(output)
 
 
 # =============================================================================
@@ -336,6 +373,19 @@ def test_exit_does_not_kill_a_finished_process() -> None:
     proc.kill.assert_not_called()
 
 
+def test_exit_closes_only_present_streams() -> None:
+    """`__exit__` tolera un proceso sin alguno de los pipes."""
+    proc = MagicMock(stdout=None, stderr=None)
+    proc.poll.return_value = 0
+    running = FfmpegProcess(cmd=["ffmpeg"], capture_steps=False)
+    running._proc = proc
+
+    running.__exit__()
+
+    proc.kill.assert_not_called()
+    proc.wait.assert_called_once()
+
+
 def test_exit_without_entering_is_a_noop() -> None:
     """Sin `__enter__` no hay proceso que limpiar."""
     FfmpegProcess(cmd=["ffmpeg"], capture_steps=False).__exit__()
@@ -450,6 +500,69 @@ def test_run_ffmpeg_stages_and_prepares_the_command(tmp_path: Path) -> None:
     assert Path(staged[5]).name == "out.mkv"
     assert Path(staged[5]).parent.name.startswith(".pymedia-")
     assert process.call_args.kwargs["capture_steps"] is True
+
+
+def test_staging_lives_next_to_the_destination(tmp_path: Path) -> None:
+    """El temporal es contiguo al destino, con el prefijo `.pymedia-`."""
+    output = tmp_path / "out.mp4"
+    probe = tmp_path / "staged.txt"
+
+    _run(cmd=_command(_PROBE, output, probe), outputs=[output])
+
+    staged = Path(probe.read_text())
+    assert staged.parent.parent == tmp_path
+    assert staged.parent.name.startswith(".pymedia-")
+    assert staged.name == output.name
+    assert not list(tmp_path.glob(".pymedia-*"))
+
+
+def test_staging_handles_spaces_and_unicode_paths(tmp_path: Path) -> None:
+    """Rutas con espacios y acentos sobreviven al staging y al movimiento."""
+    folder = tmp_path / "mi vídeo ñ"
+    folder.mkdir()
+    output = folder / "salida final.mkv"
+
+    _run(cmd=_command(_WRITE, output), outputs=[output])
+
+    assert output.read_text() == "new"
+    assert not list(folder.glob(".pymedia-*"))
+
+
+def test_relative_output_stages_in_current_directory(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Una salida relativa usa el directorio actual como destino."""
+    monkeypatch.chdir(tmp_path)
+
+    _run(cmd=_command(_WRITE, Path("out.mp4")), outputs=[Path("out.mp4")])
+
+    assert (tmp_path / "out.mp4").read_text() == "new"
+    assert not list(tmp_path.glob(".pymedia-*"))
+
+
+def test_missing_destination_directory_is_reported(tmp_path: Path) -> None:
+    """Un destino sin directorio se informa antes de lanzar el proceso."""
+    output = tmp_path / "missing" / "out.mp4"
+
+    with pytest.raises(OperativeSystemError, match="Destination directory"):
+        _run(cmd=_command(_WRITE, output), outputs=[output])
+
+    assert not output.parent.exists()
+    assert not list(tmp_path.glob(".pymedia-*"))
+
+
+def test_run_ffmpeg_rejects_duplicate_names_without_writing(tmp_path: Path) -> None:
+    """Dos salidas homónimas no llegan a ejecutar nada."""
+    first = tmp_path / "a" / "out.mkv"
+    second = tmp_path / "b" / "out.mkv"
+    first.parent.mkdir()
+    second.parent.mkdir()
+
+    with pytest.raises(InvalidParameterError, match="same file name"):
+        _run(cmd=_command(_WRITE, first, second), outputs=[first])
+
+    assert not first.exists() and not second.exists()
+    assert not list(tmp_path.rglob(".pymedia-*"))
 
 
 def test_progress_by_time_updates_the_bar(tmp_path: Path) -> None:

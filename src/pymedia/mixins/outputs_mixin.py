@@ -54,11 +54,10 @@ class AnimatedOutputMixin:
             output_directory: Directorio de salida para lotes de varias imágenes.
 
         Raises:
-            InvalidContainerTypeError: Si la extensión no es una imagen
+            InvalidContainerError: Si la extensión no es una imagen
                 animada soportada.
-            InvalidArgumentError: Si el nombre de salida contiene caracteres
+            UserError: Si el nombre de salida contiene caracteres
                 no permitidos.
-            PermissionDeniedError: Si no se puede crear el directorio de salida.
         """
         if output_directory is not None:
             self.output_directory = _process_output_directory(output_directory)
@@ -118,17 +117,15 @@ class AudioOutputMixin:
             output_directory: Directorio de salida para lotes de varios ficheros.
 
         Raises:
-            InvalidContainerTypeError: Si la extensión no es una pista de audio
+            InvalidContainerError: Si la extensión no es una pista de audio
                 soportada.
             MissingPropertyError: Si el medio no tiene pistas de audio o alguna
                 no declara códec.
-            InvalidContainerError: Si la extensión no soporta el códec de una
+            InvalidCodecContainerError: Si la extensión no soporta el códec de una
                 pista.
-            InvalidRemuxError: Si el remux de una pista a la extensión no es
-                seguro.
-            InvalidArgumentError: Si el nombre de salida contiene caracteres
+            UserError: Si el remux de una pista a la extensión no es
+                seguro, o si el nombre de salida contiene caracteres
                 no permitidos.
-            PermissionDeniedError: Si no se puede crear el directorio de salida.
         """
         if output_directory is not None:
             self.output_directory = _process_output_directory(output_directory)
@@ -208,11 +205,10 @@ class ImageOutputMixin:
             output_directory: Directorio de salida para lotes de varios ficheros.
 
         Raises:
-            InvalidContainerTypeError: Si la extensión no es una imagen
+            InvalidContainerError: Si la extensión no es una imagen
                 soportada.
-            InvalidArgumentError: Si el nombre de salida contiene caracteres
+            UserError: Si el nombre de salida contiene caracteres
                 no permitidos.
-            PermissionDeniedError: Si no se puede crear el directorio de salida.
         """
         if output_directory is not None:
             self.output_directory = _process_output_directory(output_directory)
@@ -272,17 +268,15 @@ class MediaOutputMixin:
             remux: Indica si es una operación de remux.
 
         Raises:
-            InvalidContainerTypeError: Si la extensión no es un contenedor
+            InvalidContainerError: Si la extensión no es un contenedor
                 soportado.
             MissingPropertyError: Si falta el vídeo o alguna pista no declara
                 su códec.
-            InvalidContainerError: Si la extensión no soporta el códec de
+            InvalidCodecContainerError: Si la extensión no soporta el códec de
                 alguna pista del medio.
-            InvalidRemuxError: Si el remux de alguna pista a la extensión no
-                es seguro.
-            InvalidArgumentError: Si el nombre de salida contiene caracteres
+            UserError: Si el remux de alguna pista a la extensión no
+                es seguro, o si el nombre de salida contiene caracteres
                 no permitidos.
-            PermissionDeniedError: Si no se puede crear el directorio de salida.
         """
         if output_directory is not None:
             self.output_directory = _process_output_directory(output_directory)
@@ -403,17 +397,15 @@ class SubtitlesOutputMixin:
             output_directory: Directorio de salida para lotes de varios ficheros.
 
         Raises:
-            InvalidContainerTypeError: Si la extensión no es un fichero de
+            InvalidContainerError: Si la extensión no es un fichero de
                 subtítulos soportado.
             MissingPropertyError: Si el medio no tiene pistas de subtítulos o
                 alguna no declara código.
-            InvalidContainerError: Si la extensión no soporta el códec de una
+            InvalidCodecContainerError: Si la extensión no soporta el códec de una
                 pista.
-            InvalidRemuxError: Si el remux de una pista a la extensión no es
-                seguro.
-            InvalidArgumentError: Si el nombre de salida contiene caracteres
+            UserError: Si el remux de una pista a la extensión no es
+                seguro, o si el nombre de salida contiene caracteres
                 no permitidos.
-            PermissionDeniedError: Si no se puede crear el directorio de salida.
         """
         if output_directory is not None:
             self.output_directory = _process_output_directory(output_directory)
@@ -542,6 +534,7 @@ def _process_output(
             output = output.with_stem(f"{output.stem}{affix}")
         if extension:
             output = output.with_suffix(extension)
+    _validate_name(output.name)
     _process_output_directory(output.parent)
     _validate_not_input(output=output, inputs=[media.path])
     return output

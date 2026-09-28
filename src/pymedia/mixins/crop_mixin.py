@@ -32,9 +32,8 @@ class CropMixin:
             crop_str: String con el valor de crop indicado por el usuario.
 
         Raises:
-            InvalidArgumentError: Si el formato del string de crop no es
-                válido.
-            InvalidParameterError: Si el valor del parámetro no es válido.
+            UserError: Si el formato del string de crop no es
+                válido, o si el valor del parámetro no es válido.
             MissingPropertyError: Si no se ha obtenido un parámetro importante.
         """
         if crop_str is None:

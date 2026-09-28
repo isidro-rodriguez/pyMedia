@@ -39,15 +39,15 @@ BUILD_SCRIPT = ROOT / "scripts" / "build.py"
 BINARY_NAME = "pymedia.exe" if sys.platform == "win32" else "pymedia"
 BINARY_PATH = ROOT / "build" / BINARY_NAME
 
-# `-g 10` fuerza un keyframe por segundo (vídeo a 10 fps): sin él, el
-# segmentador de `split` no puede cortar en la marca indicada.
+# `-g 5` fuerza un keyframe cada medio segundo (vídeo a 10 fps): sin él, el
+# segmentador de `cut` no puede cortar en las marcas indicadas (p. ej. 0,5 s).
 VIDEO_ARGS: list[str] = [
     "-c:v",
     "libx264",
     "-preset",
     "ultrafast",
     "-g",
-    "10",
+    "5",
     "-pix_fmt",
     "yuv420p",
 ]

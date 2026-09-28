@@ -52,9 +52,10 @@ class SubtitlesInputMixin:
             title: Título descriptivo de la pista de subtítulos.
 
         Raises:
-            InvalidArgumentError: Si el idioma indicado no sigue el estándar ISO 639-2.
-            MissingArgumentError: Si no se recibió el argumento `language`.
-            SubtitlesError: Si el contenedor de salida no tiene un códec de
+            UserError: Si el idioma indicado no sigue el estándar ISO 639-2.
+            MissingParameterError: Si no se recibió el argumento `language`
+                o los metadatos del medio.
+            FfprobeError: Si el contenedor de salida no tiene un códec de
                 subtítulos soportado.
         """
 

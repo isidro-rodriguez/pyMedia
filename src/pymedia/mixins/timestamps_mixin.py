@@ -37,9 +37,9 @@ class TimestampStartEndMixin:
             timestamp_end: Marca de tiempo que indica el punto final.
 
         Raises:
-            InvalidTimeFormatError: Si el formato de la marca no es válido.
-            InvalidParameterError: Si la marca de inicio es posterior a la
-                de fin.
+            UserError: Si el formato de la marca no es válido, si la marca de
+                inicio es posterior a la de fin, o si la marca supera la
+                duración del vídeo.
             MissingPropertyError: Si no se pudo obtener la duración del vídeo.
             MissingParameterError: Si no se pudo obtener el parámetro.
         """
@@ -140,9 +140,9 @@ class TimestampAtMixin:
             times_str: String de lista de marcas de tiempo.
 
         Raises:
-            InvalidArgumentError: Si el str no tiene un formato válido.
-            InvalidTimeFormatError: Si el formato de la marca no es válido.
-            InvalidParameterError: Si la marca supera la duración del vídeo.
+            UserError: Si el str no tiene un formato válido, si el formato de
+                la marca no es válido, si la marca supera la duración del
+                vídeo, o si hay marcas duplicadas/orden incorrecto.
             MissingPropertyError: Si no se pudo obtener la duración del vídeo.
         """
         if times_str is None:

@@ -57,6 +57,128 @@ def test_info_error_nonexistent_input(pymedia: Invoke, tmp_path: Path) -> None:
     assert "is not a file" in result.output
 
 
+def test_output_directory_with_spaces_and_unicode(
+    pymedia: Invoke, video_mp4_a: Path, tmp_path: Path
+) -> None:
+    """`--directory` admite espacios y acentos en la ruta de salida."""
+    directory = tmp_path / "mis vídeos ñ"
+
+    result = pymedia(
+        "sheet",
+        str(video_mp4_a),
+        "--directory",
+        str(directory),
+        "--preset",
+        "web",
+        "-ov",
+        "yes",
+    )
+
+    assert result.exit_code == 0
+    assert len(list(directory.glob("*_sheet.jpg"))) == 1
+
+
+def test_output_relative_path_resolves_against_cwd(
+    pymedia: Invoke, video_mp4_a: Path, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Una salida relativa se resuelve contra el directorio de trabajo."""
+    monkeypatch.chdir(tmp_path)
+    source = tmp_path / "entrada.mp4"
+    shutil.copy(video_mp4_a, source)
+
+    result = pymedia("remux", "entrada.mp4", "-o", "relativa.mkv", "-ov", "yes")
+
+    assert result.exit_code == 0
+    assert (tmp_path / "relativa.mkv").exists()
+
+
+def test_directory_with_nested_missing_parents_is_created(
+    pymedia: Invoke, video_mp4_a: Path, tmp_path: Path
+) -> None:
+    """`--directory` crea los directorios intermedios que falten."""
+    directory = tmp_path / "a" / "b" / "c"
+
+    result = pymedia(
+        "transcode",
+        str(video_mp4_a),
+        "--video",
+        "-d",
+        str(directory),
+        "-ov",
+        "yes",
+    )
+
+    assert result.exit_code == 0
+    assert directory.is_dir()
+    assert len(list(directory.glob("*_transcoded.mp4"))) == 1
+
+
+def test_invalid_output_directory_name_is_rejected(
+    pymedia: Invoke, video_mp4_a: Path, tmp_path: Path
+) -> None:
+    """`--directory` con un nombre no válido se rechaza antes de ejecutar."""
+    result = pymedia(
+        "transcode",
+        str(video_mp4_a),
+        "--video",
+        "-d",
+        str(tmp_path / "in<valid>"),
+        "-ov",
+        "yes",
+    )
+
+    assert result.exit_code != 0
+    assert "contains invalid characters" in result.output
+
+
+def test_invalid_output_file_name_is_rejected(
+    pymedia: Invoke, video_mp4_a: Path, tmp_path: Path
+) -> None:
+    """`-o` con un nombre de fichero no válido se rechaza antes de ejecutar."""
+    result = pymedia(
+        "transcode",
+        str(video_mp4_a),
+        "--video",
+        "-o",
+        str(tmp_path / "bad<name>.mp4"),
+        "-ov",
+        "yes",
+    )
+
+    assert result.exit_code != 0
+    assert "contains invalid characters" in result.output
+
+
+def test_input_and_output_in_separate_directories(
+    pymedia: Invoke, video_mp4_a: Path, tmp_path: Path
+) -> None:
+    """La salida vive en otro directorio que la entrada y esta queda intacta."""
+    inputs = tmp_path / "entradas"
+    outputs = tmp_path / "salidas"
+    inputs.mkdir()
+    source = inputs / "origen.mp4"
+    shutil.copy(video_mp4_a, source)
+    clip = outputs / "clip.jpg"
+
+    result = pymedia(
+        "frames",
+        str(source),
+        "--at",
+        "00:00:01",
+        "-o",
+        str(clip),
+        "-ov",
+        "yes",
+    )
+
+    assert result.exit_code == 0
+    generated = list(outputs.glob("clip_*.jpg"))
+    assert len(generated) == 1
+    assert source.exists()
+    assert not list(inputs.glob(".pymedia-*"))
+    assert not list(outputs.glob(".pymedia-*"))
+
+
 def test_info_success_with_debug(pymedia: Invoke, video_mp4_a: Path) -> None:
     """`info --debug` termina sin error mostrando los metadatos."""
     result = pymedia("info", str(video_mp4_a), "--debug")
@@ -544,16 +666,72 @@ def test_cut_success_cuts_at_timestamp(
     tmp_path: Path,
 ) -> None:
     """`cut --at` divide el vídeo en un segmento por cada marca."""
-    output = tmp_path / "part.mp4"
+    output = tmp_path / "fragmento.mp4"
 
     result = pymedia(
         "cut", str(video_mp4_a), "--at", "00:00:01", "-o", str(output), "-ov", "yes"
     )
 
     assert result.exit_code == 0
-    parts = sorted(tmp_path.glob("part_*.mp4"))
-    assert len(parts) == 2
-    assert all(ffprobe_duration(part) < 1.9 for part in parts)
+    fragments = sorted(tmp_path.glob("fragmento_*.mp4"))
+    assert len(fragments) == 2
+    assert all(ffprobe_duration(fragment) < 1.9 for fragment in fragments)
+
+
+def test_cut_split_generates_every_segment(
+    pymedia: Invoke,
+    video_mp4_a: Path,
+    tmp_path: Path,
+) -> None:
+    """`cut --at a,b` divide el vídeo en un segmento por cada tramo."""
+    output = tmp_path / "part.mp4"
+
+    result = pymedia(
+        "cut",
+        str(video_mp4_a),
+        "--at",
+        "00:00:00.500,00:00:01",
+        "-o",
+        str(output),
+        "-ov",
+        "yes",
+    )
+
+    assert result.exit_code == 0
+    parts = sorted(tmp_path.glob("part_0*.mp4"))
+    assert len(parts) == 3
+    assert all(part.exists() for part in parts)
+    assert parts[0].name.startswith("part_000")
+    assert not list(tmp_path.glob(".pymedia-*"))
+
+
+def test_cut_split_overwrite_no_skips_whole_process(
+    pymedia: Invoke,
+    video_mp4_a: Path,
+    tmp_path: Path,
+) -> None:
+    """En un corte múltiple con `-ov no`, un segmento existente omite el proceso."""
+    output = tmp_path / "part.mp4"
+    existing = tmp_path / "part_001.mp4"
+    existing.write_text("old")
+
+    result = pymedia(
+        "cut",
+        str(video_mp4_a),
+        "--at",
+        "00:00:00.500,00:00:01",
+        "-o",
+        str(output),
+        "-ov",
+        "no",
+    )
+
+    assert result.exit_code == 0
+    assert "Process skipped" in result.output
+    assert existing.read_text() == "old"
+    assert not (tmp_path / "part_000.mp4").exists()
+    assert not (tmp_path / "part_002.mp4").exists()
+    assert not list(tmp_path.glob(".pymedia-*"))
 
 
 def test_cut_error_missing_options(
@@ -897,6 +1075,66 @@ def test_directory_with_multiple_inputs_generates_one_output_each(
 
     assert result.exit_code == 0
     assert len(list(directory.glob(pattern))) == 2
+    assert not list(directory.rglob(".pymedia-*"))
+
+
+def test_batch_directory_skips_existing_and_processes_the_rest(
+    pymedia: Invoke,
+    video_mp4_a: Path,
+    video_mp4_b: Path,
+    tmp_path: Path,
+) -> None:
+    """En un lote con `-ov no` la salida existente se omite sin bloquear el resto."""
+    directory = tmp_path / "batch"
+    shutil.copy(video_mp4_a, tmp_path / "a.mp4")
+    shutil.copy(video_mp4_b, tmp_path / "b.mp4")
+    existing = directory / "a_transcoded.mp4"
+    existing.parent.mkdir()
+    existing.write_text("old")
+
+    result = pymedia(
+        "transcode",
+        str(tmp_path / "a.mp4"),
+        str(tmp_path / "b.mp4"),
+        "--video",
+        "-d",
+        str(directory),
+        "-ov",
+        "no",
+    )
+
+    assert result.exit_code == 0
+    assert existing.read_text() == "old"
+    processed = list(directory.glob("b_transcoded.mp4"))
+    assert len(processed) == 1
+    assert processed[0].stat().st_size > 0
+    assert not list(directory.rglob(".pymedia-*"))
+
+
+def test_batch_directory_outputs_do_not_collide(
+    pymedia: Invoke,
+    video_mp4_a: Path,
+    video_mp4_b: Path,
+    tmp_path: Path,
+) -> None:
+    """Cada entrada del lote genera una salida única contigua al directorio."""
+    directory = tmp_path / "batch"
+    result = pymedia(
+        "sheet",
+        str(video_mp4_a),
+        str(video_mp4_b),
+        "--directory",
+        str(directory),
+        "--preset",
+        "web",
+        "-ov",
+        "yes",
+    )
+
+    assert result.exit_code == 0
+    generated = sorted(directory.glob("*_sheet.jpg"))
+    assert len(generated) == 2
+    assert len({path.name for path in generated}) == 2
 
 
 def test_transcode_success_transcode_audio(
@@ -1280,6 +1518,59 @@ def test_extract_audio_success_extracts_track(
     extracted = list(tmp_path.glob("audio_audio_track_*.m4a"))
     assert len(extracted) == 1
     assert "audio" in stream_types(extracted[0])
+
+
+def test_extract_audio_multiple_tracks_generates_every_file(
+    pymedia: Invoke,
+    video_mkv_two_audio: Path,
+    tmp_path: Path,
+) -> None:
+    """`extract-audio --tracks 0,1` vuelca cada pista a su propio fichero."""
+    output = tmp_path / "audio.m4a"
+
+    result = pymedia(
+        "extract-audio",
+        str(video_mkv_two_audio),
+        "--tracks",
+        "0,1",
+        "-o",
+        str(output),
+        "-ov",
+        "yes",
+    )
+
+    assert result.exit_code == 0
+    extracted = sorted(tmp_path.glob("audio_audio_track_*.m4a"))
+    assert len(extracted) == 2
+    assert all("audio" in stream_types(track) for track in extracted)
+    assert not list(tmp_path.glob(".pymedia-*"))
+
+
+def test_extract_audio_batch_pre_check_blocks_all_outputs(
+    pymedia: Invoke,
+    video_mkv_two_audio: Path,
+    tmp_path: Path,
+) -> None:
+    """Con `-ov no` una salida existente bloquea todo el lote de pistas."""
+    output = tmp_path / "audio.m4a"
+    existing = tmp_path / "audio_audio_track_1.m4a"
+    existing.write_text("old")
+
+    result = pymedia(
+        "extract-audio",
+        str(video_mkv_two_audio),
+        "--tracks",
+        "0,1",
+        "-o",
+        str(output),
+        "-ov",
+        "no",
+    )
+
+    assert result.exit_code == 0
+    assert existing.read_text() == "old"
+    assert not (tmp_path / "audio_audio_track_0.m4a").exists()
+    assert not list(tmp_path.glob(".pymedia-*"))
 
 
 def test_extract_audio_error_without_audio_tracks(
@@ -1956,6 +2247,7 @@ def test_frames_success_multiple_timestamps(
 
     assert result.exit_code == 0
     assert len(list(tmp_path.glob("multi_*.jpg"))) == 2
+    assert not list(tmp_path.glob(".pymedia-*"))
 
 
 IMAGE_FORMAT_CASES = [
@@ -2012,6 +2304,7 @@ def test_interval_success_generates_series(
 
     assert result.exit_code == 0
     assert len(list(tmp_path.glob("periodic_*.jpg"))) >= 1
+    assert not list(tmp_path.glob(".pymedia-*"))
 
 
 def test_interval_success_with_range(
@@ -2039,6 +2332,44 @@ def test_interval_success_with_range(
 
     assert result.exit_code == 0
     assert len(list(tmp_path.glob("periodic_range_*.jpg"))) >= 1
+    assert not list(tmp_path.glob(".pymedia-*"))
+
+
+def test_scene_and_interval_series_have_no_staging_leftovers(
+    pymedia: Invoke, video_scenes: Path, tmp_path: Path
+) -> None:
+    """Las series generadas no dejan temporales junto al destino."""
+    scene_out = tmp_path / "s.jpg"
+    interval_out = tmp_path / "periodic.jpg"
+
+    assert (
+        pymedia(
+            "scene",
+            str(video_scenes),
+            "-o",
+            str(scene_out),
+            "-ov",
+            "yes",
+        ).exit_code
+        == 0
+    )
+    assert (
+        pymedia(
+            "interval",
+            str(video_scenes),
+            "--every",
+            "1",
+            "-o",
+            str(interval_out),
+            "-ov",
+            "yes",
+        ).exit_code
+        == 0
+    )
+
+    assert len(list(tmp_path.glob("s_*.jpg"))) >= 1
+    assert len(list(tmp_path.glob("periodic_*.jpg"))) >= 1
+    assert not list(tmp_path.glob(".pymedia-*"))
 
 
 def test_interval_error_every_too_small(

@@ -29,8 +29,8 @@ class MediaInputMixin:
             logger: Sistema de registro de mensajes.
 
         Raises:
-            InvalidContainerTypeError: Si la extensión del fichero no es un
-                contenedor de vídeo soportado.
+            FfprobeError: Si la extensión del fichero no es un
+                contenedor de vídeo soportado, o ffprobe no puede leer el archivo.
             MissingParameterError: Si los metadatos del fichero no se pudieron
                 mapear.
         """
@@ -69,7 +69,8 @@ class MediaListMixin:
             logger: Sistema de registro de mensajes.
 
         Raises:
-            InvalidContainerTypeError: Si extensión no es de contenedor soportado.
+            FfprobeError: Si extensión no es de contenedor soportado, o
+                ffprobe no puede leer algún fichero.
             MissingParameterError: Si metadatos de algún fichero no se pudieron mapear.
         """
         media_list: list[Media] = []

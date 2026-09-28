@@ -6,6 +6,30 @@ Las versiones se han reconstruido a partir del histórico de
 Las versiones intermedias no registradas (0.2–0.4, 0.6–0.8) se agrupan
 con la sección anterior.
 
+## [0.21.2-beta.14] - 2026-09-28
+
+### Añadido
+
+- Tests completos para mixins de Audio y Subtitles (`test_mixins_audio.py`, `test_mixins_subtitles.py`).
+- Tests para `ffprobe` y nuevo módulo `utils` (`test_ffprobe.py`, `test_utils.py`).
+- Tests para `BaseService` y `FfmpegRunner` (`test_base_service.py`, `test_ffmpeg_runner.py`).
+
+### Cambiado
+
+- **Refactor mayor**: Reorganización de la estructura de comandos base. `base_cli.py` → `base/cli.py`, `base_cli_options.py` → `base/cli_options.py`. Nuevos módulos `base/ffmpeg_runner.py` y `base/service.py`. Eliminados `base_service.py` y `base_parameters.py` legacy.
+- **Refactor**: Módulo `ffprobe` reescrito con parsing mejorado y nuevo módulo `utils` para funciones compartidas.
+- **Refactor**: Estandarización de mutabilidad en modelos (`frozen=True, slots=True` en Audio, Video, Subtitles, Chapters, Media).
+- `OsError` renombrado a `OperativeSystemError` para evitar colisión con `OSError` nativo de Python.
+- `sys.exit(0)` reemplazado por `return` en servicios de comandos.
+- Corrección de requerimiento de Python, versión y nombre de script en `README.md` y `pyproject.toml`.
+- Limpieza de errores de IDE y actualización de `platformdirs`.
+- Actualización de catálogos de localización al español.
+
+### Corregido
+
+- Tests que se saltaban en `test_cli_options.py`.
+
+
 ## [0.21.1-beta.13] - 2026-09-27
 
 ### Añadido

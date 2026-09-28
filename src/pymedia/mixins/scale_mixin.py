@@ -51,10 +51,9 @@ class ScaleMixin:
             scale_to: Dimensión objetivo, en píxeles, o `None` si no se cambia.
 
         Raises:
-            InvalidArgumentError: Si la dimensión objetivo no tiene un formato
-                válido (se esperaba WIDTHxHEIGHT).
-            InvalidParameterError: Si la dimensión objetivo no es par o el modo
-                de escalado no tiene un valor válido.
+            UserError: Si la dimensión objetivo no tiene un formato
+                válido (se esperaba WIDTHxHEIGHT), si la dimensión objetivo no es par,
+                o si el modo de escalado no tiene un valor válido.
             MissingPropertyError: Si las dimensiones del vídeo no se
                 pueden obtener.
         """

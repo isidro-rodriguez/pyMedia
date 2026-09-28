@@ -6,6 +6,7 @@ pruebas propias están en `test_ffmpeg_runner.py`.
 """
 
 import _thread
+import os
 import subprocess
 import sys
 import threading
@@ -94,6 +95,34 @@ def test_display_cmd_quotes_tokens_for_windows(tmp_path: Path) -> None:
     assert '"' in rendered and str(token) in rendered or rendered.count('"') == 2
 
 
+def test_display_cmd_escapes_quotes_for_windows(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """En Windows, las comillas de un token se escapan."""
+    monkeypatch.setattr(os, "name", "nt")
+    service = _service(show_cmd=True)
+
+    with pytest.raises(SystemExit):
+        service.display_cmd(["ffmpeg", "-i", 'my "video".mkv', "out.mp4"])
+
+    rendered = service.logger.print.call_args.kwargs["renderable"]
+    assert rendered == '\nffmpeg -i "my \\"video\\".mkv" out.mp4\n'
+
+
+def test_display_cmd_uses_posix_quoting_outside_windows(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Fuera de Windows, el comando se formatea como cadena de shell."""
+    monkeypatch.setattr(os, "name", "posix")
+    service = _service(show_cmd=True)
+
+    with pytest.raises(SystemExit):
+        service.display_cmd(["ffmpeg", "-i", "my video.mkv", "out.mp4"])
+
+    rendered = service.logger.print.call_args.kwargs["renderable"]
+    assert rendered == "\nffmpeg -i 'my video.mkv' out.mp4\n"
+
+
 def test_display_cmd_logs_command_in_default_mode() -> None:
     """Sin `show_cmd`, solo se registra el comando como DEBUG."""
     service = _service()
@@ -125,6 +154,14 @@ def test_resolve_overwrite_allows_when_policy_is_yes() -> None:
 
     assert service.resolve_overwrite([Path("x.mp4")])
     assert service.logger.warning.call_count == 0
+
+
+def test_resolve_overwrite_allows_when_nothing_exists(tmp_path: Path) -> None:
+    """Sin ficheros conflictivos no se pregunta ni se avisa."""
+    service = _service(overwrite=OverwriteMode.ASK)
+
+    assert service.resolve_overwrite([tmp_path / "a.mp4", tmp_path / "b.mp4"]) is True
+    service.logger.warning.assert_not_called()
 
 
 def test_resolve_overwrite_rejects_existing_without_permission(tmp_path: Path) -> None:

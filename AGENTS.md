@@ -6,15 +6,15 @@ Código simple, legible, stdlib antes que dependencias nuevas.
 
 - Orden imports: stdlib > third-party > local.
 - Sin mutable default args.
-- Funciones: responsabilidad única, ~20 líneas máximo.
+- Funciones: responsabilidad única, ~50 líneas máximo.
 - Nunca silenciar errores.
 
 ## Types & Docs
 
 - Type hints estrictos (Ty).
 - Docstrings Google-style: completos en público, una línea en privado/anidado.
-- Docstring público hereda `Raises` de las funciones privadas que llama.
-- Comentarios explican el *porqué*, no el *qué*.
+- Docstring público hereda `Raises` de las funciones y métodos privados que llama.
+- En código complejo, comentar **el porqué** de su implementación.
 
 ## Ahorro de tokens
 

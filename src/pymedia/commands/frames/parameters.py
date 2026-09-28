@@ -70,7 +70,6 @@ class FramesParameters(
             InvalidTimeFormatError: Si alguna marca no tiene un formato válido.
             MissingParameterError: Si falta el medio o la propiedad indicada.
             MissingPropertyError: Si el medio no declara alguna propiedad técnica.
-            PermissionDeniedError: Si no se puede crear el directorio de salida.
             UserError: Si una marca supera la duración del vídeo o el nombre de
                 salida contiene caracteres no permitidos.
         """

@@ -12,6 +12,7 @@ from pymedia.mixins.outputs_mixin import (
     MediaOutputMixin,
     SubtitlesOutputMixin,
     _process_output,
+    _process_output_directory,
     _validate_name,
 )
 from pymedia.models.audio import AudioFormat
@@ -77,7 +78,7 @@ def _media_tracks(*audio_tracks: Audio) -> Media:
     return Media(path=Path("clip.mkv"), audio=list(audio_tracks))
 
 
-def _subtitles_track(codec: str, track_index: int) -> Subtitles:
+def _subtitles_track(codec: str | None, track_index: int) -> Subtitles:
     """Pista de subtítulos de ayuda con códec e índice concretos."""
     return Subtitles(
         path=Path("clip.mkv"),
@@ -261,6 +262,17 @@ class TestAudioOutputMixin:
 
         assert mixin.audio_output == (tmp_path / "out.ogg").absolute()
 
+    def test_output_directory_created_and_used(self, tmp_path: Path) -> None:
+        """Comprueba que se crea y usa el directorio de salida del lote."""
+        target = tmp_path / "audio"
+        mixin = _audio_mixin(media=_media_tracks(_audio_track("aac", 0)))
+
+        mixin.create_audio_output(extension=".m4a", output_directory=target)
+
+        assert mixin.output_directory == target
+        assert mixin.audio_output == (target / "clip.m4a").absolute()
+        assert target.is_dir()
+
 
 class TestImageOutputMixin:
     """Pruebas del mixin de salida de imágenes."""
@@ -374,6 +386,63 @@ class TestSubtitlesOutputMixin:
 
         assert mixin.subtitles_output == (tmp_path / "out.ass").absolute()
 
+    def test_output_directory_created_and_used(self, tmp_path: Path) -> None:
+        """Comprueba que se crea y usa el directorio de salida del lote."""
+        target = tmp_path / "subs"
+        mixin = _subtitles_mixin(media=_media_sub_tracks(_subtitles_track("srt", 0)))
+
+        mixin.create_subtitles_output(extension=".srt", output_directory=target)
+
+        assert mixin.output_directory == target
+        assert mixin.subtitles_output == (target / "clip.srt").absolute()
+        assert target.is_dir()
+
+    def test_requires_subtitles_track(self, tmp_path: Path) -> None:
+        """Comprueba que la salida de subtítulos exige pistas en el medio."""
+        mixin = _subtitles_mixin(media=Media(path=Path("clip.mkv"), subtitles=None))
+
+        with pytest.raises(MissingPropertyError, match="subtitles"):
+            mixin.create_subtitles_output(extension=".srt", output=tmp_path / "out.srt")
+
+    def test_requires_codec(self, tmp_path: Path) -> None:
+        """Comprueba que la salida de subtítulos exige códec en cada pista."""
+        mixin = _subtitles_mixin(media=_media_sub_tracks(_subtitles_track(None, 0)))
+
+        with pytest.raises(MissingPropertyError, match="subtitles codec"):
+            mixin.create_subtitles_output(extension=".srt", output=tmp_path / "out.srt")
+
+
+class TestProcessOutputDirectory:
+    """Pruebas de creación del directorio de salida (función compartida)."""
+
+    def test_creates_nested_directories(self, tmp_path: Path) -> None:
+        """Comprueba que se crean los directorios intermedios que falten."""
+        target = tmp_path / "a" / "b" / "c"
+
+        assert _process_output_directory(target) == target
+        assert target.is_dir()
+
+    def test_reuses_existing_directory(self, tmp_path: Path) -> None:
+        """Comprueba que un directorio ya existente se reutiliza sin error."""
+        target = tmp_path / "out"
+        target.mkdir()
+
+        assert _process_output_directory(target) == target
+
+    def test_creation_failure_raises_user_error(
+        self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """Comprueba que un fallo al crear el directorio se informa al usuario."""
+
+        def _refuse(*_args: object, **_kwargs: object) -> None:
+            """Simula un sistema de ficheros sin permiso de escritura."""
+            raise PermissionError
+
+        monkeypatch.setattr(Path, "mkdir", _refuse)
+
+        with pytest.raises(UserError, match="Could not create directory"):
+            _process_output_directory(tmp_path / "denied")
+
 
 class TestProcessOutput:
     """Pruebas del procesamiento de la ruta de salida (función compartida)."""
@@ -430,6 +499,46 @@ class TestProcessOutput:
 
         assert output == (target / "clip.gif").absolute()
 
+    def test_output_without_extension_keeps_explicit_name(self, tmp_path: Path) -> None:
+        """Comprueba que una extensión vacía no modifica la ruta explícita."""
+        explicit = tmp_path / "noext"
+
+        output = _process_output(_media_with_path(), extension="", output=explicit)
+
+        assert output == explicit.absolute()
+
+    @pytest.mark.parametrize("name", ["bad<name>.mp4", "bad?name.mp4", "con.mp4"])
+    def test_output_name_with_invalid_characters_is_rejected(
+        self, tmp_path: Path, name: str
+    ) -> None:
+        """Comprueba que un nombre de salida no válido se rechaza."""
+        with pytest.raises(UserError, match="contains invalid characters"):
+            _process_output(
+                _media_with_path(), extension=".mp4", output=tmp_path / name
+            )
+
+    def test_output_equal_to_the_input_is_rejected(
+        self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """Comprueba que la salida no puede coincidir con la entrada."""
+        monkeypatch.chdir(tmp_path)
+        media = _media_with_path()
+
+        with pytest.raises(UserError, match="must be different"):
+            _process_output(media, extension=".mp4", output=media.path.absolute())
+
+    def test_tilde_and_env_vars_are_not_expanded(
+        self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """Comprueba que `~` y las variables de entorno quedan literales."""
+        monkeypatch.chdir(tmp_path)
+
+        output = _process_output(
+            _media_with_path(), extension=".gif", output=Path("~/v$VAR/clip.gif")
+        )
+
+        assert output == (tmp_path / "~" / "v$VAR" / "clip.gif").absolute()
+
 
 class TestMediaOutputMixin:
     """Pruebas del mixin de salida de contenedores multimedia."""
@@ -484,6 +593,31 @@ class TestMediaOutputMixin:
             mixin.create_media_output(extension=".mp4", output=tmp_path / "out.mp4")
 
         assert "vorbis" in str(exc_info.value)
+
+    def test_audio_codec_required(self, tmp_path: Path) -> None:
+        """Comprueba que el contenedor de vídeo exige códec en cada pista."""
+        mixin = _media_mixin(
+            media=_media_with_path(video=_video("h264"), audio=_audio(None))
+        )
+
+        with pytest.raises(MissingPropertyError, match="audio codec"):
+            mixin.create_media_output(extension=".mp4", output=tmp_path / "out.mp4")
+
+    def test_output_equal_to_second_input_is_rejected(
+        self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """Comprueba que la validación cubre todas las entradas del lote."""
+        monkeypatch.chdir(tmp_path)
+        first = _media_with_path("a.mp4", video=_video("h264"))
+        second = _media_with_path("b.mp4", video=_video("h264"))
+        mixin = _media_mixin(media=first)
+
+        with pytest.raises(UserError, match="must be different"):
+            mixin.create_media_output(
+                extension=".mp4",
+                output=Path("b.mp4"),
+                media_list=[first, second],
+            )
 
 
 class TestValidateName:

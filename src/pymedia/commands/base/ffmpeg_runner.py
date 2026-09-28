@@ -16,7 +16,12 @@ from typing import Self, TextIO
 
 from rich.progress import Progress
 
-from pymedia.errors import CommandError, OperativeSystemError, UserError
+from pymedia.errors import (
+    CommandError,
+    InvalidParameterError,
+    OperativeSystemError,
+    UserError,
+)
 from pymedia.locales import translate as _
 
 STDOUT, STDERR = "stdout", "stderr"
@@ -59,12 +64,29 @@ def stage_outputs(cmd: list[str], outputs: Iterable[str], staging: Path) -> list
 
     Returns:
         Copia de `cmd` con las salidas apuntando a `staging`.
+
+    Raises:
+        InvalidParameterError: Si dos salidas comparten el mismo nombre de
+            fichero: en el temporal solo se distinguen por nombre, así que una
+            pisaría a la otra.
     """
     targets = {cmd[-1], *outputs}
+    _validate_unique_names(targets)
     return [
         str(staging / Path(arg).name) if i and arg in targets else arg
         for i, arg in enumerate(cmd)
     ]
+
+
+def _validate_unique_names(targets: set[str]) -> None:
+    """Comprueba que ninguna salida comparta nombre de fichero con otra."""
+    names = [Path(target).name for target in targets]
+    duplicates = sorted({name for name in names if names.count(name) > 1})
+    if duplicates:
+        raise InvalidParameterError(
+            msg=_("Multiple outputs share the same file name: %(name)s")
+            % {"name": ", ".join(duplicates)}
+        )
 
 
 def commit_outputs(staging: Path, dest_dir: Path, overwrite: bool) -> None:
@@ -270,9 +292,14 @@ def run_ffmpeg(
     Raises:
         CommandError: Si ffmpeg falla, se bloquea o una salida ya existe.
         UserError: Si el usuario interrumpe la ejecución.
-        OperativeSystemError: Si no se puede mover una salida a su destino final.
+        OperativeSystemError: Si el directorio de destino no existe o no se
+            puede mover una salida a su destino final.
     """
     dest_dir = Path(cmd[-1]).parent
+    if not dest_dir.is_dir():
+        raise OperativeSystemError(
+            msg=_("Destination directory does not exist: %(path)s") % {"path": dest_dir}
+        )
     tracker = ProgressTracker(progress_time, total_steps)
     with tempfile.TemporaryDirectory(
         dir=dest_dir, prefix=".pymedia-", ignore_cleanup_errors=True

@@ -89,9 +89,8 @@ def validate_conflict_output_options(
         output_directory: Directorio de salida para lotes de ficheros.
 
     Raises:
-        ExclusiveOptionsError: Si se aportan `output` y `output_directory`
-            a la vez.
-        OptionError: Si se indica una salida única con varias entradas.
+        UserError: Si se aportan `output` y `output_directory`
+            a la vez, o si se indica una salida única con varias entradas.
     """
     if output is not None and output_directory is not None:
         raise UserError(
