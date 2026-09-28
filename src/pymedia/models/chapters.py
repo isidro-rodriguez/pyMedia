@@ -4,7 +4,7 @@ from dataclasses import dataclass, field
 from datetime import timedelta
 
 
-@dataclass(kw_only=True)
+@dataclass(kw_only=True, frozen=True, slots=True)
 class ChapterFormat:
     """Propiedades técnicas de sincronización y base temporal del capítulo.
 
@@ -32,7 +32,7 @@ class ChapterMetadata:
     tags: dict[str, str] = field(default_factory=dict)
 
 
-@dataclass(kw_only=True, slots=True)
+@dataclass(kw_only=True, frozen=True, slots=True)
 class Chapter:
     """Información completa de un capítulo individual del contenedor.
 

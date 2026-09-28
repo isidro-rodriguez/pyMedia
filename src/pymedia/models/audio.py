@@ -5,7 +5,7 @@ from datetime import timedelta
 from pathlib import Path
 
 
-@dataclass(kw_only=True)
+@dataclass(kw_only=True, frozen=True, slots=True)
 class AudioFormat:
     """Propiedades técnicas del formato y codificación del flujo de audio.
 
@@ -24,7 +24,7 @@ class AudioFormat:
     bit_rate: int | None = None
 
 
-@dataclass(kw_only=True)
+@dataclass(kw_only=True, frozen=True, slots=True)
 class AudioLoudness:
     """Métricas y metadatos de normalización y volumen (Loudness).
 

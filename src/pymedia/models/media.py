@@ -10,7 +10,7 @@ from pymedia.models.subtitles import Subtitles
 from pymedia.models.video import Video
 
 
-@dataclass(kw_only=True)
+@dataclass(kw_only=True, frozen=True, slots=True)
 class MediaFormat:
     """Propiedades técnicas del formato contenedor y archivo multimedia.
 

@@ -6,7 +6,7 @@ from fractions import Fraction
 from pathlib import Path
 
 
-@dataclass(kw_only=True)
+@dataclass(kw_only=True, frozen=True, slots=True)
 class VideoFormat:
     """Propiedades técnicas del formato, codificación y renderizado del flujo de vídeo.
 

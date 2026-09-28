@@ -5,7 +5,7 @@ from datetime import timedelta
 from pathlib import Path
 
 
-@dataclass(kw_only=True)
+@dataclass(kw_only=True, frozen=True, slots=True)
 class SubtitlesFormat:
     """Propiedades técnicas del formato y codificación de la pista de subtítulos.
 
