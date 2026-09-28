@@ -1,6 +1,6 @@
 """Comando ``edit-audio``: service."""
 
-from pymedia.commands.base_service import BaseService
+from pymedia.commands.base.service import BaseService
 from pymedia.commands.edit_audio.cmd import EditAudioCmd
 from pymedia.commands.edit_audio.parameters import EditAudioParameters
 from pymedia.errors import MissingParameterError

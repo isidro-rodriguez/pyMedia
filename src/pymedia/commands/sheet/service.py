@@ -3,7 +3,7 @@
 import tempfile
 from pathlib import Path
 
-from pymedia.commands.base_service import BaseService
+from pymedia.commands.base.service import BaseService
 from pymedia.commands.sheet.cmd import SheetCmd
 from pymedia.commands.sheet.parameters import SheetParameters
 from pymedia.errors import (

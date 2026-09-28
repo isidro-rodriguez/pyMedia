@@ -2,8 +2,8 @@
 
 import shutil
 
-from pymedia.commands.base_cli import base_cli
-from pymedia.commands.base_cli_options import HelpOption, VersionOption
+from pymedia.commands.base.cli import base_cli
+from pymedia.commands.base.cli_options import HelpOption, VersionOption
 from pymedia.errors import UserError
 from pymedia.locales import translate as _
 

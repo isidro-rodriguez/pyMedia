@@ -7,7 +7,7 @@ from rich.console import Group
 from rich.panel import Panel
 from rich.table import Table
 
-from pymedia.commands.base_service import BaseService
+from pymedia.commands.base.service import BaseService
 from pymedia.commands.info.parameters import InfoParameters
 from pymedia.errors import MissingParameterError
 from pymedia.locale_manager import locale_manager

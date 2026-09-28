@@ -4,7 +4,7 @@ import typer
 
 from pymedia.commands.add_subtitles.parameters import AddSubtitlesParameters
 from pymedia.commands.add_subtitles.service import AddSubtitlesService
-from pymedia.commands.base_cli_options import (
+from pymedia.commands.base.cli_options import (
     DebugOption,
     HelpOption,
     MediaInputArgument,

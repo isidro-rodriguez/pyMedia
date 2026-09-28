@@ -4,7 +4,7 @@ from typing import cast
 
 import typer
 
-from pymedia.commands.base_cli_options import (
+from pymedia.commands.base.cli_options import (
     DebugOption,
     HelpOption,
     MediaInputArgument,

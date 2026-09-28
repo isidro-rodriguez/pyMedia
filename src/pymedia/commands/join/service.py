@@ -4,7 +4,7 @@ import tempfile
 from pathlib import Path
 from typing import Any
 
-from pymedia.commands.base_service import BaseService
+from pymedia.commands.base.service import BaseService
 from pymedia.commands.join.cmd import JoinCmd
 from pymedia.commands.join.parameters import JoinParameters
 from pymedia.errors import MissingParameterError, UserError

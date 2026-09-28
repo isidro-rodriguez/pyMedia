@@ -2,7 +2,7 @@
 
 from pymedia.commands.add_audio.cmd import AddAudioCmd
 from pymedia.commands.add_audio.parameters import AddAudioParameters
-from pymedia.commands.base_service import BaseService
+from pymedia.commands.base.service import BaseService
 from pymedia.errors import MissingParameterError
 from pymedia.locales import translate as _
 

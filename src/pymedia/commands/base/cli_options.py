@@ -9,7 +9,7 @@ from typing import Annotated
 
 import typer
 
-from pymedia.commands.base_cli import (
+from pymedia.commands.base.cli import (
     show_help,
     show_version,
     validate_audio_path,

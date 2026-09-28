@@ -62,6 +62,7 @@
       <w>Transcodifica</w>
       <w>Tshivenḓa</w>
       <w>Tupla</w>
+      <w>Tuplas</w>
       <w>Türkmençe</w>
       <w>Türkçe</w>
       <w>Vahcuengh</w>
@@ -112,6 +113,7 @@
       <w>msmpeg</w>
       <w>multisalida</w>
       <w>ngettext</w>
+      <w>nostdin</w>
       <w>nynorsk</w>
       <w>pgssub</w>
       <w>prores</w>
@@ -123,6 +125,7 @@
       <w>remuxed</w>
       <w>remuxing,</w>
       <w>replaygain</w>
+      <w>returncode</w>
       <w>spanish</w>
       <w>subrip</w>
       <w>testons</w>

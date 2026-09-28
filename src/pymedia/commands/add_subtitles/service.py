@@ -2,7 +2,7 @@
 
 from pymedia.commands.add_subtitles.cmd import AddSubtitlesCmd
 from pymedia.commands.add_subtitles.parameters import AddSubtitlesParameters
-from pymedia.commands.base_service import BaseService
+from pymedia.commands.base.service import BaseService
 from pymedia.errors import MissingParameterError
 from pymedia.locales import translate as _
 

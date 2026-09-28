@@ -1,6 +1,6 @@
 """Comando ``remux``: service."""
 
-from pymedia.commands.base_service import BaseService
+from pymedia.commands.base.service import BaseService
 from pymedia.commands.remux.cmd import RemuxCmd
 from pymedia.commands.remux.parameters import RemuxParameters
 from pymedia.errors import MissingParameterError

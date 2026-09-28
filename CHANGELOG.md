@@ -136,7 +136,7 @@ con la sección anterior.
 ### Cambiado
 
 - `refactor(tests)`: reestructurada la suite de pruebas completa con mejor soporte para binarios y fixtures centralizados (`scripts/fixtures/`)
-- `refactor(core)`: limpiadas importaciones y mejoradas validaciones de comandos en `base_service.py` y `base_cli_options.py`
+- `refactor(core)`: limpiadas importaciones y mejoradas validaciones de comandos en `service.py` y `cli_options.py`
 - `refactor(fixtures)`: reorganizado y centralizado el sistema de generación de archivos de prueba
 - `chore(config)`: eliminada configuración de mypy y actualizado `.gitignore`
 - `docs`: actualizado README a versión 0.20.0
@@ -278,7 +278,7 @@ con la sección anterior.
 ### Interno
 
 - `types.py`: eliminados los enums `AudioMode` y `SubtitlesMode` (sin uso)
-- `base_parameters.py`: eliminadas `AudioParameters` y `SubtitlesParameters`
+- `parameters.py`: eliminadas `AudioParameters` y `SubtitlesParameters`
   (solo `BaseParameters` y `ThumbParameters`)
 - Los pipelines migraron a un servicio por comando con `Parameters.load()`,
   `Cmd.create()` y `Service.start()` siguiendo la misma convención

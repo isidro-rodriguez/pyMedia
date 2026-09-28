@@ -1,25 +1,212 @@
-"""Pruebas del ciclo de vida de los procesos de BaseService."""
+"""Pruebas del ciclo de vida de los procesos de BaseService.
+
+El servicio base de los comandos vive en `commands/base/service.py` y delega
+la ejecución de `run_ffmpeg` en `commands/base/ffmpeg_runner.py`, cuyas
+pruebas propias están en `test_ffmpeg_runner.py`.
+"""
 
 import _thread
-import io
-import queue
 import subprocess
 import sys
 import threading
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 from unittest.mock import MagicMock, patch
 
 import pytest
 
-from pymedia.commands.base_service import BaseService
+from pymedia.commands.base.service import BaseService
 from pymedia.errors import CommandError, OsError, UserError
 from pymedia.models.config import App, Config
 from pymedia.types import OverwriteMode
 
+_MODULE = "pymedia.commands.base.service"
+_RUNNER = "pymedia.commands.base.ffmpeg_runner"
 
-class _TestService(BaseService[object]):
-    """Tipo concreto para probar la ejecución sin cargar configuración de usuario."""
+
+@dataclass
+class _Params:
+    """Parámetros requeridos por el bound `_OverwriteParams` para testing."""
+
+    overwrite: OverwriteMode
+
+
+class _TestService(BaseService[_Params]):
+    """Servicio concreto para probar sin cargar la configuración del usuario."""
+
+    logger: MagicMock
+
+
+def _service(
+    overwrite: OverwriteMode = OverwriteMode.ASK,
+    *,
+    debug: bool = False,
+    show_cmd: bool = False,
+) -> _TestService:
+    """Construye un servicio sin tocar la configuración ni el logger globales."""
+    service = object.__new__(_TestService)
+    service.debug = debug
+    service.show_cmd = show_cmd
+    service.command_name = "Test"
+    service.config = object.__new__(Config)
+    object.__setattr__(
+        service.config,
+        "app",
+        App(language="en", stall_timeout=5),
+    )
+    service.logger = MagicMock()
+    service.params = _Params(overwrite=overwrite)
+    return service
+
+
+def _writer_command(*outputs: Path) -> list[str]:
+    """Comando que simula a ffmpeg escribiendo `new` en cada ruta recibida."""
+    script = (
+        "import pathlib, sys\n"
+        "for name in sys.argv[1:]:\n"
+        " pathlib.Path(name).write_text('new')\n"
+    )
+    return [sys.executable, "-c", script, *map(str, outputs)]
+
+
+def test_display_cmd_prints_and_exits_when_show_cmd_is_true() -> None:
+    """Cuando `show_cmd=True`, el comando se muestra y el proceso termina."""
+    service = _service(show_cmd=True)
+    cmd = ["ffmpeg", "-i", "in.mkv", "out.mp4"]
+
+    with pytest.raises(SystemExit) as exc_info:
+        service.display_cmd(cmd)
+    assert exc_info.value.code == 0
+    service.logger.print.assert_called_once()
+
+
+def test_display_cmd_quotes_tokens_for_windows(tmp_path: Path) -> None:
+    """En Windows, los tokens con caracteres especiales se entrecomillan."""
+    service = _service(show_cmd=True)
+    token = tmp_path / "my videos" / "a.mkv"
+
+    with pytest.raises(SystemExit):
+        service.display_cmd(["ffmpeg", "-i", str(token), "out.mp4"])
+
+    rendered = service.logger.print.call_args.kwargs["renderable"]
+    # En Windows espera '"my videos\a.mkv"'
+    assert '"' in rendered and str(token) in rendered or rendered.count('"') == 2
+
+
+def test_display_cmd_logs_command_in_default_mode() -> None:
+    """Sin `show_cmd`, solo se registra el comando como DEBUG."""
+    service = _service()
+    cmd = ["ffmpeg", "-i", "in.mkv", "out.mp4"]
+    service.display_cmd(cmd)
+
+    assert service.logger.debug.call_args.kwargs["cmd"] == cmd
+
+
+def test_display_cmd_aborts_process_when_debug_declined() -> None:
+    """Si debug=True y se rechaza la confirmación, se aborta el comando."""
+    service = _service(debug=True)
+
+    with (
+        patch(f"{_MODULE}.typer.confirm", return_value=False) as confirm,
+        pytest.raises(SystemExit) as exc_info,
+    ):
+        service.display_cmd(["ffmpeg", "-i", "in.mkv", "out.mp4"])
+
+    confirm.assert_called_once()
+    assert exc_info.value.code == 0
+    service.logger.warning.assert_called_once()
+    service.logger.print.assert_not_called()
+
+
+def test_resolve_overwrite_allows_when_policy_is_yes() -> None:
+    """Con `overwrite=OverwriteMode.YES`, todo es permitido."""
+    service = _service(overwrite=OverwriteMode.YES)
+
+    assert service.resolve_overwrite([Path("x.mp4")])
+    assert service.logger.warning.call_count == 0
+
+
+def test_resolve_overwrite_rejects_existing_without_permission(tmp_path: Path) -> None:
+    """Con `overwrite=OverwriteMode.NO`, se rechazan los ya existentes."""
+    existing = tmp_path / "out.mp4"
+    existing.write_text("old")
+
+    service = _service(overwrite=OverwriteMode.NO)
+    assert service.resolve_overwrite([existing]) is False
+    service.logger.warning.assert_called_once()
+    existing.unlink(missing_ok=True)
+
+
+def test_resolve_overwrite_prompts_user_when_needed(tmp_path: Path) -> None:
+    """Con `overwrite=OverwriteMode.ASK` se pregunta si el fichero existe."""
+    service = _service(overwrite=OverwriteMode.ASK)
+    output = tmp_path / "out.mp4"
+    output.write_text("old")
+
+    with patch(f"{_MODULE}.typer.confirm", return_value=True) as confirm:
+        assert service.resolve_overwrite([output]) is True
+
+    confirm.assert_called_once()
+    assert service.params.overwrite == OverwriteMode.YES
+
+
+def test_resolve_overwrite_aborts_when_user_declines(tmp_path: Path) -> None:
+    """Si el usuario rechaza el prompt, el proceso se omite."""
+    service = _service(overwrite=OverwriteMode.ASK)
+    output = tmp_path / "out.mp4"
+    output.write_text("old")
+
+    with patch(f"{_MODULE}.typer.confirm", return_value=False):
+        assert service.resolve_overwrite([output]) is False
+
+    assert service.params.overwrite == OverwriteMode.ASK
+    service.logger.warning.assert_called()
+
+
+def test_success_moves_every_output_and_removes_temp(tmp_path: Path) -> None:
+    """Con salida múltiple, todas las rutas llegan a su destino final."""
+    first, last = tmp_path / "a_0.mka", tmp_path / "a_1.mka"
+    pipeline = _service(OverwriteMode.YES)
+
+    pipeline.run_ffmpeg(_writer_command(first, last), "Test", [first])
+
+    assert first.read_text() == "new" and last.read_text() == "new"
+    assert not list(tmp_path.glob(".pymedia-*"))
+
+
+@pytest.mark.parametrize("overwrite", [OverwriteMode.YES, OverwriteMode.NO])
+def test_existing_output_is_replaced_only_when_allowed(
+    tmp_path: Path, overwrite: OverwriteMode
+) -> None:
+    """Sin permiso de sobrescritura no se pisa un destino ya existente."""
+    output = tmp_path / "out.mp4"
+    output.write_text("old")
+    pipeline = _service(overwrite)
+
+    if overwrite == OverwriteMode.YES:
+        pipeline.run_ffmpeg(_writer_command(output), "Test", [output])
+    else:
+        with pytest.raises(CommandError, match="already exists"):
+            pipeline.run_ffmpeg(_writer_command(output), "Test", [output])
+
+    assert output.read_text() == ("new" if overwrite == OverwriteMode.YES else "old")
+    assert not list(tmp_path.glob(".pymedia-*"))
+
+
+def test_move_failure_is_reported_as_os_error(tmp_path: Path) -> None:
+    """Un fallo al mover la salida se informa como OsError."""
+    output = tmp_path / "out.mp4"
+    pipeline = _service(OverwriteMode.YES)
+
+    with (
+        patch.object(Path, "replace", side_effect=PermissionError),
+        pytest.raises(OsError, match="could not be moved"),
+    ):
+        pipeline.run_ffmpeg(_writer_command(output), "Test", [output])
+
+    assert not output.exists()
+    assert not list(tmp_path.glob(".pymedia-*"))
 
 
 def test_manual_interrupt_stops_real_process(tmp_path: Path) -> None:
@@ -31,6 +218,9 @@ def test_manual_interrupt_stops_real_process(tmp_path: Path) -> None:
     pipeline.command_name = "Test"
     pipeline.config = object.__new__(Config)
     object.__setattr__(pipeline.config, "app", App(language="en", stall_timeout=5))
+    pipeline.logger = MagicMock()
+    pipeline.params = _Params(OverwriteMode.YES)
+
     processes: list[subprocess.Popen[str]] = []
     popen = subprocess.Popen
     ready = threading.Event()
@@ -68,7 +258,7 @@ def test_manual_interrupt_stops_real_process(tmp_path: Path) -> None:
     interrupter = threading.Thread(target=interrupt)
     interrupter.start()
     try:
-        with patch("pymedia.commands.base_service.subprocess.Popen", launch):
+        with patch(f"{_RUNNER}.subprocess.Popen", launch):
             try:
                 pipeline.run_ffmpeg(command, "Test", [output])
             except UserError as error:
@@ -93,154 +283,3 @@ def test_manual_interrupt_stops_real_process(tmp_path: Path) -> None:
                 proc.stdout.close()
             if proc.stderr is not None:
                 proc.stderr.close()
-
-
-@pytest.mark.parametrize("phase", ["queue", "first_start", "second_start", "wait"])
-def test_interrupt_cleans_initialized_resources(tmp_path: Path, phase: str) -> None:
-    """La interrupción limpia también un arranque parcial y la espera final."""
-    pipeline = object.__new__(_TestService)
-    pipeline.debug = False
-    pipeline.command_name = "Test"
-    pipeline.config = MagicMock()
-    output = tmp_path / "partial.mp4"
-    output.write_text("original")
-    proc = MagicMock(stdout=io.StringIO(), stderr=io.StringIO(), returncode=0)
-    proc.poll.return_value = None
-    readers = [MagicMock(ident=1), MagicMock(ident=2)]
-    events = MagicMock()
-    events.get.side_effect = [("stdout", None), ("stderr", None)]
-    match phase:
-        case "queue":
-            events.get.side_effect = KeyboardInterrupt
-        case "first_start" | "second_start":
-            index = 0 if phase == "first_start" else 1
-            readers[index].start.side_effect = KeyboardInterrupt
-            for reader in readers[index:]:
-                reader.ident = None
-        case "wait":
-            proc.wait.side_effect = [KeyboardInterrupt, 0]
-        case _:
-            pass
-
-    with (
-        patch("pymedia.commands.base_service.subprocess.Popen", return_value=proc),
-        patch("pymedia.commands.base_service.threading.Thread", side_effect=readers),
-        patch("pymedia.commands.base_service.queue.Queue", return_value=events),
-        patch("pymedia.commands.base_service.Progress"),
-        pytest.raises(UserError, match="interrupted manually"),
-    ):
-        pipeline.run_ffmpeg(["ffmpeg", "-i", "in.mkv", str(output)], "Test", [output])
-
-    proc.kill.assert_called_once()
-    assert proc.stdout.closed and proc.stderr.closed
-    assert output.read_text() == "original"
-    assert not list(tmp_path.glob(".pymedia-*"))
-    for reader in readers:
-        if reader.ident is None:
-            reader.join.assert_not_called()
-        else:
-            reader.join.assert_called()
-
-
-@pytest.mark.parametrize("scenario", ["timeout", "ffmpeg", "success"])
-def test_abort_preserves_error_kind(tmp_path: Path, scenario: str) -> None:
-    """Los fallos del proceso no se convierten en aborto manual ni tocan la salida."""
-    pipeline = object.__new__(_TestService)
-    pipeline.debug = False
-    pipeline.command_name = "Test"
-    pipeline.config = MagicMock()
-    output = tmp_path / "partial.mp4"
-    output.write_text("original")
-    cmd = ["ffmpeg", "-i", "in.mkv", str(output)]
-    proc = MagicMock(stdout=io.StringIO(), stderr=io.StringIO(), returncode=0)
-    proc.poll.return_value = None if scenario == "timeout" else 0
-    if scenario == "ffmpeg":
-        proc.returncode = 1
-        proc.poll.return_value = 1
-    events = MagicMock()
-    events.get.side_effect = [("stdout", None), ("stderr", None)]
-    if scenario == "timeout":
-        events.get.side_effect = queue.Empty
-    with (
-        patch("pymedia.commands.base_service.subprocess.Popen", return_value=proc),
-        patch("pymedia.commands.base_service.threading.Thread"),
-        patch("pymedia.commands.base_service.queue.Queue", return_value=events),
-        patch("pymedia.commands.base_service.Progress"),
-    ):
-        if scenario == "success":
-            pipeline.run_ffmpeg(cmd, "Test", [output])
-        else:
-            message = "timed out" if scenario == "timeout" else "failed during"
-            with pytest.raises(CommandError, match=message):
-                pipeline.run_ffmpeg(cmd, "Test", [output])
-    assert output.read_text() == "original"
-    assert not list(tmp_path.glob(".pymedia-*"))
-    assert proc.stdout.closed and proc.stderr.closed
-    if scenario in ("success", "ffmpeg"):
-        proc.kill.assert_not_called()
-
-
-def _real_pipeline(overwrite: OverwriteMode) -> _TestService:
-    """Servicio con configuración mínima para ejecutar procesos reales."""
-    pipeline = object.__new__(_TestService)
-    pipeline.debug = False
-    pipeline.command_name = "Test"
-    pipeline.config = object.__new__(Config)
-    object.__setattr__(pipeline.config, "app", App(language="en", stall_timeout=5))
-    pipeline.params = MagicMock(overwrite=overwrite)
-    return pipeline
-
-
-def _writer_command(*outputs: Path) -> list[str]:
-    """Comando que simula a ffmpeg escribiendo `new` en cada ruta recibida."""
-    script = (
-        "import pathlib, sys\n"
-        "for name in sys.argv[1:]:\n"
-        " pathlib.Path(name).write_text('new')\n"
-    )
-    return [sys.executable, "-c", script, *map(str, outputs)]
-
-
-def test_success_moves_every_output_and_removes_temp(tmp_path: Path) -> None:
-    """Con salida múltiple, todas las rutas llegan a su destino final."""
-    first, last = tmp_path / "a_0.mka", tmp_path / "a_1.mka"
-    pipeline = _real_pipeline(OverwriteMode.YES)
-
-    pipeline.run_ffmpeg(_writer_command(first, last), "Test", [first])
-
-    assert first.read_text() == "new" and last.read_text() == "new"
-    assert not list(tmp_path.glob(".pymedia-*"))
-
-
-@pytest.mark.parametrize("overwrite", [OverwriteMode.YES, OverwriteMode.NO])
-def test_existing_output_is_replaced_only_when_allowed(
-    tmp_path: Path, overwrite: OverwriteMode
-) -> None:
-    """Sin permiso de sobrescritura no se pisa un destino ya existente."""
-    output = tmp_path / "out.mp4"
-    output.write_text("old")
-    pipeline = _real_pipeline(overwrite)
-
-    if overwrite == OverwriteMode.YES:
-        pipeline.run_ffmpeg(_writer_command(output), "Test", [output])
-    else:
-        with pytest.raises(CommandError, match="already exists"):
-            pipeline.run_ffmpeg(_writer_command(output), "Test", [output])
-
-    assert output.read_text() == ("new" if overwrite == OverwriteMode.YES else "old")
-    assert not list(tmp_path.glob(".pymedia-*"))
-
-
-def test_move_failure_is_reported_as_os_error(tmp_path: Path) -> None:
-    """Un fallo al mover la salida se informa como OsError."""
-    output = tmp_path / "out.mp4"
-    pipeline = _real_pipeline(OverwriteMode.YES)
-
-    with (
-        patch.object(Path, "replace", side_effect=PermissionError),
-        pytest.raises(OsError, match="could not be moved"),
-    ):
-        pipeline.run_ffmpeg(_writer_command(output), "Test", [output])
-
-    assert not output.exists()
-    assert not list(tmp_path.glob(".pymedia-*"))

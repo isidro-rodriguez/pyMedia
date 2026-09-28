@@ -1,6 +1,6 @@
 """Comando ``delete-subs``: service."""
 
-from pymedia.commands.base_service import BaseService
+from pymedia.commands.base.service import BaseService
 from pymedia.commands.delete_subtitles.cmd import DeleteSubtitlesCmd
 from pymedia.commands.delete_subtitles.parameters import DeleteSubtitlesParameters
 from pymedia.errors import MissingParameterError

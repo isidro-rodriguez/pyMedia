@@ -1,6 +1,6 @@
 """Comando ``frames``: service."""
 
-from pymedia.commands.base_service import BaseService
+from pymedia.commands.base.service import BaseService
 from pymedia.commands.frames.cmd import FramesCmd
 from pymedia.commands.frames.parameters import FramesParameters
 from pymedia.errors import MissingParameterError

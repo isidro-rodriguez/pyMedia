@@ -4,7 +4,7 @@ import typer
 
 from pymedia.commands.animated.parameters import AnimatedParameters
 from pymedia.commands.animated.service import AnimatedService
-from pymedia.commands.base_cli_options import (
+from pymedia.commands.base.cli_options import (
     CropOption,
     DebugOption,
     FlipHorizontalOption,

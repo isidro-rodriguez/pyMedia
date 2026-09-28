@@ -2,7 +2,7 @@
 
 from pathlib import Path
 
-from pymedia.commands.base_service import BaseService
+from pymedia.commands.base.service import BaseService
 from pymedia.commands.cut.cmd import CutCmd
 from pymedia.commands.cut.parameters import CutParameters
 from pymedia.errors import MissingParameterError

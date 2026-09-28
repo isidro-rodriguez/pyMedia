@@ -4,7 +4,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Self
 
-from pymedia.commands.base_parameters import BaseParameters
+from pymedia.commands.base.parameters import BaseParameters
 from pymedia.errors import MissingParameterError
 from pymedia.ffprobe import validate_subtitles_file_codec
 from pymedia.mixins.filters_mixin import FiltersMixin

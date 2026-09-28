@@ -1,6 +1,6 @@
 """Comando ``delete-audio``: service."""
 
-from pymedia.commands.base_service import BaseService
+from pymedia.commands.base.service import BaseService
 from pymedia.commands.delete_audio.cmd import DeleteAudioCmd
 from pymedia.commands.delete_audio.parameters import DeleteAudioParameters
 from pymedia.errors import MissingParameterError

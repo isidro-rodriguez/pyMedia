@@ -4,7 +4,7 @@ import typer
 
 from pymedia.commands.add_audio.parameters import AddAudioParameters
 from pymedia.commands.add_audio.service import AddAudioService
-from pymedia.commands.base_cli_options import (
+from pymedia.commands.base.cli_options import (
     AudioArgument,
     DebugOption,
     HelpOption,

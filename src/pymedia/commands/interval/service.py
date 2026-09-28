@@ -3,7 +3,7 @@
 import math
 from pathlib import Path
 
-from pymedia.commands.base_service import BaseService
+from pymedia.commands.base.service import BaseService
 from pymedia.commands.interval.cmd import IntervalCmd
 from pymedia.commands.interval.parameters import IntervalParameters
 from pymedia.errors import MissingParameterError

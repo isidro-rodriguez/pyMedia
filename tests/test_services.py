@@ -8,7 +8,7 @@ from pathlib import Path
 
 import pytest
 
-from pymedia.commands.base_cli import validate_conflict_output_options
+from pymedia.commands.base.cli import validate_conflict_output_options
 from pymedia.errors import UserError
 
 

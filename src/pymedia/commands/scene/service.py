@@ -7,7 +7,7 @@ from pathlib import Path
 
 import typer
 
-from pymedia.commands.base_service import BaseService
+from pymedia.commands.base.service import BaseService
 from pymedia.commands.scene.cmd import SceneCmd
 from pymedia.commands.scene.parameters import SceneParameters
 from pymedia.errors import MissingParameterError

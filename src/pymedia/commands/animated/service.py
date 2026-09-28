@@ -2,7 +2,7 @@
 
 from pymedia.commands.animated.cmd import AnimatedCmd
 from pymedia.commands.animated.parameters import AnimatedParameters
-from pymedia.commands.base_service import BaseService
+from pymedia.commands.base.service import BaseService
 from pymedia.errors import (
     MissingParameterError,
 )

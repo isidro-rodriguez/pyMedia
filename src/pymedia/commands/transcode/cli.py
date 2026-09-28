@@ -2,8 +2,8 @@
 
 import typer
 
-from pymedia.commands.base_cli import validate_conflict_output_options
-from pymedia.commands.base_cli_options import (
+from pymedia.commands.base.cli import validate_conflict_output_options
+from pymedia.commands.base.cli_options import (
     CropOption,
     DebugOption,
     FlipHorizontalOption,
