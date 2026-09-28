@@ -31,24 +31,24 @@ class ImageQualityMixin:
             case ".jpg" | ".jpeg":
                 return ImageQuality(
                     format="format=yuv420p",
-                    compression=["-c:v", "mjpeg", "-color_range", "2", "-q:v", "2"],
+                    compression=("-c:v", "mjpeg", "-color_range", "2", "-q:v", "2"),
                 )
             case ".png":
                 return ImageQuality(
                     format="format=rgb24",
-                    compression=["-c:v", "png", "-compression_level", "6"],
+                    compression=("-c:v", "png", "-compression_level", "6"),
                 )
             case ".webp":
                 return ImageQuality(
                     format="format=rgb24",
-                    compression=[
+                    compression=(
                         "-c:v",
                         "libwebp",
                         "-lossless",
                         "1",
                         "-compression_level",
                         "6",
-                    ],
+                    ),
                 )
             case _:
                 raise InvalidParameterError(msg=_("Image container not supported."))

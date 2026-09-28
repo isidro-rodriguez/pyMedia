@@ -158,7 +158,7 @@ class InvalidCodecContainerError(UserError):
 
 
 class InvalidContainerError(UserError):
-    """Si indicado contenedor de salida incompatible con el tipo de contenido."""
+    """Si se ha indicado contenedor de salida incompatible con el tipo de medio."""
 
     def __init__(
         self, extension: str, media_type: MediaType, supported: tuple[str, ...]

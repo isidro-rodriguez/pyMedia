@@ -70,7 +70,7 @@ pymedia <comando> --help     # ayuda detallada de cada comando
 | Comando         | Ejemplo                                                           |
 |-----------------|-------------------------------------------------------------------|
 | `info`          | `pymedia info input.mp4`                                          |
-| `sheet`         | `pymedia sheet input.mp4 --preset fhd -o vcs.webp`                |
+| `sheet`         | `pymedia sheet input.mp4 --preset fhd -o output.webp`             |
 | `transcode`     | `pymedia transcode source.mp4 --preset slow --video --audio 1`    |
 | `remux`         | `pymedia remux input.mp4 -o output.mkv`                           |
 | `join`          | `pymedia join part1.mp4 part2.mp4 -o movie.mp4`                   |
@@ -78,8 +78,8 @@ pymedia <comando> --help     # ayuda detallada de cada comando
 | `add-audio`     | `pymedia add-audio input.mp4 audio.m4a`                           |
 | `delete-audio`  | `pymedia delete-audio input.mp4 --tracks 1,2`                     |
 | `edit-audio`    | `pymedia edit-audio input.mp4 --track 0 --forced --default`       |
-| `extract-audio` | `pymedia extract-audio input.mp4 --tracks 1,2 -o audio.m4a`        |
-| `add-subs`      | `pymedia add-subs input.mp4 subs_es.srt --language spa`            |
+| `extract-audio` | `pymedia extract-audio input.mp4 --tracks 1,2 -o audio.m4a`       |
+| `add-subs`      | `pymedia add-subs input.mp4 subs_es.srt --language spa`           |
 | `delete-subs`   | `pymedia delete-subs input.mp4 --tracks 1,2`                      |
 | `edit-subs`     | `pymedia edit-subs input.mp4 --track 0 --forced --default`        |
 | `extract-subs`  | `pymedia extract-subs input.mp4 --tracks 3,5 -o subs.srt`         |
@@ -99,23 +99,24 @@ pymedia <comando> --help     # ayuda detallada de cada comando
 
 ### Vídeo
 
-| Comando     | Acción                                                                                         |
-|-------------|------------------------------------------------------------------------------------------------|
+| Comando     | Acción                                                                                                                              |
+|-------------|-------------------------------------------------------------------------------------------------------------------------------------|
 | `transcode` | Transcodifica audio y/o vídeo con un perfil de `config.toml`, aplicando los filtros indicados y, opcionalmente, `--burn-subtitles`. |
-| `remux`     | Cambia de contenedor sin transcodificar.                                                       |
-| `join`      | Une varios vídeos consecutivamente en un único contenedor (_mínimo 2_).                        |
-| `cut`       | Recorta una sección o divide el vídeo por marcas de tiempo.                                    |
+| `remux`     | Cambia de contenedor sin transcodificar.                                                                                            |
+| `join`      | Une varios vídeos consecutivamente en un único contenedor (_mínimo 2_).                                                             |
+| `cut`       | Recorta una sección o divide el vídeo por marcas de tiempo.                                                                         |
 
 ### Audio
 
 | Comando         | Acción                                                                                                   |
 |-----------------|----------------------------------------------------------------------------------------------------------|
 | `add-audio`     | Añade una pista de audio al contenedor (hereda metadatos y disposiciones del archivo origen).            |
-| `delete-audio`  | Elimina las pistas indicadas (`--tracks` es obligatorio).                           |
+| `delete-audio`  | Elimina las pistas indicadas (`--tracks` es obligatorio).                                                |
 | `edit-audio`    | Edita metadatos de la pista `--track N` (idioma, título, default, forced, commentary, hearing-impaired). |
-| `extract-audio` | Extrae pistas a fichero de audio independiente (`--tracks` es obligatorio).                             |
+| `extract-audio` | Extrae pistas a fichero de audio independiente (`--tracks` es obligatorio).                              |
 
-> `--language <código ISO 639-2>` (p. ej. `eng`, `spa`) es obligatorio en `add-subs` y opcional en `edit-audio` y `edit-subs`. En `add-audio` la pista hereda idioma y título del fichero origen.
+> `--language <código ISO 639-2>` (p. ej. `eng`, `spa`) en `add-audio` la pista hereda los  
+> metadatos de idioma del audio origen y es opcional en `edit-audio`.
 
 ### Subtítulos
 
@@ -125,6 +126,10 @@ pymedia <comando> --help     # ayuda detallada de cada comando
 | `delete-subs`  | Elimina las pistas indicadas (`--tracks` es obligatorio).                            |
 | `edit-subs`    | Edita metadatos de la pista `--track N` (+ `--visual-impaired`).      |
 | `extract-subs` | Extrae pistas a fichero de subtítulos independiente (`--tracks` es obligatorio). |
+
+> `--language <código ISO 639-2>` (p. ej. `eng`, `spa`) es obligatorio en `add-subs` y opcional 
+> en `edit-subs`.
+
 
 ### Imagen
 

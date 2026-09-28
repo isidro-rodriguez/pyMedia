@@ -70,7 +70,8 @@ def stage_outputs(cmd: list[str], outputs: Iterable[str], staging: Path) -> list
             fichero: en el temporal solo se distinguen por nombre, así que una
             pisaría a la otra.
     """
-    targets = {cmd[-1], *outputs}
+    output_set = {str(o) for o in outputs}
+    targets = {cmd[-1], *output_set}
     _validate_unique_names(targets)
     return [
         str(staging / Path(arg).name) if i and arg in targets else arg

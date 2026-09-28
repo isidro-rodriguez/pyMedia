@@ -16,22 +16,6 @@ class AudioCodecMode(Enum):
     OPUS = "opus"
 
 
-class Channels(Enum):
-    """Refiere al uso de canales de audio en uniones conflictivas."""
-
-    MONO = "mono"
-    STEREO = "stereo"
-    SURROUND = "5.1"
-
-
-class LanguageMode(Enum):
-    """Locales disponibles en la aplicación, códigos ISO 639-2."""
-
-    SYSTEM = "sys"
-    ENGLISH = "eng"
-    SPANISH = "spa"
-
-
 class MediaType(Enum):
     """Tipos de streams presentes en un contenedor."""
 
@@ -134,15 +118,6 @@ class CropArea(NamedTuple):
     y: int  # Coordenada Y del punto de corte
 
 
-class CropBorders(NamedTuple):
-    """Datos para el corte de imagen mediante bordes."""
-
-    left: int
-    right: int
-    top: int
-    bottom: int
-
-
 class Dimensions(NamedTuple):
     """Tipos de dimensiones."""
 
@@ -154,4 +129,4 @@ class ImageQuality(NamedTuple):
     """Parámetros para optimizar la calidad de la imagen de salida."""
 
     format: str
-    compression: list[str]
+    compression: tuple[str, ...]
