@@ -30,6 +30,7 @@ from pymedia.errors import MissingRequiredOptionsError
 from pymedia.locales import translate as _
 from pymedia.logger import Logger
 from pymedia.types import OverwriteMode, PresetsTranscodeMode, ScaleMode
+from pymedia.ui import styled_help
 
 transcode_cli = typer.Typer()
 
@@ -53,7 +54,7 @@ NOTE: You can edit preset profiles in config.toml.
 
 @transcode_cli.command(
     name="transcode",
-    help=TRANSCODE_HELP,
+    help=styled_help(TRANSCODE_HELP),
     rich_help_panel=_("Video commands"),
     no_args_is_help=True,
 )

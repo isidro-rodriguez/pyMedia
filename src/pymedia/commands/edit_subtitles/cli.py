@@ -23,6 +23,7 @@ from pymedia.errors import MissingRequiredOptionsError
 from pymedia.locales import translate as _
 from pymedia.logger import Logger
 from pymedia.types import OverwriteMode
+from pymedia.ui import styled_help
 
 edit_subs_cli = typer.Typer()
 
@@ -43,7 +44,7 @@ You can consult what subtitles tracks have a container with `info` command.
 
 @edit_subs_cli.command(
     name="edit-subs",
-    help=EDIT_SUBS_HELP,
+    help=styled_help(EDIT_SUBS_HELP),
     rich_help_panel=_("Subtitles commands"),
     no_args_is_help=True,
 )

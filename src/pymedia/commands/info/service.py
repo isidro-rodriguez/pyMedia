@@ -3,19 +3,22 @@
 import math
 from dataclasses import astuple
 
-from rich.console import Group
+from rich import box
+from rich.console import Group, RenderableType
 from rich.panel import Panel
 from rich.table import Table
+from rich.text import Text
 
 from pymedia.commands.base.service import BaseService
 from pymedia.commands.info.parameters import InfoParameters
 from pymedia.errors import MissingParameterError
 from pymedia.locale_manager import locale_manager
 from pymedia.locales import translate as _
-from pymedia.models.media import Audio, Subtitles, Video
+from pymedia.models.media import Audio, Media, Subtitles, Video
+from pymedia.ui import console
 from pymedia.utils import parse_quantity, parse_size, parse_timedelta
 
-_PANEL_WIDTH = 120
+_MAX_PANEL_WIDTH = 120
 
 
 class InfoService(BaseService[InfoParameters]):
@@ -31,185 +34,237 @@ class InfoService(BaseService[InfoParameters]):
         if self.params.media is None:
             raise MissingParameterError(name="media")
 
-        panel = self._build_info_panel()
-        self.logger.print(panel)
+        self.logger.print(_build_info_panel(self.params.media))
 
-    def _build_info_panel(self) -> Panel:
-        """Construye el panel Rich con los metadatos del vídeo."""
-        if self.params.media is None:
-            raise MissingParameterError(name="media")
-        media = self.params.media
-        media_input = media.path
-        locale = locale_manager.detect_language()
-        na = _("-")
 
-        def _build_general_table() -> Table:
-            """Construye la tabla de datos generales del vídeo."""
-            if media.metadata is None:
-                raise MissingParameterError(name="media.metadata")
-            metadata = media.metadata
+def _build_info_panel(media: Media) -> Panel:
+    """Construye el panel con una sección por tipo de pista.
 
-            metadata_fields = (
-                (_("Title"), metadata.title),
-                (_("Comment"), metadata.comment),
-                (_("Description"), metadata.description),
-                (_("Synopsis"), metadata.synopsis),
-                (_("Genre"), metadata.genre),
-                (_("Date"), metadata.date),
-                (_("Copyright"), metadata.copyright),
-                (_("Law rating"), metadata.law_rating),
-                (_("Artist"), metadata.artist),
-                (_("Album"), metadata.album),
-                (_("Encoder"), metadata.encoder),
-            )
+    Raises:
+        MissingParameterError: Si falta alguna propiedad necesaria de las pistas.
+    """
+    tables = [_general_table(media)]
+    if media.video is not None:
+        tables.append(_video_table(media, media.video))
+    if media.audio:
+        tables.append(_audio_table(media.audio))
+    if media.subtitles:
+        tables.append(_subtitles_table(media.subtitles))
+    # Una línea en blanco entre secciones.
+    sections: list[RenderableType] = [tables[0]]
+    for table in tables[1:]:
+        sections.extend([Text(""), table])
 
-            table = Table(title=f"📁 {_('General')}", show_header=True, expand=True)
-            table.add_column(header=_("Field"), style="bold", ratio=1)
-            table.add_column(header=_("Value"), ratio=3)
-            table.add_row(_("File"), media_input.name)
-            table.add_row(_("Container"), media.format.name or na)
-            table.add_row(
-                _("Duration"),
-                parse_timedelta(media.duration) if media.duration else na,
-                end_section=True
-                if any(astuple(metadata)) and media.format.size is None
-                else False,
-            )
-            if media.format.size is not None:
-                table.add_row(
-                    _("Size"),
-                    parse_size(size_bytes=media.format.size, locale=locale),
-                    end_section=True if any(astuple(metadata)) else False,
-                )
-            for label, value in metadata_fields:
-                if value is not None:
-                    table.add_row(label, str(value) or na)
+    return Panel(
+        Group(*sections),
+        title=Text(f" {media.path.name} ", style="panel.title"),
+        title_align="left",
+        subtitle=Text(_("Metadata"), style="panel.subtitle"),
+        subtitle_align="right",
+        border_style="border",
+        box=box.ROUNDED,
+        padding=(0, 1),
+        width=min(console.width, _MAX_PANEL_WIDTH),
+    )
 
-            return table
 
-        def _build_video_table(video: Video) -> Table:
-            """Construye la tabla de metadatos de la pista de vídeo."""
-            if video.global_index is None:
-                raise MissingParameterError(name="global_index")
-            if video.track_index is None:
-                raise MissingParameterError(name="track_index")
-            if video.format.width is None or video.format.height is None:
-                raise MissingParameterError(name=_("video dimensions"))
+# =============================================================================
+#  Celdas
+# =============================================================================
 
-            table = Table(title=f"🎬 {_('Video')}", show_header=True, expand=True)
-            table.add_column(header=_("Track"), ratio=1, justify="center")
-            table.add_column(header=_("Codec"), ratio=2, justify="center")
-            table.add_column(header=_("Resolution"), ratio=2, justify="center")
-            table.add_column(header=_("FPS"), ratio=1, justify="center")
-            table.add_column(header=_("Bit rate"), ratio=1, justify="center")
-            table.add_row(
-                str(video.track_index),
-                f"{video.format.codec} ({video.format.profile})"
-                if video.format.codec and video.format.profile
-                else video.format.codec or na,
-                f"{video.format.width}x{video.format.height}",
-                str(video.format.fps) if video.format.fps else na,
-                _format_kbps(media.video_bit_rate, na),
-            )
-            return table
 
-        def _build_audio_table(audio: list[Audio]) -> Table:
-            """Construye la tabla compacta de metadatos de las pistas de audio."""
-            table = Table(title=f"🎵 {_('Audio')}", expand=True)
-            table.add_column(header=_("Track"), ratio=1, justify="center")
-            table.add_column(header=_("Codec"), ratio=1, justify="center")
-            table.add_column(header=_("Sample"), ratio=1, justify="center")
-            table.add_column(header=_("Channels"), ratio=1, justify="center")
-            table.add_column(header=_("Lang"), ratio=1, justify="center")
-            table.add_column(header=_("Title"), ratio=2, justify="center")
-            # Iniciales de "Default" para mantener tabla compacta
-            table.add_column(header=_("Def"), ratio=1, justify="center")
-            # Iniciales de "Forced"
-            table.add_column(header=_("For"), ratio=1, justify="center")
-            # Iniciales de Hearing Impaired
-            table.add_column(header=_("HI"), ratio=1, justify="center")
-            # Iniciales de Commentary
-            table.add_column(header=_("Com"), ratio=1, justify="center")
+def _na() -> Text:
+    """Celda de valor desconocido."""
+    return Text("—", style="table.na")
 
-            for track in audio:
-                if track.track_index is None:
-                    raise MissingParameterError(name="track_index")
 
-                metadata = track.metadata
-                dispositions = track.dispositions
+def _value(value: object | None) -> Text:
+    """Celda con el valor, o la marca de desconocido si falta."""
+    return Text(str(value)) if value not in (None, "") else _na()
 
-                table.add_row(
-                    str(track.track_index),
-                    track.format.codec or na,
-                    f"{track.format.sample_rate} Hz"
-                    if track.format.sample_rate
-                    else na,
-                    str(track.format.channels or na),
-                    metadata.language or na,
-                    metadata.title or na,
-                    "✓" if dispositions.default else "",
-                    "✓" if dispositions.forced else "",
-                    "✓" if dispositions.hearing_impaired else "",
-                    "✓" if dispositions.commentary else "",
-                )
 
-            return table
+def _check(flag: bool | None) -> Text:
+    """Celda de disposición: marca si está activa, punto tenue si no."""
+    return Text("✔", style="table.check") if flag else Text("·", style="table.na")
 
-        def _build_subtitles_table(subtitles: list[Subtitles]) -> Table:
-            """Construye la tabla de metadatos de las pistas de subtítulos."""
-            table = Table(title=f"💬 {_('Subtitles')}", expand=True)
-            table.add_column(header=_("Track"), ratio=1, justify="center")
-            table.add_column(header=_("Codec"), ratio=2, justify="center")
-            table.add_column(header=_("Language"), ratio=2, justify="center")
-            table.add_column(header=_("Title"), ratio=2, justify="center")
-            # Iniciales de "Default"
-            table.add_column(header=_("Def"), ratio=1, justify="center")
-            # Iniciales de "Forced"
-            table.add_column(header=_("For"), ratio=1, justify="center")
-            # Iniciales de "Hearing Impaired"
-            table.add_column(header=_("HI"), ratio=1, justify="center")
-            # Iniciales de "Visual Impaired"
-            table.add_column(header=_("VI"), ratio=1, justify="center")
-            for sub in subtitles:
-                if sub.track_index is None:
-                    raise MissingParameterError(name="track_index")
 
-                dispositions = sub.dispositions
+def _section(title: str, icon: str) -> Table:
+    """Tabla de sección con el estilo común del panel."""
+    return Table(
+        title=Text.assemble((f"{icon} ", ""), (title, "heading")),
+        title_justify="left",
+        box=box.SIMPLE_HEAD,
+        border_style="table.border",
+        header_style="table.header",
+        show_edge=False,
+        expand=True,
+        pad_edge=False,
+    )
 
-                table.add_row(
-                    str(sub.track_index),
-                    sub.format.codec or na,
-                    sub.metadata.language or na,
-                    sub.metadata.title or na,
-                    "✓" if dispositions.default else "",
-                    "✓" if dispositions.forced else "",
-                    "✓" if dispositions.hearing_impaired else "",
-                    "✓" if dispositions.visual_impaired else "",
-                )
-            return table
 
-        sections = [_build_general_table()]
+# =============================================================================
+#  Secciones
+# =============================================================================
 
-        if media.video is not None:
-            sections.append(_build_video_table(media.video))
-        if media.audio:
-            sections.append(_build_audio_table(media.audio))
-        if media.subtitles:
-            sections.append(_build_subtitles_table(media.subtitles))
 
-        return Panel(
-            renderable=Group(*sections),
-            title=_("Metadata"),
-            border_style="cyan",
-            width=_PANEL_WIDTH,
+def _general_table(media: Media) -> Table:
+    """Tabla clave-valor con los datos generales y los metadatos del contenedor."""
+    locale = locale_manager.detect_language()
+    metadata = media.metadata
+    table = _section(_("General"), "📁")
+    table.show_header = False
+    table.box = None
+    table.expand = False
+    table.add_column(style="table.label", no_wrap=True, min_width=14)
+    table.add_column()
+
+    table.add_row(_("File"), _value(media.path.name))
+    table.add_row(_("Container"), _value(media.format.name))
+    table.add_row(
+        _("Duration"),
+        _value(parse_timedelta(media.duration) if media.duration else None),
+    )
+    if media.format.size is not None:
+        table.add_row(
+            _("Size"), _value(parse_size(size_bytes=media.format.size, locale=locale))
         )
+    if any(astuple(metadata)):
+        table.add_section()
+    for label, value in (
+        (_("Title"), metadata.title),
+        (_("Comment"), metadata.comment),
+        (_("Description"), metadata.description),
+        (_("Synopsis"), metadata.synopsis),
+        (_("Genre"), metadata.genre),
+        (_("Date"), metadata.date),
+        (_("Copyright"), metadata.copyright),
+        (_("Law rating"), metadata.law_rating),
+        (_("Artist"), metadata.artist),
+        (_("Album"), metadata.album),
+        (_("Encoder"), metadata.encoder),
+    ):
+        if value is not None:
+            table.add_row(label, _value(value))
+    return table
 
 
-def _format_kbps(bit_rate: float | None, na: str) -> str:
-    """Formatea una tasa de bits en bps como kbps (SI), o `na` si no se conoce."""
+def _video_table(media: Media, video: Video) -> Table:
+    """Tabla de la pista de vídeo.
+
+    Raises:
+        MissingParameterError: Si la pista no tiene índice o dimensiones.
+    """
+    if video.track_index is None:
+        raise MissingParameterError(name="track_index")
+    if video.format.width is None or video.format.height is None:
+        raise MissingParameterError(name=_("video dimensions"))
+
+    table = _section(_("Video"), "🎬")
+    for header, ratio in (
+        (_("Track"), 1),
+        (_("Codec"), 3),
+        (_("Resolution"), 2),
+        (_("FPS"), 1),
+        (_("Bit rate"), 2),
+    ):
+        table.add_column(header=header, ratio=ratio)
+    codec = video.format.codec
+    if codec and video.format.profile:
+        codec = f"{codec} ({video.format.profile})"
+    table.add_row(
+        Text(str(video.track_index), style="highlight"),
+        _value(codec),
+        _value(f"{video.format.width}×{video.format.height}"),
+        _value(video.format.fps),
+        _format_kbps(media.video_bit_rate),
+    )
+    return table
+
+
+def _audio_table(audio: list[Audio]) -> Table:
+    """Tabla compacta de las pistas de audio.
+
+    Raises:
+        MissingParameterError: Si alguna pista no tiene índice.
+    """
+    table = _section(_("Audio"), "🎵")
+    for header, ratio, justify in (
+        (_("Track"), 1, "left"),
+        (_("Codec"), 2, "left"),
+        (_("Sample"), 2, "left"),
+        (_("Channels"), 2, "left"),
+        (_("Lang"), 1, "left"),
+        (_("Title"), 3, "left"),
+        # Iniciales de Default, Forced, Hearing Impaired y Commentary.
+        (_("Def"), 1, "center"),
+        (_("For"), 1, "center"),
+        (_("HI"), 1, "center"),
+        (_("Com"), 1, "center"),
+    ):
+        table.add_column(header=header, ratio=ratio, justify=justify)
+
+    for track in audio:
+        if track.track_index is None:
+            raise MissingParameterError(name="track_index")
+        rate = track.format.sample_rate
+        dispositions = track.dispositions
+        table.add_row(
+            Text(str(track.track_index), style="highlight"),
+            _value(track.format.codec),
+            _value(f"{rate} Hz" if rate else None),
+            _value(track.format.channels),
+            _value(track.metadata.language),
+            _value(track.metadata.title),
+            _check(dispositions.default),
+            _check(dispositions.forced),
+            _check(dispositions.hearing_impaired),
+            _check(dispositions.commentary),
+        )
+    return table
+
+
+def _subtitles_table(subtitles: list[Subtitles]) -> Table:
+    """Tabla de las pistas de subtítulos.
+
+    Raises:
+        MissingParameterError: Si alguna pista no tiene índice.
+    """
+    table = _section(_("Subtitles"), "💬")
+    for header, ratio, justify in (
+        (_("Track"), 1, "left"),
+        (_("Codec"), 2, "left"),
+        (_("Language"), 2, "left"),
+        (_("Title"), 3, "left"),
+        # Iniciales de Default, Forced, Hearing Impaired y Visual Impaired.
+        (_("Def"), 1, "center"),
+        (_("For"), 1, "center"),
+        (_("HI"), 1, "center"),
+        (_("VI"), 1, "center"),
+    ):
+        table.add_column(header=header, ratio=ratio, justify=justify)
+
+    for sub in subtitles:
+        if sub.track_index is None:
+            raise MissingParameterError(name="track_index")
+        dispositions = sub.dispositions
+        table.add_row(
+            Text(str(sub.track_index), style="highlight"),
+            _value(sub.format.codec),
+            _value(sub.metadata.language),
+            _value(sub.metadata.title),
+            _check(dispositions.default),
+            _check(dispositions.forced),
+            _check(dispositions.hearing_impaired),
+            _check(dispositions.visual_impaired),
+        )
+    return table
+
+
+def _format_kbps(bit_rate: float | None) -> Text:
+    """Formatea una tasa de bits en bps como kbps (SI), o desconocido si falta."""
     if bit_rate is None:
-        return na
+        return _na()
     kbps = parse_quantity(
         value=math.floor(bit_rate / 1000), locale=locale_manager.detect_language()
     )
-    return _("%(bit_rate)s kbps") % {"bit_rate": kbps}
+    return Text(_("%(bit_rate)s kbps") % {"bit_rate": kbps})

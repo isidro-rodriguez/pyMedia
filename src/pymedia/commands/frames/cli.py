@@ -24,6 +24,7 @@ from pymedia.errors import MissingRequiredOptionsError
 from pymedia.locales import translate as _
 from pymedia.logger import Logger
 from pymedia.types import OverwriteMode, ScaleMode
+from pymedia.ui import styled_help
 
 frames_cli = typer.Typer()
 
@@ -44,7 +45,7 @@ Captures video frames at the specified timestamps.
 
 @frames_cli.command(
     name="frames",
-    help=FRAMES_HELP,
+    help=styled_help(FRAMES_HELP),
     rich_help_panel=_("Image commands"),
     no_args_is_help=True,
 )

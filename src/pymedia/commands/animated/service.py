@@ -37,7 +37,7 @@ class AnimatedService(BaseService[AnimatedParameters]):
             output_list=[self.params.animated_output],
         )
 
-        self.logger.info(
+        self.logger.success(
             msg=_("Animated image generated successfully: %(output)s"),
             output=self.params.animated_output,
         )

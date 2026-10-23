@@ -30,6 +30,8 @@ src/pymedia/
 ├── utils.py             # Conversión de valores de ffprobe (fechas, fracciones…)
 ├── errors.py            # Jerarquía de excepciones localizadas
 ├── logger.py            # Logger dual: consola Rich + fichero rotativo
+├── theme.py             # Paleta y estilos con nombre de la interfaz
+├── ui.py                # Consola temática, preguntas, barra de progreso, ayuda de Typer
 ├── locale_manager.py    # Detección de idioma y carga de catálogos gettext
 ├── locales/             # pymedia.pot y catálogos <idioma>/LC_MESSAGES
 ├── types.py             # Enums compartidos (modos, perfiles, tipos de pista)
@@ -212,6 +214,40 @@ Reglas:
 registro: consola (Rich) y fichero (`TimedRotatingFileHandler`, 7 días). Cada llamada
 puede elegir destino (`console=False`, `file=False`), lo que permite, por ejemplo,
 registrar en fichero un error que Click ya muestra en pantalla.
+
+En consola, cada mensaje lleva un icono por nivel y los valores interpolados
+(`%(output)s`…) se resaltan. El fichero recibe siempre el texto plano.
+
+| Método      | Icono | Uso                                               |
+|-------------|:-----:|---------------------------------------------------|
+| `debug`     | `•`   | Detalle interno (solo con `--debug`).             |
+| `info`      | `ℹ`   | Información neutra.                               |
+| `success`   | `✔`   | Resultado satisfactorio de una operación.         |
+| `warning`   | `▲`   | Aviso que no detiene el proceso.                  |
+| `error`     | `✖`   | Error; lo emiten las excepciones `PyMediaError`.  |
+
+Los mensajes son texto plano: los corchetes se muestran tal cual (no se interpretan
+como markup de Rich).
+
+## Interfaz y tema
+
+- `theme.py` define la paleta y **estilos con nombre** (`primary`, `success`,
+  `heading`, `border`, `table.header`, `cmd.flag`…). Las pantallas usan siempre esos
+  nombres, nunca colores sueltos.
+- `ui.py` concentra lo que se pinta en el terminal:
+
+| Elemento               | Responsabilidad                                                      |
+|------------------------|----------------------------------------------------------------------|
+| `console`              | Consola única con el tema; la usan el logger, las tablas y la barra. |
+| `confirm()`            | Pregunta sí/no temática; acepta `y/yes/s/sí` y `n/no`; EOF aborta.   |
+| `new_progress()`       | Barra de progreso: estado, descripción, barra, porcentaje y tiempo.  |
+| `styled_help()`        | Colorea cabeceras y ejemplos de la ayuda sin tocar los `msgid`.      |
+| `install_typer_theme()`| Aplica el tema a la ayuda y a los paneles de error de Typer (lo llama `main`). |
+
+- El cuerpo del texto usa el color por defecto del terminal, para leerse en fondos
+  claros y oscuros; el color se reserva para iconos, cabeceras y valores.
+- `--show-cmd` colorea el comando por tipo de token (`format_cmd`) sin alterar el
+  texto, que sigue siendo copiable.
 
 ## Internacionalización
 

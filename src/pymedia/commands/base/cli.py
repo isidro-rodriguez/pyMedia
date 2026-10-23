@@ -1,11 +1,16 @@
 """Instancia de Typer y sus comandos."""
 
 import platform
+import shutil
+import subprocess
 from pathlib import Path
 
 import typer
-from rich import print as rprint
+from rich import box
+from rich.console import Group
 from rich.panel import Panel
+from rich.table import Table
+from rich.text import Text
 
 from pymedia import version
 from pymedia.data.containers import (
@@ -16,6 +21,7 @@ from pymedia.data.containers import (
 from pymedia.errors import InvalidContainerError, UserError
 from pymedia.locales import translate as _
 from pymedia.types import MediaType
+from pymedia.ui import console
 
 # =============================================================================
 #  Instancia base
@@ -49,7 +55,7 @@ def show_help(ctx: typer.Context, value: bool) -> None:
 
 
 def show_version(value: bool) -> None:
-    """Muestra la versión de la aplicación.
+    """Muestra la versión de la aplicación, de Python, de ffmpeg y la plataforma.
 
     Args:
         value: Si se solicitó explícitamente la versión.
@@ -57,25 +63,48 @@ def show_version(value: bool) -> None:
     Raises:
         typer.Exit: Siempre que `value` es verdadero, tras mostrar la versión.
     """
-    if value:
-        version_text = _("Version")
-        platform_text = _("Platform")
-        subtitle_text = _("Ffmpeg CLI handler")
+    if not value:
+        return
 
-        rprint(
-            Panel.fit(
-                renderable=(
-                    f"[dim]{version_text}:[/]   [bold]{version}[/]\n"
-                    f"[dim]Python:[/]    {platform.python_version()}\n"
-                    f"[dim]{platform_text}:[/]  {platform.platform()}"
-                ),
-                title=" 🐍 [bold]pyMedia[/] 🎬 ",
-                subtitle=f" {subtitle_text} ",
-                border_style="cyan",
-                padding=(1, 4),
-            )
+    details = Table.grid(padding=(0, 2))
+    details.add_column(style="muted", no_wrap=True)
+    details.add_column()
+    details.add_row("Python", platform.python_version())
+    details.add_row("ffmpeg", _ffmpeg_version())
+    details.add_row(_("Platform"), platform.platform())
+
+    header = Text.assemble(
+        ("▶ ", "primary"),
+        ("pyMedia ", "heading"),
+        (version, "highlight"),
+        "\n",
+        (_("Ffmpeg CLI handler"), "muted"),
+    )
+    console.print(
+        Panel.fit(
+            Group(header, Text(""), details),
+            border_style="border",
+            box=box.ROUNDED,
+            padding=(1, 3),
         )
-        raise typer.Exit()
+    )
+    raise typer.Exit()
+
+
+def _ffmpeg_version() -> Text:
+    """Versión de ffmpeg instalada, o aviso si no está en el `PATH`."""
+    binary = shutil.which("ffmpeg")
+    if binary is None:
+        return Text(_("not found"), style="error")
+    try:
+        result = subprocess.run(
+            [binary, "-version"], capture_output=True, text=True, check=True
+        )
+    except (OSError, subprocess.CalledProcessError):
+        return Text(_("not found"), style="error")
+    # Primera línea: "ffmpeg version <versión> Copyright ..."
+    words = result.stdout.split()
+    return Text(words[2] if len(words) > 2 else "?")
 
 
 def validate_conflict_output_options(

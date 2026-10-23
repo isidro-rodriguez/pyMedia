@@ -17,6 +17,7 @@ from pymedia.commands.extract_audio.service import ExtractAudioService
 from pymedia.locales import translate as _
 from pymedia.logger import Logger
 from pymedia.types import OverwriteMode
+from pymedia.ui import styled_help
 
 extract_audio_cli = typer.Typer()
 
@@ -37,7 +38,7 @@ You can consult what audio tracks have a container with `info` command.
 
 @extract_audio_cli.command(
     name="extract-audio",
-    help=EXTRACT_AUDIO_HELP,
+    help=styled_help(EXTRACT_AUDIO_HELP),
     rich_help_panel=_("Audio commands"),
     no_args_is_help=True,
 )

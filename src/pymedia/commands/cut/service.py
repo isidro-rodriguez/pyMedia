@@ -39,12 +39,12 @@ class CutService(BaseService[CutParameters]):
         )
 
         if self.params.timestamp_at is not None:
-            self.logger.info(
+            self.logger.success(
                 _("Container split successfully: %(count)s files."),
                 count=len(self.params.timestamp_at) + 1,
             )
         else:
-            self.logger.info(
+            self.logger.success(
                 _("Container split successfully: %(output)s"),
                 output=self.params.media_output,
             )

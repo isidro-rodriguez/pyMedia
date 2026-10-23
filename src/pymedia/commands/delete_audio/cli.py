@@ -16,6 +16,7 @@ from pymedia.commands.delete_audio.service import DeleteAudioService
 from pymedia.locales import translate as _
 from pymedia.logger import Logger
 from pymedia.types import OverwriteMode
+from pymedia.ui import styled_help
 
 delete_audio_cli = typer.Typer()
 
@@ -34,7 +35,7 @@ You can consult what audio tracks have a container with `info` command.
 
 @delete_audio_cli.command(
     name="delete-audio",
-    help=DELETE_AUDIO_HELP,
+    help=styled_help(DELETE_AUDIO_HELP),
     rich_help_panel=_("Audio commands"),
     no_args_is_help=True,
 )

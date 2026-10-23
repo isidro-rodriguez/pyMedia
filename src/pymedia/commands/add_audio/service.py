@@ -34,7 +34,7 @@ class AddAudioService(BaseService[AddAudioParameters]):
             output_list=[self.params.media_output],
         )
 
-        self.logger.info(
+        self.logger.success(
             msg=_("Audio added successfully: %(output)s"),
             output=self.params.media_output,
         )

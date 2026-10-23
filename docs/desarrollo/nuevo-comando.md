@@ -155,7 +155,7 @@ class CleanService(BaseService[CleanParameters]):
             output_list=[output],
             progress_time=self.params.media.duration if self.params.media else None,
         )
-        self.logger.info(
+        self.logger.success(
             msg=_("Metadata cleaned successfully: %(output)s"), output=output
         )
 ```

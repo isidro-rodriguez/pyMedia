@@ -11,9 +11,24 @@ from typing import Any, Self
 
 import platformdirs
 from rich.console import Console, RenderableType
-from rich.logging import RichHandler
+from rich.highlighter import ReprHighlighter
 from rich.markup import escape
 from rich.pretty import pretty_repr
+from rich.table import Table
+from rich.text import Text
+from rich.traceback import Traceback
+
+from pymedia.ui import console as ui_console
+
+# Icono y estilo de cada nivel en consola; el éxito es un INFO marcado.
+_LEVEL_ICONS = {
+    logging.DEBUG: ("•", "log.debug"),
+    logging.INFO: ("ℹ", "log.info"),
+    logging.WARNING: ("▲", "log.warning"),
+    logging.ERROR: ("✖", "log.error"),
+    logging.CRITICAL: ("✖", "log.error"),
+}
+_SUCCESS_ICON = ("✔", "log.success")
 
 
 class Logger:
@@ -24,7 +39,7 @@ class Logger:
     """
 
     _configured = False
-    _console = Console()
+    _console: Console = ui_console
 
     def __init__(self, logger: logging.Logger) -> None:
         """Inicializa el wrapper sobre un logger estándar.
@@ -51,16 +66,8 @@ class Logger:
         root = logging.getLogger()
         root.setLevel(level)
 
-        # Handler de Consola con Rich
-        console = RichHandler(
-            console=cls._console,
-            show_time=False,
-            show_path=debug,
-            markup=True,
-            rich_tracebacks=True,
-            tracebacks_show_locals=debug,
-        )
-        console.setFormatter(logging.Formatter("%(msg)s"))
+        # Handler de consola con el tema de pyMedia
+        console = _ConsoleHandler(console=cls._console, debug=debug)
         console.addFilter(_DestinationFilter("to_console"))
         root.addHandler(console)
 
@@ -127,7 +134,7 @@ class Logger:
             exc_info: Si `True`, añade la traza de la excepción activa.
             console: Si `True`, se muestra por consola.
             file: Si `True`, se escribe en el fichero de log.
-            markup: Si `True`, renderiza marcas de formateo.
+            markup: Si `True`, resalta en consola los valores interpolados.
             **kwargs: Valores para interpolar en `msg` vía `%`.
         """
         self._log(
@@ -154,7 +161,7 @@ class Logger:
             msg: Mensaje ya traducido a mostrar.
             console: Si `True`, se muestra por consola.
             file: Si `True`, se escribe en el fichero de log.
-            markup: Si `True`, renderiza marcas de formateo.
+            markup: Si `True`, resalta en consola los valores interpolados.
             **kwargs: Valores para interpolar en `msg` vía `%`.
         """
         self._log(
@@ -180,7 +187,7 @@ class Logger:
             msg: Mensaje ya traducido a mostrar.
             console: Si `True`, se muestra por consola.
             file: Si `True`, se escribe en el fichero de log.
-            markup: Si `True`, renderiza marcas de formateo.
+            markup: Si `True`, resalta en consola los valores interpolados.
             **kwargs: Valores para interpolar en `msg` vía `%`.
         """
         self._log(
@@ -190,6 +197,33 @@ class Logger:
             file=file,
             markup=markup,
             values=kwargs,
+        )
+
+    def success(
+        self,
+        msg: str,
+        console: bool = True,
+        file: bool = True,
+        markup: bool = True,
+        **kwargs: object,
+    ) -> None:
+        """Muestra el resultado satisfactorio de una operación (nivel INFO).
+
+        Args:
+            msg: Mensaje ya traducido a mostrar.
+            console: Si `True`, se muestra por consola.
+            file: Si `True`, se escribe en el fichero de log.
+            markup: Si `True`, resalta en consola los valores interpolados.
+            **kwargs: Valores para interpolar en `msg` vía `%`.
+        """
+        self._log(
+            level=logging.INFO,
+            msg=msg,
+            console=console,
+            file=file,
+            markup=markup,
+            values=kwargs,
+            success=True,
         )
 
     def debug(
@@ -206,17 +240,15 @@ class Logger:
             msg: Mensaje ya traducido a mostrar.
             console: Si `True`, se muestra por consola.
             file: Si `True`, se escribe en el fichero de log.
-            markup: Si `True`, renderiza marcas de formateo.
+            markup: Si `True`, resalta en consola los valores interpolados.
             **kwargs: Valores para interpolar en `msg` vía `%`.
         """
 
         def _prettify(value: Any) -> object:
-            """Convierte en texto multilínea legible y escapa el markup."""
+            """Convierte las colecciones en texto multilínea legible."""
             if isinstance(value, (dict, list, tuple, set)):
-                rendered = pretty_repr(_object=value, indent_size=2, expand_all=True)
-            else:
-                rendered = str(value)
-            return escape(rendered)
+                return pretty_repr(_object=value, indent_size=2, expand_all=True)
+            return value
 
         kwargs = {name: _prettify(value) for name, value in kwargs.items()}
         self._log(
@@ -247,13 +279,26 @@ class Logger:
         *,
         exc_info: bool = False,
         values: dict[str, object] | None = None,
+        success: bool = False,
     ) -> None:
-        """Envía el registro al logger interno filtrado por destino."""
+        """Envía el registro al logger interno filtrado por destino.
+
+        El fichero recibe el texto plano; la consola, la versión con estilos en
+        la que los valores interpolados se resaltan.
+        """
+        values = values or {}
+        plain = self._render(msg=msg, kwargs=values)
+        rich_msg = _render_markup(msg, values) if markup else escape(plain)
         self._logger.log(
             level=level,
-            msg=self._render(msg=msg, kwargs=values or {}),
+            msg=plain,
             exc_info=exc_info,
-            extra={"to_console": console, "to_file": file, "markup": markup},
+            extra={
+                "to_console": console,
+                "to_file": file,
+                "rich_msg": rich_msg,
+                "success": success,
+            },
         )
 
     @staticmethod
@@ -262,6 +307,66 @@ class Logger:
         if kwargs:
             return msg % kwargs
         return msg
+
+
+def _render_markup(msg: str, values: dict[str, object]) -> str:
+    """Convierte el mensaje en markup seguro con los valores interpolados resaltados.
+
+    Los textos traducidos no llevan markup: se escapan para que corchetes como
+    `[https://...]` se muestren tal cual.
+    """
+    if not values:
+        return escape(msg)
+    return escape(msg) % {
+        name: f"[highlight]{escape(str(value))}[/]" for name, value in values.items()
+    }
+
+
+class _ConsoleHandler(logging.Handler):
+    """Muestra cada registro como `icono mensaje` con el tema de pyMedia."""
+
+    def __init__(self, console: Console, debug: bool) -> None:
+        """Inicializa el handler.
+
+        Args:
+            console: Consola temática donde escribir.
+            debug: Si `True`, las trazas incluyen variables locales.
+        """
+        super().__init__()
+        self._console = console
+        self._debug = debug
+        self._highlighter = ReprHighlighter()
+
+    def emit(self, record: logging.LogRecord) -> None:
+        """Escribe el registro en consola; los fallos se delegan en `handleError`."""
+        try:
+            self._console.print(self._render(record))
+            if record.exc_info and record.exc_info[1] is not None:
+                exc_type, exc_value, traceback = record.exc_info
+                self._console.print(
+                    Traceback.from_exception(
+                        exc_type, exc_value, traceback, show_locals=self._debug
+                    )
+                )
+        except Exception:  # noqa: BLE001 - contrato de logging.Handler
+            self.handleError(record)
+
+    def _render(self, record: logging.LogRecord) -> Table:
+        """Compone el icono y el mensaje alineando las líneas de continuación."""
+        icon, style = (
+            _SUCCESS_ICON
+            if getattr(record, "success", False)
+            else _LEVEL_ICONS.get(record.levelno, _LEVEL_ICONS[logging.INFO])
+        )
+        rich_msg = getattr(record, "rich_msg", None)
+        text = Text.from_markup(rich_msg) if rich_msg is not None else Text(record.msg)
+        # El cuerpo usa el color del terminal para leerse en fondos claros y oscuros.
+        text.style = "dim" if record.levelno == logging.DEBUG else ""
+        grid = Table.grid(padding=(0, 1))
+        grid.add_column(width=1, no_wrap=True)
+        grid.add_column(overflow="fold")
+        grid.add_row(Text(icon, style=style), self._highlighter(text))
+        return grid
 
 
 class _DestinationFilter(logging.Filter):

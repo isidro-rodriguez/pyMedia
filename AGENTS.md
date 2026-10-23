@@ -42,6 +42,8 @@ pyMedia: Typer CLI that wraps `ffmpeg`/`ffprobe` for everyday media tasks. Read
 │       ├── ffprobe.py      # ffprobe → models
 │       ├── errors.py       # Localized exception hierarchy
 │       ├── logger.py       # Rich console + rotating file logger
+│       ├── theme.py        # UI palette and named styles
+│       ├── ui.py           # Themed console, confirm, progress bar, Typer help theme
 │       └── main.py         # Entry point (`pymedia.main:run`)
 └── tests/                  # pytest suite (conftest generates synthetic media)
 ```
@@ -127,6 +129,10 @@ similar command as template (`docs/desarrollo/nuevo-comando.md`).
 - Always run ffmpeg through `BaseService.run_ffmpeg`, listing every output in `output_list`
   (outputs are staged in a temp dir and moved on success).
 - Codec/container knowledge belongs in `src/pymedia/data/`, not in commands.
+- All terminal output goes through `pymedia.ui.console` (via `Logger` or `logger.print`).
+  Never use `print`, `rich.print` or a new `Console`. Use named styles from
+  `pymedia/theme.py`, never raw colors. Ask questions with `pymedia.ui.confirm`, report
+  finished operations with `logger.success`, and pass help texts through `styled_help`.
 - Register new commands in `main._build_app()` (imports stay inside the function).
 - Raise the exceptions from `errors.py`: `UserError` subclasses for user-fixable problems,
   `PyMediaError` subclasses for runtime/internal ones. Build messages with

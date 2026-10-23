@@ -15,8 +15,6 @@ from datetime import timedelta
 from pathlib import Path
 from typing import Self, TextIO
 
-from rich.progress import Progress
-
 from pymedia.errors import (
     CommandError,
     InvalidParameterError,
@@ -24,6 +22,7 @@ from pymedia.errors import (
     UserError,
 )
 from pymedia.locales import translate as _
+from pymedia.ui import new_progress
 
 STDOUT, STDERR = "stdout", "stderr"
 _STDERR_TAIL = 10
@@ -346,15 +345,17 @@ def run_ffmpeg(
         try:
             with (
                 FfmpegProcess(cmd=staged_cmd) as proc,
-                Progress() as progress,
+                new_progress() as progress,
             ):
                 task = progress.add_task(description=description, total=tracker.total)
                 for source, line in proc.events(stall_timeout):
                     if (done := tracker.update(source=source, line=line)) is not None:
                         progress.update(task_id=task, completed=done)
                 returncode = proc.wait()
-                if returncode == 0 and tracker.total is not None:
-                    progress.update(task_id=task, completed=tracker.total)
+                if returncode == 0:
+                    # Sin total conocido, se fija uno para marcar la tarea terminada.
+                    final = tracker.total if tracker.total is not None else 1.0
+                    progress.update(task_id=task, total=final, completed=final)
         except KeyboardInterrupt:
             raise UserError(
                 msg=_("FFmpeg command interrupted manually: %(command_name)s")

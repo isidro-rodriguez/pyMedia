@@ -5,14 +5,13 @@ import re
 from collections.abc import Iterator
 from pathlib import Path
 
-import typer
-
 from pymedia.commands.base.service import BaseService
 from pymedia.commands.scene.cmd import SceneCmd
 from pymedia.commands.scene.parameters import SceneParameters
 from pymedia.errors import MissingParameterError
 from pymedia.locales import translate as _
 from pymedia.types import OverwriteMode
+from pymedia.ui import confirm
 
 
 class SceneService(BaseService[SceneParameters]):
@@ -56,13 +55,15 @@ class SceneService(BaseService[SceneParameters]):
             )
             return
 
-        self.logger.info(
+        self.logger.success(
             msg=_("Thumbnail(s) generated successfully: %(output)s"),
             output=str(template).replace("%03d", "*"),
         )
 
     def _confirm_overwrite(self, output_template: Path) -> bool:
         """Detecta si existen archivos con patrón 'filename_XXX.ext'."""
+        if self.show_cmd:
+            return True
         stem = output_template.stem
         suffix = output_template.suffix
         match = re.match(r"^(.+)_%03d$", stem)
@@ -86,7 +87,7 @@ class SceneService(BaseService[SceneParameters]):
                 _("Found existing scene thumbnail files: %(files)s")
                 % {"files": ", ".join(f.name for f in existing_files)}
             )
-            if self.params.overwrite == OverwriteMode.NO or not typer.confirm(
+            if self.params.overwrite == OverwriteMode.NO or not confirm(
                 _("Overwrite?")
             ):
                 self.logger.warning(

@@ -11,6 +11,7 @@ import typer
 
 from pymedia.errors import PyMediaError
 from pymedia.locale_manager import locale_manager
+from pymedia.ui import install_typer_theme
 
 
 def _configure_runtime() -> None:
@@ -18,9 +19,11 @@ def _configure_runtime() -> None:
 
     El idioma debe fijarse antes de importar los módulos de comandos, ya que
     estos usan `_()` en sus `help=` al definirse. En Windows, stdout se
-    reconfigura a UTF-8 para evitar errores de codificación en la salida.
+    reconfigura a UTF-8 para evitar errores de codificación en la salida. El
+    tema visual se aplica a Typer antes de que construya la ayuda.
     """
     locale_manager.set_language(locale_manager.detect_language())
+    install_typer_theme()
 
     if sys.platform == "win32" and type(sys.stdout) is io.TextIOWrapper:
         sys.stdout.reconfigure(encoding="utf-8")

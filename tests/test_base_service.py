@@ -94,7 +94,7 @@ def test_display_cmd_quotes_tokens_for_windows(
     with pytest.raises(typer.Exit):
         service.display_cmd(["ffmpeg", "-i", token, "out.mp4"])
 
-    rendered = service.logger.print.call_args.kwargs["renderable"]
+    rendered = service.logger.print.call_args.kwargs["renderable"].plain
     assert rendered == f'\nffmpeg -i "{token}" out.mp4\n'
 
 
@@ -108,7 +108,7 @@ def test_display_cmd_escapes_quotes_for_windows(
     with pytest.raises(typer.Exit):
         service.display_cmd(["ffmpeg", "-i", 'my "video".mkv', "out.mp4"])
 
-    rendered = service.logger.print.call_args.kwargs["renderable"]
+    rendered = service.logger.print.call_args.kwargs["renderable"].plain
     assert rendered == '\nffmpeg -i "my \\"video\\".mkv" out.mp4\n'
 
 
@@ -122,7 +122,7 @@ def test_display_cmd_uses_posix_quoting_outside_windows(
     with pytest.raises(typer.Exit):
         service.display_cmd(["ffmpeg", "-i", "my video.mkv", "out.mp4"])
 
-    rendered = service.logger.print.call_args.kwargs["renderable"]
+    rendered = service.logger.print.call_args.kwargs["renderable"].plain
     assert rendered == "\nffmpeg -i 'my video.mkv' out.mp4\n"
 
 
@@ -140,7 +140,7 @@ def test_display_cmd_aborts_process_when_debug_declined() -> None:
     service = _service(debug=True)
 
     with (
-        patch(f"{_MODULE}.typer.confirm", return_value=False) as confirm,
+        patch(f"{_MODULE}.confirm", return_value=False) as confirm,
         pytest.raises(typer.Exit) as exc_info,
     ):
         service.display_cmd(["ffmpeg", "-i", "in.mkv", "out.mp4"])
@@ -184,7 +184,7 @@ def test_resolve_overwrite_prompts_user_when_needed(tmp_path: Path) -> None:
     output = tmp_path / "out.mp4"
     output.write_text("old")
 
-    with patch(f"{_MODULE}.typer.confirm", return_value=True) as confirm:
+    with patch(f"{_MODULE}.confirm", return_value=True) as confirm:
         assert service.resolve_overwrite([output]) is True
 
     confirm.assert_called_once()
@@ -197,11 +197,23 @@ def test_resolve_overwrite_aborts_when_user_declines(tmp_path: Path) -> None:
     output = tmp_path / "out.mp4"
     output.write_text("old")
 
-    with patch(f"{_MODULE}.typer.confirm", return_value=False):
+    with patch(f"{_MODULE}.confirm", return_value=False):
         assert service.resolve_overwrite([output]) is False
 
     assert service.params.overwrite == OverwriteMode.ASK
     service.logger.warning.assert_called()
+
+
+def test_resolve_overwrite_does_not_ask_with_show_cmd(tmp_path: Path) -> None:
+    """Regresión: `--show-cmd` no escribe nada, así que no pregunta."""
+    service = _service(overwrite=OverwriteMode.ASK, show_cmd=True)
+    output = tmp_path / "out.mp4"
+    output.write_text("old")
+
+    with patch(f"{_MODULE}.confirm") as confirm:
+        assert service.resolve_overwrite([output]) is True
+
+    confirm.assert_not_called()
 
 
 def test_success_moves_every_output_and_removes_temp(tmp_path: Path) -> None:

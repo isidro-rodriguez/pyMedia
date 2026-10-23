@@ -50,7 +50,7 @@ class FramesService(BaseService[FramesParameters]):
                 )
                 continue
 
-            self.logger.info(
+            self.logger.success(
                 msg=_("Thumbnail(s) generated successfully: %(output)s"),
                 output=output,
             )

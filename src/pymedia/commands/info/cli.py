@@ -11,6 +11,7 @@ from pymedia.commands.info.parameters import InfoParameters
 from pymedia.commands.info.service import InfoService
 from pymedia.locales import translate as _
 from pymedia.logger import Logger
+from pymedia.ui import styled_help
 
 info_cli = typer.Typer()
 
@@ -28,7 +29,7 @@ Shows information about a video.
 
 @info_cli.command(
     name="info",
-    help=INFO_HELP,
+    help=styled_help(INFO_HELP),
     rich_help_panel=_("Analysis commands"),
     no_args_is_help=True,
 )

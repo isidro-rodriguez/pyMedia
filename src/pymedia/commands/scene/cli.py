@@ -25,6 +25,7 @@ from pymedia.commands.scene.service import SceneService
 from pymedia.locales import translate as _
 from pymedia.logger import Logger
 from pymedia.types import OverwriteMode, ScaleMode
+from pymedia.ui import styled_help
 
 scene_cli = typer.Typer()
 
@@ -50,7 +51,7 @@ than the user-defined threshold, expressed as a value between 0 and 1.
 
 @scene_cli.command(
     name="scene",
-    help=SCENE_HELP,
+    help=styled_help(SCENE_HELP),
     rich_help_panel=_("Image commands"),
     no_args_is_help=True,
 )

@@ -189,9 +189,9 @@ def _validate(data: dict[str, Any]) -> None:
 def _raise_if_errors(errors: list[str]) -> None:
     """Eleva `ConfigError` con todos los errores acumulados, si los hay."""
     if errors:
-        raise ConfigError(
-            msg=_("Invalid configuration: %(msg)s") % {"msg": "; ".join(errors)}
-        )
+        # Un error por línea, como lista, para leerlos de un vistazo.
+        items = "".join(f"\n  • {error.strip()}" for error in errors)
+        raise ConfigError(msg=_("Invalid configuration: %(msg)s") % {"msg": items})
 
 
 # -----------------------------------------------------------------------------

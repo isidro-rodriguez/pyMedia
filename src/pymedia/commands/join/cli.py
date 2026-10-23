@@ -17,6 +17,7 @@ from pymedia.errors import UserError
 from pymedia.locales import translate as _
 from pymedia.logger import Logger
 from pymedia.types import OverwriteMode
+from pymedia.ui import styled_help
 
 join_cli = typer.Typer()
 
@@ -36,7 +37,7 @@ Compatible videos must have same codecs, dimensions, tracks, ...
 
 @join_cli.command(
     name="join",
-    help=JOIN_HELP,
+    help=styled_help(JOIN_HELP),
     rich_help_panel=_("Video commands"),
     no_args_is_help=True,
 )

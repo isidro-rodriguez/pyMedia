@@ -20,6 +20,7 @@ from pymedia.errors import MissingArgumentError
 from pymedia.locales import translate as _
 from pymedia.logger import Logger
 from pymedia.types import OverwriteMode
+from pymedia.ui import styled_help
 
 add_subs_cli = typer.Typer()
 
@@ -44,7 +45,7 @@ mark it as default or forced after insertion.
 
 @add_subs_cli.command(
     name="add-subs",
-    help=ADD_SUBS_HELP,
+    help=styled_help(ADD_SUBS_HELP),
     rich_help_panel=_("Subtitles commands"),
     no_args_is_help=True,
 )

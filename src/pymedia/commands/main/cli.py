@@ -6,6 +6,7 @@ from pymedia.commands.base.cli import base_cli
 from pymedia.commands.base.cli_options import HelpOption, VersionOption
 from pymedia.errors import UserError
 from pymedia.locales import translate as _
+from pymedia.ui import styled_help
 
 main_cli = base_cli
 
@@ -26,7 +27,7 @@ Easy CLI for ffmpeg.
 )
 
 
-@main_cli.callback(help=MAIN_HELP)
+@main_cli.callback(help=styled_help(MAIN_HELP))
 def main(
     _help: HelpOption = False,
     version: VersionOption = False,

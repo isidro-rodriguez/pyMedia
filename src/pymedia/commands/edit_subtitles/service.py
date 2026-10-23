@@ -34,7 +34,7 @@ class EditSubtitlesService(BaseService[EditSubtitlesParameters]):
             output_list=[self.params.media_output],
         )
 
-        self.logger.info(
+        self.logger.success(
             msg=_("Subtitles disposition edited successfully: %(output)s"),
             output=self.params.media_output,
         )

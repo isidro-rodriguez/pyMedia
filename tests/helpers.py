@@ -37,7 +37,7 @@ class Invoke(Protocol):
 
         Args:
             *args: Argumentos de línea de comandos, sin el nombre del programa.
-            input: Texto a enviar por stdin (respuestas a `typer.confirm`).
+            input: Texto a enviar por stdin (respuestas a `pymedia.ui.confirm`).
 
         Returns:
             Código de salida y salida combinada.

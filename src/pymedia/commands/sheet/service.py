@@ -64,7 +64,7 @@ class SheetService(BaseService[SheetParameters]):
                 output_list=[self.params.image_output],
             )
 
-        self.logger.info(
+        self.logger.success(
             msg=_("Sheet generated successfully: %(output)s"),
             output=self.params.image_output,
         )

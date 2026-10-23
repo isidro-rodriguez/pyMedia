@@ -32,7 +32,7 @@ class RemuxService(BaseService[RemuxParameters]):
             output_list=[self.params.media_output],
         )
 
-        self.logger.info(
+        self.logger.success(
             msg=_("Container remuxed successfully: %(output)s"),
             output=self.params.media_output,
         )

@@ -25,6 +25,7 @@ from pymedia.commands.base.cli_options import (
 from pymedia.locales import translate as _
 from pymedia.logger import Logger
 from pymedia.types import OverwriteMode, ScaleMode
+from pymedia.ui import styled_help
 
 animated_cli = typer.Typer()
 
@@ -47,7 +48,7 @@ Generates an animated image from the specified video.
 
 @animated_cli.command(
     name="animated",
-    help=ANIMATED_HELP,
+    help=styled_help(ANIMATED_HELP),
     rich_help_panel=_("Image commands"),
     no_args_is_help=True,
 )

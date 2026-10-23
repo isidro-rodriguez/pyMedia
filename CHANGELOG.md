@@ -12,6 +12,8 @@ Primera versión estable.
 
 ### Añadido
 
+- Tema visual propio (`theme.py`, `ui.py`) aplicado a toda la interfaz: ayuda y errores de Typer, mensajes con icono por nivel y valores resaltados, barra de progreso con estado y tiempo, preguntas sí/no, panel de `info`, panel de `--version` (ahora incluye la versión de ffmpeg) y comando coloreado de `--show-cmd`.
+- Las preguntas aceptan respuestas en inglés y español (`y/yes/s/sí`, `n/no`) y muestran las opciones en el idioma activo.
 - Paquetes de distribución: `.deb` para Linux (ejecutable, man page, icono y lanzador; depende de `ffmpeg`) y `.zip` para Windows, generados con `scripts/package.py`.
 - Workflow de release: al publicar un tag `vX.Y.Z`, GitHub Actions compila, prueba y adjunta ambos paquetes con sus checksums a un GitHub Release con las notas del CHANGELOG.
 - `transcode` avisa de los subtítulos que el contenedor de salida no admite y pregunta si convertir los de texto a su formato (`mov_text`, `srt` o `webvtt`); los gráficos se descartan con aviso.
@@ -22,6 +24,8 @@ Primera versión estable.
 
 ### Corregido
 
+- `--show-cmd` preguntaba si sobrescribir la salida aunque no escribe nada.
+- Los errores de `config.toml` se muestran como lista, uno por línea.
 - `transcode` de MKV con subtítulos SRT a MP4 fallaba: la compatibilidad se evaluaba con el contenedor de entrada.
 - `--crop` rechazaba recortes que llegaban justo al borde derecho del vídeo.
 - La barra de progreso calculaba mal el tramo cuando solo se indicaba `--end`.

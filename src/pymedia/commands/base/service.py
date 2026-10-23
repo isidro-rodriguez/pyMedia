@@ -13,6 +13,7 @@ from pathlib import Path
 from typing import Protocol, TypeVar
 
 import typer
+from rich.text import Text
 
 from pymedia.commands.base.ffmpeg_runner import run_ffmpeg
 from pymedia.errors import (
@@ -22,6 +23,7 @@ from pymedia.locales import translate as _
 from pymedia.logger import Logger
 from pymedia.models.config import Config
 from pymedia.types import OverwriteMode
+from pymedia.ui import confirm
 
 
 class _OverwriteParams(Protocol):
@@ -79,10 +81,14 @@ class BaseService[ParamsT: _OverwriteParams](ABC):
 
         Returns:
             `True` si se puede sobrescribir o no hay conflicto, `False` si el
-            proceso debe omitirse.
+            proceso debe omitirse. Con `--show-cmd` no se pregunta: no se
+            escribe nada.
+
+        Raises:
+            typer.Abort: Si el usuario cierra la entrada sin responder.
         """
         params = self.params
-        if params.overwrite == OverwriteMode.YES:
+        if params.overwrite == OverwriteMode.YES or self.show_cmd:
             return True
 
         process_skip_msg = _("Process skipped since output file already exists.")
@@ -94,7 +100,7 @@ class BaseService[ParamsT: _OverwriteParams](ABC):
                 self.logger.warning(
                     _("Output file already exists: %(name)s") % {"name": output.name}
                 )
-                if typer.confirm(_("Overwrite?")):
+                if confirm(_("Overwrite?")):
                     params.overwrite = OverwriteMode.YES
                     return True
                 self.logger.warning(process_skip_msg)
@@ -111,33 +117,13 @@ class BaseService[ParamsT: _OverwriteParams](ABC):
             typer.Exit: Tras mostrar el comando con `show_cmd`, o si el usuario
                 rechaza ejecutarlo en modo debug.
         """
-
-        def _quote_windows(token: str) -> str:
-            """Entrecomilla un token si contiene caracteres especiales."""
-            if not _UNSAFE_CHARS.search(token):
-                return token
-            return '"' + token.replace('"', '\\"') + '"'
-
-        def _format_cmd() -> str:
-            """Formatea el comando como cadena lista para copiar en la shell."""
-            if os.name == "nt":
-                return " ".join(_quote_windows(t) for t in cmd)
-            return shlex.join(cmd)
-
         if self.show_cmd:
-            self.logger.print(
-                renderable=f"\n{_format_cmd()}\n",
-                emoji=False,
-                soft_wrap=True,
-                markup=False,
-            )
+            self.logger.print(renderable=format_cmd(cmd), emoji=False, soft_wrap=True)
             raise typer.Exit()
 
         self.logger.debug(_("FFmpeg command: %(cmd)s"), cmd=cmd)
 
-        if self.debug and not typer.confirm(
-            text=_("Do you want to run this ffmpeg command?")
-        ):
+        if self.debug and not confirm(_("Do you want to run this ffmpeg command?")):
             self.logger.warning(msg=_("User decided to abort process."))
             raise typer.Exit()
 
@@ -177,3 +163,45 @@ class BaseService[ParamsT: _OverwriteParams](ABC):
             progress_time=progress_time,
             total_steps=total_steps,
         )
+
+
+def format_cmd(cmd: list[str]) -> Text:
+    """Formatea el comando para copiarlo en la shell, coloreado por tipo de token.
+
+    Los tokens se entrecomillan según el sistema operativo; el color no altera
+    el texto, que sigue siendo válido al copiarlo.
+
+    Args:
+        cmd: Comando ffmpeg ya construido.
+
+    Returns:
+        Texto con el binario, las opciones, las rutas y los valores resaltados,
+        precedido y seguido de un salto de línea.
+    """
+    text = Text("\n")
+    for index, token in enumerate(cmd):
+        if index:
+            text.append(" ")
+        text.append(_quote_token(token), style=_token_style(index, token))
+    text.append("\n")
+    return text
+
+
+def _quote_token(token: str) -> str:
+    """Entrecomilla un token para la shell del sistema operativo."""
+    if os.name != "nt":
+        return shlex.quote(token)
+    if not _UNSAFE_CHARS.search(token):
+        return token
+    return '"' + token.replace('"', '\\"') + '"'
+
+
+def _token_style(index: int, token: str) -> str:
+    """Estilo del token: binario, opción, ruta o valor."""
+    if index == 0:
+        return "cmd.binary"
+    if re.match(r"^-[A-Za-z]", token):
+        return "cmd.flag"
+    if "/" in token or "\\" in token or Path(token).suffix:
+        return "cmd.path"
+    return "cmd.value"

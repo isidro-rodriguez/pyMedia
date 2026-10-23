@@ -20,6 +20,7 @@ from pymedia.errors import MissingRequiredOptionsError, UserError
 from pymedia.locales import translate as _
 from pymedia.logger import Logger
 from pymedia.types import OverwriteMode
+from pymedia.ui import styled_help
 
 cut_cli = typer.Typer()
 
@@ -41,7 +42,7 @@ Cut off a video container's section or split it between different media files.
 
 @cut_cli.command(
     name="cut",
-    help=CUT_HELP,
+    help=styled_help(CUT_HELP),
     rich_help_panel=_("Video commands"),
     no_args_is_help=True,
 )

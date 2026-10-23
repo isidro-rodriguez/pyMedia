@@ -16,6 +16,7 @@ from pymedia.commands.delete_subtitles.service import DeleteSubtitlesService
 from pymedia.locales import translate as _
 from pymedia.logger import Logger
 from pymedia.types import OverwriteMode
+from pymedia.ui import styled_help
 
 delete_subs_cli = typer.Typer()
 
@@ -34,7 +35,7 @@ You can consult what subtitles tracks have a container with `info` command.
 
 @delete_subs_cli.command(
     name="delete-subs",
-    help=DELETE_SUBS_HELP,
+    help=styled_help(DELETE_SUBS_HELP),
     rich_help_panel=_("Subtitles commands"),
     no_args_is_help=True,
 )

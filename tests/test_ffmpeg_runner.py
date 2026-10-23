@@ -514,7 +514,7 @@ def test_run_ffmpeg_stages_and_prepares_the_command(tmp_path: Path) -> None:
 
     with (
         patch(f"{_MODULE}.FfmpegProcess", return_value=running) as process,
-        patch(f"{_MODULE}.Progress"),
+        patch(f"{_MODULE}.new_progress"),
     ):
         _run(
             cmd=["ffmpeg", "-i", "in.mkv", str(output)], outputs=[output], total_steps=3
@@ -600,7 +600,7 @@ def test_progress_by_time_updates_the_bar(tmp_path: Path) -> None:
         " time.sleep(0.01)\n"
     )
 
-    with patch(f"{_MODULE}.Progress") as progress:
+    with patch(f"{_MODULE}.new_progress") as progress:
         _run(
             cmd=_command(script, output),
             outputs=[output],
@@ -626,7 +626,7 @@ def test_progress_by_steps_counts_showinfo(tmp_path: Path) -> None:
         " file=sys.stderr, flush=True)\n"
     )
 
-    with patch(f"{_MODULE}.Progress") as progress:
+    with patch(f"{_MODULE}.new_progress") as progress:
         _run(cmd=_command(script, output), outputs=[output], total_steps=2)
 
     bar = progress.return_value.__enter__.return_value
@@ -639,15 +639,18 @@ def test_progress_by_steps_counts_showinfo(tmp_path: Path) -> None:
 
 
 def test_progress_is_indeterminate_without_settings(tmp_path: Path) -> None:
-    """Sin parámetros la barra no tiene total y no se actualiza."""
+    """Sin parámetros la barra no tiene total; al acabar bien se marca completa."""
     output = tmp_path / "out.mkv"
 
-    with patch(f"{_MODULE}.Progress") as progress:
+    with patch(f"{_MODULE}.new_progress") as progress:
         _run(cmd=_command(_WRITE, output), outputs=[output])
 
     bar = progress.return_value.__enter__.return_value
     assert bar.add_task.call_args.kwargs["total"] is None
-    bar.update.assert_not_called()
+    bar.update.assert_called_once()
+    assert (
+        bar.update.call_args.kwargs["total"] == bar.update.call_args.kwargs["completed"]
+    )
 
 
 def test_failure_keeps_the_output_and_reports_stderr(tmp_path: Path) -> None:
@@ -657,7 +660,7 @@ def test_failure_keeps_the_output_and_reports_stderr(tmp_path: Path) -> None:
     script = "import sys\nprint('boom on stderr', file=sys.stderr)\nsys.exit(1)\n"
 
     with (
-        patch(f"{_MODULE}.Progress"),
+        patch(f"{_MODULE}.new_progress"),
         pytest.raises(CommandError) as exc,
     ):
         _run(cmd=_command(script, output), outputs=[output])
@@ -680,7 +683,7 @@ def test_stall_timeout_kills_the_process_and_keeps_the_output(
     with (
         patch(f"{_MODULE}.subprocess.Popen", return_value=proc),
         patch(f"{_MODULE}.threading.Thread"),
-        patch(f"{_MODULE}.Progress"),
+        patch(f"{_MODULE}.new_progress"),
         pytest.raises(CommandError, match="timed out"),
     ):
         run_ffmpeg(
@@ -708,7 +711,7 @@ def test_stderr_activity_keeps_a_slow_process_alive(tmp_path: Path) -> None:
         "pathlib.Path(sys.argv[1]).write_text('new')\n"
     )
 
-    with patch(f"{_MODULE}.Progress"):
+    with patch(f"{_MODULE}.new_progress"):
         _run(cmd=_command(script, output), outputs=[output], stall_timeout=0.3)
 
     assert output.read_text() == "new"
@@ -724,7 +727,7 @@ def test_manual_interrupt_is_reported_as_user_error(tmp_path: Path) -> None:
 
     with (
         patch(f"{_MODULE}.FfmpegProcess", return_value=running),
-        patch(f"{_MODULE}.Progress"),
+        patch(f"{_MODULE}.new_progress"),
         pytest.raises(UserError, match="interrupted manually"),
     ):
         run_ffmpeg(

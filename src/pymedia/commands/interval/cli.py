@@ -26,6 +26,7 @@ from pymedia.errors import MissingRequiredOptionsError, UserError
 from pymedia.locales import translate as _
 from pymedia.logger import Logger
 from pymedia.types import OverwriteMode, ScaleMode
+from pymedia.ui import styled_help
 
 interval_cli = typer.Typer()
 
@@ -46,7 +47,7 @@ Captures video frames at regular intervals.
 
 @interval_cli.command(
     name="interval",
-    help=INTERVAL_HELP,
+    help=styled_help(INTERVAL_HELP),
     rich_help_panel=_("Image commands"),
     no_args_is_help=True,
 )

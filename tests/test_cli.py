@@ -23,6 +23,8 @@ from helpers import (
     video_size,
 )
 
+from pymedia import version
+
 # =============================================================================
 #  info
 # =============================================================================
@@ -2515,7 +2517,7 @@ def test_main_version(pymedia: Invoke) -> None:
     result = pymedia("--version")
 
     assert result.exit_code == 0
-    assert "Version" in result.output
+    assert f"pyMedia {version}" in result.output
 
 
 def test_main_help(pymedia: Invoke) -> None:
@@ -2535,12 +2537,12 @@ def test_main_help(pymedia: Invoke) -> None:
 
 
 def test_main_version_shows_runtime_details(pymedia: Invoke) -> None:
-    """`--version` incluye la versión de Python y la plataforma."""
+    """`--version` incluye las versiones de Python y ffmpeg, y la plataforma."""
     result = pymedia("--version")
 
     assert result.exit_code == 0
-    assert "Python:" in result.output
-    assert "Platform:" in result.output
+    for label in ("Python", "ffmpeg", "Platform"):
+        assert label in result.output
 
 
 def test_main_without_arguments_shows_help(pymedia: Invoke) -> None:

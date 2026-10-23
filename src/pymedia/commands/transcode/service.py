@@ -1,7 +1,5 @@
 """Comando ``transcode``: service."""
 
-import typer
-
 from pymedia.commands.base.service import BaseService
 from pymedia.commands.transcode.cmd import TranscodeCmd
 from pymedia.commands.transcode.parameters import TranscodeParameters
@@ -9,6 +7,7 @@ from pymedia.errors import MissingParameterError
 from pymedia.locales import translate as _
 from pymedia.mixins.transcode_mixin import is_text_subtitles
 from pymedia.models.subtitles import Subtitles
+from pymedia.ui import confirm
 
 
 class TranscodeService(BaseService[TranscodeParameters]):
@@ -41,7 +40,7 @@ class TranscodeService(BaseService[TranscodeParameters]):
             output_list=[self.params.media_output],
         )
 
-        self.logger.info(
+        self.logger.success(
             msg=_("Container transcoded successfully: %(output)s"),
             output=self.params.media_output,
         )
@@ -81,8 +80,8 @@ class TranscodeService(BaseService[TranscodeParameters]):
                 tracks=_format_tracks(text),
                 extension=output.suffix,
             )
-            self.params.convert_subtitles = self.show_cmd or typer.confirm(
-                text=_("Convert them to a supported subtitles format?"), default=True
+            self.params.convert_subtitles = self.show_cmd or confirm(
+                _("Convert them to a supported subtitles format?"), default=True
             )
             if not self.params.convert_subtitles:
                 self.logger.warning(msg=_("Incompatible subtitles will be discarded."))

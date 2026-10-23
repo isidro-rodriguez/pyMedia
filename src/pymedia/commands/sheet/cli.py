@@ -18,6 +18,7 @@ from pymedia.commands.sheet.service import SheetService
 from pymedia.locales import translate as _
 from pymedia.logger import Logger
 from pymedia.types import OverwriteMode, PresetsSheetMode
+from pymedia.ui import styled_help
 
 sheet_cli = typer.Typer()
 
@@ -37,7 +38,7 @@ Generates a thumbnail grid sheet with disposition information.
 
 @sheet_cli.command(
     name="sheet",
-    help=SHEET_HELP,
+    help=styled_help(SHEET_HELP),
     rich_help_panel=_("Analysis commands"),
     no_args_is_help=True,
 )

@@ -39,7 +39,7 @@ class IntervalService(BaseService[IntervalParameters]):
             output_list=output_list,
         )
 
-        self.logger.info(
+        self.logger.success(
             msg=_("Thumbnail(s) generated successfully: %(output)s"),
             output=str(self.params.image_output).replace("%03d", "*"),
         )

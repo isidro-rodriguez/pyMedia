@@ -32,7 +32,7 @@ class ExtractSubtitlesService(BaseService[ExtractSubtitlesParameters]):
             output_list=outputs,
         )
 
-        self.logger.info(
+        self.logger.success(
             msg=_("Subtitles extracted successfully: %(output)s"),
             output=self.params.subtitles_output,
         )

@@ -22,6 +22,7 @@ from pymedia.errors import MissingArgumentError
 from pymedia.locales import translate as _
 from pymedia.logger import Logger
 from pymedia.types import OverwriteMode, RotateMetadataMode
+from pymedia.ui import styled_help
 
 remux_cli = typer.Typer()
 
@@ -45,7 +46,7 @@ Change container and disposition without transcoding.
 
 @remux_cli.command(
     name="remux",
-    help=REMUX_HELP,
+    help=styled_help(REMUX_HELP),
     rich_help_panel=_("Video commands"),
     no_args_is_help=True,
 )

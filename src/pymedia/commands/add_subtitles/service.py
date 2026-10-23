@@ -34,7 +34,7 @@ class AddSubtitlesService(BaseService[AddSubtitlesParameters]):
             output_list=[self.params.media_output],
         )
 
-        self.logger.info(
+        self.logger.success(
             msg=_("Subtitles added successfully: %(output)s"),
             output=self.params.media_output,
         )

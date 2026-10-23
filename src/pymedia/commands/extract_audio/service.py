@@ -32,7 +32,7 @@ class ExtractAudioService(BaseService[ExtractAudioParameters]):
             output_list=outputs,
         )
 
-        self.logger.info(
+        self.logger.success(
             msg=_("Audio extracted successfully: %(output)s"),
             output=self.params.audio_output,
         )
