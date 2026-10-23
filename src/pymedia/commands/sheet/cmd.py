@@ -1,5 +1,6 @@
 """Comando ``sheet``: compositor de comandos ffmpeg."""
 
+import math
 from datetime import timedelta
 from fractions import Fraction
 from pathlib import Path
@@ -11,7 +12,8 @@ from pymedia.errors import (
 )
 from pymedia.locale_manager import locale_manager
 from pymedia.locales import translate as _
-from pymedia.models.media import Audio, Subtitles
+from pymedia.models.media import Audio, Media, Subtitles, Video
+from pymedia.models.sheet_preset import PresetSheet
 from pymedia.utils import parse_quantity, parse_size, parse_timedelta, to_ffmpeg_value
 
 
@@ -79,58 +81,7 @@ class SheetCmd:
 
     def _generate_snapshots(self) -> list[str]:
         """Comando para capturar frames y componer la cuadrícula de miniaturas."""
-
-        def _calculate_capture_frames() -> list[int]:
-            """Calcula los índices de los frames que se van a capturar uniformemente."""
-            start = int(total_frames * 0.05)
-            end = int(total_frames * 0.95)
-            step = (end - start) / n_captures
-            return [start + int(step * i) for i in range(n_captures)]
-
-        def _build_thumb_pad() -> str:
-            """Construye el filtro pad de para bordes y espaciados de cada miniatura."""
-            if preset is None:
-                raise MissingParameterError(name="preset")
-            bw = preset.border_width
-            half_gap = preset.gap // 2
-            border = (
-                f"pad=iw+{bw * 2}:ih+{bw * 2}:{bw}:{bw}:color={preset.border_color}"
-            )
-            gap = (
-                f"pad=iw+{half_gap * 2}:ih+{half_gap * 2}:{half_gap}:{half_gap}:"
-                f"color={preset.background}"
-            )
-            return f"{border},{gap}"
-
-        def _build_timestamp_drawtext() -> str:
-            """Construye el filtro drawtext con la marca de tiempo de la miniatura."""
-            if preset is None:
-                raise MissingParameterError(name="preset")
-            ts_margin = 4
-            return (
-                f"drawtext=fontfile={to_ffmpeg_value(preset.fontfile)}:"
-                f"text={to_ffmpeg_value(timestamp_str)}:expansion=none:"
-                f"fontsize={preset.timestamp_fontsize}:"
-                f"fontcolor={preset.timestamp_color}:"
-                f"bordercolor={preset.timestamp_border_color}:"
-                f"borderw={preset.timestamp_border_width}:"
-                f"x=w-tw-{ts_margin}:y=h-th-{ts_margin}"
-            )
-
-        def _build_stack_filter() -> str:
-            """Construye filtros hstack y vstack para miniaturas en la cuadrícula."""
-            if preset is None:
-                raise MissingParameterError(name="preset")
-            rows_expr: list[str] = []
-            for row in range(preset.rows):
-                inputs = "".join(f"[t{row}{col}]" for col in range(preset.columns))
-                rows_expr.append(f"{inputs}hstack=inputs={preset.columns}[row{row}]")
-            row_labels = "".join(f"[row{row}]" for row in range(preset.rows))
-            rows_expr.append(f"{row_labels}vstack=inputs={preset.rows}[grid]")
-            return ";".join(rows_expr)
-
         params = self.params
-        output = self.tile_tmp
         preset = params.preset_sheet
         media = params.media
 
@@ -143,52 +94,32 @@ class SheetCmd:
         if media.video is None or media.video.format.fps is None:
             raise MissingPropertyError(name="fps")
 
-        total_frames = int(media.duration.total_seconds() * media.video.format.fps)
-        n_captures = preset.columns * preset.rows
-        frames = _calculate_capture_frames()
+        fps = media.video.format.fps
+        total_frames = int(media.duration.total_seconds() * fps)
+        frames = _capture_frames(total_frames, n_captures=preset.columns * preset.rows)
+        image_quality = params.to_image_quality_cmd()
 
-        split_labels = "".join(f"[s{i}]" for i in range(n_captures))
-        filter_complex_parts = [f"split={n_captures}{split_labels}"]
-
-        for i, frame_n in enumerate(frames):
-            r, c = divmod(i, preset.columns)
-            seconds = timedelta(
-                microseconds=round(
-                    (Fraction(frame_n) / media.video.format.fps) * 1_000_000
-                )
-            )
-            timestamp_str = parse_timedelta(seconds)
-
-            filter_complex_parts.append(
-                f"[s{i}]select='eq(n\\,{frame_n})',showinfo,"
-                f"scale={params.thumb_width}:-1,"
-                f"{_build_timestamp_drawtext()},"
-                f"{_build_thumb_pad()}[t{r}{c}]"
-            )
-
-        m = preset.margin
-        filter_complex_parts.append(
-            f"{_build_stack_filter()},"
-            f"[grid]pad=iw+{m * 2}:ih+{m * 2}:{m}:{m}:color={preset.background}, "
-            f"{params.to_image_quality_cmd().format}[out]"
-        )
+        filter_complex = [
+            f"split={len(frames)}" + "".join(f"[s{i}]" for i in range(len(frames))),
+            *(
+                _thumb_filter(i, frame_n, fps, preset, params.thumb_width)
+                for i, frame_n in enumerate(frames)
+            ),
+            _grid_filter(preset, image_format=image_quality.format),
+        ]
 
         return [
             "ffmpeg",
-            "-y",
             "-i",
             str(media.path),
             "-filter_complex",
-            ";".join(filter_complex_parts),
+            ";".join(filter_complex),
             "-map",
             "[out]",
             "-frames:v",
             "1",
-            *params.to_image_quality_cmd().compression,
-            "-progress",
-            "pipe:1",
-            "-nostats",
-            str(output),
+            *image_quality.compression,
+            str(self.tile_tmp),
         ]
 
     def _generate_header(self) -> list[str]:
@@ -196,65 +127,10 @@ class SheetCmd:
 
         Construye la cabecera de forma resiliente a propiedades ausentes del medio.
         """
-
-        def _truncate_list_display(prefix: str, items: list[str], max_len: int) -> str:
-            """Recorta la cabecera con elipsis si excede la longitud del preset."""
-            base_template = f"{prefix} [{', '.join(items)}]"
-            if len(base_template) <= max_len:
-                return base_template
-            acc: list[str] = []
-            for item in items:
-                candidate = f"{prefix} [{', '.join(acc + [item])}, ...]"
-                if len(candidate) > max_len:
-                    break
-                acc.append(item)
-            if not acc:
-                return f"{prefix} [...]"
-            return f"{prefix} [{', '.join(acc)}, ...]"
-
-        def _build_audio_line(tracks: list[Audio], max_len: int) -> str | None:
-            """Formatea el texto que muestra las pistas de audio del vídeo."""
-
-            def _format_channels(channels: int | None) -> str:
-                """Formatea los canales de audio."""
-                if channels is None:
-                    return "unk"
-                mapping = {1: "mono", 2: "stereo", 6: "5.1", 8: "7.1"}
-                return mapping.get(channels, f"{channels}ch")
-
-            if not tracks:
-                return None
-            formatted_items: list[str] = []
-            for t in tracks:
-                lang_str = t.metadata.language or "und"
-                codec_str = t.format.codec or "audio"
-                ch_str = _format_channels(t.format.channels)
-                formatted_items.append(f"{lang_str} ({codec_str} {ch_str})")
-            prefix = f"Audio: {len(tracks)} tracks"
-            return _truncate_list_display(prefix, formatted_items, max_len)
-
-        def _build_subtitles_line(
-            subtitles: list[Subtitles], max_len: int
-        ) -> str | None:
-            """Construye línea informativa de las pistas de subtítulos en cabecera."""
-            if not subtitles:
-                return None
-
-            subs: list[str] = []
-            for sub in subtitles:
-                # Usar 'und' (undefined) si sub.language es None o está vacío
-                lang = sub.metadata.language if sub.metadata.language else "und"
-                subs.append(lang)
-
-            prefix = f"Subtitles: {len(subtitles)} tracks"
-            return _truncate_list_display(prefix, subs, max_len)
-
         params = self.params
-        image_input = self.tile_tmp
         preset = params.preset_sheet
         media = params.media
 
-        # Validaciones críticas de estructura básica
         if media is None:
             raise MissingParameterError(name="media")
         if params.image_output is None:
@@ -266,97 +142,200 @@ class SheetCmd:
         if video is None or video.format.width is None or video.format.height is None:
             raise MissingPropertyError(name="width/height")
 
-        # Construcción dinámica de detalles de vídeo (manejando opcionales)
-        video_parts = [f"{video.format.width}x{video.format.height}"]
-
-        if video.format.codec:
-            codec_info = video.format.codec
-            if video.format.profile:
-                codec_info += f" ({video.format.profile})"
-            video_parts.append(codec_info)
-
-        if video.format.pix_fmt:
-            video_parts.append(video.format.pix_fmt)
-
-        if video.format.fps:
-            video_parts.append(f"{video.format.fps} fps")
-
-        # Bitrate: Usar el explícito, o calcularlo aproximadamente por tamaño/duración
-        bit_rate_val: float | None = video.format.bit_rate
-        if (
-            bit_rate_val is None
-            and media.format.size
-            and media.duration
-            and media.duration.total_seconds() > 0
-        ):
-            bit_rate_val = (media.format.size * 8) / (
-                media.duration.total_seconds() * 1000
-            )
-
-        if bit_rate_val:
-            bit_rate_str = parse_quantity(
-                value=bit_rate_val, locale=locale_manager.detect_language()
-            )
-            video_parts.append(f"{bit_rate_str} kb/s")
-
-        # Ensamblado de líneas
-        lines: list[str] = [f"{_('File')}: {media.path.name}"]
-
-        size_dur_parts: list[str] = []
-        if media.format.size:
-            size_dur_parts.append(
-                f"{_('Size')}: {
-                    parse_size(
-                        size_bytes=media.format.size,
-                        locale=locale_manager.detect_language(),
-                    )
-                }"
-            )
-        if media.duration:
-            size_dur_parts.append(f"{_('Duration')}: {parse_timedelta(media.duration)}")
-        if size_dur_parts:
-            lines.append(" | ".join(size_dur_parts))
-
-        lines.append(f"{_('Video')}: {', '.join(video_parts)}")
-
-        if media.audio and len(media.audio) > 0:
-            audio_line = _build_audio_line(
-                tracks=media.audio, max_len=preset.max_line_length
-            )
-            if audio_line:
-                lines.append(audio_line)
-
-        if media.subtitles and len(media.subtitles) > 0:
-            sub_line = _build_subtitles_line(
-                subtitles=media.subtitles, max_len=preset.max_line_length
-            )
-            if sub_line:
-                lines.append(sub_line)
-
-        line_height = preset.fontsize + preset.line_gap
-        header_height = preset.header_margin_top + line_height * len(lines)
-        fontfile = to_ffmpeg_value(preset.fontfile)
-
-        filters = [
-            f"pad=iw:ih+{header_height}:0:{header_height}:color={preset.background}"
-        ]
-        for i, line in enumerate(lines):
-            y = preset.header_margin_top + i * line_height
-            filters.append(
-                f"drawtext=fontfile={fontfile}:"
-                f"text={to_ffmpeg_value(line)}:expansion=none:"
-                f"fontsize={preset.fontsize}:fontcolor={preset.text_color}:"
-                f"x={preset.header_margin_left}:y={y}"
-            )
-        filters.append(params.to_image_quality_cmd().format)
+        lines = _header_lines(media, video, max_len=preset.max_line_length)
+        image_quality = params.to_image_quality_cmd()
 
         return [
             "ffmpeg",
-            "-y",
             "-i",
-            str(image_input),
+            str(self.tile_tmp),
             "-vf",
-            ",".join(filters),
-            *params.to_image_quality_cmd().compression,
+            ",".join(_header_filters(lines, preset, image_format=image_quality.format)),
+            *image_quality.compression,
             str(params.image_output),
         ]
+
+
+# =============================================================================
+#  Cuadrícula de miniaturas
+# =============================================================================
+
+
+def _capture_frames(total_frames: int, n_captures: int) -> list[int]:
+    """Calcula los índices de los frames que se van a capturar uniformemente."""
+    start = int(total_frames * 0.05)
+    end = int(total_frames * 0.95)
+    step = (end - start) / n_captures
+    return [start + int(step * i) for i in range(n_captures)]
+
+
+def _thumb_filter(
+    index: int, frame_n: int, fps: Fraction, preset: PresetSheet, thumb_width: int
+) -> str:
+    """Construye el filtro que selecciona, rotula y enmarca una miniatura."""
+    row, col = divmod(index, preset.columns)
+    seconds = timedelta(microseconds=round(frame_n / fps * 1_000_000))
+    return (
+        f"[s{index}]select='eq(n\\,{frame_n})',showinfo,"
+        f"scale={thumb_width}:-1,"
+        f"{_timestamp_drawtext(preset, parse_timedelta(seconds))},"
+        f"{_thumb_pad(preset)}[{_thumb_label(row, col)}]"
+    )
+
+
+def _thumb_label(row: int, col: int) -> str:
+    """Etiqueta de una miniatura; el separador evita colisiones (1,11 vs 11,1)."""
+    return f"t{row}_{col}"
+
+
+def _thumb_pad(preset: PresetSheet) -> str:
+    """Construye el filtro pad para bordes y espaciados de cada miniatura."""
+    bw = preset.border_width
+    half_gap = preset.gap // 2
+    border = f"pad=iw+{bw * 2}:ih+{bw * 2}:{bw}:{bw}:color={preset.border_color}"
+    gap = (
+        f"pad=iw+{half_gap * 2}:ih+{half_gap * 2}:{half_gap}:{half_gap}:"
+        f"color={preset.background}"
+    )
+    return f"{border},{gap}"
+
+
+def _timestamp_drawtext(preset: PresetSheet, timestamp: str) -> str:
+    """Construye el filtro drawtext con la marca de tiempo de la miniatura."""
+    ts_margin = 4
+    return (
+        f"drawtext=fontfile={to_ffmpeg_value(preset.fontfile)}:"
+        f"text={to_ffmpeg_value(timestamp)}:expansion=none:"
+        f"fontsize={preset.timestamp_fontsize}:"
+        f"fontcolor={preset.timestamp_color}:"
+        f"bordercolor={preset.timestamp_border_color}:"
+        f"borderw={preset.timestamp_border_width}:"
+        f"x=w-tw-{ts_margin}:y=h-th-{ts_margin}"
+    )
+
+
+def _grid_filter(preset: PresetSheet, image_format: str) -> str:
+    """Apila las miniaturas en la cuadrícula y añade el margen exterior."""
+    rows_expr: list[str] = []
+    for row in range(preset.rows):
+        inputs = "".join(f"[{_thumb_label(row, col)}]" for col in range(preset.columns))
+        rows_expr.append(f"{inputs}hstack=inputs={preset.columns}[row{row}]")
+    row_labels = "".join(f"[row{row}]" for row in range(preset.rows))
+    rows_expr.append(f"{row_labels}vstack=inputs={preset.rows}[grid]")
+
+    m = preset.margin
+    return (
+        f"{';'.join(rows_expr)},"
+        f"[grid]pad=iw+{m * 2}:ih+{m * 2}:{m}:{m}:color={preset.background}, "
+        f"{image_format}[out]"
+    )
+
+
+# =============================================================================
+#  Cabecera de metadatos
+# =============================================================================
+
+
+def _header_lines(media: Media, video: Video, max_len: int) -> list[str]:
+    """Líneas de texto de la cabecera, omitiendo las propiedades ausentes."""
+    lines = [f"{_('File')}: {media.path.name}"]
+    if size_duration := _size_duration_line(media):
+        lines.append(size_duration)
+    lines.append(f"{_('Video')}: {_video_details(video, media.video_bit_rate)}")
+    if media.audio:
+        lines.append(_audio_line(media.audio, max_len))
+    if media.subtitles:
+        lines.append(_subtitles_line(media.subtitles, max_len))
+    return lines
+
+
+def _header_filters(
+    lines: list[str], preset: PresetSheet, image_format: str
+) -> list[str]:
+    """Filtros que amplían el lienzo y escriben cada línea de la cabecera."""
+    line_height = preset.fontsize + preset.line_gap
+    header_height = preset.header_margin_top + line_height * len(lines)
+    fontfile = to_ffmpeg_value(preset.fontfile)
+
+    filters = [f"pad=iw:ih+{header_height}:0:{header_height}:color={preset.background}"]
+    for i, line in enumerate(lines):
+        y = preset.header_margin_top + i * line_height
+        filters.append(
+            f"drawtext=fontfile={fontfile}:"
+            f"text={to_ffmpeg_value(line)}:expansion=none:"
+            f"fontsize={preset.fontsize}:fontcolor={preset.text_color}:"
+            f"x={preset.header_margin_left}:y={y}"
+        )
+    filters.append(image_format)
+    return filters
+
+
+def _size_duration_line(media: Media) -> str | None:
+    """Línea con tamaño y duración del contenedor, si se conoce alguno."""
+    locale = locale_manager.detect_language()
+    parts: list[str] = []
+    if media.format.size:
+        size = parse_size(size_bytes=media.format.size, locale=locale)
+        parts.append(f"{_('Size')}: {size}")
+    if media.duration:
+        parts.append(f"{_('Duration')}: {parse_timedelta(media.duration)}")
+    return " | ".join(parts) or None
+
+
+def _video_details(video: Video, bit_rate: float | None) -> str:
+    """Resolución, códec, formato de píxel, fps y tasa de bits disponibles."""
+    fmt = video.format
+    parts = [f"{fmt.width}x{fmt.height}"]
+    if fmt.codec:
+        parts.append(f"{fmt.codec} ({fmt.profile})" if fmt.profile else fmt.codec)
+    if fmt.pix_fmt:
+        parts.append(fmt.pix_fmt)
+    if fmt.fps:
+        parts.append(f"{fmt.fps} fps")
+    if bit_rate:
+        kbps = parse_quantity(
+            value=math.floor(bit_rate / 1000), locale=locale_manager.detect_language()
+        )
+        parts.append(f"{kbps} kb/s")
+    return ", ".join(parts)
+
+
+def _audio_line(tracks: list[Audio], max_len: int) -> str:
+    """Formatea el texto que muestra las pistas de audio del vídeo."""
+    items = [
+        f"{t.metadata.language or 'und'} "
+        f"({t.format.codec or 'audio'} {_format_channels(t.format.channels)})"
+        for t in tracks
+    ]
+    return _truncate_list_display(f"Audio: {len(tracks)} tracks", items, max_len)
+
+
+def _format_channels(channels: int | None) -> str:
+    """Formatea los canales de audio."""
+    if channels is None:
+        return "unk"
+    mapping = {1: "mono", 2: "stereo", 6: "5.1", 8: "7.1"}
+    return mapping.get(channels, f"{channels}ch")
+
+
+def _subtitles_line(subtitles: list[Subtitles], max_len: int) -> str:
+    """Construye línea informativa de las pistas de subtítulos en cabecera."""
+    # 'und' (undefined) si el idioma no está definido.
+    langs = [sub.metadata.language or "und" for sub in subtitles]
+    return _truncate_list_display(f"Subtitles: {len(subtitles)} tracks", langs, max_len)
+
+
+def _truncate_list_display(prefix: str, items: list[str], max_len: int) -> str:
+    """Recorta la cabecera con elipsis si excede la longitud del preset."""
+    base_template = f"{prefix} [{', '.join(items)}]"
+    if len(base_template) <= max_len:
+        return base_template
+    acc: list[str] = []
+    for item in items:
+        candidate = f"{prefix} [{', '.join([*acc, item])}, ...]"
+        if len(candidate) > max_len:
+            break
+        acc.append(item)
+    if not acc:
+        return f"{prefix} [...]"
+    return f"{prefix} [{', '.join(acc)}, ...]"

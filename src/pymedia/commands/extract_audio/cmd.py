@@ -4,7 +4,6 @@ from pathlib import Path
 
 from pymedia.commands.extract_audio.parameters import ExtractAudioParameters
 from pymedia.errors import MissingParameterError
-from pymedia.types import OverwriteMode
 
 
 class ExtractAudioCmd:
@@ -58,9 +57,6 @@ class ExtractAudioCmd:
 
         output_list: list[Path] = []
         cmd = ["ffmpeg"]
-
-        if self.params.overwrite == OverwriteMode.YES:
-            cmd.append("-y")
 
         cmd.extend(["-i", str(self.params.media.path)])
 

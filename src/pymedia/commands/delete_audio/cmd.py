@@ -2,7 +2,6 @@
 
 from pymedia.commands.delete_audio.parameters import DeleteAudioParameters
 from pymedia.errors import MissingParameterError
-from pymedia.types import OverwriteMode
 
 
 class DeleteAudioCmd:
@@ -49,9 +48,6 @@ class DeleteAudioCmd:
             raise MissingParameterError(name="media_output")
 
         cmd = ["ffmpeg"]
-
-        if self.params.overwrite == OverwriteMode.YES:
-            cmd.append("-y")
 
         cmd.extend(
             [

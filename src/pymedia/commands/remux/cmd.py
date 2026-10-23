@@ -1,8 +1,8 @@
 """Comando ``remux``: compositor de comandos ffmpeg."""
 
 from pymedia.commands.remux.parameters import RemuxParameters
+from pymedia.data.containers import CONTAINERS
 from pymedia.errors import MissingParameterError
-from pymedia.types import OverwriteMode
 
 
 class RemuxCmd:
@@ -29,7 +29,10 @@ class RemuxCmd:
             raise MissingParameterError(name="media")
         if self.params.media_output is None:
             raise MissingParameterError(name="media_output")
-        container = self.params.media_output.suffix
+        # La familia MP4/MOV solo admite subtítulos `mov_text` y `faststart`.
+        is_mov_family = CONTAINERS[
+            self.params.media_output.suffix
+        ].subtitles_codecs == ("mov_text",)
 
         if self.params.sort_tracks:
             tracks = self.params.to_sort_tracks_cmd()
@@ -38,11 +41,8 @@ class RemuxCmd:
 
         cmd = ["ffmpeg"]
 
-        if self.params.overwrite == OverwriteMode.YES:
-            cmd.append("-y")
-
         if self.params.rotate_metadata is not None:
-            cmd.extend([*self.params.to_rotate_metadata_cmd()])
+            cmd.extend(self.params.to_rotate_metadata_cmd())
 
         if self.params.regenerate_pts:
             cmd.extend(self.params.to_regenerate_pts_cmd())
@@ -57,11 +57,11 @@ class RemuxCmd:
                 "-c:a",
                 "copy",
                 "-c:s",
-                "copy" if container != ".mp4" else "mov_text",
+                "mov_text" if is_mov_family else "copy",
             ]
         )
 
-        if container == ".mp4":
+        if is_mov_family:
             cmd.extend(["-movflags", "+faststart"])
 
         if self.params.strip_metadata:

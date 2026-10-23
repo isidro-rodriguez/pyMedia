@@ -37,7 +37,7 @@ You can consult what audio tracks have a container with `info` command.
     > pymedia edit-audio input.mp4 --track 1 --language eng
   Edit multiple tags in a single call:
     > pymedia edit-audio input.mp4 --track 1 --language spa --title "Comentario director" --default --commentary
-"""  # noqa
+"""  # noqa: E501
 )
 
 

@@ -3,7 +3,7 @@
 from pymedia.commands.animated.parameters import AnimatedParameters
 from pymedia.errors import InvalidParameterError, MissingParameterError
 from pymedia.locales import translate as _
-from pymedia.types import OverwriteMode, ScaleFlag
+from pymedia.types import ScaleFlag
 
 
 class AnimatedCmd:
@@ -33,9 +33,6 @@ class AnimatedCmd:
 
         cmd = ["ffmpeg"]
 
-        if self.params.overwrite == OverwriteMode.YES:
-            cmd.extend(["-y"])
-
         if self.params.timestamp_start:
             cmd.extend(self.params.to_timestamp_start_cmd())
 
@@ -49,9 +46,6 @@ class AnimatedCmd:
                 "-filter_complex",
                 self._build_filters(),
                 *self._build_args_per_animated_container(),
-                "-progress",
-                "pipe:1",
-                "-nostats",
                 str(self.params.animated_output),
             ]
         )

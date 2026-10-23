@@ -2,7 +2,6 @@
 
 from pymedia.commands.delete_subtitles.parameters import DeleteSubtitlesParameters
 from pymedia.errors import MissingParameterError
-from pymedia.types import OverwriteMode
 
 
 class DeleteSubtitlesCmd:
@@ -49,9 +48,6 @@ class DeleteSubtitlesCmd:
             raise MissingParameterError(name="media_output")
 
         cmd = ["ffmpeg"]
-
-        if self.params.overwrite == OverwriteMode.YES:
-            cmd.append("-y")
 
         cmd.extend(
             [

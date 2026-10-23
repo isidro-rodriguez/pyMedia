@@ -13,76 +13,80 @@ _CLOCK_RE = re.compile(r"(\d+):([0-5]?\d):([0-5]?\d(?:\.\d+)?)")
 _MAX_SECONDS = 1e12
 
 
+# Formatos con nombre de mes: no admiten ambigüedad día/mes.
+_NAMED_MONTH_FORMATS = (
+    "%a %b %d %H:%M:%S %Y",
+    "%b %d %H:%M:%S %Y",
+    "%b %d %Y",
+    "%d %b %Y",
+    "%d %B %Y",
+    "%B %d %Y",
+)
+# Formatos numéricos no ISO: año delante, o día antes que mes (convención
+# europea). Se excluye a propósito el orden estadounidense mes/día/año.
+_NUMERIC_FORMATS = ("%Y/%m/%d", "%Y.%m.%d", "%d-%m-%Y", "%d/%m/%Y", "%d.%m.%Y")
+
+
 def parse_date(raw: str | None) -> datetime | None:
-    """Convierte fechas habituales de metadatos multimedia a datetime formato ISO-8601.
+    """Convierte fechas habituales de metadatos multimedia a `datetime`.
+
+    Admite ISO-8601, RFC 2822, formatos con nombre de mes, formatos numéricos
+    con día antes que mes y timestamps Unix en segundos.
 
     Args:
         raw: String a ser parseado como fecha.
 
     Returns:
-        La fecha en formato ISO-8601, o `None` si la conversión falla.
+        La fecha a medianoche y sin zona horaria, o `None` si la conversión falla.
     """
     if not raw:
         return None
+    dt = (
+        _parse_iso_date(raw)
+        or _parse_rfc2822_date(raw)
+        or _parse_date_formats(raw, _NAMED_MONTH_FORMATS + _NUMERIC_FORMATS)
+        or _parse_unix_date(raw)
+    )
+    return None if dt is None else datetime(dt.year, dt.month, dt.day)
 
-    # ISO 8601
+
+def _parse_iso_date(raw: str) -> datetime | None:
+    """Parsea ISO-8601, aceptando el sufijo `Z` como UTC."""
     if raw.endswith(("Z", "z")):
         raw = raw[:-1] + "+00:00"
-
     try:
-        dt = datetime.fromisoformat(raw)
-        return datetime(dt.year, dt.month, dt.day)
+        return datetime.fromisoformat(raw)
     except ValueError:
-        pass
+        return None
 
-    # RFC 2822 / RFC 5322 / formatos similares
+
+def _parse_rfc2822_date(raw: str) -> datetime | None:
+    """Parsea RFC 2822 / RFC 5322 y formatos similares."""
     try:
-        dt = parsedate_to_datetime(raw)
-        return datetime(dt.year, dt.month, dt.day)
+        return parsedate_to_datetime(raw)
     except (TypeError, ValueError, OverflowError):
-        pass
+        return None
 
-    # Formatos con nombres de mes
-    for fmt in (
-        "%a %b %d %H:%M:%S %Y",
-        "%b %d %H:%M:%S %Y",
-        "%b %d %Y",
-        "%d %b %Y",
-        "%d %B %Y",
-        "%B %d %Y",
-    ):
+
+def _parse_date_formats(raw: str, formats: tuple[str, ...]) -> datetime | None:
+    """Prueba los formatos `strptime` en orden y devuelve el primer acierto."""
+    for fmt in formats:
         try:
-            dt = datetime.strptime(raw, fmt)
-            return datetime(dt.year, dt.month, dt.day)
+            return datetime.strptime(raw, fmt)
         except ValueError:
-            pass
-
-    # Formatos numéricos no ISO.
-    # Evitamos deliberadamente formatos ambiguos como 01/02/2024.
-    for fmt in (
-        "%Y/%m/%d",
-        "%Y.%m.%d",
-        "%d-%m-%Y",
-        "%d/%m/%Y",
-        "%d.%m.%Y",
-    ):
-        try:
-            dt = datetime.strptime(raw, fmt)
-            return datetime(dt.year, dt.month, dt.day)
-        except ValueError:
-            pass
-
-    # Unix timestamp en segundos.
-    if re.fullmatch(r"\d{9,11}", raw):
-        try:
-            timestamp = int(raw)
-            dt = datetime.fromtimestamp(timestamp, tz=UTC)
-            if 1970 <= dt.year <= 2100:
-                return datetime(dt.year, dt.month, dt.day)
-        except (ValueError, OverflowError, OSError):
-            pass
-
+            continue
     return None
+
+
+def _parse_unix_date(raw: str) -> datetime | None:
+    """Parsea un timestamp Unix en segundos con año plausible (1970-2100)."""
+    if not re.fullmatch(r"\d{9,11}", raw):
+        return None
+    try:
+        dt = datetime.fromtimestamp(int(raw), tz=UTC)
+    except (ValueError, OverflowError, OSError):
+        return None
+    return dt if 1970 <= dt.year <= 2100 else None
 
 
 def parse_fraction(value: str | None) -> Fraction | None:

@@ -91,3 +91,16 @@ class Media:
     audio: list[Audio] | None = field(default_factory=list)
     subtitles: list[Subtitles] | None = field(default_factory=list)
     chapters: list[Chapter] | None = field(default_factory=list)
+
+    @property
+    def video_bit_rate(self) -> float | None:
+        """Tasa de bits del vídeo en bps: la declarada o una estimación.
+
+        Si ffprobe no la declara, se aproxima por tamaño y duración del
+        contenedor (incluye audio y demás pistas, así que es una cota superior).
+        """
+        if self.video is not None and self.video.format.bit_rate:
+            return self.video.format.bit_rate
+        if self.format.size and self.duration and self.duration.total_seconds() > 0:
+            return self.format.size * 8 / self.duration.total_seconds()
+        return None

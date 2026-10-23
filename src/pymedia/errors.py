@@ -34,7 +34,7 @@ class PyMediaError(TyperException):
         Args:
             msg: Mensaje de error ya formateado.
         """
-        self.msg = f"{msg}"
+        self.msg = msg
         super().__init__(self.msg)
         logger.error(msg=self.msg)
 
@@ -124,7 +124,7 @@ class UserError(BadParameter):
         Args:
             msg: Mensaje de error ya formateado.
         """
-        self.msg = f"{msg}"
+        self.msg = msg
         super().__init__(message=self.msg)
         logger.error(msg=self.msg, console=False)
 

@@ -2,7 +2,6 @@
 
 from pymedia.commands.scene.parameters import SceneParameters
 from pymedia.errors import MissingParameterError
-from pymedia.types import OverwriteMode
 
 
 class SceneCmd:
@@ -45,9 +44,6 @@ class SceneCmd:
 
         cmd: list[str] = ["ffmpeg"]
 
-        if params.overwrite == OverwriteMode.YES:
-            cmd.append("-y")
-
         if params.timestamp_start is not None:
             cmd.extend(params.to_timestamp_start_cmd())
         if params.timestamp_end is not None:
@@ -62,9 +58,6 @@ class SceneCmd:
                 "-fps_mode",
                 "vfr",
                 *params.to_image_quality_cmd().compression,
-                "-progress",
-                "pipe:1",
-                "-nostats",
                 str(output),
             ]
         )

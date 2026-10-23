@@ -145,7 +145,7 @@ def test_load_error_campo_invalido(
 @pytest.mark.parametrize(
     ("invalido", "replacement", "fragmento"),
     [
-        ('media = ".mp4"', 'media = ".webm"', "default_container.media"),
+        ('media = ".mp4"', 'media = ".webm"', "default_containers.media"),
         ('language = "system"', 'language = "klingon"', "app.language"),
         ("stall_timeout = 60", "stall_timeout = 0", "app.stall_timeout"),
         ("stall_timeout = 60", 'stall_timeout = "60"', "app.stall_timeout"),
@@ -159,3 +159,32 @@ def test_demandada_opciones_invalidas(
 
     with pytest.raises(ConfigError, match=fragmento):
         _load(text, tmp_path)
+
+
+@pytest.mark.parametrize(
+    ("invalido", "replacement", "fragmento"),
+    [
+        ("video_crf = 25\n", "", "transcode.fast.video_crf"),
+        ("stall_timeout = 60\n", "", "app.stall_timeout"),
+        (
+            'image = ".jpg"\n',
+            'image = ".jpg"\nvideo = ".mkv"\n',
+            "default_containers.video",
+        ),
+        ("[app]", "[application]", "app"),
+    ],
+)
+def test_load_error_estructura(
+    invalido: str, replacement: str, fragmento: str, tmp_path: Path
+) -> None:
+    """Tablas o claves ausentes o desconocidas elevan `ConfigError`, no KeyError."""
+    text = _DEFAULT_CONFIG.replace(invalido, replacement, 1)
+
+    with pytest.raises(ConfigError, match=fragmento):
+        _load(text, tmp_path)
+
+
+def test_load_error_toml_mal_formado(tmp_path: Path) -> None:
+    """Un TOML con sintaxis inválida eleva `ConfigError` con la ruta."""
+    with pytest.raises(ConfigError, match="not valid TOML"):
+        _load(_DEFAULT_CONFIG + "x = [\n", tmp_path)

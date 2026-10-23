@@ -4,7 +4,6 @@ from pathlib import Path
 
 from pymedia.commands.extract_subtitles.parameters import ExtractSubtitlesParameters
 from pymedia.errors import MissingParameterError
-from pymedia.types import OverwriteMode
 
 
 class ExtractSubtitlesCmd:
@@ -59,9 +58,6 @@ class ExtractSubtitlesCmd:
 
         output_list: list[Path] = []
         cmd = ["ffmpeg"]
-
-        if self.params.overwrite == OverwriteMode.YES:
-            cmd.append("-y")
 
         if self.params.strip_metadata:
             cmd.extend(self.params.to_strip_metadata_cmd())

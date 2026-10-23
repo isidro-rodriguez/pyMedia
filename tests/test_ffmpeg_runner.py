@@ -55,6 +55,9 @@ def _command(script: str, *args: Path) -> list[str]:
 # =============================================================================
 
 
+_PROGRESS = ["-progress", "pipe:1", "-nostats"]
+
+
 def _cmd(args: list[str]) -> list[str]:
     """Normaliza a una lista con el binario y las args."""
     return ["ffmpeg", *args]
@@ -74,15 +77,23 @@ def test_prepare_command_inserts_policy_for_ffmpeg(
     cmd = _cmd(["-i", "in.mkv", "out.mp4"])
     prepared = prepare_command(cmd=cmd, overwrite=overwrite)
 
-    assert prepared == ["ffmpeg", "-nostdin", expected_flag, "-i", "in.mkv", "out.mp4"]
+    assert prepared == [
+        "ffmpeg",
+        "-nostdin",
+        expected_flag,
+        *_PROGRESS,
+        "-i",
+        "in.mkv",
+        "out.mp4",
+    ]
 
 
-def test_prepare_command_drops_previous_policy_flags() -> None:
-    """Los flags `-y`/`-n` previos no se duplican."""
-    cmd = ["ffmpeg", "-y", "-n", "out.mp4"]
+def test_prepare_command_drops_previous_managed_flags() -> None:
+    """Los flags gestionados previos no se duplican."""
+    cmd = ["ffmpeg", "-y", "-n", "-progress", "pipe:2", "-nostats", "out.mp4"]
     prepared = prepare_command(cmd=cmd, overwrite=True)
 
-    assert prepared == ["ffmpeg", "-nostdin", "-y", "out.mp4"]
+    assert prepared == ["ffmpeg", "-nostdin", "-y", *_PROGRESS, "out.mp4"]
 
 
 def test_prepare_command_matches_binary_stem() -> None:
@@ -299,6 +310,7 @@ def test_tracker_counts_showinfo_steps_from_stderr() -> None:
     assert tracker.update(source=STDERR, line="pts_time:1\n") == 1.0
     assert tracker.update(source=STDERR, line="pts_time:2\n") == 2.0
     assert tracker.update(source=STDOUT, line="pts_time:3\n") is None
+    assert tracker.update(source=STDERR, line="frame=1\n") is None
 
 
 def test_tracker_without_settings_reports_nothing() -> None:
@@ -328,7 +340,7 @@ def test_process_starts_two_readers_and_returns_itself() -> None:
         patch(f"{_MODULE}.subprocess.Popen", return_value=proc) as popen,
         patch(f"{_MODULE}.threading.Thread") as thread,
     ):
-        with FfmpegProcess(cmd=["ffmpeg", "out.mp4"], capture_steps=False) as running:
+        with FfmpegProcess(cmd=["ffmpeg", "out.mp4"]) as running:
             assert running._proc is proc
 
     kwargs = popen.call_args.kwargs
@@ -350,7 +362,7 @@ def test_exit_kills_a_live_process_and_closes_pipes() -> None:
         patch(f"{_MODULE}.subprocess.Popen", return_value=proc),
         patch(f"{_MODULE}.threading.Thread", side_effect=threads),
     ):
-        with FfmpegProcess(cmd=["ffmpeg"], capture_steps=False):
+        with FfmpegProcess(cmd=["ffmpeg"]):
             pass
 
     proc.kill.assert_called_once()
@@ -367,7 +379,7 @@ def test_exit_does_not_kill_a_finished_process() -> None:
         patch(f"{_MODULE}.subprocess.Popen", return_value=proc),
         patch(f"{_MODULE}.threading.Thread"),
     ):
-        with FfmpegProcess(cmd=["ffmpeg"], capture_steps=False):
+        with FfmpegProcess(cmd=["ffmpeg"]):
             pass
 
     proc.kill.assert_not_called()
@@ -377,7 +389,7 @@ def test_exit_closes_only_present_streams() -> None:
     """`__exit__` tolera un proceso sin alguno de los pipes."""
     proc = MagicMock(stdout=None, stderr=None)
     proc.poll.return_value = 0
-    running = FfmpegProcess(cmd=["ffmpeg"], capture_steps=False)
+    running = FfmpegProcess(cmd=["ffmpeg"])
     running._proc = proc
 
     running.__exit__()
@@ -388,12 +400,12 @@ def test_exit_closes_only_present_streams() -> None:
 
 def test_exit_without_entering_is_a_noop() -> None:
     """Sin `__enter__` no hay proceso que limpiar."""
-    FfmpegProcess(cmd=["ffmpeg"], capture_steps=False).__exit__()
+    FfmpegProcess(cmd=["ffmpeg"]).__exit__()
 
 
 def test_pump_publishes_every_line_from_stdout() -> None:
     """Todas las líneas de stdout llegan a la cola, acabando en el sentinel."""
-    running = FfmpegProcess(cmd=["ffmpeg"], capture_steps=False)
+    running = FfmpegProcess(cmd=["ffmpeg"])
 
     running._pump(STDOUT, io.StringIO("a\nb\n"))
 
@@ -404,25 +416,36 @@ def test_pump_publishes_every_line_from_stdout() -> None:
     ]
 
 
-def test_pump_stores_stderr_and_filters_showinfo() -> None:
-    """Stderr se guarda entero; solo `pts_time` se emite si se piden pasos."""
-    running = FfmpegProcess(cmd=["ffmpeg"], capture_steps=True)
+def test_pump_stores_and_publishes_every_stderr_line() -> None:
+    """Stderr se guarda y se publica entero: toda línea cuenta como actividad."""
+    running = FfmpegProcess(cmd=["ffmpeg"])
 
     running._pump(STDERR, io.StringIO("frame=1\n[Parsed_showinfo_1] pts_time:2\n"))
 
-    assert running.stderr_lines == [
+    assert list(running.stderr_lines) == [
         "frame=1\n",
         "[Parsed_showinfo_1] pts_time:2\n",
     ]
-    assert [running._events.get_nowait() for _ in range(2)] == [
+    assert [running._events.get_nowait() for _ in range(3)] == [
+        (STDERR, "frame=1\n"),
         (STDERR, "[Parsed_showinfo_1] pts_time:2\n"),
         (STDERR, None),
     ]
 
 
+def test_enter_raises_command_error_without_binary() -> None:
+    """Si el binario no existe, se informa con un error de pyMedia."""
+    with (
+        patch(f"{_MODULE}.subprocess.Popen", side_effect=FileNotFoundError),
+        pytest.raises(CommandError),
+        FfmpegProcess(cmd=["ffmpeg"]),
+    ):
+        pass
+
+
 def test_events_stops_after_both_streams_finish() -> None:
     """El generador termina al recibir el sentinel de cada stream."""
-    running = FfmpegProcess(cmd=["ffmpeg"], capture_steps=False)
+    running = FfmpegProcess(cmd=["ffmpeg"])
     running._events.put((STDOUT, "a\n"))
     running._events.put((STDERR, None))
     running._events.put((STDOUT, None))
@@ -432,7 +455,7 @@ def test_events_stops_after_both_streams_finish() -> None:
 
 def test_events_raises_when_nothing_arrives() -> None:
     """Sin eventos en el plazo, el error de cola se propaga al runner."""
-    running = FfmpegProcess(cmd=["ffmpeg"], capture_steps=False)
+    running = FfmpegProcess(cmd=["ffmpeg"])
 
     with pytest.raises(queue.Empty):
         list(running.events(stall_timeout=0.01))
@@ -440,7 +463,7 @@ def test_events_raises_when_nothing_arrives() -> None:
 
 def test_wait_returns_the_exit_code() -> None:
     """`wait` delega en el proceso."""
-    running = FfmpegProcess(cmd=["ffmpeg"], capture_steps=False)
+    running = FfmpegProcess(cmd=["ffmpeg"])
     running._proc = _popen()
     running._proc.wait.return_value = 3
 
@@ -449,15 +472,16 @@ def test_wait_returns_the_exit_code() -> None:
 
 def test_stderr_tail_keeps_the_last_ten_lines() -> None:
     """El diagnóstico final solo incluye las últimas líneas de stderr."""
-    running = FfmpegProcess(cmd=["ffmpeg"], capture_steps=False)
-    running.stderr_lines = [f"line {i}\n" for i in range(12)]
+    running = FfmpegProcess(cmd=["ffmpeg"])
+    lines = [f"line {i}\n" for i in range(12)]
+    running.stderr_lines.extend(lines)
 
-    assert running.stderr_tail == "".join(running.stderr_lines[-10:]).strip()
+    assert running.stderr_tail == "".join(lines[-10:]).strip()
 
 
 def test_stderr_tail_is_empty_without_output() -> None:
     """Sin stderr acumulado, el diagnóstico queda vacío."""
-    assert FfmpegProcess(cmd=["ffmpeg"], capture_steps=False).stderr_tail == ""
+    assert FfmpegProcess(cmd=["ffmpeg"]).stderr_tail == ""
 
 
 # =============================================================================
@@ -465,14 +489,16 @@ def test_stderr_tail_is_empty_without_output() -> None:
 # =============================================================================
 
 
-def _run(cmd: list[str], outputs: list[Path], **kwargs: Any) -> None:
+def _run(
+    cmd: list[str], outputs: list[Path], stall_timeout: float = 5, **kwargs: Any
+) -> None:
     """Invoca el runner con los valores por defecto para testing."""
     run_ffmpeg(
         cmd=cmd,
         description="Test",
         outputs=outputs,
         overwrite=True,
-        stall_timeout=5,
+        stall_timeout=stall_timeout,
         command_name="Test",
         **kwargs,
     )
@@ -495,11 +521,10 @@ def test_run_ffmpeg_stages_and_prepares_the_command(tmp_path: Path) -> None:
         )
 
     staged = process.call_args.kwargs["cmd"]
-    assert staged[:3] == ["ffmpeg", "-nostdin", "-y"]
-    assert staged[3:5] == ["-i", "in.mkv"]
-    assert Path(staged[5]).name == "out.mkv"
-    assert Path(staged[5]).parent.name.startswith(".pymedia-")
-    assert process.call_args.kwargs["capture_steps"] is True
+    assert staged[:6] == ["ffmpeg", "-nostdin", "-y", *_PROGRESS]
+    assert staged[6:8] == ["-i", "in.mkv"]
+    assert Path(staged[8]).name == "out.mkv"
+    assert Path(staged[8]).parent.name.startswith(".pymedia-")
 
 
 def test_staging_lives_next_to_the_destination(tmp_path: Path) -> None:
@@ -670,6 +695,23 @@ def test_stall_timeout_kills_the_process_and_keeps_the_output(
     proc.kill.assert_called_once()
     assert output.read_text() == "original"
     assert not list(tmp_path.glob(".pymedia-*"))
+
+
+def test_stderr_activity_keeps_a_slow_process_alive(tmp_path: Path) -> None:
+    """Un proceso que solo escribe en stderr no se da por bloqueado."""
+    output = tmp_path / "out.mkv"
+    script = (
+        "import pathlib, sys, time\n"
+        "for i in range(4):\n"
+        " print('frame', i, file=sys.stderr, flush=True)\n"
+        " time.sleep(0.1)\n"
+        "pathlib.Path(sys.argv[1]).write_text('new')\n"
+    )
+
+    with patch(f"{_MODULE}.Progress"):
+        _run(cmd=_command(script, output), outputs=[output], stall_timeout=0.3)
+
+    assert output.read_text() == "new"
 
 
 def test_manual_interrupt_is_reported_as_user_error(tmp_path: Path) -> None:

@@ -6,6 +6,27 @@ Las versiones se han reconstruido a partir del histórico de
 Las versiones intermedias no registradas (0.2–0.4, 0.6–0.8) se agrupan
 con la sección anterior.
 
+## [Sin publicar]
+
+### Corregido
+
+- Falso "timed out" en comandos sin `-progress` (`remux`, `delete/edit/extract-audio`, `delete/edit/extract-subtitles`): cualquier línea de stderr cuenta ya como actividad.
+- `config.toml` con claves ausentes, sobrantes o TOML mal formado eleva `ConfigError` en vez de `KeyError`/`TOMLDecodeError`.
+- Los errores de pyMedia ya no muestran traza: nuevo punto de entrada `pymedia.main:run`.
+- La cabecera de `sheet` mostraba bps como kb/s; `info` y `sheet` comparten `Media.video_bit_rate` (kbps SI).
+- Etiquetas de miniaturas de `sheet` sin colisiones con 10 o más filas/columnas.
+- Ejemplos de ayuda con opciones inexistentes (`remux --fast-start`, `transcode --profile`).
+- `scripts/i18n.py` rechaza idiomas desconocidos y la documentación usa `-l spanish` (con `-l es` se creaba un catálogo vacío).
+- Test de entrecomillado de Windows que dependía de la plataforma.
+
+### Cambiado
+
+- `prepare_command` centraliza `-y`/`-n`, `-progress pipe:1` y `-nostats`; se eliminan de los `cmd.py` (y `--show-cmd` muestra un comando más limpio).
+- `display_cmd` termina con `typer.Exit` en vez de `sys.exit`.
+- `FfmpegProcess` guarda solo las últimas líneas de stderr (`deque`) e informa si falta el binario.
+- Refactor en funciones pequeñas de la validación de `config.toml`, `join`, `sheet`, `ffprobe` y `utils.parse_date`; mensajes de configuración unificados.
+- Validadores de rutas de `base/cli.py` unificados; `noqa` con código concreto.
+
 ## [0.21.2-beta.14] - 2026-09-28
 
 ### Añadido

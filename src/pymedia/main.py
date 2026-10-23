@@ -1,7 +1,7 @@
 """Punto de entrada de la CLI de pyMedia.
 
-Construye la aplicación Typer, registra los subcomandos y configura la codificación
-de la salida estándar en Windows.
+Construye la aplicación Typer, registra los subcomandos, configura la codificación
+de la salida estándar en Windows y expone `run` como punto de entrada.
 """
 
 import io
@@ -9,6 +9,7 @@ import sys
 
 import typer
 
+from pymedia.errors import PyMediaError
 from pymedia.locale_manager import locale_manager
 
 
@@ -77,9 +78,24 @@ def _build_app() -> typer.Typer:
     return built_app
 
 
+def run() -> None:
+    """Ejecuta la CLI sin mostrar trazas por los errores propios de pyMedia.
+
+    `PyMediaError` ya registra y muestra su mensaje al crearse; la traza solo
+    aportaría ruido al usuario, así que se termina con su código de salida.
+
+    Raises:
+        SystemExit: Con el código de salida del error de pyMedia recibido.
+    """
+    try:
+        app()
+    except PyMediaError as err:
+        sys.exit(err.exit_code)
+
+
 _configure_runtime()
 app = _build_app()
 
 
 if __name__ == "__main__":
-    app()
+    run()

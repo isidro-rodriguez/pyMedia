@@ -2,7 +2,6 @@
 
 from pymedia.commands.add_audio.parameters import AddAudioParameters
 from pymedia.errors import MissingParameterError
-from pymedia.types import OverwriteMode
 
 
 class AddAudioCmd:
@@ -38,9 +37,6 @@ class AddAudioCmd:
 
         cmd = ["ffmpeg"]
 
-        if self.params.overwrite == OverwriteMode.YES:
-            cmd.append("-y")
-
         if self.params.strip_metadata:
             cmd.extend(self.params.to_strip_metadata_cmd())
 
@@ -62,14 +58,7 @@ class AddAudioCmd:
         if media.audio:
             cmd.extend([*self._reset_imported_defaults_args()])
 
-        cmd.extend(
-            [
-                "-progress",
-                "pipe:1",
-                "-nostats",
-                str(self.params.media_output),
-            ]
-        )
+        cmd.append(str(self.params.media_output))
 
         return cmd
 

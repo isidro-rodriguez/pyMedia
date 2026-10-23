@@ -38,7 +38,7 @@ mark it as default or forced after insertion.
   Add spanish subtitles with custom title:
     > pymedia add-subs input.mp4 spa_subs.srt --language spa --title "Español"
     Then: pymedia edit-subs output.mp4 --track 1 --default --forced
-"""  # noqa
+"""
 )
 
 

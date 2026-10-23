@@ -37,7 +37,7 @@ You can consult what subtitles tracks have a container with `info` command.
     > pymedia edit-subs input.mp4 --track 2 --language eng
   Edit multiple tags in a single call:
     > pymedia edit-subs input.mp4 --track 2 --language spa --title "Español (forced)" --default --forced
-"""  # noqa
+"""  # noqa: E501
 )
 
 

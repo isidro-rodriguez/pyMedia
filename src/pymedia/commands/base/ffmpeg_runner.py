@@ -8,6 +8,7 @@ import queue
 import subprocess
 import tempfile
 import threading
+from collections import deque
 from collections.abc import Iterable, Iterator
 from dataclasses import dataclass
 from datetime import timedelta
@@ -25,13 +26,18 @@ from pymedia.errors import (
 from pymedia.locales import translate as _
 
 STDOUT, STDERR = "stdout", "stderr"
+_STDERR_TAIL = 10
+# Flags que pyMedia gestiona por su cuenta; se ignoran si vienen en `cmd`.
+_MANAGED_FLAGS = frozenset({"-y", "-n", "-nostdin", "-nostats"})
 
 
 def prepare_command(cmd: list[str], overwrite: bool) -> list[str]:
-    """Añade `-nostdin` y la política de sobrescritura si el binario es ffmpeg.
+    """Añade los flags de ejecución desatendida si el binario es ffmpeg.
 
     ffmpeg no debe preguntar por su cuenta: el prompt quedaría oculto tras la
-    barra de progreso y bloquearía el proceso.
+    barra de progreso y bloquearía el proceso. `-progress pipe:1` alimenta la
+    barra y, además, mantiene activo el control de bloqueo en procesos sin
+    salida por stderr (p. ej. copias de streams).
 
     Args:
         cmd: Comando ya construido.
@@ -42,13 +48,29 @@ def prepare_command(cmd: list[str], overwrite: bool) -> list[str]:
     """
     if Path(cmd[0]).stem != "ffmpeg":
         return cmd
-    flags = ("-y", "-n")
     return [
         cmd[0],
         "-nostdin",
         "-y" if overwrite else "-n",
-        *(a for a in cmd[1:] if a not in flags),
+        "-progress",
+        "pipe:1",
+        "-nostats",
+        *_strip_managed_flags(cmd[1:]),
     ]
+
+
+def _strip_managed_flags(args: list[str]) -> list[str]:
+    """Elimina de `args` los flags gestionados y el par `-progress <url>`."""
+    stripped: list[str] = []
+    skip_next = False
+    for arg in args:
+        if skip_next:
+            skip_next = False
+        elif arg == "-progress":
+            skip_next = True
+        elif arg not in _MANAGED_FLAGS:
+            stripped.append(arg)
+    return stripped
 
 
 def stage_outputs(cmd: list[str], outputs: Iterable[str], staging: Path) -> list[str]:
@@ -121,8 +143,8 @@ class ProgressTracker:
 
     Attributes:
         progress_time: Duración a procesar; activa el progreso por tiempo.
-        total_steps: Pasos `showinfo` esperados; activa el progreso por pasos.
-            Si se dan ambos, prevalece el tiempo.
+        total_steps: Líneas `showinfo` (`pts_time:`) esperadas por stderr;
+            activa el progreso por pasos. Si se dan ambos, prevalece el tiempo.
     """
 
     progress_time: timedelta | None = None
@@ -149,7 +171,7 @@ class ProgressTracker:
         if self.progress_time is not None and line.startswith("out_time_ms="):
             value = line.partition("=")[2].strip()
             return int(value) / 1_000_000 if value.isdigit() else None
-        if self.total_steps is not None and source == STDERR:
+        if self.total_steps is not None and source == STDERR and "pts_time:" in line:
             self._steps += 1
             return float(self._steps)
         return None
@@ -165,32 +187,40 @@ class FfmpegProcess:
         stderr_lines: Todas las líneas recibidas por stderr.
     """
 
-    def __init__(self, cmd: list[str], *, capture_steps: bool) -> None:
+    def __init__(self, cmd: list[str]) -> None:
         """Prepara el proceso sin lanzarlo.
 
         Args:
             cmd: Comando a ejecutar.
-            capture_steps: Si `True`, emite como evento las líneas `showinfo`
-                de stderr para el progreso por pasos.
         """
         self._cmd = cmd
-        self._capture_steps = capture_steps
         self._events: queue.Queue[tuple[str, str | None]] = queue.Queue()
         self._threads: list[threading.Thread] = []
         self._proc: subprocess.Popen[str] | None = None
-        self.stderr_lines: list[str] = []
+        # Solo interesa el final para diagnosticar fallos; acota la memoria.
+        self.stderr_lines: deque[str] = deque(maxlen=_STDERR_TAIL)
 
     def __enter__(self) -> Self:
-        """Lanza el proceso y arranca los hilos lectores."""
-        self._proc = proc = subprocess.Popen(
-            args=self._cmd,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            stdin=subprocess.DEVNULL,
-            text=True,
-            errors="replace",
-            bufsize=1,
-        )
+        """Lanza el proceso y arranca los hilos lectores.
+
+        Raises:
+            CommandError: Si no se encuentra el binario a ejecutar.
+        """
+        try:
+            self._proc = proc = subprocess.Popen(
+                args=self._cmd,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                stdin=subprocess.DEVNULL,
+                text=True,
+                errors="replace",
+                bufsize=1,
+            )
+        except FileNotFoundError as err:
+            raise CommandError(
+                msg=_("%(binary)s was not found in PATH. Install ffmpeg first.")
+                % {"binary": self._cmd[0]}
+            ) from err
         for name, stream in ((STDOUT, proc.stdout), (STDERR, proc.stderr)):
             thread = threading.Thread(
                 target=self._pump, args=(name, stream), daemon=True
@@ -216,6 +246,9 @@ class FfmpegProcess:
     def _pump(self, name: str, stream: TextIO) -> None:
         """Lee un stream línea a línea y publica eventos en la cola.
 
+        Toda línea se publica, también las de stderr, porque cualquier
+        actividad demuestra que el proceso no está bloqueado.
+
         Args:
             name: Nombre del stream (`STDOUT` o `STDERR`).
             stream: Stream de texto a consumir.
@@ -223,8 +256,6 @@ class FfmpegProcess:
         for line in stream:
             if name == STDERR:
                 self.stderr_lines.append(line)
-                if not (self._capture_steps and "pts_time:" in line):
-                    continue
             self._events.put((name, line))
         self._events.put((name, None))  # sentinel: fin de stream
 
@@ -259,8 +290,8 @@ class FfmpegProcess:
 
     @property
     def stderr_tail(self) -> str:
-        """Últimas 10 líneas de stderr, para informar de fallos."""
-        return "".join(self.stderr_lines[-10:]).strip()
+        """Últimas líneas de stderr, para informar de fallos."""
+        return "".join(self.stderr_lines).strip()
 
 
 def run_ffmpeg(
@@ -288,10 +319,11 @@ def run_ffmpeg(
         stall_timeout: Segundos sin actividad antes de dar el proceso por bloqueado.
         command_name: Nombre del comando, para los mensajes de error.
         progress_time: Duración del tramo a procesar (progreso por tiempo).
-        total_steps: Pasos `showinfo` esperados (progreso por pasos).
+        total_steps: Líneas `showinfo` esperadas (progreso por pasos).
 
     Raises:
-        CommandError: Si ffmpeg falla, se bloquea o una salida ya existe.
+        CommandError: Si ffmpeg no está instalado, falla, se bloquea o una
+            salida ya existe.
         UserError: Si el usuario interrumpe la ejecución.
         OperativeSystemError: Si el directorio de destino no existe o no se
             puede mover una salida a su destino final.
@@ -313,10 +345,7 @@ def run_ffmpeg(
         )
         try:
             with (
-                FfmpegProcess(
-                    cmd=staged_cmd,
-                    capture_steps=total_steps is not None,
-                ) as proc,
+                FfmpegProcess(cmd=staged_cmd) as proc,
                 Progress() as progress,
             ):
                 task = progress.add_task(description=description, total=tracker.total)

@@ -29,7 +29,7 @@ Easy CLI for ffmpeg.
 @main_cli.callback(help=MAIN_HELP)
 def main(
     _help: HelpOption = False,
-    version: VersionOption = False,  # noqa
+    version: VersionOption = False,
 ) -> None:
     """Muestra la ayuda global de la aplicación cuando se invoca con `--help`.
 

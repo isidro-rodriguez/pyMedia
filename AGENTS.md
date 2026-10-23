@@ -52,8 +52,8 @@ En modo `ACT`:
    - `uv run pytest -m locales`
    - Si `pytest -m locales` falla:
      - `uv run python scripts/i18n.py extract`
-     - `uv run python scripts/i18n.py update -l es`
-     - `uv run python scripts/i18n.py compile -l es`
+     - `uv run python scripts/i18n.py update -l spanish`
+     - `uv run python scripts/i18n.py compile -l spanish`
      - `uv run python scripts/i18n.py check`
      - `uv run pytest -m locales`
 3. **Al completar**, presentar un resumen de cambios y limpiar `.kilo/temp/`.

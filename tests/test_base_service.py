@@ -16,6 +16,7 @@ from typing import Any
 from unittest.mock import MagicMock, patch
 
 import pytest
+import typer
 
 from pymedia.commands.base.service import BaseService
 from pymedia.errors import CommandError, OperativeSystemError, UserError
@@ -76,23 +77,25 @@ def test_display_cmd_prints_and_exits_when_show_cmd_is_true() -> None:
     service = _service(show_cmd=True)
     cmd = ["ffmpeg", "-i", "in.mkv", "out.mp4"]
 
-    with pytest.raises(SystemExit) as exc_info:
+    with pytest.raises(typer.Exit) as exc_info:
         service.display_cmd(cmd)
-    assert exc_info.value.code == 0
+    assert exc_info.value.exit_code == 0
     service.logger.print.assert_called_once()
 
 
-def test_display_cmd_quotes_tokens_for_windows(tmp_path: Path) -> None:
+def test_display_cmd_quotes_tokens_for_windows(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
     """En Windows, los tokens con caracteres especiales se entrecomillan."""
+    monkeypatch.setattr(os, "name", "nt")
     service = _service(show_cmd=True)
-    token = tmp_path / "my videos" / "a.mkv"
+    token = r"C:\my videos\a.mkv"
 
-    with pytest.raises(SystemExit):
-        service.display_cmd(["ffmpeg", "-i", str(token), "out.mp4"])
+    with pytest.raises(typer.Exit):
+        service.display_cmd(["ffmpeg", "-i", token, "out.mp4"])
 
     rendered = service.logger.print.call_args.kwargs["renderable"]
-    # En Windows espera '"my videos\a.mkv"'
-    assert '"' in rendered and str(token) in rendered or rendered.count('"') == 2
+    assert rendered == f'\nffmpeg -i "{token}" out.mp4\n'
 
 
 def test_display_cmd_escapes_quotes_for_windows(
@@ -102,7 +105,7 @@ def test_display_cmd_escapes_quotes_for_windows(
     monkeypatch.setattr(os, "name", "nt")
     service = _service(show_cmd=True)
 
-    with pytest.raises(SystemExit):
+    with pytest.raises(typer.Exit):
         service.display_cmd(["ffmpeg", "-i", 'my "video".mkv', "out.mp4"])
 
     rendered = service.logger.print.call_args.kwargs["renderable"]
@@ -116,7 +119,7 @@ def test_display_cmd_uses_posix_quoting_outside_windows(
     monkeypatch.setattr(os, "name", "posix")
     service = _service(show_cmd=True)
 
-    with pytest.raises(SystemExit):
+    with pytest.raises(typer.Exit):
         service.display_cmd(["ffmpeg", "-i", "my video.mkv", "out.mp4"])
 
     rendered = service.logger.print.call_args.kwargs["renderable"]
@@ -138,12 +141,12 @@ def test_display_cmd_aborts_process_when_debug_declined() -> None:
 
     with (
         patch(f"{_MODULE}.typer.confirm", return_value=False) as confirm,
-        pytest.raises(SystemExit) as exc_info,
+        pytest.raises(typer.Exit) as exc_info,
     ):
         service.display_cmd(["ffmpeg", "-i", "in.mkv", "out.mp4"])
 
     confirm.assert_called_once()
-    assert exc_info.value.code == 0
+    assert exc_info.value.exit_code == 0
     service.logger.warning.assert_called_once()
     service.logger.print.assert_not_called()
 

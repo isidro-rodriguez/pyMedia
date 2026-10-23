@@ -2,7 +2,6 @@
 
 from pymedia.commands.cut.parameters import CutParameters
 from pymedia.errors import MissingParameterError
-from pymedia.types import OverwriteMode
 
 
 class CutCmd:
@@ -30,9 +29,6 @@ class CutCmd:
 
         cmd = ["ffmpeg"]
 
-        if self.params.overwrite == OverwriteMode.YES:
-            cmd.extend(["-y"])
-
         if self.params.timestamp_start is not None:
             cmd.extend(self.params.to_timestamp_start_cmd())
 
@@ -58,13 +54,6 @@ class CutCmd:
         if self.params.timestamp_at is not None:
             cmd.extend(self.params.to_timestamp_at_cmd())
 
-        cmd.extend(
-            [
-                "-progress",
-                "pipe:1",
-                "-nostats",
-                str(self.params.media_output),
-            ]
-        )
+        cmd.append(str(self.params.media_output))
 
         return cmd

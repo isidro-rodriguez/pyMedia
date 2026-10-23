@@ -6,7 +6,6 @@ Define los servicios comunes para los comandos.
 import os
 import re
 import shlex
-import sys
 from abc import ABC
 from collections.abc import Iterable
 from datetime import timedelta
@@ -103,7 +102,15 @@ class BaseService[ParamsT: _OverwriteParams](ABC):
         return True
 
     def display_cmd(self, cmd: list[str]) -> None:
-        """Muestra el comando compuesto al usuario si ha activado debug o show-cmd."""
+        """Muestra el comando compuesto al usuario si ha activado debug o show-cmd.
+
+        Args:
+            cmd: Comando ffmpeg ya construido.
+
+        Raises:
+            typer.Exit: Tras mostrar el comando con `show_cmd`, o si el usuario
+                rechaza ejecutarlo en modo debug.
+        """
 
         def _quote_windows(token: str) -> str:
             """Entrecomilla un token si contiene caracteres especiales."""
@@ -112,7 +119,7 @@ class BaseService[ParamsT: _OverwriteParams](ABC):
             return '"' + token.replace('"', '\\"') + '"'
 
         def _format_cmd() -> str:
-            """Format a command list as a copy-pasteable shell string."""
+            """Formatea el comando como cadena lista para copiar en la shell."""
             if os.name == "nt":
                 return " ".join(_quote_windows(t) for t in cmd)
             return shlex.join(cmd)
@@ -124,7 +131,7 @@ class BaseService[ParamsT: _OverwriteParams](ABC):
                 soft_wrap=True,
                 markup=False,
             )
-            sys.exit(0)
+            raise typer.Exit()
 
         self.logger.debug(_("FFmpeg command: %(cmd)s"), cmd=cmd)
 
@@ -132,7 +139,7 @@ class BaseService[ParamsT: _OverwriteParams](ABC):
             text=_("Do you want to run this ffmpeg command?")
         ):
             self.logger.warning(msg=_("User decided to abort process."))
-            sys.exit(0)
+            raise typer.Exit()
 
     def run_ffmpeg(
         self,
@@ -160,12 +167,11 @@ class BaseService[ParamsT: _OverwriteParams](ABC):
             OperativeSystemError: Si el directorio de destino no existe o no se
                 puede mover una salida a su destino final.
         """
-        overwrite = True if self.params.overwrite == OverwriteMode.YES else False
         run_ffmpeg(
             cmd=cmd,
             description=description,
             outputs=output_list,
-            overwrite=overwrite,
+            overwrite=self.params.overwrite == OverwriteMode.YES,
             stall_timeout=self.config.app.stall_timeout,
             command_name=self.command_name,
             progress_time=progress_time,

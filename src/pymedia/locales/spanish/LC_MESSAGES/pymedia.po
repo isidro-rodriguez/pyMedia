@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-09-28 13:45+0100\n"
+"POT-Creation-Date: 2026-10-23 12:32+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -69,50 +69,50 @@ msgstr "ffprobe no se encontró. Instala ffmpeg."
 
 #: pymedia/ffprobe.py:70
 #, python-format
-msgid "ffprobe couldn't read %(path)s: %(err.stderr)s"
-msgstr "ffprobe no pudo leer %(path)s: %(err.stderr)s"
+msgid "ffprobe couldn't read %(path)s: %(reason)s"
+msgstr "ffprobe no pudo leer %(path)s: %(reason)s"
 
 #: pymedia/ffprobe.py:74
 #, python-format
 msgid "ffprobe returned invalid output for %(path)s"
 msgstr "ffprobe devolvió una salida no válida para %(path)s"
 
-#: pymedia/ffprobe.py:326
+#: pymedia/ffprobe.py:389
 #, python-format
 msgid "ffprobe media data: %(data)s"
 msgstr "Datos de medio de ffprobe: %(data)s"
 
-#: pymedia/ffprobe.py:379
+#: pymedia/ffprobe.py:398
 #, python-format
 msgid "Invalid video container: %(path)s"
 msgstr "Contenedor de vídeo no válido: %(path)s"
 
-#: pymedia/ffprobe.py:429
+#: pymedia/ffprobe.py:444
 #, python-format
 msgid "ffprobe audio file data: %(data)s"
 msgstr "Datos de audio del fichero ffprobe: %(data)s"
 
-#: pymedia/ffprobe.py:460
+#: pymedia/ffprobe.py:453
 #, python-format
 msgid "It doesn't contain any audio track. Invalid audio file: %(file)s"
 msgstr "No contiene ninguna pista de audio. Fichero de audio no válido: %(file)s"
 
-#: pymedia/ffprobe.py:466
+#: pymedia/ffprobe.py:459
 #, python-format
 msgid "Audio file contains video tracks: %(tracks)s"
 msgstr "El fichero de audio contiene pistas de vídeo: %(tracks)s"
 
-#: pymedia/ffprobe.py:471
+#: pymedia/ffprobe.py:464
 #, python-format
 msgid "Audio file contains subtitles tracks: %(tracks)s"
 msgstr "El fichero de audio contiene pistas de subtítulos: %(tracks)s"
 
-#: pymedia/ffprobe.py:491
+#: pymedia/ffprobe.py:484
 #, python-format
 msgid "ffprobe subtitles file data: %(data)s"
 msgstr "Datos de fichero de subtítulos de ffprobe: %(data)s"
 
-#: pymedia/ffprobe.py:504
+#: pymedia/ffprobe.py:497
 #, python-format
 msgid ""
 "\"%(path)s\" is not a recognized subtitles file (detected format: "
@@ -121,7 +121,7 @@ msgstr ""
 "\"%(path)s\" no es un fichero de subtítulos reconocido (formato "
 "detectado: %(format_name)s)."
 
-#: pymedia/ffprobe.py:513
+#: pymedia/ffprobe.py:506
 #, python-format
 msgid "%(path.suffix)s extension doesn't support %(codec_name)s subtitles."
 msgstr "La extensión %(path.suffix)s no admite subtítulos %(codec_name)s."
@@ -258,7 +258,7 @@ msgstr ""
 msgid "Image commands"
 msgstr "Comandos de imagen"
 
-#: pymedia/commands/animated/cmd.py:125
+#: pymedia/commands/animated/cmd.py:119
 msgid "Animated image output not supported"
 msgstr "La salida de imagen animada no es compatible."
 
@@ -283,13 +283,13 @@ msgstr "Plataforma"
 msgid "Ffmpeg CLI handler"
 msgstr "Interfaz CLI para FFmpeg"
 
-#: pymedia/commands/base/cli.py:99
+#: pymedia/commands/base/cli.py:98
 msgid "The following options are mutually exclusive: output, output_directory"
 msgstr ""
 "Las siguientes opciones son mutuamente excluyentes: output, "
 "output_directory"
 
-#: pymedia/commands/base/cli.py:105
+#: pymedia/commands/base/cli.py:104
 msgid ""
 "It is not allowed to specify an output with multiple inputs, use output "
 "directory instead."
@@ -297,8 +297,7 @@ msgstr ""
 "No se permite especificar una salida con varias entradas; usa el "
 "directorio de salida en su lugar."
 
-#: pymedia/commands/base/cli.py:126 pymedia/commands/base/cli.py:151
-#: pymedia/commands/base/cli.py:176
+#: pymedia/commands/base/cli.py:115
 #, python-format
 msgid "%(path)s is not a file."
 msgstr "%(path)s no es un archivo."
@@ -591,52 +590,67 @@ msgstr "Especifica un ángulo de giro ortogonal para rotar la imagen vía metada
 msgid "Output file will not copy disposition from source file."
 msgstr "El fichero de salida no copiará las disposiciones del fichero de origen."
 
-#: pymedia/commands/base/ffmpeg_runner.py:86
-#: pymedia/commands/base/service.py:96
+#: pymedia/commands/base/ffmpeg_runner.py:110
+#, python-format
+msgid "Multiple outputs share the same file name: %(name)s"
+msgstr "Varias salidas comparten el mismo nombre de fichero: %(name)s"
+
+#: pymedia/commands/base/ffmpeg_runner.py:131
+#: pymedia/commands/base/service.py:95
 #, python-format
 msgid "Output file already exists: %(name)s"
 msgstr "El fichero de salida ya existe: %(name)s"
 
-#: pymedia/commands/base/ffmpeg_runner.py:92
+#: pymedia/commands/base/ffmpeg_runner.py:137
 msgid "Output file could not be moved."
 msgstr "No se pudo mover el fichero de salida."
 
-#: pymedia/commands/base/ffmpeg_runner.py:303
+#: pymedia/commands/base/ffmpeg_runner.py:221 pymedia/commands/main/cli.py:46
+#, python-format
+msgid "%(binary)s was not found in PATH. Install ffmpeg first."
+msgstr "%(binary)s no se encontró en el PATH. Instala ffmpeg primero."
+
+#: pymedia/commands/base/ffmpeg_runner.py:334
+#, python-format
+msgid "Destination directory does not exist: %(path)s"
+msgstr "El directorio de destino no existe: %(path)s"
+
+#: pymedia/commands/base/ffmpeg_runner.py:360
 #, python-format
 msgid "FFmpeg command interrupted manually: %(command_name)s"
 msgstr "Comando FFmpeg %(command_name)s interrumpido manualmente."
 
-#: pymedia/commands/base/ffmpeg_runner.py:308
+#: pymedia/commands/base/ffmpeg_runner.py:365
 #, python-format
 msgid "FFmpeg command timed out: %(command_name)s"
 msgstr "El comando FFmpeg %(command_name)s agotó el tiempo de espera."
 
-#: pymedia/commands/base/ffmpeg_runner.py:316
+#: pymedia/commands/base/ffmpeg_runner.py:373
 msgid "FFmpeg command failed during execution."
 msgstr "El comando FFmpeg falló durante la ejecución."
 
-#: pymedia/commands/base/service.py:67
+#: pymedia/commands/base/service.py:66
 msgid "Invalid class name format!"
 msgstr "¡Formato de nombre de clase no válido!"
 
-#: pymedia/commands/base/service.py:89
+#: pymedia/commands/base/service.py:88
 msgid "Process skipped since output file already exists."
 msgstr "Proceso omitido porque el fichero de salida ya existe."
 
-#: pymedia/commands/base/service.py:98 pymedia/commands/scene/service.py:90
+#: pymedia/commands/base/service.py:97 pymedia/commands/scene/service.py:90
 msgid "Overwrite?"
 msgstr "¿Sobrescribir?"
 
-#: pymedia/commands/base/service.py:129
+#: pymedia/commands/base/service.py:136
 #, python-format
 msgid "FFmpeg command: %(cmd)s"
 msgstr "Comando FFmpeg: %(cmd)s"
 
-#: pymedia/commands/base/service.py:132
+#: pymedia/commands/base/service.py:139
 msgid "Do you want to run this ffmpeg command?"
 msgstr "¿Quieres ejecutar este comando ffmpeg?"
 
-#: pymedia/commands/base/service.py:134
+#: pymedia/commands/base/service.py:141
 msgid "User decided to abort process."
 msgstr "El usuario decidió abortar el proceso."
 
@@ -1006,7 +1020,7 @@ msgstr "Campo"
 msgid "Value"
 msgstr "Valor"
 
-#: pymedia/commands/info/service.py:69 pymedia/commands/sheet/cmd.py:303
+#: pymedia/commands/info/service.py:69 pymedia/commands/sheet/cmd.py:241
 msgid "File"
 msgstr "Archivo"
 
@@ -1014,20 +1028,20 @@ msgstr "Archivo"
 msgid "Container"
 msgstr "Contenedor"
 
-#: pymedia/commands/info/service.py:72 pymedia/commands/sheet/cmd.py:316
+#: pymedia/commands/info/service.py:72 pymedia/commands/sheet/cmd.py:281
 msgid "Duration"
 msgstr "Duración"
 
-#: pymedia/commands/info/service.py:80 pymedia/commands/sheet/cmd.py:308
+#: pymedia/commands/info/service.py:80 pymedia/commands/sheet/cmd.py:279
 msgid "Size"
 msgstr "Tamaño"
 
-#: pymedia/commands/info/service.py:97 pymedia/mixins/scale_mixin.py:124
-#: pymedia/mixins/scale_mixin.py:140
+#: pymedia/commands/info/service.py:97 pymedia/mixins/scale_mixin.py:123
+#: pymedia/mixins/scale_mixin.py:139
 msgid "video dimensions"
 msgstr "dimensiones del vídeo"
 
-#: pymedia/commands/info/service.py:99 pymedia/commands/sheet/cmd.py:320
+#: pymedia/commands/info/service.py:99 pymedia/commands/sheet/cmd.py:244
 msgid "Video"
 msgstr "Vídeo"
 
@@ -1101,7 +1115,7 @@ msgstr "VI"
 msgid "Metadata"
 msgstr "Metadatos"
 
-#: pymedia/commands/info/service.py:230
+#: pymedia/commands/info/service.py:215
 #, python-format
 msgid "%(bit_rate)s kbps"
 msgstr "%(bit_rate)s kbps"
@@ -1158,7 +1172,7 @@ msgstr ""
 msgid "It's required to provide at least 2 videos."
 msgstr "Es necesario proporcionar al menos 2 vídeos."
 
-#: pymedia/commands/join/service.py:47
+#: pymedia/commands/join/service.py:44
 #, python-format
 msgid ""
 "List file:\n"
@@ -1167,16 +1181,16 @@ msgstr ""
 "Fichero de lista:\n"
 "%(list_txt)s"
 
-#: pymedia/commands/join/service.py:54
+#: pymedia/commands/join/service.py:51
 msgid "Joining media files"
 msgstr "Uniendo archivos multimedia"
 
-#: pymedia/commands/join/service.py:59
+#: pymedia/commands/join/service.py:56
 #, python-format
 msgid "Containers joined successfully: %(output)s"
 msgstr "Contenedores unidos correctamente: %(output)s"
 
-#: pymedia/commands/join/service.py:180
+#: pymedia/commands/join/service.py:82
 #, python-format
 msgid ""
 "Incompatible media files for join output %(output)s.\n"
@@ -1213,11 +1227,6 @@ msgstr ""
 "  Muestra la versión y sale:\n"
 "    > pymedia --version\n"
 
-#: pymedia/commands/main/cli.py:46
-#, python-format
-msgid "%(binary)s was not found in PATH. Install ffmpeg first."
-msgstr "%(binary)s no se encontró en el PATH. Instala ffmpeg primero."
-
 #: pymedia/commands/remux/cli.py:30
 msgid ""
 "Change container and disposition without transcoding.\n"
@@ -1225,8 +1234,8 @@ msgid ""
 "[bold]Examples[/bold]:\n"
 "  Change video container:\n"
 "    > pymedia remux input.mp4 -o output.mkv\n"
-"  Fix faststart moving moov atom at the start\n"
-"    > pymedia remux input.mp4 --fast-start -o output.mp4\n"
+"  Move moov atom to the start (faststart, automatic in .mp4):\n"
+"    > pymedia remux input.mkv -o output.mp4\n"
 "  Fix broken timestamps\n"
 "    > pymedia remux input.mp4 --genpts -o output.mkv\n"
 "  Sort stream tracks\n"
@@ -1237,8 +1246,8 @@ msgstr ""
 "[bold]Ejemplos[/bold]:\n"
 "  Cambia el contenedor del vídeo:\n"
 "    > pymedia remux input.mp4 -o output.mkv\n"
-"  Corrige faststart moviendo el átomo moov al inicio\n"
-"    > pymedia remux input.mp4 --fast-start -o output.mp4\n"
+"  Mueve el átomo moov al inicio (faststart, automático en .mp4):\n"
+"    > pymedia remux input.mkv -o output.mp4\n"
 "  Corrige las marcas de tiempo dañadas\n"
 "    > pymedia remux input.mp4 --genpts -o output.mkv\n"
 "  Ordena las pistas de flujo\n"
@@ -1359,8 +1368,7 @@ msgid ""
 "    Transcode only video track changing with a configurated profile:\n"
 "    > pymedia transcode source.mp4 --preset even --video -o target.mp4\n"
 "    Transcode video track meanwhile its applied multiple filters:\n"
-"    > pymedia transcode source.mp4 --profile fast --size 1280x720 --hflip"
-"\n"
+"    > pymedia transcode source.mp4 --preset fast --size 1280x720 --hflip\n"
 "    Burn subtitles in video track.\n"
 "    > pymedia transcode source.mp4 --burn-subtitles eng-subs.srt\n"
 msgstr ""
@@ -1373,8 +1381,7 @@ msgstr ""
 "    Transcodifica solo la pista de vídeo con un perfil configurado:\n"
 "    > pymedia transcode source.mp4 --preset even --video -o target.mp4\n"
 "    Transcodifica la pista de vídeo mientras se aplican varios filtros:\n"
-"    > pymedia transcode source.mp4 --profile fast --size 1280x720 --hflip"
-"\n"
+"    > pymedia transcode source.mp4 --preset fast --size 1280x720 --hflip\n"
 "    Incrusta subtítulos en la pista de vídeo.\n"
 "    > pymedia transcode source.mp4 --burn-subtitles eng-subs.srt\n"
 
@@ -1401,18 +1408,18 @@ msgstr ""
 "o un código estándar ISO 639-1/639-2: "
 "[https://www.loc.gov/standards/iso639-2/php/code_list.php]"
 
-#: pymedia/mixins/crop_mixin.py:81
+#: pymedia/mixins/crop_mixin.py:80
 #, python-format
 msgid "Invalid crop %(crop_str)s. Expected: WIDTH,HEIGHT,X,Y"
 msgstr "Crop no válido %(crop_str)s. Se esperaba: WIDTH,HEIGHT,X,Y"
 
-#: pymedia/mixins/crop_mixin.py:99
+#: pymedia/mixins/crop_mixin.py:98
 msgid "Invalid crop dimensions: width and height must be greater than 0."
 msgstr ""
 "Dimensiones de recorte no válidas: la anchura y la altura deben ser "
 "mayores que 0."
 
-#: pymedia/mixins/crop_mixin.py:107
+#: pymedia/mixins/crop_mixin.py:106
 #, python-format
 msgid ""
 "Invalid crop area. Area width (%(area_width)s) and coordinate X "
@@ -1421,7 +1428,7 @@ msgstr ""
 "Área de recorte no válida. La anchura del área (%(area_width)s) y la "
 "coordenada X (%(area_x)s) superan la anchura del vídeo (%(video_width)s)"
 
-#: pymedia/mixins/crop_mixin.py:120
+#: pymedia/mixins/crop_mixin.py:119
 #, python-format
 msgid ""
 "Invalid crop area. Area height (%(area_height)s) and coordinate Y "
@@ -1438,7 +1445,7 @@ msgstr "Parámetro de inversión no válido."
 msgid "Image container not supported."
 msgstr "Contenedor de imagen no soportado."
 
-#: pymedia/mixins/outputs_mixin.py:487
+#: pymedia/mixins/outputs_mixin.py:479
 #, python-format
 msgid ""
 "Cannot remux %(codec)s to %(extension)s. Safe remux targets: "
@@ -1447,35 +1454,35 @@ msgstr ""
 "No se puede hacer remux del códec %(codec)s a %(extension)s. Destinos "
 "seguros para remux: %(supported)s."
 
-#: pymedia/mixins/outputs_mixin.py:511
+#: pymedia/mixins/outputs_mixin.py:503
 #, python-format
 msgid "%(name)s contains invalid characters: < > : \" / \\ | ? *"
 msgstr "%(name)s contiene caracteres no válidos: < > : \" / \\ | ? *"
 
-#: pymedia/mixins/outputs_mixin.py:523
+#: pymedia/mixins/outputs_mixin.py:515
 #, python-format
 msgid "Could not create directory: %(path)s"
 msgstr "No se pudo crear el directorio: %(path)s"
 
-#: pymedia/mixins/outputs_mixin.py:559
+#: pymedia/mixins/outputs_mixin.py:552
 #, python-format
 msgid "Output file must be different from the input file: %(path)s"
 msgstr "El fichero de salida debe ser distinto del de entrada: %(path)s"
 
-#: pymedia/mixins/scale_mixin.py:112
+#: pymedia/mixins/scale_mixin.py:111
 #, python-format
 msgid "Invalid dimensions %(value)s. Expected: WIDTHxHEIGHT"
 msgstr "Dimensiones inválidas %(value)s. Se esperaba: WIDTHxHEIGHT"
 
-#: pymedia/mixins/scale_mixin.py:136
+#: pymedia/mixins/scale_mixin.py:135
 msgid "Scale mode not supported."
 msgstr "Modo de escala no soportado."
 
-#: pymedia/mixins/scale_mixin.py:147
+#: pymedia/mixins/scale_mixin.py:146
 msgid "Target dimensions must be even."
 msgstr "Las dimensiones objetivo deben ser pares."
 
-#: pymedia/mixins/scale_mixin.py:152
+#: pymedia/mixins/scale_mixin.py:151
 msgid "Ignored scale. Target scale > video resolution, it requires upscale."
 msgstr ""
 "Escala ignorada. La escala objetivo supera la resolución del vídeo y "
@@ -1491,7 +1498,7 @@ msgstr ""
 msgid "Stream index must be greater than 0."
 msgstr "El índice del stream debe ser mayor que 0."
 
-#: pymedia/mixins/streams_mixin.py:95 pymedia/mixins/subtitles_mixin.py:350
+#: pymedia/mixins/streams_mixin.py:95 pymedia/mixins/subtitles_mixin.py:351
 msgid "Subtitles index not included."
 msgstr "Índice de subtítulos no incluido."
 
@@ -1499,11 +1506,11 @@ msgstr "Índice de subtítulos no incluido."
 msgid "Incorrect stream type."
 msgstr "Tipo de stream incorrecto."
 
-#: pymedia/mixins/subtitles_mixin.py:132
+#: pymedia/mixins/subtitles_mixin.py:133
 msgid "Subtitles codec not supported."
 msgstr "Códec de subtítulos no soportado."
 
-#: pymedia/mixins/subtitles_mixin.py:360
+#: pymedia/mixins/subtitles_mixin.py:361
 msgid ""
 "Value doesn't match with ISO 639-1/639-2: Codes for the Representation of"
 " Names of "
@@ -1536,7 +1543,34 @@ msgstr "Formato de marca de tiempo no válido. Esperado: hh:mm:ss."
 msgid "Timestamp %(time)s exceeds video duration %(duration)s."
 msgstr "La marca de tiempo %(time)s supera la duración del vídeo %(duration)s."
 
-#: pymedia/models/config.py:177
+#: pymedia/models/config.py:170
+#, python-format
+msgid "Configuration file is not valid TOML: %(path)s (%(reason)s)"
+msgstr "El fichero de configuración no es un TOML válido: %(path)s (%(reason)s)"
+
+#: pymedia/models/config.py:193
+#, python-format
+msgid "Invalid configuration: %(msg)s"
+msgstr "Configuración no válida: %(msg)s"
+
+#: pymedia/models/config.py:220
+#, python-format
+msgid "Invalid configuration setting: %(setting)s is expected to be a table."
+msgstr ""
+"Ajuste de configuración no válido: se espera que %(setting)s sea una "
+"tabla."
+
+#: pymedia/models/config.py:227
+#, python-format
+msgid "Missing configuration setting: %(setting)s."
+msgstr "Falta el ajuste de configuración: %(setting)s."
+
+#: pymedia/models/config.py:233
+#, python-format
+msgid "Unknown configuration setting: %(setting)s."
+msgstr "Ajuste de configuración desconocido: %(setting)s."
+
+#: pymedia/models/config.py:249
 #, python-format
 msgid ""
 "Invalid configuration setting: transcode presets are expected one of: "
@@ -1545,7 +1579,7 @@ msgstr ""
 "Ajuste de configuración no válido: se espera que los presets de transcode"
 " sean uno de: %(expected)s."
 
-#: pymedia/models/config.py:193
+#: pymedia/models/config.py:259
 #, python-format
 msgid ""
 "Invalid configuration setting: transcode.%(preset)s is expected to be a "
@@ -1554,115 +1588,21 @@ msgstr ""
 "Ajuste de configuración no válido: se espera que transcode.%(preset)s sea"
 " una tabla de parámetros de codificación."
 
-#: pymedia/models/config.py:211
-#, python-format
-msgid ""
-"Invalid configuration setting: transcode.%(preset)s.video_codec is "
-"expected one of: %(expected)s."
-msgstr ""
-"Ajuste de configuración no válido: se espera que "
-"transcode.%(preset)s.video_codec sea uno de: %(expected)s."
-
-#: pymedia/models/config.py:228
-#, python-format
-msgid ""
-"Invalid configuration setting: transcode.%(preset)s.video_preset is "
-"expected one of: %(expected)s."
-msgstr ""
-"Ajuste de configuración no válido: se espera que "
-"transcode.%(preset)s.video_preset sea uno de: %(expected)s."
-
-#: pymedia/models/config.py:247
-#, python-format
-msgid ""
-"Invalid configuration setting: transcode.%(preset)s.video_crf is expected"
-" between %(min)s and %(max)s."
-msgstr ""
-"Ajuste de configuración no válido: se espera que "
-"transcode.%(preset)s.video_crf esté entre %(min)s y %(max)s."
-
-#: pymedia/models/config.py:260
-#, python-format
-msgid ""
-"Invalid configuration setting: transcode.%(preset)s.audio_codec is "
-"expected one of: %(expected)s."
-msgstr ""
-"Ajuste de configuración no válido: se espera que "
-"transcode.%(preset)s.audio_codec sea uno de: %(expected)s."
-
 #: pymedia/models/config.py:277
 #, python-format
 msgid ""
-"Invalid configuration setting: transcode.%(preset)s.audio_bit_rate is "
-"expected one of: %(expected)s."
-msgstr ""
-"Ajuste de configuración no válido: se espera que "
-"transcode.%(preset)s.audio_bit_rate sea uno de: %(expected)s."
-
-#: pymedia/models/config.py:294
-#, python-format
-msgid ""
-"Invalid configuration setting: default_container.animated_image is "
-"expected one of: %(expected)s."
-msgstr ""
-"Ajuste de configuración no válido: default_container.animated_image debe "
-"ser uno de: %(expected)s."
-
-#: pymedia/models/config.py:313
-#, python-format
-msgid ""
-"Invalid configuration setting: default_container.audio is expected one "
-"of: %(expected)s."
-msgstr ""
-"Ajuste de configuración no válido: default_container.audio debe ser uno "
-"de: %(expected)s."
-
-#: pymedia/models/config.py:325
-#, python-format
-msgid ""
-"Invalid configuration setting: default_container.image is expected one "
-"of: %(expected)s."
-msgstr ""
-"Ajuste de configuración no válido: default_container.image debe ser uno "
-"de: %(expected)s."
-
-#: pymedia/models/config.py:346
-#, python-format
-msgid ""
-"Invalid configuration setting: default_container.media is expected one "
-"of: %(expected)s."
-msgstr ""
-"Ajuste de configuración no válido: default_container.media debe ser uno "
-"de: %(expected)s."
-
-#: pymedia/models/config.py:358
-#, python-format
-msgid ""
-"Invalid configuration setting: default_container.subtitles is expected "
-"one of: %(expected)s."
-msgstr ""
-"Ajuste de configuración no válido: default_container.subtitles debe ser "
-"uno de: %(expected)s."
-
-#: pymedia/models/config.py:374
-#, python-format
-msgid ""
-"Invalid configuration setting: app.language is expected one of: "
+"Invalid configuration setting: %(setting)s is expected one of: "
 "%(expected)s."
 msgstr ""
-"Configuración no válida: se espera que app.language sea uno de: "
+"Ajuste de configuración no válido: se espera que %(setting)s sea uno de: "
 "%(expected)s."
 
-#: pymedia/models/config.py:388
-msgid ""
-"Invalid configuration setting: app.stall_timeout is expected to an "
-"integer between 30 to 600."
-msgstr ""
-"Configuración no válida: se espera que app.stall_timeout sea un entero "
-"entre 30 y 600."
-
-#: pymedia/models/config.py:395
+#: pymedia/models/config.py:284
 #, python-format
-msgid "Invalid configuration: %(msg)s"
-msgstr "Configuración no válida: %(msg)s"
+msgid ""
+"Invalid configuration setting: %(setting)s is expected to be an integer "
+"between %(min)s and %(max)s."
+msgstr ""
+"Ajuste de configuración no válido: se espera que %(setting)s sea un "
+"entero entre %(min)s y %(max)s."
 

@@ -33,8 +33,8 @@ Change container and disposition without transcoding.
 [bold]Examples[/bold]:
   Change video container:
     > pymedia remux input.mp4 -o output.mkv
-  Fix faststart moving moov atom at the start
-    > pymedia remux input.mp4 --fast-start -o output.mp4
+  Move moov atom to the start (faststart, automatic in .mp4):
+    > pymedia remux input.mkv -o output.mp4
   Fix broken timestamps
     > pymedia remux input.mp4 --genpts -o output.mkv
   Sort stream tracks

@@ -35,7 +35,7 @@ the source audio file. Use `edit-audio` to modify them after insertion.
   Add audio and override default disposition:
     > pymedia add-audio input.mp4 audio.m4a
     Then: pymedia edit-audio output.mp4 --track 1 --default
-"""  # noqa
+"""
 )
 
 

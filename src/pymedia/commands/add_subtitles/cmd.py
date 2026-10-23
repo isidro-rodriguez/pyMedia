@@ -2,7 +2,6 @@
 
 from pymedia.commands.add_subtitles.parameters import AddSubtitlesParameters
 from pymedia.errors import MissingParameterError
-from pymedia.types import OverwriteMode
 
 
 class AddSubtitlesCmd:
@@ -37,9 +36,6 @@ class AddSubtitlesCmd:
 
         cmd = ["ffmpeg"]
 
-        if self.params.overwrite == OverwriteMode.YES:
-            cmd.append("-y")
-
         cmd.extend(
             [
                 "-i",
@@ -63,9 +59,6 @@ class AddSubtitlesCmd:
         cmd.extend(
             [
                 *self.params.to_subtitles_metadata_cmd(subtitles=subtitles),
-                "-progress",
-                "pipe:1",
-                "-nostats",
                 str(self.params.media_output),
             ]
         )

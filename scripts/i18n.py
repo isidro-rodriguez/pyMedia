@@ -47,6 +47,12 @@ def _po_path(lang: str) -> Path:
     return LOCALEDIR / lang / "LC_MESSAGES" / f"{DOMAIN}.po"
 
 
+def _read_catalog(path: Path) -> Catalog:
+    """Lee un catálogo `.po`/`.pot` cerrando el fichero al terminar."""
+    with path.open("rb") as file:
+        return read_po(file)
+
+
 def _extract_catalog() -> Catalog:
     """Extrae los msgid de los archivos Python de `src/`."""
     catalog = Catalog(domain=DOMAIN)
@@ -78,12 +84,12 @@ def cmd_update(lang: str) -> None:
         lang: Nombre de idioma del catálogo (`spanish`, `english`...).
     """
     pot_path = LOCALEDIR / f"{DOMAIN}.pot"
-    pot = read_po(pot_path.open("rb"))
+    pot = _read_catalog(pot_path)
     po_path = _po_path(lang)
 
     old: dict[str, str] = {}
     if po_path.exists():
-        for msg in read_po(po_path.open("rb")):
+        for msg in _read_catalog(po_path):
             # las formas plurales tienen id tuple/list: no hashable, fuera de alcance
             if isinstance(msg.id, str) and msg.id:
                 old[msg.id] = msg.string if isinstance(msg.string, str) else ""
@@ -108,7 +114,7 @@ def cmd_compile(lang: str) -> None:
     po_path = _po_path(lang)
     if not po_path.exists():
         sys.exit(f"No existe {po_path}")
-    catalog = read_po(po_path.open("rb"))
+    catalog = _read_catalog(po_path)
     mo_path = po_path.with_suffix(".mo")
     with mo_path.open("wb") as f:
         write_mo(f, catalog)
@@ -140,7 +146,7 @@ def cmd_check() -> None:
         if not po_path.exists():
             problems.append(f"Falta el catálogo: {po_path}")
             continue
-        catalog = read_po(po_path.open("rb"))
+        catalog = _read_catalog(po_path)
         try:
             stream = io.BytesIO()
             write_mo(stream, catalog)
@@ -182,7 +188,7 @@ def main() -> None:
     sub.add_parser("extract", help="Genera pymedia.pot desde src/")
     for name in ("update", "compile"):
         p = sub.add_parser(name, help=f"{name.capitalize()} de catálogos")
-        p.add_argument("-l", "--lang", default="spanish")
+        p.add_argument("-l", "--lang", default="spanish", choices=LANGUAGES)
     sub.add_parser("check", help="Valida los catálogos")
 
     args = parser.parse_args()

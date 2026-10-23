@@ -8,7 +8,7 @@ from typing import Any
 
 from pymedia.data.subtitles_formats import SUBTITLES_FORMATS, SubtitlesType
 from pymedia.data.video_codecs import VIDEO_CODECS
-from pymedia.errors import FfprobeError, MissingParameterError, UserError
+from pymedia.errors import FfprobeError, UserError
 from pymedia.locales import translate as _
 from pymedia.logger import Logger
 from pymedia.models.audio import (
@@ -67,8 +67,8 @@ def _run_ffprobe(args: list[str], path: Path) -> dict[str, Any]:
         lines = [line for line in err.stderr.splitlines() if line.strip()]
         reason = lines[-1] if lines else str(err.returncode)
         raise FfprobeError(
-            msg=_("ffprobe couldn't read %(path)s: %(err.stderr)s")
-            % {"path": path, "err.stderr": reason}
+            msg=_("ffprobe couldn't read %(path)s: %(reason)s")
+            % {"path": path, "reason": reason}
         ) from err
 
     invalid = _("ffprobe returned invalid output for %(path)s") % {"path": path}
@@ -312,98 +312,113 @@ def _build_chapter(chapter: dict[str, Any]) -> Chapter:
     )
 
 
-def get_media_information(media_input: Path, logger: Logger) -> "Media":
+def _build_video(path: Path, stream: dict[str, Any], track_index: int) -> Video:
+    """Construye la pista de vídeo a partir de un stream de ffprobe."""
+    tags = to_dict(stream.get("tags"))
+    return Video(
+        path=path.absolute(),
+        global_index=to_int(stream.get("index")),
+        track_index=track_index,
+        duration=_stream_duration(stream=stream, tags=tags),
+        format=_build_video_format(stream=stream),
+        metadata=_build_video_metadata(tags=tags),
+        dispositions=_build_video_dispositions(
+            disposition=to_dict(stream.get("disposition"))
+        ),
+    )
+
+
+def _build_audio(path: Path, stream: dict[str, Any], track_index: int) -> Audio:
+    """Construye una pista de audio a partir de un stream de ffprobe."""
+    tags = to_dict(stream.get("tags"))
+    return Audio(
+        path=path.absolute(),
+        global_index=to_int(stream.get("index")),
+        track_index=track_index,
+        duration=_stream_duration(stream=stream, tags=tags),
+        format=_build_audio_format(stream=stream),
+        loudness=_build_audio_loudness(tags=tags),
+        metadata=_build_audio_metadata(tags=tags),
+        dispositions=_build_audio_dispositions(
+            disposition=to_dict(stream.get("disposition"))
+        ),
+    )
+
+
+def _build_subtitles(path: Path, stream: dict[str, Any], track_index: int) -> Subtitles:
+    """Construye una pista de subtítulos a partir de un stream de ffprobe."""
+    tags = to_dict(stream.get("tags"))
+    return Subtitles(
+        path=path.absolute(),
+        global_index=to_int(stream.get("index")),
+        track_index=track_index,
+        duration=_stream_duration(stream=stream, tags=tags),
+        format=_build_subtitles_format(stream=stream),
+        metadata=_build_subtitles_metadata(tags=tags),
+        dispositions=_build_subtitles_dispositions(
+            disposition=to_dict(stream.get("disposition"))
+        ),
+    )
+
+
+def _streams_by_type(data: dict[str, Any]) -> dict[str, list[dict[str, Any]]]:
+    """Agrupa los streams de ffprobe por `codec_type`, conservando su orden."""
+    grouped: dict[str, list[dict[str, Any]]] = {}
+    for stream in to_dict_list(data.get("streams")):
+        grouped.setdefault(str(stream.get("codec_type")), []).append(stream)
+    return grouped
+
+
+def get_media_information(media_input: Path, logger: Logger) -> Media:
     """Obtiene información del contenedor multimedia.
+
+    Args:
+        media_input: Ruta del contenedor multimedia a analizar.
+        logger: Servicio de registro de mensajes.
+
+    Returns:
+        Contenedor con sus pistas, capítulos y metadatos.
 
     Raises:
         UserError: Si el contenedor no tiene pista de vídeo.
         FfprobeError: Si ffprobe no puede leer el archivo.
-        MissingParameterError: Si faltan parámetros requeridos.
     """
     data = _run_ffprobe(
         ["-show_format", "-show_streams", "-show_chapters"], media_input
     )
     logger.debug(msg=_("ffprobe media data: %(data)s"), data=data)
 
-    video: Video | None = None
-    audio: list[Audio] = []
-    subtitles: list[Subtitles] = []
-    video_track_index, audio_track_index, subtitles_track_index = 0, 0, 0
-
-    for stream in to_dict_list(data.get("streams")):
-        codec_type = stream.get("codec_type")
-        tags = to_dict(stream.get("tags"))
-        disposition = to_dict(stream.get("disposition"))
-
-        if codec_type == "video":
-            video = Video(
-                path=media_input.absolute(),
-                global_index=to_int(stream.get("index")),
-                track_index=video_track_index,
-                duration=_stream_duration(stream=stream, tags=tags),
-                format=_build_video_format(stream=stream),
-                metadata=_build_video_metadata(tags=tags),
-                dispositions=_build_video_dispositions(disposition=disposition),
-            )
-            video_track_index += 1
-        elif codec_type == "audio":
-            audio.append(
-                Audio(
-                    path=media_input.absolute(),
-                    global_index=to_int(stream.get("index")),
-                    track_index=audio_track_index,
-                    duration=_stream_duration(stream=stream, tags=tags),
-                    format=_build_audio_format(stream=stream),
-                    loudness=_build_audio_loudness(tags=tags),
-                    metadata=_build_audio_metadata(tags=tags),
-                    dispositions=_build_audio_dispositions(disposition=disposition),
-                )
-            )
-            audio_track_index += 1
-        elif codec_type == "subtitle":
-            subtitles.append(
-                Subtitles(
-                    path=media_input.absolute(),
-                    global_index=to_int(stream.get("index")),
-                    track_index=subtitles_track_index,
-                    duration=_stream_duration(stream=stream, tags=tags),
-                    format=_build_subtitles_format(stream=stream),
-                    metadata=_build_subtitles_metadata(tags=tags),
-                    dispositions=_build_subtitles_dispositions(disposition=disposition),
-                )
-            )
-            subtitles_track_index += 1
-
-    if video is None:
+    streams = _streams_by_type(data)
+    videos = [
+        _build_video(media_input, stream, i)
+        for i, stream in enumerate(streams.get("video", []))
+    ]
+    if not videos:
         raise UserError(
             msg=_("Invalid video container: %(path)s") % {"path": str(media_input)}
         )
+    audio = [
+        _build_audio(media_input, stream, i)
+        for i, stream in enumerate(streams.get("audio", []))
+    ]
+    subtitles = [
+        _build_subtitles(media_input, stream, i)
+        for i, stream in enumerate(streams.get("subtitle", []))
+    ]
 
     fmt = to_dict(data.get("format"))
-    tags = to_dict(fmt.get("tags"))
-    duration = to_timedelta(to_float(fmt.get("duration")))
     chapters = [_build_chapter(chapter=ch) for ch in to_dict_list(data.get("chapters"))]
-
-    try:
-        media = Media(
-            path=media_input.absolute(),
-            duration=duration,
-            format=_build_media_format(fmt=fmt),
-            video=video,
-            audio=audio or None,
-            subtitles=subtitles or None,
-            chapters=chapters or None,
-            metadata=_build_media_metadata(tags=tags),
-        )
-    except (
-        ValueError,
-        subprocess.CalledProcessError,
-        json.JSONDecodeError,
-        OSError,
-    ) as e:
-        raise MissingParameterError(name="media") from e
-
-    return media
+    return Media(
+        path=media_input.absolute(),
+        duration=to_timedelta(to_float(fmt.get("duration"))),
+        format=_build_media_format(fmt=fmt),
+        # Con varias pistas de vídeo (p. ej. carátulas) prevalece la última.
+        video=videos[-1],
+        audio=audio or None,
+        subtitles=subtitles or None,
+        chapters=chapters or None,
+        metadata=_build_media_metadata(tags=to_dict(fmt.get("tags"))),
+    )
 
 
 def get_audio_information(audio_input: Path, logger: Logger) -> list[Audio]:
@@ -428,45 +443,23 @@ def get_audio_information(audio_input: Path, logger: Logger) -> list[Audio]:
     )
     logger.debug(msg=_("ffprobe audio file data: %(data)s"), data=data)
 
-    audio: list[Audio] = []
-    audio_track_index, video_tracks, subtitles_tracks = 0, 0, 0
-
-    for stream in to_dict_list(data.get("streams")):
-        codec_type = stream.get("codec_type")
-        tags = to_dict(stream.get("tags"))
-        disposition = to_dict(stream.get("disposition"))
-
-        if codec_type == "audio":
-            audio.append(
-                Audio(
-                    path=audio_input.absolute(),
-                    global_index=to_int(stream.get("index")),
-                    track_index=audio_track_index,
-                    duration=_stream_duration(stream=stream, tags=tags),
-                    format=_build_audio_format(stream=stream),
-                    loudness=_build_audio_loudness(tags=tags),
-                    metadata=_build_audio_metadata(tags=tags),
-                    dispositions=_build_audio_dispositions(disposition=disposition),
-                )
-            )
-            audio_track_index += 1
-        elif codec_type == "video":
-            video_tracks += 1
-        elif codec_type == "subtitle":
-            subtitles_tracks += 1
-
-    if len(audio) == 0:
+    streams = _streams_by_type(data)
+    audio = [
+        _build_audio(audio_input, stream, i)
+        for i, stream in enumerate(streams.get("audio", []))
+    ]
+    if not audio:
         raise UserError(
             msg=_("It doesn't contain any audio track. Invalid audio file: %(file)s")
             % {"file": audio_input}
         )
 
-    if video_tracks > 0:
+    if video_tracks := len(streams.get("video", [])):
         logger.warning(
             msg=_("Audio file contains video tracks: %(tracks)s")
             % {"tracks": video_tracks}
         )
-    if subtitles_tracks > 0:
+    if subtitles_tracks := len(streams.get("subtitle", [])):
         logger.warning(
             msg=_("Audio file contains subtitles tracks: %(tracks)s")
             % {"tracks": subtitles_tracks}

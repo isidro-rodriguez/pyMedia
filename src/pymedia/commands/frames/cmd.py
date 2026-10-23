@@ -4,7 +4,6 @@ from datetime import timedelta
 
 from pymedia.commands.frames.parameters import FramesParameters
 from pymedia.errors import MissingParameterError
-from pymedia.types import OverwriteMode
 
 
 class FramesCmd:
@@ -51,9 +50,6 @@ class FramesCmd:
 
         cmd: list[str] = ["ffmpeg"]
 
-        if params.overwrite == OverwriteMode.YES:
-            cmd.append("-y")
-
         cmd.extend(["-ss", str(timestamp)])
 
         cmd.extend(
@@ -65,9 +61,6 @@ class FramesCmd:
                 "-frames:v",
                 "1",
                 *params.to_image_quality_cmd().compression,
-                "-progress",
-                "pipe:1",
-                "-nostats",
                 str(output),
             ]
         )

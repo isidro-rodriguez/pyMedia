@@ -44,7 +44,7 @@ NOTE: You can edit preset profiles in config.toml.
     Transcode only video track changing with a configurated profile:
     > pymedia transcode source.mp4 --preset even --video -o target.mp4
     Transcode video track meanwhile its applied multiple filters:
-    > pymedia transcode source.mp4 --profile fast --size 1280x720 --hflip
+    > pymedia transcode source.mp4 --preset fast --size 1280x720 --hflip
     Burn subtitles in video track.
     > pymedia transcode source.mp4 --burn-subtitles eng-subs.srt
 """

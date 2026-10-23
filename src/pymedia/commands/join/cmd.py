@@ -4,7 +4,6 @@ from pathlib import Path
 
 from pymedia.commands.join.parameters import JoinParameters
 from pymedia.errors import MissingParameterError
-from pymedia.types import OverwriteMode
 
 
 class JoinCmd:
@@ -35,9 +34,6 @@ class JoinCmd:
 
         cmd = ["ffmpeg"]
 
-        if self.params.overwrite == OverwriteMode.YES:
-            cmd.append("-y")
-
         cmd.extend(
             [
                 "-f",
@@ -55,9 +51,6 @@ class JoinCmd:
                     if self.params.strip_metadata
                     else []
                 ),
-                "-progress",
-                "pipe:1",
-                "-nostats",
                 str(self.params.media_output),
             ]
         )

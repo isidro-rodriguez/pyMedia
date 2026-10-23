@@ -289,8 +289,8 @@ La fixture `pymedia` ejecuta cada test como CLI en proceso (`[cli]`) y como bina
 
 ```bash
 uv run python scripts/i18n.py extract            # regenera pymedia.pot desde src/
-uv run python scripts/i18n.py update -l es       # sincroniza es.po con el POT
-uv run python scripts/i18n.py compile -l es      # compila pymedia.po -> pymedia.mo
+uv run python scripts/i18n.py update -l spanish       # sincroniza spanish.po con el POT
+uv run python scripts/i18n.py compile -l spanish      # compila pymedia.po -> pymedia.mo
 uv run python scripts/i18n.py check              # valida POT y catálogos
 uv run pytest -m locales
 ```

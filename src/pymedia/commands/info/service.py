@@ -109,7 +109,7 @@ class InfoService(BaseService[InfoParameters]):
                 else video.format.codec or na,
                 f"{video.format.width}x{video.format.height}",
                 str(video.format.fps) if video.format.fps else na,
-                self._estimated_bit_rate(),
+                _format_kbps(media.video_bit_rate, na),
             )
             return table
 
@@ -204,27 +204,12 @@ class InfoService(BaseService[InfoParameters]):
             width=_PANEL_WIDTH,
         )
 
-    def _estimated_bit_rate(self) -> str:
-        """Devuelve el bit_rate obtenido por ffprobe o lo calcula si no se obtuvo."""
-        if self.params.media is None:
-            raise MissingParameterError(name="media")
-        media = self.params.media
-        if media.format.size is None:
-            raise MissingParameterError(name="media")
-        if media.duration is None:
-            raise MissingParameterError(name="duration")
-        video = self.params.media.video
-        if video is None:
-            raise MissingParameterError(name="video")
 
-        locale = locale_manager.detect_language()
-
-        if video.format.bit_rate:
-            bit_rate = video.format.bit_rate / 1024
-        else:
-            bit_rate = (media.format.size * 8 / media.duration.total_seconds()) / 1024
-
-        bit_rate = math.floor(bit_rate)
-        bit_rate = parse_quantity(value=bit_rate, locale=locale)
-
-        return _("%(bit_rate)s kbps") % {"bit_rate": bit_rate}
+def _format_kbps(bit_rate: float | None, na: str) -> str:
+    """Formatea una tasa de bits en bps como kbps (SI), o `na` si no se conoce."""
+    if bit_rate is None:
+        return na
+    kbps = parse_quantity(
+        value=math.floor(bit_rate / 1000), locale=locale_manager.detect_language()
+    )
+    return _("%(bit_rate)s kbps") % {"bit_rate": kbps}

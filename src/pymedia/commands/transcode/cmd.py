@@ -3,7 +3,6 @@
 from pymedia.commands.transcode.parameters import TranscodeParameters
 from pymedia.errors import MissingParameterError
 from pymedia.models.config import Config
-from pymedia.types import OverwriteMode
 
 
 class TranscodeCmd:
@@ -48,9 +47,6 @@ class TranscodeCmd:
 
         cmd = ["ffmpeg"]
 
-        if self.params.overwrite == OverwriteMode.YES:
-            cmd.extend(["-y"])
-
         cmd.extend(
             [
                 "-i",
@@ -81,9 +77,6 @@ class TranscodeCmd:
         cmd.extend(
             [
                 *self.params.to_video_transcode_cmd(),
-                "-progress",
-                "pipe:1",
-                "-nostats",
                 str(self.params.media_output),
             ]
         )

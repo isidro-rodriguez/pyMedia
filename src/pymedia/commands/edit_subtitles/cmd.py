@@ -2,7 +2,6 @@
 
 from pymedia.commands.edit_subtitles.parameters import EditSubtitlesParameters
 from pymedia.errors import MissingParameterError
-from pymedia.types import OverwriteMode
 
 
 class EditSubtitlesCmd:
@@ -34,9 +33,6 @@ class EditSubtitlesCmd:
             raise MissingParameterError(name="subtitles")
 
         cmd = ["ffmpeg"]
-
-        if self.params.overwrite == OverwriteMode.YES:
-            cmd.append("-y")
 
         cmd.extend(
             [
