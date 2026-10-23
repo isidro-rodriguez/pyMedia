@@ -14,7 +14,7 @@ and
 .BR ffprobe (1).
 
 It provides higher-level commands for common media-processing operations:
-metadata inspection, thumbnail sheets, container joining, splitting and
+metadata inspection, thumbnail sheets, playback preview, container joining, splitting and
 remuxing, profile-based transcoding, audio and subtitles track editing and
 animated image generation. It also handles input validation, output-path
 resolution and output-name conflicts, and shows a progress bar for long
@@ -37,6 +37,39 @@ with
 .I web
 (default:
 .BR hd ).
+.TP
+.B play
+Play a media file with
+.BR ffplay (1).
+Select a range with
+.B --start
+and
+.BR --end ,
+the tracks with
+.B --audio
+and
+.B --subs
+(or
+.B --no-subs
+/
+.BR --mute ),
+draw an external subtitles file with
+.BR --burn-subtitles ,
+and preview the image filters
+.RB ( --crop ,
+.BR --size ,
+.BR --rotate ,
+.BR --hflip ,
+.BR --vflip ).
+.B --volume
+.IR 0-100 ,
+.B --loop
+and
+.B --fullscreen
+control the playback. Requires
+.B ffplay
+in
+.BR PATH .
 .SS Video
 .TP
 .B join
@@ -423,6 +456,7 @@ full command-line interface. For operations requiring functionality not
 exposed by pyMedia, use FFmpeg directly.
 .SH SEE ALSO
 .BR ffmpeg (1),
+.BR ffplay (1),
 .BR ffprobe (1)
 .SH AUTHORS
 pyMedia contributors. Project: https://github.com/isidro-rodriguez/pyMedia

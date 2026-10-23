@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-10-23 19:22+0100\n"
+"POT-Creation-Date: 2026-10-23 19:42+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -462,153 +462,206 @@ msgstr "Quema el fichero de subtítulos en la pista de vídeo."
 msgid "Set to transcode the video track."
 msgstr "Transcodifica la pista de vídeo."
 
-#: pymedia/commands/base/cli_options.py:322
-#: pymedia/commands/base/cli_options.py:331
-#: pymedia/commands/base/cli_options.py:340
-#: pymedia/commands/base/cli_options.py:349
-#: pymedia/commands/base/cli_options.py:358
-#: pymedia/commands/base/cli_options.py:368
+#: pymedia/commands/base/cli_options.py:323
+#: pymedia/commands/base/cli_options.py:332
+#: pymedia/commands/base/cli_options.py:342
+#: pymedia/commands/base/cli_options.py:351
+#: pymedia/commands/base/cli_options.py:360
+#: pymedia/commands/base/cli_options.py:369
 #: pymedia/commands/base/cli_options.py:378
-#: pymedia/commands/base/cli_options.py:387
+#: pymedia/commands/base/cli_options.py:388
+#: pymedia/commands/base/cli_options.py:398
+#: pymedia/commands/base/cli_options.py:408
+msgid "Playback options"
+msgstr "Opciones de reproducción"
+
+#: pymedia/commands/base/cli_options.py:324
+msgid "Audio track to play."
+msgstr "Pista de audio a reproducir."
+
+#: pymedia/commands/base/cli_options.py:333
+msgid "Draw a subtitles file over the video."
+msgstr "Dibuja un fichero de subtítulos sobre el vídeo."
+
+#: pymedia/commands/base/cli_options.py:343
+msgid "Timestamp where playback ends."
+msgstr "Marca de tiempo donde termina la reproducción."
+
+#: pymedia/commands/base/cli_options.py:352
+msgid "Start playback in full screen."
+msgstr "Inicia la reproducción a pantalla completa."
+
+#: pymedia/commands/base/cli_options.py:361
+msgid "Repeat playback until the window is closed."
+msgstr "Repite la reproducción hasta cerrar la ventana."
+
+#: pymedia/commands/base/cli_options.py:370
+msgid "Play without audio."
+msgstr "Reproduce sin audio."
+
+#: pymedia/commands/base/cli_options.py:379
+msgid "Hide the container subtitles."
+msgstr "Oculta los subtítulos del contenedor."
+
+#: pymedia/commands/base/cli_options.py:389
+msgid "Timestamp where playback starts."
+msgstr "Marca de tiempo donde empieza la reproducción."
+
+#: pymedia/commands/base/cli_options.py:399
+msgid "Subtitles track to show."
+msgstr "Pista de subtítulos a mostrar."
+
+#: pymedia/commands/base/cli_options.py:409
+msgid "Initial volume, as a percentage."
+msgstr "Volumen inicial, en porcentaje."
+
+#: pymedia/commands/base/cli_options.py:421
+#: pymedia/commands/base/cli_options.py:430
+#: pymedia/commands/base/cli_options.py:439
+#: pymedia/commands/base/cli_options.py:448
+#: pymedia/commands/base/cli_options.py:457
+#: pymedia/commands/base/cli_options.py:467
+#: pymedia/commands/base/cli_options.py:477
+#: pymedia/commands/base/cli_options.py:486
 msgid "Audio options"
 msgstr "Opciones de audio"
 
-#: pymedia/commands/base/cli_options.py:323
+#: pymedia/commands/base/cli_options.py:422
 msgid "Set as commentary audio track."
 msgstr "Establece la pista de audio como comentario."
 
-#: pymedia/commands/base/cli_options.py:332
+#: pymedia/commands/base/cli_options.py:431
 msgid "Set as default audio track of the container."
 msgstr "Establece la pista de audio como predeterminada del contenedor."
 
-#: pymedia/commands/base/cli_options.py:341
-#: pymedia/commands/base/cli_options.py:410
+#: pymedia/commands/base/cli_options.py:440
+#: pymedia/commands/base/cli_options.py:509
 msgid "Set as forced to be displayed."
 msgstr "Establecer como forzado a mostrarse."
 
-#: pymedia/commands/base/cli_options.py:350
+#: pymedia/commands/base/cli_options.py:449
 msgid "Set audio track as targeted for hearing impaired people."
 msgstr ""
 "Establece la pista de audio como destinada a personas con discapacidad "
 "auditiva."
 
-#: pymedia/commands/base/cli_options.py:359
+#: pymedia/commands/base/cli_options.py:458
 msgid "Set audio language, formatted as ISO 639-2 code."
 msgstr "Establece el idioma de la pista de audio, con código ISO 639-2."
 
-#: pymedia/commands/base/cli_options.py:369
+#: pymedia/commands/base/cli_options.py:468
 msgid "List of audio tracks to process."
 msgstr "Lista de pistas de audio a procesar."
 
-#: pymedia/commands/base/cli_options.py:379
+#: pymedia/commands/base/cli_options.py:478
 msgid "Audio track to edit."
 msgstr "Pista de audio que editar."
 
-#: pymedia/commands/base/cli_options.py:388
+#: pymedia/commands/base/cli_options.py:487
 msgid "Set a custom audio track title for video player."
 msgstr ""
 "Establece un título personalizado de la pista de audio para el "
 "reproductor."
 
-#: pymedia/commands/base/cli_options.py:400
-#: pymedia/commands/base/cli_options.py:409
-#: pymedia/commands/base/cli_options.py:418
-#: pymedia/commands/base/cli_options.py:427
-#: pymedia/commands/base/cli_options.py:437
-#: pymedia/commands/base/cli_options.py:447
-#: pymedia/commands/base/cli_options.py:456
-#: pymedia/commands/base/cli_options.py:465
+#: pymedia/commands/base/cli_options.py:499
+#: pymedia/commands/base/cli_options.py:508
+#: pymedia/commands/base/cli_options.py:517
+#: pymedia/commands/base/cli_options.py:526
+#: pymedia/commands/base/cli_options.py:536
+#: pymedia/commands/base/cli_options.py:546
+#: pymedia/commands/base/cli_options.py:555
+#: pymedia/commands/base/cli_options.py:564
 msgid "Subtitles options"
 msgstr "Opciones de subtítulos"
 
-#: pymedia/commands/base/cli_options.py:401
+#: pymedia/commands/base/cli_options.py:500
 msgid "Set as default subtitles of the container."
 msgstr "Establecer como subtítulo predeterminado del contenedor."
 
-#: pymedia/commands/base/cli_options.py:419
+#: pymedia/commands/base/cli_options.py:518
 msgid "Set as targeted for hearing impaired people."
 msgstr "Establecer como dirigido a personas con discapacidad auditiva."
 
-#: pymedia/commands/base/cli_options.py:428
+#: pymedia/commands/base/cli_options.py:527
 msgid "Set subtitles language, formatted as ISO 639-2 code."
 msgstr "Establece el idioma de los subtítulos, con formato de código ISO 639-2."
 
-#: pymedia/commands/base/cli_options.py:438
+#: pymedia/commands/base/cli_options.py:537
 msgid "List of subtitles tracks to process."
 msgstr "Lista de pistas de subtítulos a procesar."
 
-#: pymedia/commands/base/cli_options.py:448
+#: pymedia/commands/base/cli_options.py:547
 msgid "Subtitles track to edit."
 msgstr "Pista de subtítulos a editar."
 
-#: pymedia/commands/base/cli_options.py:457
+#: pymedia/commands/base/cli_options.py:556
 msgid "Set a custom title for video player."
 msgstr "Establece un título personalizado para el reproductor de vídeo."
 
-#: pymedia/commands/base/cli_options.py:466
+#: pymedia/commands/base/cli_options.py:565
 msgid "Set as targeted for visual impaired people."
 msgstr "Establecer como dirigido a personas con discapacidad visual."
 
-#: pymedia/commands/base/cli_options.py:479
-#: pymedia/commands/base/cli_options.py:488
-#: pymedia/commands/base/cli_options.py:497
-#: pymedia/commands/base/cli_options.py:508
-#: pymedia/commands/base/cli_options.py:517
+#: pymedia/commands/base/cli_options.py:578
+#: pymedia/commands/base/cli_options.py:587
+#: pymedia/commands/base/cli_options.py:596
+#: pymedia/commands/base/cli_options.py:607
+#: pymedia/commands/base/cli_options.py:616
 msgid "Filter options"
 msgstr "Opciones de filtro"
 
-#: pymedia/commands/base/cli_options.py:480
+#: pymedia/commands/base/cli_options.py:579
 msgid "Crop to WIDTH×HEIGHT at offset X,Y (from top-left)."
 msgstr ""
 "Recorta a ANCHO×ALTO en el desplazamiento X,Y (desde la esquina superior "
 "izquierda)."
 
-#: pymedia/commands/base/cli_options.py:489
+#: pymedia/commands/base/cli_options.py:588
 msgid "Flip the image horizontally, swapping left and right."
 msgstr "Invierte la imagen horizontalmente, intercambiando izquierda y derecha."
 
-#: pymedia/commands/base/cli_options.py:498
+#: pymedia/commands/base/cli_options.py:597
 msgid "Flip the image vertically, swapping top and bottom."
 msgstr "Invierte la imagen verticalmente, intercambiando arriba y abajo."
 
-#: pymedia/commands/base/cli_options.py:509
+#: pymedia/commands/base/cli_options.py:608
 msgid "Set the animated image frame rate in frames per second."
 msgstr ""
 "Establece la velocidad de fotogramas de la imagen animada en fotogramas "
 "por segundo."
 
-#: pymedia/commands/base/cli_options.py:518
+#: pymedia/commands/base/cli_options.py:617
 msgid "Specify an orthogonal arc degree to rotate the image."
 msgstr "Especifica un ángulo de giro ortogonal para rotar la imagen."
 
-#: pymedia/commands/base/cli_options.py:530
-#: pymedia/commands/base/cli_options.py:540
-#: pymedia/commands/base/cli_options.py:549
+#: pymedia/commands/base/cli_options.py:629
+#: pymedia/commands/base/cli_options.py:639
+#: pymedia/commands/base/cli_options.py:648
 msgid "Scale filter options"
 msgstr "Opciones de filtro de escala"
 
-#: pymedia/commands/base/cli_options.py:531
+#: pymedia/commands/base/cli_options.py:630
 msgid "Specify different ways to scale the video."
 msgstr "Especifica distintas formas de escalar el vídeo."
 
-#: pymedia/commands/base/cli_options.py:541
+#: pymedia/commands/base/cli_options.py:640
 msgid "Target resolution, in pixels, to resize the video."
 msgstr "Resolución objetivo, en píxeles, para redimensionar el vídeo."
 
-#: pymedia/commands/base/cli_options.py:550
+#: pymedia/commands/base/cli_options.py:649
 msgid "Allows upscaling beyond the source dimensions."
 msgstr "Permite ampliar más allá de las dimensiones de origen."
 
-#: pymedia/commands/base/cli_options.py:563
-#: pymedia/commands/base/cli_options.py:572
+#: pymedia/commands/base/cli_options.py:662
+#: pymedia/commands/base/cli_options.py:671
 msgid "Metadata options"
 msgstr "Opciones de metadatos"
 
-#: pymedia/commands/base/cli_options.py:564
+#: pymedia/commands/base/cli_options.py:663
 msgid "Specify an orthogonal arc degree to rotate image through disposition."
 msgstr "Especifica un ángulo de giro ortogonal para rotar la imagen vía metadatos."
 
-#: pymedia/commands/base/cli_options.py:573
+#: pymedia/commands/base/cli_options.py:672
 msgid "Output file will not copy disposition from source file."
 msgstr "El fichero de salida no copiará las disposiciones del fichero de origen."
 
@@ -628,6 +681,7 @@ msgid "Output file could not be moved."
 msgstr "No se pudo mover el fichero de salida."
 
 #: pymedia/commands/base/ffmpeg_runner.py:220 pymedia/commands/main/cli.py:47
+#: pymedia/commands/play/service.py:38
 #, python-format
 msgid "%(binary)s was not found in PATH. Install ffmpeg first."
 msgstr "%(binary)s no se encontró en el PATH. Instala ffmpeg primero."
@@ -977,7 +1031,8 @@ msgstr ""
 "  Muestra los metadatos del vídeo:\n"
 "    > pymedia info input.mp4\n"
 
-#: pymedia/commands/info/cli.py:33 pymedia/commands/sheet/cli.py:42
+#: pymedia/commands/info/cli.py:33 pymedia/commands/play/cli.py:62
+#: pymedia/commands/sheet/cli.py:42
 msgid "Analysis commands"
 msgstr "Comandos de análisis"
 
@@ -1237,6 +1292,58 @@ msgstr ""
 "  Muestra la versión y sale:\n"
 "    > pymedia --version\n"
 
+#: pymedia/commands/play/cli.py:38
+msgid ""
+"Plays a video with ffplay.\n"
+"\n"
+"Useful to preview a cut, an audio or subtitles track, or image filters\n"
+"before processing the file.\n"
+"\n"
+"[bold]Examples[/bold]:\n"
+"  Play a video:\n"
+"    > pymedia play input.mkv\n"
+"  Play a range with the second audio track and the first subtitles track:"
+"\n"
+"    > pymedia play input.mkv --start 10:00 --end 12:30 --audio 1 --subs 0"
+"\n"
+"  Preview image filters before transcoding:\n"
+"    > pymedia play input.mp4 --crop 1280,720,0,0 --hflip\n"
+"\n"
+"[bold]Keys[/bold]:\n"
+"  space pause · ←/→ seek 10 s · ↓/↑ seek 1 min · 9/0 volume · m mute\n"
+"  a audio track · t subtitles track · f full screen · q quit\n"
+msgstr ""
+"Reproduce un vídeo con ffplay.\n"
+"\n"
+"Útil para previsualizar un corte, una pista de audio o de subtítulos, o "
+"los\n"
+"filtros de imagen antes de procesar el fichero.\n"
+"\n"
+"[bold]Ejemplos[/bold]:\n"
+"  Reproducir un vídeo:\n"
+"    > pymedia play entrada.mkv\n"
+"  Reproducir un tramo con la segunda pista de audio y la primera de "
+"subtítulos:\n"
+"    > pymedia play entrada.mkv --start 10:00 --end 12:30 --audio 1 --subs"
+" 0\n"
+"  Previsualizar filtros de imagen antes de transcodificar:\n"
+"    > pymedia play entrada.mp4 --crop 1280,720,0,0 --hflip\n"
+"\n"
+"[bold]Teclas[/bold]:\n"
+"  espacio pausa · ←/→ ±10 s · ↓/↑ ±1 min · 9/0 volumen · m silencio\n"
+"  a pista de audio · t pista de subtítulos · f pantalla completa · q "
+"salir\n"
+
+#: pymedia/commands/play/service.py:42
+#, python-format
+msgid "Playing %(name)s"
+msgstr "Reproduciendo %(name)s"
+
+#: pymedia/commands/play/service.py:51
+#, python-format
+msgid "ffplay ended with an error (exit code %(code)s)."
+msgstr "ffplay terminó con un error (código de salida %(code)s)."
+
 #: pymedia/commands/remux/cli.py:31
 msgid ""
 "Change container and disposition without transcoding.\n"
@@ -1426,7 +1533,8 @@ msgstr "¿Convertirlas a un formato de subtítulos compatible?"
 msgid "Incompatible subtitles will be discarded."
 msgstr "Los subtítulos incompatibles se descartarán."
 
-#: pymedia/mixins/audio_mixin.py:308 pymedia/mixins/streams_mixin.py:87
+#: pymedia/mixins/audio_mixin.py:308 pymedia/mixins/playback_mixin.py:157
+#: pymedia/mixins/streams_mixin.py:87
 msgid "Audio index not included."
 msgstr "Índice de audio no incluido."
 
@@ -1501,6 +1609,21 @@ msgstr "No se pudo crear el directorio: %(path)s"
 msgid "Output file must be different from the input file: %(path)s"
 msgstr "El fichero de salida debe ser distinto del de entrada: %(path)s"
 
+#: pymedia/mixins/playback_mixin.py:88
+#, python-format
+msgid "Volume must be between 0 and %(max)s."
+msgstr "El volumen debe estar entre 0 y %(max)s."
+
+#: pymedia/mixins/playback_mixin.py:159 pymedia/mixins/streams_mixin.py:95
+#: pymedia/mixins/subtitles_mixin.py:351
+msgid "Subtitles index not included."
+msgstr "Índice de subtítulos no incluido."
+
+#: pymedia/mixins/playback_mixin.py:166
+#, python-format
+msgid "These options cannot be combined: %(options)s"
+msgstr "Estas opciones no se pueden combinar: %(options)s"
+
 #: pymedia/mixins/scale_mixin.py:111
 #, python-format
 msgid "Invalid dimensions %(value)s. Expected: WIDTHxHEIGHT"
@@ -1529,10 +1652,6 @@ msgstr ""
 #: pymedia/mixins/streams_mixin.py:77
 msgid "Stream index must be 0 or greater."
 msgstr "El índice del stream debe ser 0 o mayor."
-
-#: pymedia/mixins/streams_mixin.py:95 pymedia/mixins/subtitles_mixin.py:351
-msgid "Subtitles index not included."
-msgstr "Índice de subtítulos no incluido."
 
 #: pymedia/mixins/streams_mixin.py:100
 msgid "Incorrect stream type."

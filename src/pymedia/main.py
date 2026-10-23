@@ -54,6 +54,7 @@ def _build_app() -> typer.Typer:
     from pymedia.commands.interval.cli import interval_cli
     from pymedia.commands.join.cli import join_cli
     from pymedia.commands.main.cli import main_cli
+    from pymedia.commands.play.cli import play_cli
     from pymedia.commands.remux.cli import remux_cli
     from pymedia.commands.scene.cli import scene_cli
     from pymedia.commands.sheet.cli import sheet_cli
@@ -62,6 +63,7 @@ def _build_app() -> typer.Typer:
     built_app = main_cli
     built_app.add_typer(info_cli)
     built_app.add_typer(sheet_cli)
+    built_app.add_typer(play_cli)
     built_app.add_typer(transcode_cli)
     built_app.add_typer(remux_cli)
     built_app.add_typer(cut_cli)

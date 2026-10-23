@@ -19,6 +19,10 @@
 `ffmpeg no se encontró en el PATH. Instala ffmpeg primero.`
 :   Instala ffmpeg (ver [Instalación](instalacion.md)) y abre una terminal nueva.
 
+`ffplay no se encontró en el PATH. Instala ffmpeg primero.`
+:   Solo afecta a `play`. Algunas compilaciones mínimas de ffmpeg no incluyen ffplay:
+    instala el paquete completo de tu sistema.
+
 `El fichero de configuración no es un TOML válido`
 :   Error de sintaxis en `config.toml`: revisa comillas y corchetes, o bórralo para regenerarlo.
 

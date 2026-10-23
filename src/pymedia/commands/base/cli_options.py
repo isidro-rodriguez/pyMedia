@@ -312,6 +312,105 @@ TranscodeVideoOption = Annotated[
 ]
 
 # =============================================================================
+#  Opciones de reproducción
+# =============================================================================
+
+PlayAudioOption = Annotated[
+    int | None,
+    typer.Option(
+        default="--audio",
+        metavar="int",
+        rich_help_panel=_("Playback options"),
+        help=_("Audio track to play."),
+    ),
+]
+
+PlayBurnSubtitlesOption = Annotated[
+    Path | None,
+    typer.Option(
+        default="--burn-subtitles",
+        rich_help_panel=_("Playback options"),
+        help=_("Draw a subtitles file over the video."),
+    ),
+]
+
+PlayEndOption = Annotated[
+    str | None,
+    typer.Option(
+        default="--end",
+        metavar="hh:mm:ss",
+        rich_help_panel=_("Playback options"),
+        help=_("Timestamp where playback ends."),
+    ),
+]
+
+PlayFullscreenOption = Annotated[
+    bool,
+    typer.Option(
+        default="--fullscreen",
+        rich_help_panel=_("Playback options"),
+        help=_("Start playback in full screen."),
+    ),
+]
+
+PlayLoopOption = Annotated[
+    bool,
+    typer.Option(
+        default="--loop",
+        rich_help_panel=_("Playback options"),
+        help=_("Repeat playback until the window is closed."),
+    ),
+]
+
+PlayMuteOption = Annotated[
+    bool,
+    typer.Option(
+        default="--mute",
+        rich_help_panel=_("Playback options"),
+        help=_("Play without audio."),
+    ),
+]
+
+PlayNoSubtitlesOption = Annotated[
+    bool,
+    typer.Option(
+        default="--no-subs",
+        rich_help_panel=_("Playback options"),
+        help=_("Hide the container subtitles."),
+    ),
+]
+
+PlayStartOption = Annotated[
+    str | None,
+    typer.Option(
+        default="--start",
+        metavar="hh:mm:ss",
+        rich_help_panel=_("Playback options"),
+        help=_("Timestamp where playback starts."),
+    ),
+]
+
+PlaySubtitlesOption = Annotated[
+    int | None,
+    typer.Option(
+        default="--subs",
+        metavar="int",
+        rich_help_panel=_("Playback options"),
+        help=_("Subtitles track to show."),
+    ),
+]
+
+PlayVolumeOption = Annotated[
+    int | None,
+    typer.Option(
+        default="--volume",
+        metavar="0-100",
+        rich_help_panel=_("Playback options"),
+        help=_("Initial volume, as a percentage."),
+    ),
+]
+
+# =============================================================================
 #  Opciones de audio
 # =============================================================================
 

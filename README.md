@@ -47,6 +47,7 @@ pymedia <comando> --help     # ayuda y ejemplos de un comando
 | --------------- | ----------------------------------------------------------------- |
 | `info`          | `pymedia info video.mp4`                                          |
 | `sheet`         | `pymedia sheet video.mp4 --preset fhd -o hoja.webp`               |
+| `play`          | `pymedia play video.mkv --start 10:00 --audio 1`                  |
 | `transcode`     | `pymedia transcode video.mkv --preset slow --video --audio 0`     |
 | `remux`         | `pymedia remux video.mp4 -o video.mkv`                            |
 | `cut`           | `pymedia cut video.mp4 --at 10:05,40:30`                          |

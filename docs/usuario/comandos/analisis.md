@@ -67,3 +67,54 @@ pymedia sheet *.mp4 --preset web -d hojas/
 
 La tipografía (Source Code Pro Bold) se copia a `assets/`, dentro del directorio de
 configuración del usuario, la primera vez que se usa.
+
+## `play`
+
+Reproduce un vídeo con `ffplay` en una ventana. Sirve para revisar un fichero o para
+**previsualizar** un tramo, una pista o unos filtros de imagen antes de procesarlo
+con `cut` o `transcode`. No escribe ningún fichero.
+
+```bash
+pymedia play pelicula.mkv
+pymedia play pelicula.mkv --start 10:00 --end 12:30 --audio 1 --subs 0
+pymedia play pelicula.mp4 --crop 1280,720,0,140 --size 960x540
+pymedia play pelicula.mp4 --burn-subtitles subs.srt --volume 50
+```
+
+| Opción              | ffplay            | Descripción                                                         |
+|---------------------|-------------------|---------------------------------------------------------------------|
+| `--start`, `--end`  | `-ss`, `-t`       | Tramo a reproducir. El final se convierte en duración desde el inicio. |
+| `--audio N`         | `-ast a:N`        | Pista de audio a reproducir (índice de `info`).                     |
+| `--subs N`          | `-sst s:N`        | Pista de subtítulos a mostrar.                                      |
+| `--no-subs`         | `-sn`             | Oculta los subtítulos del contenedor.                               |
+| `--burn-subtitles`  | `-vf subtitles=`  | Dibuja un fichero `.srt`/`.ass`/`.ssa` sobre el vídeo y oculta los internos. |
+| `--mute`            | `-an`             | Reproduce sin audio.                                                |
+| `--volume`          | `-volume`         | Volumen inicial, de 0 a 100.                                        |
+| `--loop`            | `-loop 0`         | Repite hasta cerrar la ventana; con `--start`/`--end`, repite el tramo. |
+| `--fullscreen`      | `-fs`             | Abre a pantalla completa.                                           |
+| `--crop`, `--size`, `--mode`, `--upscale`, `--rotate`, `--hflip`, `--vflip` | `-vf` | Los mismos [filtros de imagen](../filtros.md) que `transcode`. |
+
+No se pueden combinar `--mute` con `--audio`, ni `--subs`, `--no-subs` y
+`--burn-subtitles` entre sí.
+
+### Controles de ffplay
+
+| Tecla           | Acción                           |
+|-----------------|----------------------------------|
+| ++space++       | Pausa / continúa.                |
+| ++left++ / ++right++ | Retrocede / avanza 10 s.    |
+| ++down++ / ++up++    | Retrocede / avanza 1 min.   |
+| ++9++ / ++0++   | Baja / sube el volumen.          |
+| ++m++           | Silencio.                        |
+| ++a++ / ++t++   | Siguiente pista de audio / de subtítulos. |
+| ++f++           | Pantalla completa.               |
+| ++q++ / ++esc++ | Cierra la ventana.               |
+
+!!! note "ffplay"
+    `play` es el único comando que necesita `ffplay`, y solo lo comprueba al
+    ejecutarse: el resto de comandos funcionan aunque no esté instalado. Viene con el
+    paquete `ffmpeg` de Debian/Ubuntu, con `winget install ffmpeg` y con Homebrew.
+    `--show-cmd` muestra el comando aunque ffplay no esté instalado.
+
+La ventana no se cierra sola al terminar el vídeo: ciérrala con ++q++. La salida de
+ffplay (estado de reproducción y errores) se muestra directamente en la terminal.

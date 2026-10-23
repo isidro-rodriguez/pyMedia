@@ -12,6 +12,7 @@ Primera versión estable.
 
 ### Añadido
 
+- Comando `play`: reproduce un vídeo con ffplay para revisar o previsualizar un tramo (`--start`/`--end`), las pistas (`--audio`, `--subs`, `--no-subs`, `--mute`), un fichero de subtítulos externo (`--burn-subtitles`) y los filtros de imagen, con `--volume`, `--loop` y `--fullscreen`.
 - Tema visual propio (`theme.py`, `ui.py`) aplicado a toda la interfaz: ayuda y errores de Typer, mensajes con icono por nivel y valores resaltados, barra de progreso con estado y tiempo, preguntas sí/no, panel de `info`, panel de `--version` (ahora incluye la versión de ffmpeg) y comando coloreado de `--show-cmd`.
 - Las preguntas aceptan respuestas en inglés y español (`y/yes/s/sí`, `n/no`) y muestran las opciones en el idioma activo.
 - Paquetes de distribución: `.deb` para Linux (ejecutable, man page, icono y lanzador; depende de `ffmpeg`) y `.zip` para Windows, generados con `scripts/package.py`.

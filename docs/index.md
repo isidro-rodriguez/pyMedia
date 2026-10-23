@@ -43,7 +43,7 @@ cuando ffmpeg termina bien. El fichero original nunca se modifica.
 |----------------------------------------------------------|---------------------------------------------------------------------------|
 | [Instalación](usuario/instalacion.md)                    | Paquetes `.deb` y Windows, instalación desde el código y autocompletado.  |
 | [Conceptos básicos](usuario/conceptos.md)                | Pistas e índices, marcas de tiempo, salidas, sobrescritura y lotes.       |
-| [Comandos de análisis](usuario/comandos/analisis.md)     | `info`, `sheet`.                                                          |
+| [Comandos de análisis](usuario/comandos/analisis.md)     | `info`, `sheet`, `play`.                                                  |
 | [Comandos de vídeo](usuario/comandos/video.md)           | `transcode`, `remux`, `cut`, `join`.                                      |
 | [Comandos de audio](usuario/comandos/audio.md)           | `add-audio`, `delete-audio`, `edit-audio`, `extract-audio`.               |
 | [Comandos de subtítulos](usuario/comandos/subtitulos.md) | `add-subs`, `delete-subs`, `edit-subs`, `extract-subs`.                   |

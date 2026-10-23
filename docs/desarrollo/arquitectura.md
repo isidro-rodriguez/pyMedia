@@ -98,6 +98,7 @@ class CutParameters(
 | `remux_mixin`                           | Rotación por metadatos, `--genpts`, orden de pistas.           |
 | `sheet_presets_mixin`                   | Preajustes de `sheet` y ancho de miniatura.                    |
 | `metadata_mixin`                        | `--strip-disposition` (`-map_metadata -1`).                    |
+| `playback_mixin`                        | Pistas, volumen, bucle, pantalla completa y subtítulos externos de `play`. |
 
 ## Ejecución de ffmpeg
 
