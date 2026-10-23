@@ -179,6 +179,12 @@ uv run zensical build        # genera site/ (ignorado por git)
 - Usa admoniciones (`!!! note`, `!!! tip`, `!!! warning`) para avisos y pestañas
   (`=== "Linux"`) para instrucciones por plataforma.
 - El build debe terminar con «No issues found».
+- `tests/test_docs_consistency.py` contrasta la CLI real con la documentación: cada
+  comando necesita su sección `## \`nombre\`` en `docs/usuario/comandos/`, su fila en
+  el README y su entrada en `pymedia.1`; cada opción propia, su mención en la
+  sección (los filtros, un enlace a `filtros.md`); y la tabla «Opciones comunes» de
+  `conceptos.md` debe indicar exactamente qué comandos las aceptan. También falla si
+  la documentación cita una opción que ya no existe.
 
 ## Versionado y CHANGELOG
 

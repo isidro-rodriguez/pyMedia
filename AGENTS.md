@@ -90,11 +90,8 @@ uv run python scripts/i18n.py check
 uv run pytest -m locales
 ```
 
-If CLI behavior changed (slow, builds the PyInstaller binary):
-
-```bash
-uv run pytest -m binary
-```
+Do not run `uv run pytest -m binary` (slow, builds the PyInstaller binary): it only
+runs in the `pre-push` hook and in CI, and passes whenever the regular suite does.
 
 If `docs/`, `zensical.toml` or `docs_templates/` changed, the build must finish with
 "No issues found" (broken links and anchors are reported as issues):
@@ -232,8 +229,9 @@ A task is done when:
 - `uv run ty check` passes without errors.
 - `uv run pytest` passes without errors.
 - If messages changed: catalogs updated and `uv run pytest -m locales` passes.
-- If CLI behavior changed: `uv run pytest -m binary` passes.
+- `pytest -m binary` is left to the `pre-push` hook and CI; do not run it manually.
 - `README.md` and `docs/` updated if commands, options, or usage change.
+- `pymedia.1` updated too: `tests/test_docs_consistency.py` checks commands and options against README, `docs/` and the man page.
 - `CHANGELOG.md` updated; version bumped before push.
 
 ## Versioning and changelog (pre-push)
