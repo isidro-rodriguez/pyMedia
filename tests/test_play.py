@@ -36,7 +36,10 @@ def test_play_minimal_command(pymedia: Invoke, video_mp4_a: Path) -> None:
     result = pymedia("play", str(video_mp4_a), "--show-cmd")
 
     assert result.exit_code == 0, result.output
-    assert f"ffplay {video_mp4_a}" in result.output
+    # En Windows la ruta se muestra entre comillas (contiene `\\`).
+    binary, path = result.output.strip().split(" ", 1)
+    assert binary == "ffplay"
+    assert path.strip("'\"") == str(video_mp4_a)
 
 
 def test_play_range_and_playback_options(

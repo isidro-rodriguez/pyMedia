@@ -3,6 +3,7 @@
 Se ejecuta ffmpeg de verdad y se miden las marcas de tiempo del resultado.
 """
 
+import json
 import subprocess
 from pathlib import Path
 
@@ -13,7 +14,11 @@ from pymedia.mixins.delay_mixin import DelayMixin
 
 
 def _first_pts(path: Path, stream: str) -> float:
-    """Marca de tiempo del primer paquete de la pista indicada (`a:1`, `s:0`)."""
+    """Marca de tiempo del primer paquete de la pista indicada (`a:1`, `s:0`).
+
+    Se pide JSON: el formato CSV varía entre versiones de ffprobe (en Windows
+    añade una coma final por campos vacíos).
+    """
     result = subprocess.run(
         [
             "ffprobe",
@@ -26,7 +31,7 @@ def _first_pts(path: Path, stream: str) -> float:
             "-read_intervals",
             "%+#1",
             "-of",
-            "csv=p=0",
+            "json",
             str(path),
         ],
         capture_output=True,
@@ -34,7 +39,7 @@ def _first_pts(path: Path, stream: str) -> float:
         encoding="utf-8",
         check=True,
     )
-    return float(result.stdout.split()[0])
+    return float(json.loads(result.stdout)["packets"][0]["pts_time"])
 
 
 # =============================================================================
