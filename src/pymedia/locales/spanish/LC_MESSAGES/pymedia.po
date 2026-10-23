@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-10-23 14:47+0100\n"
+"POT-Creation-Date: 2026-10-23 19:22+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -37,7 +37,17 @@ msgstr "Falta el parámetro: %(name)s"
 msgid "Missing property: %(name)s"
 msgstr "Falta la propiedad: %(name)s"
 
-#: pymedia/errors.py:149
+#: pymedia/errors.py:146
+#, python-format
+msgid "Invalid value: %(message)s"
+msgstr "Valor no válido: %(message)s"
+
+#: pymedia/errors.py:150
+#, python-format
+msgid "Invalid value for %(param)s: %(message)s"
+msgstr "Valor no válido para %(param)s: %(message)s"
+
+#: pymedia/errors.py:173
 #, python-format
 msgid ""
 "Invalid extension %(extension)s. Codec %(codec)s requires one of: "
@@ -46,19 +56,19 @@ msgstr ""
 "Extensión %(extension)s no válida. El códec %(codec)s requiere una de: "
 "%(supported)s."
 
-#: pymedia/errors.py:175
+#: pymedia/errors.py:199
 #, python-format
 msgid "Invalid extension %(extension)s. %(media)s requires one of: %(supported)s."
 msgstr ""
 "Extensión %(extension)s no válida. %(media)s requiere una de: "
 "%(supported)s."
 
-#: pymedia/errors.py:197
+#: pymedia/errors.py:221
 #, python-format
 msgid "Missing required option: %(options)s"
 msgstr "Falta la opción requerida: %(options)s"
 
-#: pymedia/errors.py:202
+#: pymedia/errors.py:226
 #, python-format
 msgid "Missing at least one of these options: %(options)s"
 msgstr "Falta al menos una de estas opciones: %(options)s"

@@ -30,6 +30,11 @@ _LEVEL_ICONS = {
 }
 _SUCCESS_ICON = ("✔", "log.success")
 
+# Hasta que `Logger.create` configura los destinos, los mensajes no deben llegar
+# al manejador de último recurso de logging, que los imprimiría sin formato en
+# stderr (p. ej. los `UserError` lanzados al validar argumentos).
+logging.getLogger("pymedia").addHandler(logging.NullHandler())
+
 
 class Logger:
     """Wrapper sobre logging estándar con plantillas de locales.

@@ -25,6 +25,7 @@ Primera versión estable.
 
 ### Corregido
 
+- Los errores de argumentos mostraban `Invalid value…` en inglés aunque la interfaz estuviera en español, y el mensaje salía duplicado sin formato encima del panel.
 - `--show-cmd` preguntaba si sobrescribir la salida aunque no escribe nada.
 - Los errores de `config.toml` se muestran como lista, uno por línea.
 - `transcode` de MKV con subtítulos SRT a MP4 fallaba: la compatibilidad se evaluaba con el contenedor de entrada.

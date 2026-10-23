@@ -128,6 +128,30 @@ class UserError(BadParameter):
         super().__init__(message=self.msg)
         logger.error(msg=self.msg, console=False)
 
+    def format_message(self) -> str:
+        """Devuelve el mensaje del panel de error en el idioma activo.
+
+        Reproduce `BadParameter.format_message` (Click integrado en Typer),
+        cuyos textos usan el dominio gettext global y no el catálogo de pyMedia.
+
+        Returns:
+            `Invalid value for <opción>: <mensaje>`, o `Invalid value: <mensaje>`
+            si el error no está asociado a una opción o argumento.
+        """
+        if self.param_hint is not None:
+            param_hint = self.param_hint
+        elif self.param is not None and self.ctx is not None:
+            param_hint = self.param.get_error_hint(self.ctx)
+        else:
+            return _("Invalid value: %(message)s") % {"message": self.message}
+
+        if not isinstance(param_hint, str):
+            param_hint = " / ".join(repr(hint) for hint in param_hint)
+        return _("Invalid value for %(param)s: %(message)s") % {
+            "param": param_hint,
+            "message": self.message,
+        }
+
 
 class FfprobeError(UserError):
     """Errores de ffprobe al leer un fichero (sin traceback para el usuario)."""
