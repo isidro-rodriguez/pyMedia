@@ -13,8 +13,16 @@ legibles, sin tener que recordar la sintaxis de ffmpeg.
 
 ## Instalación
 
-Requisitos: Python 3.12+, [uv](https://docs.astral.sh/uv/) y
-[ffmpeg](https://ffmpeg.org/download.html) (con ffprobe) en el `PATH`.
+Descarga el paquete de tu sistema desde [Releases](https://github.com/isidro-rodriguez/pyMedia/releases/latest):
+
+```bash
+sudo apt install ./pymedia_1.0.0_amd64.deb      # Linux (instala ffmpeg como dependencia)
+```
+
+En Windows, descomprime `pymedia-1.0.0-windows-x64.zip`, añade la carpeta al `PATH` e
+instala [ffmpeg](https://ffmpeg.org/download.html) (`winget install ffmpeg`).
+
+Desde el código fuente (Python 3.12+, [uv](https://docs.astral.sh/uv/) y ffmpeg en el `PATH`):
 
 ```bash
 git clone https://github.com/isidro-rodriguez/pyMedia.git
@@ -22,8 +30,6 @@ cd pyMedia
 uv tool install .
 pymedia --version
 ```
-
-También puedes compilar un ejecutable único con `uv run python scripts/build.py`.
 Más opciones en [Instalación](docs/usuario/instalacion.md).
 
 ## Uso

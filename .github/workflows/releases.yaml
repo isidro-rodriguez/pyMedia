@@ -1,0 +1,108 @@
+name: Release
+
+# Publica un GitHub Release con el .deb (Linux) y el .zip (Windows) al subir un
+# tag `vX.Y.Z`. Lanzado a mano (workflow_dispatch) solo genera los paquetes como
+# artefactos, útil para probarlos antes de etiquetar.
+on:
+  push:
+    tags: ["v*.*.*"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  package:
+    name: Paquete ${{ matrix.target }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: true
+      matrix:
+        include:
+          # glibc 2.35: el ejecutable funciona también en distribuciones anteriores a la actual.
+          - os: ubuntu-22.04
+            target: linux
+            executable: build/pymedia
+          - os: windows-latest
+            target: windows
+            executable: build/pymedia.exe
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Instalar uv
+        uses: astral-sh/setup-uv@v6
+        with:
+          python-version: "3.12"
+          enable-cache: true
+
+      - name: Sincronizar dependencias
+        run: uv sync --locked
+
+      - name: Comprobar que el tag coincide con la versión
+        if: github.ref_type == 'tag'
+        run: |
+          version=$(uv run python -c "import pymedia; print(pymedia.version)")
+          if [ "v${version}" != "${GITHUB_REF_NAME}" ]; then
+            echo "::error::El tag ${GITHUB_REF_NAME} no coincide con la versión ${version} de src/pymedia/__init__.py"
+            exit 1
+          fi
+
+      - name: Compilar ejecutable
+        run: uv run python scripts/build.py
+
+      - name: Probar ejecutable
+        run: ${{ matrix.executable }} --version
+
+      - name: Empaquetar
+        run: uv run python scripts/package.py
+
+      - name: Probar instalación del .deb
+        if: matrix.target == 'linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ./dist/*.deb
+          pymedia --version
+          dpkg -L pymedia
+
+      - name: Subir paquete
+        uses: actions/upload-artifact@v4
+        with:
+          name: package-${{ matrix.target }}
+          path: dist/*
+          if-no-files-found: error
+          retention-days: 7
+
+  release:
+    name: GitHub Release
+    needs: package
+    if: github.ref_type == 'tag'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Descargar paquetes
+        uses: actions/download-artifact@v4
+        with:
+          pattern: package-*
+          path: dist
+          merge-multiple: true
+
+      - name: Extraer notas del CHANGELOG
+        run: python3 scripts/package.py notes > release-notes.md
+
+      - name: Publicar release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          prerelease=""
+          if [[ "${GITHUB_REF_NAME}" == *-* ]]; then prerelease="--prerelease"; fi
+          gh release create "${GITHUB_REF_NAME}" dist/* \
+            --repo "${GITHUB_REPOSITORY}" \
+            --title "pyMedia ${GITHUB_REF_NAME#v}" \
+            --notes-file release-notes.md \
+            ${prerelease}

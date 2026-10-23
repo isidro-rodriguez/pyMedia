@@ -1,10 +1,41 @@
 # Instalación
 
-## Requisitos
+## Paquetes publicados
+
+Cada versión publica en [GitHub Releases](https://github.com/isidro-rodriguez/pyMedia/releases/latest) paquetes que no necesitan Python.
+Junto a cada paquete hay un fichero `.sha256` para verificar la descarga.
+
+### Linux (Debian, Ubuntu y derivadas)
+
+```bash
+sudo apt install ./pymedia_1.0.0_amd64.deb
+```
+
+`apt` instala también `ffmpeg` como dependencia. El paquete incluye el ejecutable en
+`/usr/bin/pymedia`, la página de manual (`man pymedia`), el icono y el lanzador de
+escritorio. Para desinstalar: `sudo apt remove pymedia`.
+
+### Windows
+
+1. Descarga `pymedia-1.0.0-windows-x64.zip` y descomprímelo, por ejemplo en
+   `C:\Programas\pymedia`.
+2. Añade esa carpeta al `PATH` (*Configuración → Sistema → Información → Configuración
+   avanzada del sistema → Variables de entorno*).
+3. Instala ffmpeg: `winget install ffmpeg`.
+4. Abre una terminal nueva y comprueba con `pymedia --version`.
+
+### Verificar la descarga
+
+```bash
+sha256sum -c pymedia_1.0.0_amd64.deb.sha256                        # Linux
+Get-FileHash pymedia-1.0.0-windows-x64.zip -Algorithm SHA256      # PowerShell
+```
+
+## Requisitos para el código fuente
 
 | Requisito          | Versión          | Notas                                                          |
 |--------------------|------------------|----------------------------------------------------------------|
-| Python             | 3.12 o superior  | Solo para ejecutar desde el código fuente.                     |
+| Python             | 3.12 o superior  | Para ejecutar desde el código fuente.                          |
 | ffmpeg y ffprobe   | Reciente         | Deben estar en el `PATH`. pyMedia lo comprueba al arrancar.    |
 | uv                 | Reciente         | Gestor de dependencias del proyecto.                           |
 

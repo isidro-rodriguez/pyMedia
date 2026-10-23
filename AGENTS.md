@@ -20,7 +20,7 @@ pyMedia: Typer CLI that wraps `ffmpeg`/`ffprobe` for everyday media tasks. Read
 
 ```bash
 .
-├── .github/                # CI workflow (Linux + Windows) and Dependabot
+├── .github/                # CI and release workflows (Linux + Windows), Dependabot
 ├── .pre-commit-config.yaml # Git hooks: pre-commit (ruff, ty, pytest) and pre-push (cov, locales, binary)
 ├── AGENTS.md               # This file
 ├── CHANGELOG.md            # Keep a Changelog (Spanish)
@@ -30,7 +30,7 @@ pyMedia: Typer CLI that wraps `ffmpeg`/`ffprobe` for everyday media tasks. Read
 │   ├── usuario/            # User guide (commands, config, formats, troubleshooting)
 │   └── desarrollo/         # Developer guide (architecture, new command, contributing)
 ├── pyproject.toml          # Project: deps, build (hatchling), tools (ruff, ty, pytest)
-├── scripts/                # build.py, i18n.py, generate_fixtures.py (+ fixtures/)
+├── scripts/                # build.py, package.py, i18n.py, generate_fixtures.py (+ fixtures/)
 ├── src/
 │   └── pymedia/
 │       ├── commands/       # One package per command: cli, parameters, cmd, service (+ base/)
@@ -240,6 +240,16 @@ Before any `git push` with code changes:
     - `chore: bump versión a X.Y.Z`
     - `docs: actualiza CHANGELOG para X.Y.Z`
       Or a single combined commit if change and release are inseparable.
+
+## Releases
+
+- Publishing is done by pushing an annotated tag `vX.Y.Z` that matches
+  `src/pymedia/__init__.py`. `.github/workflows/release.yml` builds the executables,
+  packages a `.deb` (Linux, built on Ubuntu 22.04) and a `.zip` (Windows) with
+  `scripts/package.py`, and creates the GitHub Release with the CHANGELOG section as notes.
+- The CHANGELOG must have a `## [X.Y.Z]` section before tagging (tested in
+  `tests/test_package.py`).
+- Never create or push tags without explicit confirmation from the user.
 
 If unsure whether a change is breaking, ask the user before choosing MAJOR. When in doubt
 between PATCH and MINOR, prefer MINOR.

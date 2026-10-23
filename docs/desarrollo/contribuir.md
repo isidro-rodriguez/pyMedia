@@ -150,6 +150,7 @@ uv run pytest -m locales
 | Script                         | Uso                                                              |
 |--------------------------------|------------------------------------------------------------------|
 | `scripts/build.py`             | Compila el ejecutable único con PyInstaller en `build/`.         |
+| `scripts/package.py`           | Empaqueta el ejecutable en `dist/`: `.deb` en Linux, `.zip` en Windows, con `.sha256`. `notes` imprime las notas de la versión desde el CHANGELOG. |
 | `scripts/i18n.py`              | Mantenimiento de catálogos gettext (ver arriba).                 |
 | `scripts/generate_fixtures.py` | Genera medios de prueba manual en `tests/fixtures/`.             |
 
@@ -157,8 +158,8 @@ Todos se ejecutan con `uv run python scripts/<script>.py`.
 
 ## Versionado y CHANGELOG
 
-- La versión vive en `src/pymedia/__init__.py` (`version = "X.Y.Z..."`); hatchling la
-  lee desde ahí. No hay tags de git.
+- La versión vive en `src/pymedia/__init__.py` (`version = "X.Y.Z"`); hatchling y
+  `scripts/package.py` la leen desde ahí. Cada versión publicada tiene su tag `vX.Y.Z`.
 - Se sigue [SemVer](https://semver.org/lang/es/): MAJOR para cambios incompatibles de
   la CLI, MINOR para funcionalidad nueva compatible, PATCH para correcciones y
   refactors internos.
@@ -169,6 +170,44 @@ Todos se ejecutan con `uv run python scripts/<script>.py`.
 - Antes de cada `git push` con cambios de código: sube la versión y actualiza el
   CHANGELOG. Si cambian restricciones de dependencias, ejecuta `uv sync` y commitea
   `uv.lock`.
+- Las prerelease usan sufijo (`1.1.0-beta.1`); en el `.deb` se convierte en
+  `1.1.0~beta.1` para que ordene antes de la versión final.
+
+## Publicar una versión
+
+1. Sube la versión en `src/pymedia/__init__.py` y renombra `## [Sin publicar]` a
+   `## [X.Y.Z] - AAAA-MM-DD` en el CHANGELOG.
+2. Pasa la [definición de terminado](#definición-de-terminado), incluidos los hooks
+   de `pre-push`.
+3. Opcional: lanza a mano el workflow **Release** (*Actions → Release → Run workflow*)
+   para descargar y probar los paquetes antes de etiquetar.
+4. Etiqueta y publica:
+
+   ```bash
+   git tag -a vX.Y.Z -m "pyMedia X.Y.Z"
+   git push origin main vX.Y.Z
+   ```
+
+`.github/workflows/release.yml` entonces:
+
+| Paso                | Linux (`ubuntu-22.04`)                     | Windows                          |
+|---------------------|--------------------------------------------|----------------------------------|
+| Comprueba el tag    | `vX.Y.Z` debe coincidir con la versión del paquete | Igual                    |
+| Compila             | `scripts/build.py`                         | `scripts/build.py`               |
+| Prueba              | `pymedia --version`, instala el `.deb` con `apt` | `pymedia.exe --version`    |
+| Empaqueta           | `pymedia_X.Y.Z_amd64.deb` + `.sha256`      | `pymedia-X.Y.Z-windows-x64.zip` + `.sha256` |
+
+Por último crea el GitHub Release con los cuatro ficheros y la sección del CHANGELOG
+como notas (marcado como *prerelease* si el tag tiene sufijo). El ejecutable de Linux
+se compila en Ubuntu 22.04 para que funcione también en distribuciones con una glibc
+más antigua que la actual.
+
+Para generar los paquetes en local:
+
+```bash
+uv run python scripts/build.py
+uv run python scripts/package.py
+```
 
 ## Commits
 

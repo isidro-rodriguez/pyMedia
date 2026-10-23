@@ -8,8 +8,12 @@ con la sección anterior.
 
 ## [1.0.0] - 2026-10-23
 
+Primera versión estable.
+
 ### Añadido
 
+- Paquetes de distribución: `.deb` para Linux (ejecutable, man page, icono y lanzador; depende de `ffmpeg`) y `.zip` para Windows, generados con `scripts/package.py`.
+- Workflow de release: al publicar un tag `vX.Y.Z`, GitHub Actions compila, prueba y adjunta ambos paquetes con sus checksums a un GitHub Release con las notas del CHANGELOG.
 - `transcode` avisa de los subtítulos que el contenedor de salida no admite y pregunta si convertir los de texto a su formato (`mov_text`, `srt` o `webvtt`); los gráficos se descartan con aviso.
 - CI de GitHub Actions en Linux y Windows (calidad, cobertura ≥ 95 %, locales y ejecutable) y Dependabot para `uv` y GitHub Actions.
 - Hooks de git separados en `pre-commit` (ruff, ty, pytest) y `pre-push` (cobertura, locales, binario).
@@ -35,6 +39,7 @@ con la sección anterior.
 
 ### Cambiado
 
+- Versión 1.0.0: estado de desarrollo *Production/Stable*.
 - Los fixtures manuales se generan en `tests/fixtures/`; retirados `local/`, `scripts/backup.py` y `scripts/code_count.py`.
 - `README.md` reducido a una introducción breve con enlaces a `docs/`.
 - `AGENTS.md` adaptado a la estructura, herramientas y convenciones de pyMedia.
@@ -152,7 +157,7 @@ con la sección anterior.
 ### Cambiado
 
 - Añadida opción `--strip-metadata` para indicar que no se copian los metadatos
-  del fichero origen. Comandos que la implementan: `add-audio`, ``add-subs``, ``cut``,
+  del fichero origen. Comandos que la implementan: `add-audio`, ``add-subs``, ``cut``, 
   ``extract-audio``, ``extract-subs``, ``join``, ``remux``, ``transcode``.
 - Refactorización modelos `Audio` y `Subtitles` separando los métadatos para
   mejor organización.
