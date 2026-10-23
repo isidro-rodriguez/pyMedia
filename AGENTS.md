@@ -1,53 +1,92 @@
 # AGENTS.md
 
+pyMedia: Typer CLI that wraps `ffmpeg`/`ffprobe` for everyday media tasks. Read
+`docs/desarrollo/arquitectura.md` before touching code.
+
 ## Language
 
 - **Code and identifiers in English**: variables, functions, constants, classes, methods,
   parameters, modules, and tests.
-- **Documentation in Spanish**: docstrings, comments, error messages, README, docs, and commits.
-- User-facing error messages must be in Spanish. Exception names and internal identifiers must
-  be in English.
+- **Documentation in Spanish**: docstrings, comments, README, `docs/`, CHANGELOG, and commits.
+- **User-facing messages** are gettext `msgid`s written in English and wrapped in `_()`
+  (`from pymedia.locales import translate as _`). Their Spanish translation lives in
+  `src/pymedia/locales/spanish/LC_MESSAGES/pymedia.po`. Never hardcode Spanish text in
+  messages.
+- Exception names and internal identifiers must be in English.
 - This file, `AGENTS.md`, is written in English so the agent does not need to translate
   instructions.
 
-## Expected structure (standalone Python project with uv)
+## Project structure
 
 ```bash
 .
-├── .github/                # GitHub Actions CI
-├── .pre-commit-config.yaml # pre-commit/pre-push hooks (ruff, ty, pytest, zensical)
-├── .python-version         # Python version pin
+├── .pre-commit-config.yaml # pre-commit hooks (ruff, ty, pytest)
 ├── AGENTS.md               # This file
 ├── CHANGELOG.md            # Keep a Changelog (Spanish)
-├── LICENSE                 # MIT
-├── pyproject.toml          # Project: deps, build, tools (ruff, ty, pytest, uv)
-├── README.md               # Project documentation
+├── README.md               # Short user-facing introduction
+├── docs/
+│   ├── usuario/            # User guide (commands, config, formats, troubleshooting)
+│   └── desarrollo/         # Developer guide (architecture, new command, contributing)
+├── pyproject.toml          # Project: deps, build (hatchling), tools (ruff, ty, pytest)
+├── scripts/                # build.py, i18n.py, generate_fixtures.py, backup.py, code_count.py
 ├── src/
-│   └── <package>/          # Source code (rename "acodo_template" to your name)
-└── tests/                  # Tests with pytest
+│   └── pymedia/
+│       ├── commands/       # One package per command: cli, parameters, cmd, service (+ base/)
+│       ├── mixins/         # Reusable validation and ffmpeg fragments for parameters
+│       ├── models/         # Dataclasses (Media, Video, Audio, Subtitles, Config…)
+│       ├── data/           # Codec, container, format and language catalogs
+│       ├── locales/        # gettext catalogs (pymedia.pot, spanish/)
+│       ├── resources/      # Default config.toml, icons, font, man page
+│       ├── ffprobe.py      # ffprobe → models
+│       ├── errors.py       # Localized exception hierarchy
+│       ├── logger.py       # Rich console + rotating file logger
+│       └── main.py         # Entry point (`pymedia.main:run`)
+└── tests/                  # pytest suite (conftest generates synthetic media)
 ```
 
 - Every `__init__.py` must include a short docstring describing the module or package.
-- The project uses `uv` as dependency manager and build backend.
+- The project uses `uv` as dependency manager and `hatchling` as build backend.
+- The package version lives in `src/pymedia/__init__.py` (`version = "..."`), not in
+  `pyproject.toml`.
+- `local/` (backups, manual fixtures) and `build/` are local-only and must not be committed.
 
 ## Project rules (load-bearing)
 
 - **One `uv.lock` and one venv** at the project root.
 - **Use `uv sync`** (not `--all-packages`): resolves the current project and its `dev` group.
 - **Run tools from the root** so they cover all code.
-- Package dependencies go in its `pyproject.toml` (`dependencies` and `dependency-groups.dev`).
+- Package dependencies go in `pyproject.toml` (`dependencies` and `dependency-groups.dev`).
 - To add dependencies: `uv add <pkg>` (runtime) or `uv add --dev <pkg>` (dev).
+- `ffmpeg` and `ffprobe` must be in `PATH` to run the app and the end-to-end tests.
 
 ## Tools and canonical commands
 
-Do not use `pip install` directly.
+Do not use `pip install` directly. Run in this order and stop at the first failure:
 
 ```bash
 uv sync
 uv run ruff format .
+uv run ruff check --fix .
 uv run ruff check .
 uv run ty check
 uv run pytest
+```
+
+If user-facing messages changed (any `_()` text added, edited, or removed):
+
+```bash
+uv run python scripts/i18n.py extract
+uv run python scripts/i18n.py update -l spanish
+# translate empty/fuzzy entries in src/pymedia/locales/spanish/LC_MESSAGES/pymedia.po
+uv run python scripts/i18n.py compile -l spanish
+uv run python scripts/i18n.py check
+uv run pytest -m locales
+```
+
+If CLI behavior changed (slow, builds the PyInstaller binary):
+
+```bash
+uv run pytest -m binary
 ```
 
 If a tool is missing, install it in the `dev` group:
@@ -58,23 +97,52 @@ uv add --dev <tool>
 
 ## Agent workflow
 
-1. Before changing, read `README.md`, `pyproject.toml`, `AGENTS.md`, and related tests.
+1. Before changing, read `README.md`, `pyproject.toml`, `AGENTS.md`, the relevant page in
+   `docs/`, and related tests.
 2. Make the smallest necessary change. Do not refactor unrelated code.
 3. If you need a new dependency, justify it. If stdlib solves it, do not add it.
 4. Do not modify CI, global config, or structure unless the task requires it.
 5. Before finishing, run quality commands from the root and fix until they pass.
-6. If something fails and you cannot resolve it, show the exact error and propose the minimal fix.
+6. If something fails and you cannot resolve it, show the exact error and propose the
+   minimal fix. Do not retry a failing command more than twice.
 7. Do not leave secrets, temporary files, or TODOs without context.
+
+## Architecture rules
+
+Each command lives in `src/pymedia/commands/<name>/` with four layers. Copy an existing
+similar command as template (`docs/desarrollo/nuevo-comando.md`).
+
+| Layer           | Responsibility                                                         |
+|-----------------|------------------------------------------------------------------------|
+| `cli.py`        | Typer options (reuse `commands/base/cli_options.py`), reject impossible option combinations, `Logger.create`, load parameters, start service. |
+| `parameters.py` | Dataclass composed of `BaseParameters` + mixins; `load()` calls the mixins' `create_*` methods. |
+| `cmd.py`        | Pure function returning the ffmpeg command as `list[str]`. No I/O, no logging. |
+| `service.py`    | `BaseService` subclass: expected outputs, `resolve_overwrite`, `display_cmd`, `run_ffmpeg`, result message. |
+
+- Reusable validation goes into a mixin (`create_*` validates, `to_*_cmd` returns ffmpeg args).
+- Never add `-y`, `-n`, `-nostdin`, `-progress` or `-nostats` in `cmd.py`:
+  `ffmpeg_runner.prepare_command` manages them.
+- Always run ffmpeg through `BaseService.run_ffmpeg`, listing every output in `output_list`
+  (outputs are staged in a temp dir and moved on success).
+- Codec/container knowledge belongs in `src/pymedia/data/`, not in commands.
+- Register new commands in `main._build_app()` (imports stay inside the function).
+- Raise the exceptions from `errors.py`: `UserError` subclasses for user-fixable problems,
+  `PyMediaError` subclasses for runtime/internal ones. Build messages with
+  `_("msgid") % {...}` at raise time. Never silence errors; chain with `from err`.
 
 ## Code rules
 
-- Follow PEP 8 and Pythonic style with strict type annotations.
-- Use `acodo-framework` (module `acodo`) as the utility library.
+- Follow PEP 8 and Pythonic style with strict type annotations (checked by `ty`).
+- Prefer the standard library; runtime dependencies are only `typer`, `rich` and
+  `platformdirs`.
 - Google-style docstrings for public identifiers: complete, with examples when they add value.
-- For private identifiers, use brief docstrings.
+  Public docstrings inherit the `Raises` of the private functions they call.
+- For private identifiers, use brief one-line docstrings.
 - Do not repeat obvious things in docstrings or add unnecessary examples.
+- Comments explain *why*, not *what*.
 - Avoid overengineering. Prefer simple and explicit solutions.
-- Keep functions and classes small, with clear English names.
+- Keep functions (~20 lines) and classes small, with clear English names.
+- No mutable default arguments. Imports ordered stdlib > third-party > local.
 
 Example of a public docstring:
 
@@ -98,34 +166,37 @@ def sum_numbers(a: int, b: int) -> int:
 
 ## Tests
 
-- Use `pytest`.
-- Cover relevant logic and fixed bugs.
+- Use `pytest`. Default run excludes the `binary` and `locales` markers.
+- Cover relevant logic and fixed bugs (`tests/test_regressions.py` for visible behavior).
 - Do not chase 100% coverage. Prioritize useful and readable tests.
-- Tests must pass on Linux and Windows.
+- Tests must pass on Linux and Windows: patch `os.name`/locale with `monkeypatch`, never
+  rely on the host.
+- End-to-end tests use the `pymedia` fixture, which runs each scenario in-process
+  (`[cli]`) and against the compiled binary (`[binary]`). Synthetic media come from
+  `tests/conftest.py`; inspect outputs with `tests/helpers.py`.
 - Test files live in `tests/`. Run `uv run pytest` from the root.
 
 ## CI
 
-- GitHub Actions on `ubuntu-latest` and `windows-latest`.
-- Minimum steps from the root:
+- Not configured yet. If added: GitHub Actions on `ubuntu-latest` and `windows-latest`,
+  installing ffmpeg and `uv` (`astral-sh/setup-uv`), and running from the root:
     - `uv sync`
     - `uv run ruff format --check .`
     - `uv run ruff check .`
     - `uv run ty check`
     - `uv run pytest`
-- Python version declared in `pyproject.toml` / `.python-version`.
-- Use `astral-sh/setup-uv` to install `uv`.
+    - `uv run pytest -m locales`
 
 ## Commits
 
 - Never commit automatically; report success and wait for confirmation.
 - Use Conventional Commits in Spanish.
 - Examples:
-    - `feat: añade cálculo de totales`
-    - `fix: corrige validación de entrada`
-    - `docs: actualiza CHANGELOG para 0.1.1`
-    - `test: cubre casos límite`
-    - `chore: bump versión a 0.2.0`
+    - `feat: añade comando clean para eliminar metadatos`
+    - `fix: corrige validación de marcas de tiempo`
+    - `docs: actualiza CHANGELOG para 0.22.0`
+    - `test: cubre casos límite de --crop`
+    - `chore: bump versión a 0.22.0`
 - Atomic commit explaining the *why*, not just the *what*.
 - Do not mix unrelated changes.
 
@@ -137,32 +208,34 @@ A task is done when:
 - `uv run ruff check .` passes without errors.
 - `uv run ty check` passes without errors.
 - `uv run pytest` passes without errors.
-- Documentation and README updated if API or usage changes.
-- Project version bumped in `pyproject.toml` and `CHANGELOG.md` updated (required before push).
+- If messages changed: catalogs updated and `uv run pytest -m locales` passes.
+- If CLI behavior changed: `uv run pytest -m binary` passes.
+- `README.md` and `docs/` updated if commands, options, or usage change.
+- `CHANGELOG.md` updated; version bumped before push.
 
 ## Versioning and changelog (pre-push)
 
 Before any `git push` with code changes:
 
-1. **Bump version** in `pyproject.toml` following SemVer:
-    - **MAJOR**: breaking changes to public API.
+1. **Bump version** in `src/pymedia/__init__.py` following SemVer:
+    - **MAJOR**: breaking changes to the CLI (removed/renamed commands or options).
     - **MINOR**: new backward-compatible functionality.
-    - **PATCH**: bug fixes, internal refactors, docs affecting published package.
-2. **Update `CHANGELOG.md`** (Keep a Changelog):
-    - Entries under `## [Unreleased]` while working, or promote to `## [X.Y.Z] - YYYY-MM-DD` on
-      bump.
-    - Group under `### Added`, `### Changed`, `### Fixed`, `### Removed`, `### Deprecated`,
-      `### Security`.
+    - **PATCH**: bug fixes, internal refactors, docs.
+2. **Update `CHANGELOG.md`** (Keep a Changelog, in Spanish):
+    - Entries under `## [Sin publicar]` while working, or promote to
+      `## [X.Y.Z] - YYYY-MM-DD` on bump.
+    - Group under `### Añadido`, `### Cambiado`, `### Corregido`, `### Eliminado`,
+      `### Obsoleto`, `### Seguridad`.
     - Write in Spanish, imperative or past tense, explaining the *why*.
-3. **Lockfile consistency**: if bump changes dep constraints, update `pyproject.toml`, run
-   `uv sync`, commit updated `uv.lock`.
+3. **Lockfile consistency**: if the bump changes dependency constraints, update
+   `pyproject.toml`, run `uv sync`, commit the updated `uv.lock`.
 4. **Atomic release commit** before push:
     - `chore: bump versión a X.Y.Z`
     - `docs: actualiza CHANGELOG para X.Y.Z`
       Or a single combined commit if change and release are inseparable.
 
-If unsure whether a change is breaking, ask the user before choosing MAJOR. When in doubt between
-PATCH and MINOR, prefer MINOR.
+If unsure whether a change is breaking, ask the user before choosing MAJOR. When in doubt
+between PATCH and MINOR, prefer MINOR.
 
 ## Limits
 

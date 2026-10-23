@@ -8,6 +8,10 @@ con la sección anterior.
 
 ## [Sin publicar]
 
+### Añadido
+
+- Documentación avanzada en `docs/`: guía de usuario (conceptos, referencia de comandos, filtros, configuración, formatos y solución de problemas) y guía de desarrollo (arquitectura, receta para añadir comandos y contribución).
+
 ### Corregido
 
 - Falso "timed out" en comandos sin `-progress` (`remux`, `delete/edit/extract-audio`, `delete/edit/extract-subtitles`): cualquier línea de stderr cuenta ya como actividad.
@@ -21,6 +25,8 @@ con la sección anterior.
 
 ### Cambiado
 
+- `README.md` reducido a una introducción breve con enlaces a `docs/`.
+- `AGENTS.md` adaptado a la estructura, herramientas y convenciones de pyMedia.
 - `prepare_command` centraliza `-y`/`-n`, `-progress pipe:1` y `-nostats`; se eliminan de los `cmd.py` (y `--show-cmd` muestra un comando más limpio).
 - `display_cmd` termina con `typer.Exit` en vez de `sys.exit`.
 - `FfmpegProcess` guarda solo las últimas líneas de stderr (`deque`) e informa si falta el binario.
