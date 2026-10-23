@@ -44,6 +44,9 @@ class EditSubtitlesCmd:
                 "copy",
                 *self.params.to_subtitles_metadata_cmd(self.params.subtitles),
                 *self.params.to_exclusive_default_cmd(),
+                *self.params.to_delay_stream_cmd(
+                    f"s:{self.params.subtitles.track_index}"
+                ),
                 str(self.params.media_output),
             ]
         )

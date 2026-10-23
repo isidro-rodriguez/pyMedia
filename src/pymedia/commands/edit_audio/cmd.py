@@ -48,6 +48,7 @@ class EditAudioCmd:
                 "-c",
                 "copy",
                 *self.params.to_audio_metadata_cmd(audio),
+                *self.params.to_delay_stream_cmd(f"a:{track_number}"),
             ]
         )
 

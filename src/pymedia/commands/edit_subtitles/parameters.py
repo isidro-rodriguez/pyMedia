@@ -6,6 +6,7 @@ from typing import Self
 
 from pymedia.commands.base.parameters import BaseParameters
 from pymedia.errors import MissingParameterError
+from pymedia.mixins.delay_mixin import DelayMixin
 from pymedia.mixins.media_mixin import MediaInputMixin
 from pymedia.mixins.outputs_mixin import MediaOutputMixin
 from pymedia.mixins.streams_mixin import StreamsMixin
@@ -20,6 +21,7 @@ class EditSubtitlesParameters(
     MediaOutputMixin,
     StreamsMixin,
     SubtitlesMetadataMixin,
+    DelayMixin,
 ):
     """Parámetros utilizados por el comando EditSubtitles."""
 
@@ -36,6 +38,7 @@ class EditSubtitlesParameters(
         default: bool | None = None,
         hearing_impaired: bool | None = None,
         visual_impaired: bool | None = None,
+        delay: float | None = None,
     ) -> Self:
         """Valida y parsea los argumentos en parámetros procesados.
 
@@ -52,6 +55,7 @@ class EditSubtitlesParameters(
                 auditivos.
             visual_impaired: Subtítulos adaptados a personas con problemas de
                 vista.
+            delay: Segundos de desfase de la pista (positivo la retrasa).
 
         Returns:
             Parámetros procesados y validados para el comando edit-subs.
@@ -59,8 +63,9 @@ class EditSubtitlesParameters(
         Raises:
             MissingParameterError: Si falta la pista a editar, el medio, las
                 pistas de subtítulos del medio o la salida procesada.
-            UserError: Si el idioma no sigue el estándar ISO 639-2 o la pista
-                indicada no existe en el contenedor.
+            UserError: Si el idioma no sigue el estándar ISO 639-2, la pista
+                indicada no existe en el contenedor o se adelantan subtítulos
+                en un contenedor que no es Matroska.
         """
         if subtitles_stream_tracks is None:
             raise MissingParameterError(name="subtitles_stream_tracks")
@@ -91,5 +96,7 @@ class EditSubtitlesParameters(
             hearing_impaired=hearing_impaired,
             visual_impaired=visual_impaired,
         )
+
+        params.create_delay(delay=delay, output=params.media_output, subtitles=True)
 
         return params

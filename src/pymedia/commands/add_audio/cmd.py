@@ -41,6 +41,7 @@ class AddAudioCmd:
             [
                 "-i",
                 str(media.path),
+                *self.params.to_delay_input_cmd(),
                 "-i",
                 str(audio[0].path),
             ]

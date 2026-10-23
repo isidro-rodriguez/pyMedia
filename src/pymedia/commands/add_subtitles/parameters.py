@@ -5,6 +5,7 @@ from pathlib import Path
 from typing import Self
 
 from pymedia.commands.base.parameters import BaseParameters
+from pymedia.mixins.delay_mixin import DelayMixin
 from pymedia.mixins.media_mixin import MediaInputMixin
 from pymedia.mixins.metadata_mixin import StripMetadataMixin
 from pymedia.mixins.outputs_mixin import MediaOutputMixin
@@ -19,6 +20,7 @@ class AddSubtitlesParameters(
     MediaOutputMixin,
     SubtitlesInputMixin,
     StripMetadataMixin,
+    DelayMixin,
 ):
     """Parámetros utilizados por el comando AddSubtitles."""
 
@@ -32,6 +34,7 @@ class AddSubtitlesParameters(
         title: str | None = None,
         media_output: Path | None = None,
         strip_metadata: bool = False,
+        delay: float | None = None,
     ) -> Self:
         """Valida y parsea los argumentos en parámetros procesados.
 
@@ -43,6 +46,7 @@ class AddSubtitlesParameters(
             media_output: Ruta absoluta del fichero de salida procesado.
             title: Título descriptivo de la pista.
             strip_metadata: No copiar los metadatos del fichero de entrada.
+            delay: Segundos de desfase de la pista importada (positivo la retrasa).
 
         Returns:
             Parámetros procesados y validados para el comando add-subs.
@@ -55,6 +59,7 @@ class AddSubtitlesParameters(
                 contenedor de salida no soporta ningún códec de subtítulos.
         """
         params = cls(overwrite=overwrite, strip_metadata=strip_metadata)
+        params.create_delay(delay=delay)
 
         params.create_media_input(
             media_input=media_input,

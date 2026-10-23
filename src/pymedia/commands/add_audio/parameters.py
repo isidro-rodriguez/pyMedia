@@ -6,6 +6,7 @@ from typing import Self
 
 from pymedia.commands.base.parameters import BaseParameters
 from pymedia.mixins.audio_mixin import AudioInputMixin
+from pymedia.mixins.delay_mixin import DelayMixin
 from pymedia.mixins.media_mixin import MediaInputMixin
 from pymedia.mixins.metadata_mixin import StripMetadataMixin
 from pymedia.mixins.outputs_mixin import MediaOutputMixin
@@ -19,6 +20,7 @@ class AddAudioParameters(
     MediaOutputMixin,
     AudioInputMixin,
     StripMetadataMixin,
+    DelayMixin,
 ):
     """Parámetros utilizados por el comando AddAudio."""
 
@@ -30,6 +32,7 @@ class AddAudioParameters(
         audio_input: Path,
         media_output: Path | None = None,
         strip_metadata: bool = False,
+        delay: float | None = None,
     ) -> Self:
         """Valida y parsea los argumentos en parámetros procesados.
 
@@ -39,6 +42,7 @@ class AddAudioParameters(
             audio_input: Ruta del fichero de audio a insertar.
             media_output: Ruta absoluta del fichero de salida procesado.
             strip_metadata: No copiar los metadatos del fichero de entrada.
+            delay: Segundos de desfase de la pista importada (positivo la retrasa).
 
         Returns:
             Parámetros procesados y validados para el comando add-audio.
@@ -50,6 +54,7 @@ class AddAudioParameters(
                 compatible con el contenedor de salida.
         """
         params = cls(overwrite=overwrite, strip_metadata=strip_metadata)
+        params.create_delay(delay=delay)
 
         params.create_media_input(
             media_input=media_input,

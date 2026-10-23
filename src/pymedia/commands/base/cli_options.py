@@ -423,6 +423,19 @@ AudioCommentaryOption = Annotated[
     ),
 ]
 
+AudioDelayOption = Annotated[
+    float | None,
+    typer.Option(
+        default="--delay",
+        metavar="SECONDS",
+        rich_help_panel=_("Audio options"),
+        help=_(
+            "Shift the audio track in seconds, without transcoding: positive "
+            "delays it, negative advances it."
+        ),
+    ),
+]
+
 AudioDefaultOption = Annotated[
     bool | None,
     typer.Option(
@@ -491,6 +504,19 @@ AudioTitleOption = Annotated[
 # =============================================================================
 #  Opciones de subtítulos
 # =============================================================================
+
+SubtitlesDelayOption = Annotated[
+    float | None,
+    typer.Option(
+        default="--delay",
+        metavar="SECONDS",
+        rich_help_panel=_("Subtitles options"),
+        help=_(
+            "Shift the subtitles track in seconds: positive delays it, "
+            "negative advances it."
+        ),
+    ),
+]
 
 SubtitlesDefaultOption = Annotated[
     bool | None,

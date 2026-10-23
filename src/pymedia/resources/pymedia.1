@@ -129,6 +129,9 @@ At least one transcoding option or filter is required.
 Add an audio track to a media file. Language, title and dispositions are
 inherited from the source audio file; change them afterwards with
 .BR edit-audio .
+.B --delay
+.I seconds
+shifts the imported tracks (positive delays them, negative advances them).
 .TP
 .B delete-audio
 Delete audio tracks. The tracks are selected with the required
@@ -147,7 +150,10 @@ using
 .BR --forced ,
 .BR --commentary
 or
-.BR --hearing-impaired .
+.BR --hearing-impaired ,
+and shift it in time without transcoding with
+.B --delay
+.IR seconds .
 .TP
 .B extract-audio
 Extract audio tracks to standalone audio files. The tracks are selected with
@@ -163,6 +169,9 @@ Add a subtitles track (SRT, ASS, SSA) to a media file.
 .I code
 (ISO 639-2) is required; adjust title and dispositions afterwards with
 .BR edit-subs .
+.B --delay
+.I seconds
+shifts the imported subtitles.
 .TP
 .B delete-subs
 Delete subtitles tracks. The tracks are selected with the required
@@ -181,7 +190,11 @@ using
 .BR --forced ,
 .BR --hearing-impaired
 or
-.BR --visual-impaired .
+.BR --visual-impaired ,
+and shift it in time with
+.B --delay
+.IR seconds
+(negative values require a Matroska output).
 .TP
 .B extract-subs
 Extract subtitles tracks to standalone files. The tracks are selected with

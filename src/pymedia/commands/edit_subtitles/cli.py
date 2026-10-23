@@ -10,6 +10,7 @@ from pymedia.commands.base.cli_options import (
     OverwriteOption,
     ShowCmdOption,
     SubtitlesDefaultOption,
+    SubtitlesDelayOption,
     SubtitlesForcedOption,
     SubtitlesHearingImpairedOption,
     SubtitlesLanguageOption,
@@ -59,6 +60,7 @@ def edit_subs(
     default: SubtitlesDefaultOption = None,
     hearing_impaired: SubtitlesHearingImpairedOption = None,
     visual_impaired: SubtitlesVisualImpairedOption = None,
+    delay: SubtitlesDelayOption = None,
     debug: DebugOption = False,
     show_cmd: ShowCmdOption = False,
     _help: HelpOption = False,
@@ -76,6 +78,7 @@ def edit_subs(
         default: Se establece como la pista de subtítulos por defecto.
         hearing_impaired: Subtítulos adaptados a personas con problemas auditivos.
         visual_impaired: Subtítulos adaptados a personas con problemas de vista.
+        delay: Segundos de desfase de la pista (positivo la retrasa).
         debug: Habilita el nivel de log DEBUG.
         show_cmd: Muestra al usuario el comando ffmpeg compuesto pero no lo ejecuta.
         _help: Helper para mostrar esta línea en distintos idiomas.
@@ -93,6 +96,7 @@ def edit_subs(
         and default is None
         and hearing_impaired is None
         and visual_impaired is None
+        and delay is None
     ):
         raise MissingRequiredOptionsError(
             options=[
@@ -102,6 +106,7 @@ def edit_subs(
                 "default",
                 "hearing_impaired",
                 "visual_impaired",
+                "delay",
             ]
         )
 
@@ -117,5 +122,6 @@ def edit_subs(
         default=default,
         hearing_impaired=hearing_impaired,
         visual_impaired=visual_impaired,
+        delay=delay,
     )
     EditSubtitlesService(debug=debug, show_cmd=show_cmd, params=params).start()

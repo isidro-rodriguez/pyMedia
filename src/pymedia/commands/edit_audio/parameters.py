@@ -7,6 +7,7 @@ from typing import Self
 from pymedia.commands.base.parameters import BaseParameters
 from pymedia.errors import MissingParameterError
 from pymedia.mixins.audio_mixin import AudioMetadataMixin
+from pymedia.mixins.delay_mixin import DelayMixin
 from pymedia.mixins.media_mixin import MediaInputMixin
 from pymedia.mixins.outputs_mixin import MediaOutputMixin
 from pymedia.mixins.streams_mixin import StreamsMixin
@@ -20,6 +21,7 @@ class EditAudioParameters(
     MediaOutputMixin,
     StreamsMixin,
     AudioMetadataMixin,
+    DelayMixin,
 ):
     """Parámetros utilizados por el comando EditAudio."""
 
@@ -36,6 +38,7 @@ class EditAudioParameters(
         default: bool | None = None,
         hearing_impaired: bool | None = None,
         commentary: bool | None = None,
+        delay: float | None = None,
     ) -> Self:
         """Valida y parsea los argumentos en parámetros procesados.
 
@@ -50,6 +53,7 @@ class EditAudioParameters(
             default: Se establece como la pista de audio por defecto del contenedor.
             hearing_impaired: Pista orientada a personas con problemas auditivos.
             commentary: Pista de comentarios de audio.
+            delay: Segundos de desfase de la pista (positivo la retrasa).
 
         Returns:
             Parámetros procesados y validados para el comando edit-audio.
@@ -89,5 +93,7 @@ class EditAudioParameters(
             hearing_impaired=hearing_impaired,
             commentary=commentary,
         )
+
+        params.create_delay(delay=delay)
 
         return params

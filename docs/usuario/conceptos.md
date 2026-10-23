@@ -95,6 +95,31 @@ Algunos comandos generan varios ficheros a partir del nombre de salida:
 - La extensión debe ser compatible con los códecs de las pistas que se copian. Si no
   lo es, el error indica qué contenedores son válidos.
 
+## Desfase de pistas
+
+`--delay` corrige una pista de audio o de subtítulos que va **siempre** adelantada o
+retrasada la misma cantidad respecto al vídeo. Está disponible en `add-audio`,
+`edit-audio`, `add-subs` y `edit-subs`.
+
+- El valor va en segundos, con decimales: positivo **retrasa** la pista (aparece
+  más tarde) y negativo la **adelanta**. Es el mismo criterio que el ajuste de
+  sincronía de VLC o mpv: mide allí el desfase y pasa el mismo número.
+- No se recodifica nada: solo se reescriben las marcas de tiempo. En `edit-*` se
+  desplaza únicamente la pista indicada (`setts`); en `add-*`, el fichero importado
+  (`-itsoffset`).
+- Al adelantar, se descarta lo que quedaría antes del inicio del vídeo.
+
+!!! warning "Adelantar subtítulos en MP4"
+    `edit-subs` con un `--delay` negativo solo se admite con salida Matroska
+    (`.mkv`, `.webm`): MP4 deforma los subtítulos `mov_text` copiados al
+    adelantarlos. Usa `-o salida.mkv`, o extrae la pista con `extract-subs` y vuelve
+    a añadirla con `add-subs --delay`.
+
+!!! note "Desfase que crece con el tiempo"
+    Si la pista empieza bien y se va desincronizando poco a poco (por ejemplo, un
+    doblaje de 25 fps sobre un vídeo de 23,976 fps), no es un desfase constante:
+    `--delay` no lo corrige.
+
 ## Sobrescritura
 
 `-ov` / `--overwrite` define qué hacer si una salida ya existe:

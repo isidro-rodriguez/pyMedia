@@ -10,12 +10,14 @@ Añade al vídeo las pistas de audio de otro fichero.
 ```bash
 pymedia add-audio pelicula.mkv doblaje.m4a
 pymedia add-audio pelicula.mkv doblaje.m4a -o pelicula_dual.mkv
+pymedia add-audio pelicula.mkv doblaje.m4a --delay -0.4   # doblaje adelantado 0,4 s
 ```
 
 | Argumento / opción    | Descripción                                                 |
 |-----------------------|-------------------------------------------------------------|
 | `MEDIA_FILE`          | Vídeo de destino.                                           |
 | `AUDIO_FILE`          | Fichero con las pistas de audio que añadir.                 |
+| `--delay`             | Desfase en segundos de las pistas importadas. Ver [Desfase de pistas](../conceptos.md#desfase-de-pistas). |
 | `--strip-metadata`    | No copia los metadatos del origen.       |
 | `-o`, `-ov`           | Ver [opciones comunes](../conceptos.md#opciones-comunes).   |
 
@@ -53,6 +55,7 @@ pymedia edit-audio pelicula.mkv --track 1 --language spa
 pymedia edit-audio pelicula.mkv --track 1 --language spa --title "Comentario" --commentary
 pymedia edit-audio pelicula.mkv --track 0 --default
 pymedia edit-audio pelicula.mkv --track 2 --no-forced
+pymedia edit-audio pelicula.mkv --track 1 --delay 0.25        # retrasa la pista 0,25 s
 ```
 
 | Opción                                      | Descripción                                                  |
@@ -64,6 +67,7 @@ pymedia edit-audio pelicula.mkv --track 2 --no-forced
 | `--forced` / `--no-forced`                  | Pista forzada.                                               |
 | `--hearing-impaired` / `--no-hearing-impaired` | Destinada a personas con discapacidad auditiva.           |
 | `--commentary` / `--no-commentary`          | Pista de comentarios.                                        |
+| `--delay`                                   | Desfase en segundos, sin recodificar. Ver [Desfase de pistas](../conceptos.md#desfase-de-pistas). |
 | `-o`, `-ov`                                 | Ver [opciones comunes](../conceptos.md#opciones-comunes).    |
 
 - Las disposiciones que no indiques se conservan. Cada flag tiene su forma `--no-`

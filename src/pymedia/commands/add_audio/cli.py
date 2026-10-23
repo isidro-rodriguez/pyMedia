@@ -6,6 +6,7 @@ from pymedia.commands.add_audio.parameters import AddAudioParameters
 from pymedia.commands.add_audio.service import AddAudioService
 from pymedia.commands.base.cli_options import (
     AudioArgument,
+    AudioDelayOption,
     DebugOption,
     HelpOption,
     MediaInputArgument,
@@ -52,6 +53,7 @@ def add_audio(
     media_output: OutputOption = None,
     overwrite: OverwriteOption = OverwriteMode.ASK,
     strip_metadata: StripMetadataOption = False,
+    delay: AudioDelayOption = None,
     debug: DebugOption = False,
     show_cmd: ShowCmdOption = False,
     _help: HelpOption = False,
@@ -64,6 +66,7 @@ def add_audio(
         media_output: Ruta absoluta del fichero de salida procesado.
         overwrite: Política ante conflicto de salida ya existente.
         strip_metadata: No copiar los metadatos del fichero de entrada.
+        delay: Segundos de desfase de la pista importada (positivo la retrasa).
         debug: Habilita el nivel de log DEBUG.
         show_cmd: Muestra al usuario el comando ffmpeg compuesto pero no lo ejecuta.
         _help: Helper para mostrar esta línea en distintos idiomas.
@@ -81,5 +84,6 @@ def add_audio(
         audio_input=audio_input,
         media_output=media_output,
         strip_metadata=strip_metadata,
+        delay=delay,
     )
     AddAudioService(debug=debug, show_cmd=show_cmd, params=params).start()

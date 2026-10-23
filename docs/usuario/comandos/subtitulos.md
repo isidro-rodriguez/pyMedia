@@ -10,6 +10,7 @@ Añade un fichero de subtítulos como nueva pista.
 ```bash
 pymedia add-subs pelicula.mkv subs_en.srt --language eng
 pymedia add-subs pelicula.mp4 subs_es.ass --language spa --title "Español"
+pymedia add-subs pelicula.mkv subs_en.srt --language eng --delay 1.5
 ```
 
 | Argumento / opción    | Descripción                                                     |
@@ -18,6 +19,7 @@ pymedia add-subs pelicula.mp4 subs_es.ass --language spa --title "Español"
 | `SUBTITLES_FILE`      | Fichero `.srt`, `.ass` o `.ssa`.                                |
 | `--language`          | **Obligatorio.** Idioma de la pista.                            |
 | `--title`             | Título visible. Por defecto, el nombre nativo del idioma.       |
+| `--delay`             | Desfase en segundos del fichero importado. Ver [Desfase de pistas](../conceptos.md#desfase-de-pistas). |
 | `--strip-metadata`    | No copia los metadatos del origen.           |
 | `-o`, `-ov`           | Ver [opciones comunes](../conceptos.md#opciones-comunes).       |
 
@@ -57,6 +59,7 @@ Cambia los metadatos y las disposiciones de una pista de subtítulos.
 ```bash
 pymedia edit-subs pelicula.mkv --track 2 --language eng
 pymedia edit-subs pelicula.mkv --track 2 --title "Español (forzados)" --default --forced
+pymedia edit-subs pelicula.mkv --track 0 --delay -2
 ```
 
 | Opción                                         | Descripción                                               |
@@ -68,6 +71,7 @@ pymedia edit-subs pelicula.mkv --track 2 --title "Español (forzados)" --default
 | `--forced` / `--no-forced`                     | Pista forzada: el reproductor la muestra siempre.         |
 | `--hearing-impaired` / `--no-hearing-impaired` | Para personas con discapacidad auditiva (SDH).            |
 | `--visual-impaired` / `--no-visual-impaired`   | Para personas con discapacidad visual.                    |
+| `--delay`                                      | Desfase en segundos. Ver [Desfase de pistas](../conceptos.md#desfase-de-pistas). Adelantar (negativo) exige salida Matroska. |
 | `-o`, `-ov`                                    | Ver [opciones comunes](../conceptos.md#opciones-comunes). |
 
 Las disposiciones que no indiques se conservan.

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-10-23 20:11+0100\n"
+"POT-Creation-Date: 2026-10-23 20:41+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -142,7 +142,7 @@ msgstr ""
 msgid "Please answer y or n."
 msgstr ""
 
-#: pymedia/commands/add_audio/cli.py:25
+#: pymedia/commands/add_audio/cli.py:26
 msgid ""
 "Add an audio track to a media file.\n"
 "\n"
@@ -160,8 +160,8 @@ msgid ""
 "    Then: pymedia edit-audio output.mp4 --track 1 --default\n"
 msgstr ""
 
-#: pymedia/commands/add_audio/cli.py:46 pymedia/commands/delete_audio/cli.py:39
-#: pymedia/commands/edit_audio/cli.py:48
+#: pymedia/commands/add_audio/cli.py:47 pymedia/commands/delete_audio/cli.py:39
+#: pymedia/commands/edit_audio/cli.py:49
 #: pymedia/commands/extract_audio/cli.py:42
 msgid "Audio commands"
 msgstr ""
@@ -175,7 +175,7 @@ msgstr ""
 msgid "Audio added successfully: %(output)s"
 msgstr ""
 
-#: pymedia/commands/add_subtitles/cli.py:28
+#: pymedia/commands/add_subtitles/cli.py:29
 msgid ""
 "Add subtitles to a media file.\n"
 "\n"
@@ -195,9 +195,9 @@ msgid ""
 "    Then: pymedia edit-subs output.mp4 --track 1 --default --forced\n"
 msgstr ""
 
-#: pymedia/commands/add_subtitles/cli.py:49
+#: pymedia/commands/add_subtitles/cli.py:50
 #: pymedia/commands/delete_subtitles/cli.py:39
-#: pymedia/commands/edit_subtitles/cli.py:48
+#: pymedia/commands/edit_subtitles/cli.py:49
 #: pymedia/commands/extract_subtitles/cli.py:42
 msgid "Subtitles commands"
 msgstr ""
@@ -463,13 +463,14 @@ msgid "Initial volume, as a percentage."
 msgstr ""
 
 #: pymedia/commands/base/cli_options.py:421
-#: pymedia/commands/base/cli_options.py:430
-#: pymedia/commands/base/cli_options.py:439
-#: pymedia/commands/base/cli_options.py:448
-#: pymedia/commands/base/cli_options.py:457
-#: pymedia/commands/base/cli_options.py:467
-#: pymedia/commands/base/cli_options.py:477
-#: pymedia/commands/base/cli_options.py:486
+#: pymedia/commands/base/cli_options.py:431
+#: pymedia/commands/base/cli_options.py:443
+#: pymedia/commands/base/cli_options.py:452
+#: pymedia/commands/base/cli_options.py:461
+#: pymedia/commands/base/cli_options.py:470
+#: pymedia/commands/base/cli_options.py:480
+#: pymedia/commands/base/cli_options.py:490
+#: pymedia/commands/base/cli_options.py:499
 msgid "Audio options"
 msgstr ""
 
@@ -477,130 +478,143 @@ msgstr ""
 msgid "Set as commentary audio track."
 msgstr ""
 
-#: pymedia/commands/base/cli_options.py:431
+#: pymedia/commands/base/cli_options.py:433
+msgid ""
+"Shift the audio track in seconds, without transcoding: positive delays "
+"it, negative advances it."
+msgstr ""
+
+#: pymedia/commands/base/cli_options.py:444
 msgid "Set as default audio track of the container."
 msgstr ""
 
-#: pymedia/commands/base/cli_options.py:440
-#: pymedia/commands/base/cli_options.py:509
+#: pymedia/commands/base/cli_options.py:453
+#: pymedia/commands/base/cli_options.py:535
 msgid "Set as forced to be displayed."
 msgstr ""
 
-#: pymedia/commands/base/cli_options.py:449
+#: pymedia/commands/base/cli_options.py:462
 msgid "Set audio track as targeted for hearing impaired people."
 msgstr ""
 
-#: pymedia/commands/base/cli_options.py:458
+#: pymedia/commands/base/cli_options.py:471
 msgid "Set audio language, formatted as ISO 639-2 code."
 msgstr ""
 
-#: pymedia/commands/base/cli_options.py:468
+#: pymedia/commands/base/cli_options.py:481
 msgid "List of audio tracks to process."
 msgstr ""
 
-#: pymedia/commands/base/cli_options.py:478
+#: pymedia/commands/base/cli_options.py:491
 msgid "Audio track to edit."
 msgstr ""
 
-#: pymedia/commands/base/cli_options.py:487
+#: pymedia/commands/base/cli_options.py:500
 msgid "Set a custom audio track title for video player."
 msgstr ""
 
-#: pymedia/commands/base/cli_options.py:499
-#: pymedia/commands/base/cli_options.py:508
-#: pymedia/commands/base/cli_options.py:517
-#: pymedia/commands/base/cli_options.py:526
-#: pymedia/commands/base/cli_options.py:536
-#: pymedia/commands/base/cli_options.py:546
-#: pymedia/commands/base/cli_options.py:555
-#: pymedia/commands/base/cli_options.py:564
+#: pymedia/commands/base/cli_options.py:513
+#: pymedia/commands/base/cli_options.py:525
+#: pymedia/commands/base/cli_options.py:534
+#: pymedia/commands/base/cli_options.py:543
+#: pymedia/commands/base/cli_options.py:552
+#: pymedia/commands/base/cli_options.py:562
+#: pymedia/commands/base/cli_options.py:572
+#: pymedia/commands/base/cli_options.py:581
+#: pymedia/commands/base/cli_options.py:590
 msgid "Subtitles options"
 msgstr ""
 
-#: pymedia/commands/base/cli_options.py:500
+#: pymedia/commands/base/cli_options.py:515
+msgid ""
+"Shift the subtitles track in seconds: positive delays it, negative "
+"advances it."
+msgstr ""
+
+#: pymedia/commands/base/cli_options.py:526
 msgid "Set as default subtitles of the container."
 msgstr ""
 
-#: pymedia/commands/base/cli_options.py:518
+#: pymedia/commands/base/cli_options.py:544
 msgid "Set as targeted for hearing impaired people."
 msgstr ""
 
-#: pymedia/commands/base/cli_options.py:527
+#: pymedia/commands/base/cli_options.py:553
 msgid "Set subtitles language, formatted as ISO 639-2 code."
 msgstr ""
 
-#: pymedia/commands/base/cli_options.py:537
+#: pymedia/commands/base/cli_options.py:563
 msgid "List of subtitles tracks to process."
 msgstr ""
 
-#: pymedia/commands/base/cli_options.py:547
+#: pymedia/commands/base/cli_options.py:573
 msgid "Subtitles track to edit."
 msgstr ""
 
-#: pymedia/commands/base/cli_options.py:556
+#: pymedia/commands/base/cli_options.py:582
 msgid "Set a custom title for video player."
 msgstr ""
 
-#: pymedia/commands/base/cli_options.py:565
+#: pymedia/commands/base/cli_options.py:591
 msgid "Set as targeted for visual impaired people."
 msgstr ""
 
-#: pymedia/commands/base/cli_options.py:578
-#: pymedia/commands/base/cli_options.py:587
-#: pymedia/commands/base/cli_options.py:596
-#: pymedia/commands/base/cli_options.py:607
-#: pymedia/commands/base/cli_options.py:616
+#: pymedia/commands/base/cli_options.py:604
+#: pymedia/commands/base/cli_options.py:613
+#: pymedia/commands/base/cli_options.py:622
+#: pymedia/commands/base/cli_options.py:633
+#: pymedia/commands/base/cli_options.py:642
 msgid "Filter options"
 msgstr ""
 
-#: pymedia/commands/base/cli_options.py:579
+#: pymedia/commands/base/cli_options.py:605
 msgid "Crop to WIDTH×HEIGHT at offset X,Y (from top-left)."
 msgstr ""
 
-#: pymedia/commands/base/cli_options.py:588
+#: pymedia/commands/base/cli_options.py:614
 msgid "Flip the image horizontally, swapping left and right."
 msgstr ""
 
-#: pymedia/commands/base/cli_options.py:597
+#: pymedia/commands/base/cli_options.py:623
 msgid "Flip the image vertically, swapping top and bottom."
 msgstr ""
 
-#: pymedia/commands/base/cli_options.py:608
+#: pymedia/commands/base/cli_options.py:634
 msgid "Set the animated image frame rate in frames per second."
 msgstr ""
 
-#: pymedia/commands/base/cli_options.py:617
+#: pymedia/commands/base/cli_options.py:643
 msgid "Specify an orthogonal arc degree to rotate the image."
 msgstr ""
 
-#: pymedia/commands/base/cli_options.py:629
-#: pymedia/commands/base/cli_options.py:639
-#: pymedia/commands/base/cli_options.py:648
+#: pymedia/commands/base/cli_options.py:655
+#: pymedia/commands/base/cli_options.py:665
+#: pymedia/commands/base/cli_options.py:674
 msgid "Scale filter options"
 msgstr ""
 
-#: pymedia/commands/base/cli_options.py:630
+#: pymedia/commands/base/cli_options.py:656
 msgid "Specify different ways to scale the video."
 msgstr ""
 
-#: pymedia/commands/base/cli_options.py:640
+#: pymedia/commands/base/cli_options.py:666
 msgid "Target resolution, in pixels, to resize the video."
 msgstr ""
 
-#: pymedia/commands/base/cli_options.py:649
+#: pymedia/commands/base/cli_options.py:675
 msgid "Allows upscaling beyond the source dimensions."
 msgstr ""
 
-#: pymedia/commands/base/cli_options.py:662
-#: pymedia/commands/base/cli_options.py:671
+#: pymedia/commands/base/cli_options.py:688
+#: pymedia/commands/base/cli_options.py:697
 msgid "Metadata options"
 msgstr ""
 
-#: pymedia/commands/base/cli_options.py:663
+#: pymedia/commands/base/cli_options.py:689
 msgid "Specify an orthogonal arc degree to rotate image through disposition."
 msgstr ""
 
-#: pymedia/commands/base/cli_options.py:673
+#: pymedia/commands/base/cli_options.py:699
 msgid ""
 "Do not copy metadata from the source file (title, tags, track language "
 "and title). Dispositions are kept."
@@ -758,7 +772,7 @@ msgstr ""
 msgid "Subtitles deleted successfully: %(output)s"
 msgstr ""
 
-#: pymedia/commands/edit_audio/cli.py:31
+#: pymedia/commands/edit_audio/cli.py:32
 msgid ""
 "Edit audio track disposition from a media file.\n"
 "\n"
@@ -782,7 +796,7 @@ msgstr ""
 msgid "Audio disposition edited successfully: %(output)s"
 msgstr ""
 
-#: pymedia/commands/edit_subtitles/cli.py:31
+#: pymedia/commands/edit_subtitles/cli.py:32
 msgid ""
 "Edit subtitles disposition from a media file.\n"
 "\n"
@@ -1319,6 +1333,13 @@ msgstr ""
 msgid ""
 "Invalid crop area. Area height (%(area_height)s) and coordinate Y "
 "(%(area_y)s) is bigger than video height (%(video_height)s) "
+msgstr ""
+
+#: pymedia/mixins/delay_mixin.py:51
+#, python-format
+msgid ""
+"Subtitles can only be advanced (negative --delay) in a Matroska output: "
+"%(containers)s."
 msgstr ""
 
 #: pymedia/mixins/flip_mixin.py:36

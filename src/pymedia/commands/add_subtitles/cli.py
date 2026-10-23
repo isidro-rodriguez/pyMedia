@@ -13,6 +13,7 @@ from pymedia.commands.base.cli_options import (
     ShowCmdOption,
     StripMetadataOption,
     SubtitlesArgument,
+    SubtitlesDelayOption,
     SubtitlesLanguageOption,
     SubtitlesTitleOption,
 )
@@ -57,6 +58,7 @@ def add_subs(
     media_output: OutputOption = None,
     overwrite: OverwriteOption = OverwriteMode.ASK,
     strip_metadata: StripMetadataOption = False,
+    delay: SubtitlesDelayOption = None,
     debug: DebugOption = False,
     show_cmd: ShowCmdOption = False,
     _help: HelpOption = False,
@@ -71,6 +73,7 @@ def add_subs(
         media_output: Ruta absoluta del fichero de salida procesado.
         overwrite: Política ante conflicto de salida ya existente.
         strip_metadata: No copiar los metadatos del fichero de entrada.
+        delay: Segundos de desfase de la pista importada (positivo la retrasa).
         debug: Habilita el nivel de log DEBUG.
         show_cmd: Muestra al usuario el comando ffmpeg compuesto pero no lo ejecuta.
         _help: Helper para mostrar esta línea en distintos idiomas.
@@ -94,5 +97,6 @@ def add_subs(
         title=title,
         media_output=media_output,
         strip_metadata=strip_metadata,
+        delay=delay,
     )
     AddSubtitlesService(debug=debug, show_cmd=show_cmd, params=params).start()

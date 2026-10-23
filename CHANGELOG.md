@@ -12,6 +12,7 @@ Primera versión estable.
 
 ### Añadido
 
+- `--delay` en `add-audio`, `edit-audio`, `add-subs` y `edit-subs`: corrige un desfase constante de la pista en segundos (positivo la retrasa, negativo la adelanta) sin recodificar.
 - Tests que contrastan los comandos y opciones de la CLI con el README, la documentación y la página de manual.
 - Comando `play`: reproduce un vídeo con ffplay para revisar o previsualizar un tramo (`--start`/`--end`), las pistas (`--audio`, `--subs`, `--no-subs`, `--mute`), un fichero de subtítulos externo (`--burn-subtitles`) y los filtros de imagen, con `--volume`, `--loop` y `--fullscreen`.
 - Tema visual propio (`theme.py`, `ui.py`) aplicado a toda la interfaz: ayuda y errores de Typer, mensajes con icono por nivel y valores resaltados, barra de progreso con estado y tiempo, preguntas sí/no, panel de `info`, panel de `--version` (ahora incluye la versión de ffmpeg) y comando coloreado de `--show-cmd`.

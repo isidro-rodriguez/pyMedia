@@ -5,6 +5,7 @@ import typer
 from pymedia.commands.base.cli_options import (
     AudioCommentaryOption,
     AudioDefaultOption,
+    AudioDelayOption,
     AudioForcedOption,
     AudioHearingImpairedOption,
     AudioLanguageOption,
@@ -59,6 +60,7 @@ def edit_audio(
     default: AudioDefaultOption = None,
     hearing_impaired: AudioHearingImpairedOption = None,
     commentary: AudioCommentaryOption = None,
+    delay: AudioDelayOption = None,
     debug: DebugOption = False,
     show_cmd: ShowCmdOption = False,
     _help: HelpOption = False,
@@ -76,6 +78,7 @@ def edit_audio(
         default: Se establece como la pista de audio por defecto del contenedor.
         hearing_impaired: Pista orientada a personas con problemas auditivos.
         commentary: Pista de comentarios de audio.
+        delay: Segundos de desfase de la pista (positivo la retrasa).
         debug: Habilita el nivel de log DEBUG.
         show_cmd: Muestra al usuario el comando ffmpeg compuesto pero no lo ejecuta.
         _help: Helper para mostrar esta línea en distintos idiomas.
@@ -93,6 +96,7 @@ def edit_audio(
         and default is None
         and hearing_impaired is None
         and commentary is None
+        and delay is None
     ):
         raise MissingRequiredOptionsError(
             options=[
@@ -102,6 +106,7 @@ def edit_audio(
                 "default",
                 "hearing_impaired",
                 "commentary",
+                "delay",
             ]
         )
 
@@ -117,5 +122,6 @@ def edit_audio(
         default=default,
         hearing_impaired=hearing_impaired,
         commentary=commentary,
+        delay=delay,
     )
     EditAudioService(debug=debug, show_cmd=show_cmd, params=params).start()

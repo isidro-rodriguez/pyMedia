@@ -40,6 +40,7 @@ class AddSubtitlesCmd:
             [
                 "-i",
                 str(self.params.media.path),
+                *self.params.to_delay_input_cmd(),
                 "-i",
                 str(subtitles.path),
                 "-map",
