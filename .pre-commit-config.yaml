@@ -49,6 +49,15 @@ repos:
   # ── pre-push: suite completa antes de publicar ──────────────────────────
   - repo: local
     hooks:
+      # El CI instala con `uv sync --locked`: falla si uv.lock no está al día.
+      - id: uv-lock-check
+        name: uv.lock al día con pyproject.toml
+        entry: uv lock --check
+        language: system
+        pass_filenames: false
+        always_run: true
+        stages: [pre-push]
+
       - id: pytest-cov
         name: Pytest con cobertura (mínimo 95 %)
         entry: uv run pytest -q --cov=pymedia --cov-report=term-missing:skip-covered --cov-fail-under=95

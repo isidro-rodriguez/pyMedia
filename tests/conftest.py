@@ -6,6 +6,7 @@ mensajes visibles no dependan del idioma del sistema.
 """
 
 import os
+import re
 import subprocess
 import sys
 from pathlib import Path
@@ -901,6 +902,17 @@ def built_binary() -> Path:
     return BINARY_PATH
 
 
+# Typer fuerza el modo terminal (colores y negritas) si detecta CI
+# (`GITHUB_ACTIONS`, `FORCE_COLOR`, `PY_COLORS`): los códigos ANSI partirían los
+# textos que comprueban los tests, así que se eliminan de la salida.
+_ANSI = re.compile(r"\x1b\[[0-9;]*[A-Za-z]")
+
+
+def _plain(text: str) -> str:
+    """Salida sin secuencias de escape ANSI."""
+    return _ANSI.sub("", text)
+
+
 def _cli_invoker() -> Invoke:
     """Ejecutor en proceso sobre `pymedia.main.app` (rápido, depurable).
 
@@ -913,7 +925,7 @@ def _cli_invoker() -> Invoke:
 
     def invoke(*args: str, input: str | None = None) -> CliResult:
         result = runner.invoke(app, list(args), input=input)
-        return CliResult(exit_code=result.exit_code, output=result.output)
+        return CliResult(exit_code=result.exit_code, output=_plain(result.output))
 
     return invoke
 
@@ -934,7 +946,7 @@ def _binary_invoker(binary: Path, localedir: Path) -> Invoke:
             check=False,
         )
         return CliResult(
-            exit_code=result.returncode, output=result.stdout + result.stderr
+            exit_code=result.returncode, output=_plain(result.stdout + result.stderr)
         )
 
     return invoke
