@@ -34,6 +34,9 @@ uv tool install .
 pymedia --version
 ```
 
+pyMedia es una aplicación de consola: úsala desde una terminal (no tiene lanzador de
+escritorio).
+
 Más opciones en [Instalación](https://isidro-rodriguez.github.io/pyMedia/usuario/instalacion/).
 
 ## Uso

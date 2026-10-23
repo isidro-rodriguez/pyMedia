@@ -73,14 +73,6 @@ def test_current_changelog_has_notes_for_the_current_version() -> None:
     assert package.release_notes(version).strip()
 
 
-def test_desktop_entry_points_to_installed_paths() -> None:
-    """El lanzador usa el ejecutable y el icono instalados por el paquete."""
-    entry = package._desktop_entry()
-
-    assert "Exec=pymedia\n" in entry
-    assert "Icon=pymedia\n" in entry
-
-
 def test_build_zip_contains_executable_license_and_readme(
     tmp_path: Path, info: object
 ) -> None:
@@ -113,9 +105,7 @@ def test_write_checksum_matches_sha256sum_format(tmp_path: Path) -> None:
 
 
 @pytest.mark.skipif(shutil.which("dpkg-deb") is None, reason="requiere dpkg-deb")
-def test_build_deb_installs_binary_manpage_icon_and_launcher(
-    tmp_path: Path, info: object
-) -> None:
+def test_build_deb_installs_binary_and_manpage(tmp_path: Path, info: object) -> None:
     """El .deb declara ffmpeg como dependencia e instala todos los recursos."""
     binary = tmp_path / "pymedia"
     binary.write_bytes(b"#!/bin/sh\n")
@@ -141,8 +131,9 @@ def test_build_deb_installs_binary_manpage_icon_and_launcher(
         "-rwxr-xr-x root/root",
         "./usr/bin/pymedia",
         "./usr/share/man/man1/pymedia.1.gz",
-        "./usr/share/applications/pymedia.desktop",
-        "./usr/share/icons/hicolor/256x256/apps/pymedia.png",
         "./usr/share/doc/pymedia/copyright",
     ):
         assert path in contents
+    # Aplicación de consola: sin lanzador ni icono de escritorio.
+    assert "/usr/share/applications/" not in contents
+    assert "/usr/share/icons/" not in contents

@@ -41,7 +41,7 @@ pyMedia: Typer CLI that wraps `ffmpeg`/`ffprobe` for everyday media tasks. Read
 │       ├── models/         # Dataclasses (Media, Video, Audio, Subtitles, Config…)
 │       ├── data/           # Codec, container, format and language catalogs
 │       ├── locales/        # gettext catalogs (pymedia.pot, spanish/)
-│       ├── resources/      # Default config.toml, icons, font, man page
+│       ├── resources/      # Default config.toml, icons (executable), font, man page
 │       ├── ffprobe.py      # ffprobe → models
 │       ├── errors.py       # Localized exception hierarchy
 │       ├── logger.py       # Rich console + rotating file logger

@@ -94,7 +94,10 @@ def deb_version(version: str) -> str:
 
 
 def build_deb(binary: Path, info: ProjectInfo, arch: str, out_dir: Path) -> Path:
-    """Construye el paquete `.deb` con el ejecutable, man page, icono y lanzador.
+    """Construye el paquete `.deb` con el ejecutable y la página de manual.
+
+    pyMedia es una aplicación de consola: no instala lanzador ni icono de
+    escritorio.
 
     Args:
         binary: Ejecutable compilado con PyInstaller.
@@ -114,11 +117,6 @@ def build_deb(binary: Path, info: ProjectInfo, arch: str, out_dir: Path) -> Path
 
     _install(binary, staging / "usr" / "bin" / "pymedia", mode=0o755)
     _install_gzip(RESOURCES / "pymedia.1", staging / "usr/share/man/man1/pymedia.1.gz")
-    _install(
-        RESOURCES / "icon.png",
-        staging / "usr/share/icons/hicolor/256x256/apps/pymedia.png",
-    )
-    _write(staging / "usr/share/applications/pymedia.desktop", _desktop_entry())
     _write(staging / "usr/share/doc/pymedia/copyright", _copyright(info))
     _write(staging / "DEBIAN" / "control", _control(info, version, arch, staging))
 
@@ -156,19 +154,6 @@ def _write(target: Path, content: str) -> None:
     target.parent.mkdir(parents=True, exist_ok=True)
     target.write_text(content, encoding="utf-8")
     target.chmod(0o644)
-
-
-def _desktop_entry() -> str:
-    """Adapta el lanzador de `resources` a las rutas instaladas por el paquete."""
-    lines = (RESOURCES / "pymedia.desktop").read_text(encoding="utf-8").splitlines()
-    fixed = {"Exec": "pymedia", "Icon": "pymedia"}
-    return (
-        "\n".join(
-            f"{key}={fixed[key]}" if (key := line.partition("=")[0]) in fixed else line
-            for line in lines
-        )
-        + "\n"
-    )
 
 
 def _copyright(info: ProjectInfo) -> str:

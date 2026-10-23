@@ -6,6 +6,11 @@ Cada versión publica en [GitHub Releases](https://github.com/isidro-rodriguez/p
 paquetes que no necesitan Python.
 Junto a cada paquete hay un fichero `.sha256` para verificar la descarga.
 
+!!! note "Aplicación de consola"
+    pyMedia se usa desde una terminal: no instala lanzador ni icono en el menú de
+    aplicaciones. Si abres el ejecutable con doble clic, la ventana se cierra en
+    cuanto muestra la ayuda.
+
 === "Linux (Debian, Ubuntu y derivadas)"
 
     ```bash
@@ -17,7 +22,6 @@ Junto a cada paquete hay un fichero `.sha256` para verificar la descarga.
     - Instalación de `ffmpeg` como dependencia.
     - Ejecutable en `/usr/bin/pymedia`.
     - Página de manual (`man pymedia`).
-    - Icono y el lanzador de escritorio.
 
     Para desinstalar: `sudo apt remove pymedia`.
 
