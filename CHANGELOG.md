@@ -28,6 +28,7 @@ Primera versión estable.
 
 ### Corregido
 
+- En Windows, las líneas de error de ffmpeg con tildes o eñes se mostraban corruptas, y `join --debug` podía fallar al mostrar la lista de ficheros: ahora se leen siempre como UTF-8.
 - `add-audio` y `extract-subs` fallaban con `--strip-metadata`: `-map_metadata -1` se colocaba antes de las entradas. En `extract-audio` y `extract-subs` con varias pistas solo se aplicaba a la primera salida.
 - Una carátula (`attached_pic`) en un MP4 se tomaba como pista de vídeo: `info` mostraba la imagen y `transcode` terminaba con una traza de Python. Ahora se ignora y se usa la primera pista de vídeo real.
 - Un `config.toml` mal formado provocaba una traza de Python al arrancar en lugar del mensaje de error de configuración.

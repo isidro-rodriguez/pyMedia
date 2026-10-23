@@ -60,7 +60,9 @@ def _sections() -> dict[str, str]:
     """Texto de cada sección `## comando` junto con la introducción de su página."""
     sections: dict[str, str] = {}
     for page in sorted(COMMANDS_DOCS.glob("*.md")):
-        parts = re.split(r"^## `([\w-]+)`\s*$", page.read_text(), flags=re.M)
+        parts = re.split(
+            r"^## `([\w-]+)`\s*$", page.read_text(encoding="utf-8"), flags=re.M
+        )
         intro = parts[0]
         for name, body in zip(parts[1::2], parts[2::2], strict=True):
             sections[name] = intro + body
@@ -69,7 +71,7 @@ def _sections() -> dict[str, str]:
 
 def _common_options() -> dict[tuple[str, ...], str]:
     """Filas de «Opciones comunes» en `conceptos.md`: opciones → disponibilidad."""
-    text = CONCEPTS.read_text()
+    text = CONCEPTS.read_text(encoding="utf-8")
     table = text.split("## Opciones comunes", 1)[1].split("\n\n", 2)[1]
     rows: dict[tuple[str, ...], str] = {}
     for line in table.splitlines()[2:]:
@@ -107,13 +109,15 @@ def test_command_has_docs_section(name: str) -> None:
 @pytest.mark.parametrize("name", NAMES)
 def test_command_in_man_page(name: str) -> None:
     """Cada comando aparece como entrada `.B nombre` en la página de manual."""
-    assert re.search(rf"^\.B {re.escape(name)}$", MAN_PAGE.read_text(), re.M)
+    assert re.search(
+        rf"^\.B {re.escape(name)}$", MAN_PAGE.read_text(encoding="utf-8"), re.M
+    )
 
 
 @pytest.mark.parametrize("name", NAMES)
 def test_command_in_readme(name: str) -> None:
     """Cada comando tiene una fila en la tabla de uso del README."""
-    assert f"| `{name}` " in README.read_text()
+    assert f"| `{name}` " in README.read_text(encoding="utf-8")
 
 
 def test_docs_do_not_describe_missing_commands() -> None:
@@ -158,7 +162,7 @@ def test_common_options_availability(flags: tuple[str, ...]) -> None:
 @pytest.mark.parametrize("name", NAMES)
 def test_command_options_in_man_page(name: str) -> None:
     """Todas las opciones del comando aparecen en la página de manual."""
-    man = MAN_PAGE.read_text()
+    man = MAN_PAGE.read_text(encoding="utf-8")
     missing = sorted(
         option
         for option in _options(COMMANDS[name], negatives=False)
@@ -178,7 +182,8 @@ def test_docs_do_not_mention_missing_options() -> None:
             f"{option} ({source.name})"
             for source in sources
             for option in re.findall(
-                r"(?<![\w-])(--[a-z][a-z0-9-]*[a-z0-9])(?![\w-])", source.read_text()
+                r"(?<![\w-])(--[a-z][a-z0-9-]*[a-z0-9])(?![\w-])",
+                source.read_text(encoding="utf-8"),
             )
             if option not in known
         }

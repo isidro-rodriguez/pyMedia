@@ -227,6 +227,9 @@ class FfmpegProcess:
                 stderr=subprocess.PIPE,
                 stdin=subprocess.DEVNULL,
                 text=True,
+                # ffmpeg escribe en UTF-8 (rutas con tildes); en Windows la
+                # codificación por defecto del sistema las mostraría corruptas.
+                encoding="utf-8",
                 errors="replace",
                 bufsize=1,
             )

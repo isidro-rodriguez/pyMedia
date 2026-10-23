@@ -31,6 +31,7 @@ def _first_pts(path: Path, stream: str) -> float:
         ],
         capture_output=True,
         text=True,
+        encoding="utf-8",
         check=True,
     )
     return float(result.stdout.split()[0])

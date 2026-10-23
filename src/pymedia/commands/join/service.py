@@ -41,7 +41,8 @@ class JoinService(BaseService[JoinParameters]):
             cmd = JoinCmd(params=self.params).create(list_txt=list_txt)
 
             self.logger.debug(
-                _("List file:\n%(list_txt)s"), list_txt=list_txt.read_text()
+                _("List file:\n%(list_txt)s"),
+                list_txt=list_txt.read_text(encoding="utf-8"),
             )
 
             self.display_cmd(cmd=cmd)

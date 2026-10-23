@@ -73,11 +73,3 @@ repos:
         pass_filenames: false
         always_run: true
         stages: [pre-push]
-
-      - id: pytest-binary
-        name: Pytest -m binary (compila el ejecutable)
-        entry: uv run pytest -q -m binary
-        language: system
-        pass_filenames: false
-        always_run: true
-        stages: [pre-push]

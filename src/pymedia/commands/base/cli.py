@@ -98,7 +98,12 @@ def _ffmpeg_version() -> Text:
         return Text(_("not found"), style="error")
     try:
         result = subprocess.run(
-            [binary, "-version"], capture_output=True, text=True, check=True
+            [binary, "-version"],
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+            errors="replace",
+            check=True,
         )
     except (OSError, subprocess.CalledProcessError):
         return Text(_("not found"), style="error")
