@@ -2,59 +2,80 @@
 
 ## Paquetes publicados
 
-Cada versión publica en [GitHub Releases](https://github.com/isidro-rodriguez/pyMedia/releases/latest) paquetes que no necesitan Python.
+Cada versión publica en [GitHub Releases](https://github.com/isidro-rodriguez/pyMedia/releases/latest)
+paquetes que no necesitan Python.
 Junto a cada paquete hay un fichero `.sha256` para verificar la descarga.
 
-### Linux (Debian, Ubuntu y derivadas)
+=== "Linux (Debian, Ubuntu y derivadas)"
 
-```bash
-sudo apt install ./pymedia_1.0.0_amd64.deb
-```
+    ```bash
+    sudo apt install ./pymedia_1.0.0_amd64.deb
+    ```
 
-`apt` instala también `ffmpeg` como dependencia. El paquete incluye el ejecutable en
-`/usr/bin/pymedia`, la página de manual (`man pymedia`), el icono y el lanzador de
-escritorio. Para desinstalar: `sudo apt remove pymedia`.
+    El paquete incluye:
 
-### Windows
+    - Instalación de `ffmpeg` como dependencia.
+    - Ejecutable en `/usr/bin/pymedia`.
+    - Página de manual (`man pymedia`).
+    - Icono y el lanzador de escritorio.
 
-1. Descarga `pymedia-1.0.0-windows-x64.zip` y descomprímelo, por ejemplo en
-   `C:\Programas\pymedia`.
-2. Añade esa carpeta al `PATH` (*Configuración → Sistema → Información → Configuración
-   avanzada del sistema → Variables de entorno*).
-3. Instala ffmpeg: `winget install ffmpeg`.
-4. Abre una terminal nueva y comprueba con `pymedia --version`.
+    Para desinstalar: `sudo apt remove pymedia`.
 
-### Verificar la descarga
+    > Verifica la descarga con:
+    >
+    > ```bash
+    > sha256sum -c pymedia_1.0.0_amd64.deb.sha256
+    > ```
 
-```bash
-sha256sum -c pymedia_1.0.0_amd64.deb.sha256                        # Linux
-Get-FileHash pymedia-1.0.0-windows-x64.zip -Algorithm SHA256      # PowerShell
-```
+=== "Windows"
+
+    1. Descarga `pymedia-1.0.0-windows-x64.zip` y descomprímelo.
+    2. Ubica el ejecutable en un directorio incluído en `PATH`.
+    4. Instala ffmpeg: `winget install ffmpeg`.
+    5. Abre una terminal nueva y comprueba con `pymedia --version`.
+
+    > Puedes añadir una carpeta al `PATH` mediante: *Configuración → Sistema →
+      Información → Configuración avanzada del sistema → Variables de entorno*.
+
+    > Verifica la descarga en PowerShell y compara el resultado con el fichero `.sha256`:
+    >
+    >    ```powershell
+    >    Get-FileHash pymedia-1.0.0-windows-x64.zip -Algorithm SHA256
+    >    ```
 
 ## Requisitos para el código fuente
 
-| Requisito          | Versión          | Notas                                                          |
-|--------------------|------------------|----------------------------------------------------------------|
-| Python             | 3.12 o superior  | Para ejecutar desde el código fuente.                          |
-| ffmpeg y ffprobe   | Reciente         | Deben estar en el `PATH`. pyMedia lo comprueba al arrancar.    |
-| uv                 | Reciente         | Gestor de dependencias del proyecto.                           |
+| Requisito        | Versión         | Notas                                                       |
+| ---------------- | --------------- | ----------------------------------------------------------- |
+| Python           | 3.12 o superior | Para ejecutar desde el código fuente.                       |
+| ffmpeg y ffprobe | Reciente        | Deben estar en el `PATH`. pyMedia lo comprueba al arrancar. |
+| uv               | Reciente        | Gestor de dependencias del proyecto.                        |
 
 Instalación de ffmpeg según plataforma:
 
-```bash
-# Windows
-winget install ffmpeg
+=== "Debian / Ubuntu"
 
-# Debian / Ubuntu
-sudo apt install ffmpeg
+    ```bash
+    sudo apt install ffmpeg
+    ```
 
-# macOS (Homebrew)
-brew install ffmpeg
-```
+=== "Windows"
 
-La transcodificación usa los codificadores `libx264`, `libx265`, `libsvtav1` y `libopus`
-según el perfil elegido. Las compilaciones oficiales de ffmpeg los incluyen; si usas una
-compilación mínima, comprueba que están disponibles con `ffmpeg -encoders`.
+    ```powershell
+    winget install ffmpeg
+    ```
+
+=== "macOS"
+
+    ```bash
+    brew install ffmpeg
+    ```
+
+!!! note "Codificadores necesarios"
+
+    La transcodificación usa `libx264`, `libx265`, `libsvtav1` y `libopus` según el
+    perfil elegido. Las compilaciones oficiales de ffmpeg los incluyen; si usas una
+    compilación mínima, comprueba que están disponibles con `ffmpeg -encoders`.
 
 ## Desde el código fuente
 
@@ -86,10 +107,10 @@ destino, pero sí ffmpeg.
 uv run python scripts/build.py
 ```
 
-| Plataforma   | Resultado               |
-|--------------|-------------------------|
-| Windows      | `build/pymedia.exe`     |
-| Linux, macOS | `build/pymedia`         |
+| Plataforma   | Resultado           |
+| ------------ | ------------------- |
+| Windows      | `build/pymedia.exe` |
+| Linux, macOS | `build/pymedia`     |
 
 ## Autocompletado de la shell
 
@@ -100,7 +121,8 @@ pymedia --install-completion   # instala el autocompletado de la shell actual
 pymedia --show-completion      # muestra el script para personalizarlo
 ```
 
-Reinicia la terminal tras instalarlo.
+!!! tip
+    Reinicia la terminal tras instalarlo.
 
 ## Comprobación
 

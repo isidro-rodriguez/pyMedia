@@ -26,9 +26,12 @@ pyMedia: Typer CLI that wraps `ffmpeg`/`ffprobe` for everyday media tasks. Read
 ├── CHANGELOG.md            # Keep a Changelog (Spanish)
 ├── LICENSE                 # MIT
 ├── README.md               # Short user-facing introduction
-├── docs/
+├── docs/                   # Zensical sources of the docs website (Spanish)
+│   ├── index.md            # Landing page
 │   ├── usuario/            # User guide (commands, config, formats, troubleshooting)
-│   └── desarrollo/         # Developer guide (architecture, new command, contributing)
+│   ├── desarrollo/         # Developer guide (architecture, new command, contributing)
+│   └── assets/             # pymedia.css (CLI palette), images, favicons
+├── docs_templates/         # Zensical template overrides (favicons, manifest)
 ├── pyproject.toml          # Project: deps, build (hatchling), tools (ruff, ty, pytest)
 ├── scripts/                # build.py, package.py, i18n.py, generate_fixtures.py (+ fixtures/)
 ├── src/
@@ -91,6 +94,13 @@ If CLI behavior changed (slow, builds the PyInstaller binary):
 
 ```bash
 uv run pytest -m binary
+```
+
+If `docs/`, `zensical.toml` or `docs_templates/` changed, the build must finish with
+"No issues found" (broken links and anchors are reported as issues):
+
+```bash
+uv run zensical build        # output in site/ (git-ignored)
 ```
 
 If a tool is missing, install it in the `dev` group:

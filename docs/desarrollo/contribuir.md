@@ -156,6 +156,30 @@ uv run pytest -m locales
 
 Todos se ejecutan con `uv run python scripts/<script>.py`.
 
+## Documentación
+
+La documentación es un sitio estático generado con [Zensical](https://zensical.org/)
+a partir de `docs/` y publicado en GitHub Pages por el workflow `docs.yml` en cada
+push a `main`.
+
+| Ruta                                 | Contenido                                               |
+|--------------------------------------|---------------------------------------------------------|
+| `zensical.toml`                      | Navegación, tema, extensiones de Markdown.              |
+| `docs/assets/stylesheets/pymedia.css`| Colores de la paleta de la CLI (`theme.py`) y estilos.  |
+| `docs_templates/`                    | Plantillas propias: favicons y manifiesto web.          |
+
+```bash
+uv run zensical serve        # vista previa con recarga en http://localhost:8000
+uv run zensical build        # genera site/ (ignorado por git)
+```
+
+- Una página nueva se añade también a `nav` en `zensical.toml`.
+- Los enlaces entre páginas son relativos al fichero `.md`; no enlaces fuera de
+  `docs/` (usa la URL de GitHub).
+- Usa admoniciones (`!!! note`, `!!! tip`, `!!! warning`) para avisos y pestañas
+  (`=== "Linux"`) para instrucciones por plataforma.
+- El build debe terminar con «No issues found».
+
 ## Versionado y CHANGELOG
 
 - La versión vive en `src/pymedia/__init__.py` (`version = "X.Y.Z"`); hatchling y

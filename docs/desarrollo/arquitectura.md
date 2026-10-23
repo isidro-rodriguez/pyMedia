@@ -41,32 +41,19 @@ src/pymedia/
 ## Flujo de un comando
 
 ```mermaid
-sequenceDiagram
-    actor U as Usuario
-    participant M as main.run
-    participant C as cli.py
-    participant P as Parameters
-    participant F as ffprobe
-    participant S as Service
-    participant K as Cmd
-    participant R as ffmpeg_runner
-
-    U->>M: pymedia cut video.mp4 --at 10:00
-    M->>M: fija idioma y registra comandos
-    M->>C: Typer despacha el comando
-    C->>C: valida combinaciones de opciones
-    C->>P: Parameters.load(...)
-    P->>F: get_media_information()
-    F-->>P: Media
-    P->>P: mixins create_*: validan y normalizan
-    C->>S: Service(params).start()
-    S->>S: resolve_overwrite()
-    S->>K: Cmd(params).create()
-    K-->>S: list[str]
-    S->>S: display_cmd() (--show-cmd / --debug)
-    S->>R: run_ffmpeg(cmd, salidas, progreso)
-    R-->>U: barra de progreso y ficheros finales
+%%{init: {"flowchart": {"nodeSpacing": 24, "rankSpacing": 22}}}%%
+flowchart TD
+    A(["pymedia cut video.mp4"]) --> B["<b>main.run</b><br/>fija el idioma y registra los comandos"]
+    B --> C["<b>cli.py</b><br/>valida combinaciones de opciones"]
+    C --> D["<b>Parameters.load()</b><br/>ffprobe → Media; los mixins validan"]
+    D --> E["<b>Service.start()</b><br/>resuelve la sobrescritura"]
+    E --> F["<b>Cmd.create()</b><br/>devuelve el comando como list[str]"]
+    F --> G{"¿--show-cmd?"}
+    G -- sí --> H(["muestra el comando y termina"])
+    G -- no --> I["<b>run_ffmpeg()</b><br/>barra de progreso y ficheros finales"]
 ```
+
+`--debug` también muestra el comando, pero pide confirmación y continúa.
 
 ## Responsabilidades por capa
 
@@ -176,22 +163,24 @@ inválidos en lugar de fallar.
 
 ## Errores
 
-```mermaid
-classDiagram
-    TyperException <|-- PyMediaError
-    PyMediaError <|-- CommandError
-    PyMediaError <|-- CommandGenerationError
-    PyMediaError <|-- ConfigError
-    PyMediaError <|-- InvalidParameterError
-    PyMediaError <|-- MissingArgumentError
-    PyMediaError <|-- MissingParameterError
-    PyMediaError <|-- MissingPropertyError
-    PyMediaError <|-- OperativeSystemError
-    BadParameter <|-- UserError
-    UserError <|-- FfprobeError
-    UserError <|-- InvalidCodecContainerError
-    UserError <|-- InvalidContainerError
-    UserError <|-- MissingRequiredOptionsError
+```text
+typer.TyperException
+└── PyMediaError                    # Base de los errores de ejecución
+    ├── CommandError                # ffmpeg falló, se bloqueó o se cortó
+    ├── CommandGenerationError      # No se pudo construir el comando
+    ├── ConfigError                 # config.toml no válido
+    ├── InvalidParameterError       # Parámetro con valor no válido
+    ├── MissingArgumentError        # Falta un argumento requerido
+    ├── MissingParameterError       # Falta un parámetro requerido
+    ├── MissingPropertyError        # Falta un dato en los metadatos
+    └── OperativeSystemError        # Fallo del sistema operativo
+
+typer.BadParameter
+└── UserError                       # Base de los errores del usuario
+    ├── FfprobeError                # ffprobe no pudo leer el fichero
+    ├── InvalidCodecContainerError  # Contenedor incompatible con códecs
+    ├── InvalidContainerError       # Contenedor incompatible con el medio
+    └── MissingRequiredOptionsError # Falta una opción obligatoria
 ```
 
 | Familia        | Cuándo                                                   | Presentación                                                        |

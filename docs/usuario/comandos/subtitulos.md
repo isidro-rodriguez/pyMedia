@@ -33,8 +33,9 @@ pymedia add-subs pelicula.mp4 subs_es.ass --language spa --title "Español"
 | `.mp4`, `.mov`, `.m2ts`, `.ts` | `mov_text` |
 | `.webm`                     | `webvtt`    |
 
-Al convertir `.ass`/`.ssa` a `srt` o `mov_text` se pierden los estilos (posición,
-colores, fuentes). Usa `.mkv` para conservarlos.
+!!! warning "Se pierden los estilos"
+    Al convertir `.ass`/`.ssa` a `srt` o `mov_text` se pierden los estilos (posición,
+    colores, fuentes). Usa `.mkv` para conservarlos.
 
 ## `delete-subs`
 

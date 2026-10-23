@@ -20,6 +20,7 @@ Primera versión estable.
 - CI de GitHub Actions en Linux y Windows (calidad, cobertura ≥ 95 %, locales y ejecutable) y Dependabot para `uv` y GitHub Actions.
 - Hooks de git separados en `pre-commit` (ruff, ty, pytest) y `pre-push` (cobertura, locales, binario).
 - Fichero `LICENSE` (MIT).
+- Web de documentación con Zensical publicada en GitHub Pages, con tema basado en la paleta de la CLI.
 - Documentación avanzada en `docs/`: guía de usuario (conceptos, referencia de comandos, filtros, configuración, formatos y solución de problemas) y guía de desarrollo (arquitectura, receta para añadir comandos y contribución).
 
 ### Corregido
