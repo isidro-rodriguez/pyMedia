@@ -88,12 +88,14 @@ def stage_outputs(cmd: list[str], outputs: Iterable[str], staging: Path) -> list
 
     Raises:
         InvalidParameterError: Si dos salidas comparten el mismo nombre de
-            fichero: en el temporal solo se distinguen por nombre, así que una
-            pisaría a la otra.
+            fichero (en el temporal solo se distinguen por nombre, así que una
+            pisaría a la otra) o si no están todas en el mismo directorio
+            (`commit_outputs` las mueve al de la salida principal).
     """
     output_set = {str(o) for o in outputs}
     targets = {cmd[-1], *output_set}
     _validate_unique_names(targets)
+    _validate_same_directory(targets)
     return [
         str(staging / Path(arg).name) if i and arg in targets else arg
         for i, arg in enumerate(cmd)
@@ -111,8 +113,21 @@ def _validate_unique_names(targets: set[str]) -> None:
         )
 
 
+def _validate_same_directory(targets: set[str]) -> None:
+    """Comprueba que todas las salidas comparten directorio."""
+    if len({Path(target).parent for target in targets}) > 1:
+        raise InvalidParameterError(
+            msg=_("All outputs of a command must be in the same directory.")
+        )
+
+
 def commit_outputs(staging: Path, dest_dir: Path, overwrite: bool) -> None:
     """Mueve las salidas completas del temporal a su destino final.
+
+    Cada salida se mueve con un renombrado dentro del mismo sistema de ficheros
+    (el temporal está en `dest_dir`). Si un movimiento falla a mitad, por
+    ejemplo porque el destino está bloqueado, las salidas anteriores ya se han
+    publicado: no se deshacen.
 
     Args:
         staging: Directorio temporal con las salidas generadas.

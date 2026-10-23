@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-10-23 19:42+0100\n"
+"POT-Creation-Date: 2026-10-23 20:11+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -88,44 +88,44 @@ msgstr ""
 msgid "ffprobe media data: %(data)s"
 msgstr ""
 
-#: pymedia/ffprobe.py:398
+#: pymedia/ffprobe.py:401
 #, python-format
 msgid "Invalid video container: %(path)s"
 msgstr ""
 
-#: pymedia/ffprobe.py:444
+#: pymedia/ffprobe.py:447
 #, python-format
 msgid "ffprobe audio file data: %(data)s"
 msgstr ""
 
-#: pymedia/ffprobe.py:453
+#: pymedia/ffprobe.py:456
 #, python-format
 msgid "It doesn't contain any audio track. Invalid audio file: %(file)s"
 msgstr ""
 
-#: pymedia/ffprobe.py:459
+#: pymedia/ffprobe.py:462
 #, python-format
 msgid "Audio file contains video tracks: %(tracks)s"
 msgstr ""
 
-#: pymedia/ffprobe.py:464
+#: pymedia/ffprobe.py:467
 #, python-format
 msgid "Audio file contains subtitles tracks: %(tracks)s"
 msgstr ""
 
-#: pymedia/ffprobe.py:484
+#: pymedia/ffprobe.py:487
 #, python-format
 msgid "ffprobe subtitles file data: %(data)s"
 msgstr ""
 
-#: pymedia/ffprobe.py:497
+#: pymedia/ffprobe.py:500
 #, python-format
 msgid ""
 "\"%(path)s\" is not a recognized subtitles file (detected format: "
 "%(format_name)s)."
 msgstr ""
 
-#: pymedia/ffprobe.py:506
+#: pymedia/ffprobe.py:509
 #, python-format
 msgid "%(path.suffix)s extension doesn't support %(codec_name)s subtitles."
 msgstr ""
@@ -600,47 +600,53 @@ msgstr ""
 msgid "Specify an orthogonal arc degree to rotate image through disposition."
 msgstr ""
 
-#: pymedia/commands/base/cli_options.py:672
-msgid "Output file will not copy disposition from source file."
+#: pymedia/commands/base/cli_options.py:673
+msgid ""
+"Do not copy metadata from the source file (title, tags, track language "
+"and title). Dispositions are kept."
 msgstr ""
 
-#: pymedia/commands/base/ffmpeg_runner.py:109
+#: pymedia/commands/base/ffmpeg_runner.py:111
 #, python-format
 msgid "Multiple outputs share the same file name: %(name)s"
 msgstr ""
 
-#: pymedia/commands/base/ffmpeg_runner.py:130
+#: pymedia/commands/base/ffmpeg_runner.py:120
+msgid "All outputs of a command must be in the same directory."
+msgstr ""
+
+#: pymedia/commands/base/ffmpeg_runner.py:145
 #: pymedia/commands/base/service.py:101
 #, python-format
 msgid "Output file already exists: %(name)s"
 msgstr ""
 
-#: pymedia/commands/base/ffmpeg_runner.py:136
+#: pymedia/commands/base/ffmpeg_runner.py:151
 msgid "Output file could not be moved."
 msgstr ""
 
-#: pymedia/commands/base/ffmpeg_runner.py:220 pymedia/commands/main/cli.py:47
+#: pymedia/commands/base/ffmpeg_runner.py:235 pymedia/commands/main/cli.py:47
 #: pymedia/commands/play/service.py:38
 #, python-format
 msgid "%(binary)s was not found in PATH. Install ffmpeg first."
 msgstr ""
 
-#: pymedia/commands/base/ffmpeg_runner.py:333
+#: pymedia/commands/base/ffmpeg_runner.py:348
 #, python-format
 msgid "Destination directory does not exist: %(path)s"
 msgstr ""
 
-#: pymedia/commands/base/ffmpeg_runner.py:361
+#: pymedia/commands/base/ffmpeg_runner.py:376
 #, python-format
 msgid "FFmpeg command interrupted manually: %(command_name)s"
 msgstr ""
 
-#: pymedia/commands/base/ffmpeg_runner.py:366
+#: pymedia/commands/base/ffmpeg_runner.py:381
 #, python-format
 msgid "FFmpeg command timed out: %(command_name)s"
 msgstr ""
 
-#: pymedia/commands/base/ffmpeg_runner.py:374
+#: pymedia/commands/base/ffmpeg_runner.py:389
 msgid "FFmpeg command failed during execution."
 msgstr ""
 
@@ -652,7 +658,7 @@ msgstr ""
 msgid "Process skipped since output file already exists."
 msgstr ""
 
-#: pymedia/commands/base/service.py:103 pymedia/commands/scene/service.py:91
+#: pymedia/commands/base/service.py:103 pymedia/commands/scene/service.py:90
 msgid "Overwrite?"
 msgstr ""
 
@@ -860,7 +866,7 @@ msgid ""
 msgstr ""
 
 #: pymedia/commands/frames/service.py:42
-#: pymedia/commands/interval/service.py:38 pymedia/commands/scene/service.py:48
+#: pymedia/commands/interval/service.py:38 pymedia/commands/scene/service.py:47
 msgid "Generating thumbnail"
 msgstr ""
 
@@ -870,7 +876,7 @@ msgid "No frame was captured at %(timestamp)s."
 msgstr ""
 
 #: pymedia/commands/frames/service.py:54
-#: pymedia/commands/interval/service.py:43 pymedia/commands/scene/service.py:59
+#: pymedia/commands/interval/service.py:43 pymedia/commands/scene/service.py:58
 #, python-format
 msgid "Thumbnail(s) generated successfully: %(output)s"
 msgstr ""
@@ -1186,20 +1192,20 @@ msgid ""
 "    > pymedia scene input.mp4 --output thumb.jpg\n"
 msgstr ""
 
-#: pymedia/commands/scene/service.py:54
+#: pymedia/commands/scene/service.py:53
 msgid "No scene changes detected: no thumbnails generated."
 msgstr ""
 
-#: pymedia/commands/scene/service.py:72 pymedia/commands/scene/service.py:104
+#: pymedia/commands/scene/service.py:71 pymedia/commands/scene/service.py:103
 msgid "Cannot resolve scene output pattern from template."
 msgstr ""
 
-#: pymedia/commands/scene/service.py:87
+#: pymedia/commands/scene/service.py:86
 #, python-format
 msgid "Found existing scene thumbnail files: %(files)s"
 msgstr ""
 
-#: pymedia/commands/scene/service.py:94
+#: pymedia/commands/scene/service.py:93
 msgid "Process skipped since output files already exist."
 msgstr ""
 

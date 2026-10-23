@@ -16,7 +16,7 @@ pymedia add-audio pelicula.mkv doblaje.m4a -o pelicula_dual.mkv
 |-----------------------|-------------------------------------------------------------|
 | `MEDIA_FILE`          | Vídeo de destino.                                           |
 | `AUDIO_FILE`          | Fichero con las pistas de audio que añadir.                 |
-| `--strip-disposition` | No copia los metadatos del origen.       |
+| `--strip-metadata`    | No copia los metadatos del origen.       |
 | `-o`, `-ov`           | Ver [opciones comunes](../conceptos.md#opciones-comunes).   |
 
 - Se añaden **todas** las pistas de audio del fichero, al final de las existentes.
@@ -87,7 +87,7 @@ pymedia extract-audio pelicula.mkv --tracks 1,2 -o audio.mka
 | Opción                | Descripción                                              |
 |-----------------------|----------------------------------------------------------|
 | `--tracks`            | **Obligatorio.** Índices de las pistas que extraer.      |
-| `--strip-disposition` | No copia los metadatos del origen.                     |
+| `--strip-metadata`    | No copia los metadatos del origen.                     |
 | `-o`, `-ov`           | Ver [opciones comunes](../conceptos.md#opciones-comunes). |
 
 - Se genera un fichero por pista: `<nombre>_audio_track_<N>.<ext>`.

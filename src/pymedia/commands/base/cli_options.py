@@ -667,8 +667,11 @@ RotateMetadataOption = Annotated[
 StripMetadataOption = Annotated[
     bool,
     typer.Option(
-        default="--strip-disposition",
+        default="--strip-metadata",
         rich_help_panel=_("Metadata options"),
-        help=_("Output file will not copy disposition from source file."),
+        help=_(
+            "Do not copy metadata from the source file (title, tags, track "
+            "language and title). Dispositions are kept."
+        ),
     ),
 ]

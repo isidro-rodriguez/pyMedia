@@ -7,6 +7,8 @@ import os
 from pathlib import Path
 from unittest.mock import patch
 
+import pytest
+
 from pymedia.locale_manager import _LocaleManager, locale_manager
 
 _SRC_DIR = Path(__file__).resolve().parents[1] / "src"
@@ -58,6 +60,27 @@ def test_detect_language_usa_config_toml(tmp_path: Path) -> None:
     ):
         with patch("platformdirs.user_config_dir", return_value=str(config_dir)):
             assert mgr.detect_language() == "spanish"
+
+
+@pytest.mark.parametrize(
+    "content",
+    ['[app\nlanguage = "spanish"\n', "app = 3\n", "[app]\nlanguage = ["],
+)
+def test_detect_language_config_toml_danado(tmp_path: Path, content: str) -> None:
+    """Regresión: un config.toml mal formado no rompe el arranque.
+
+    Se ignora y se usa el idioma del sistema; `Config.load()` informa del
+    error después con su propio mensaje.
+    """
+    config_dir = tmp_path / "config"
+    config_dir.mkdir()
+    (config_dir / "config.toml").write_text(content, encoding="utf-8")
+    mgr = _LocaleManager()
+    with (
+        patch.dict(os.environ, {"PYMEDIA_LANG": ""}, clear=False),
+        patch("platformdirs.user_config_dir", return_value=str(config_dir)),
+    ):
+        assert mgr.detect_language() in mgr.SUPPORTED_LANGUAGES
 
 
 def test_detect_language_usa_env_var(tmp_path: Path) -> None:

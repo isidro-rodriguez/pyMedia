@@ -44,6 +44,9 @@ class ExtractSubtitlesCmd:
             output = self.params.subtitles_output
             str_list: list[str] = []
             for stream in self.params.stream_tracks:
+                # `-map_metadata` es opción de salida: se repite en cada una.
+                if self.params.strip_metadata:
+                    str_list.extend(self.params.to_strip_metadata_cmd())
                 str_list.append("-map")
                 str_list.append(f"0:s:{stream}")
                 final_output = output.with_stem(
@@ -58,9 +61,6 @@ class ExtractSubtitlesCmd:
 
         output_list: list[Path] = []
         cmd = ["ffmpeg"]
-
-        if self.params.strip_metadata:
-            cmd.extend(self.params.to_strip_metadata_cmd())
 
         cmd.extend(
             [

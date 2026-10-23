@@ -1,6 +1,5 @@
 """Comando ``scene``: service."""
 
-import glob
 import re
 from collections.abc import Iterator
 from pathlib import Path
@@ -74,7 +73,7 @@ class SceneService(BaseService[SceneParameters]):
         base_stem = match.group(1)
 
         directory = output_template.parent
-        pattern = re.compile(rf"^{re.escape(base_stem)}_(\d{{3}}){re.escape(suffix)}$")
+        pattern = _numbered_pattern(base_stem=base_stem, suffix=suffix)
 
         existing_files: list[Path] = []
         if directory.exists():
@@ -103,6 +102,18 @@ class SceneService(BaseService[SceneParameters]):
         if match is None:
             self.logger.warning(_("Cannot resolve scene output pattern from template."))
             return
-        # glob.escape evita que caracteres especiales del nombre actúen de patrón.
-        pattern = f"{glob.escape(match.group(1))}_??*{template.suffix}"
-        yield from sorted(template.parent.glob(pattern))
+        if not template.parent.is_dir():
+            return
+        pattern = _numbered_pattern(base_stem=match.group(1), suffix=template.suffix)
+        yield from sorted(
+            path for path in template.parent.iterdir() if pattern.match(path.name)
+        )
+
+
+def _numbered_pattern(base_stem: str, suffix: str) -> re.Pattern[str]:
+    """Patrón de las miniaturas `base_NNN.ext` que genera la plantilla `%03d`.
+
+    `%03d` rellena hasta 3 cifras pero no limita: la miniatura 1000 se llama
+    `base_1000.ext`. Se excluyen nombres ajenos como `base_backup.ext`.
+    """
+    return re.compile(rf"^{re.escape(base_stem)}_\d{{3,}}{re.escape(suffix)}$")

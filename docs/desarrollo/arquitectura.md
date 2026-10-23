@@ -97,7 +97,7 @@ class CutParameters(
 | `transcode_mixin`                       | Argumentos de códec de vídeo, audio y subtítulos para `transcode`. |
 | `remux_mixin`                           | Rotación por metadatos, `--genpts`, orden de pistas.           |
 | `sheet_presets_mixin`                   | Preajustes de `sheet` y ancho de miniatura.                    |
-| `metadata_mixin`                        | `--strip-disposition` (`-map_metadata -1`).                    |
+| `metadata_mixin`                        | `--strip-metadata`    (`-map_metadata -1`).                    |
 | `playback_mixin`                        | Pistas, volumen, bucle, pantalla completa y subtítulos externos de `play`. |
 
 ## Ejecución de ffmpeg
@@ -122,10 +122,10 @@ flowchart TD
 | Pieza              | Responsabilidad                                                                 |
 |--------------------|---------------------------------------------------------------------------------|
 | `prepare_command`  | Añade los flags de ejecución desatendida y elimina duplicados del comando. Los `cmd.py` no deben incluir `-y`, `-n`, `-progress` ni `-nostats`. |
-| `stage_outputs`    | Redirige cada salida al directorio temporal. Exige nombres de salida únicos.    |
+| `stage_outputs`    | Redirige cada salida al directorio temporal. Exige nombres únicos y un único directorio de salida. |
 | `FfmpegProcess`    | Gestor de contexto: lanza el proceso, publica cada línea en una cola desde dos hilos y, al salir, mata el proceso si sigue vivo. Conserva las últimas 10 líneas de stderr. |
 | `ProgressTracker`  | Progreso por tiempo (`out_time_ms` de `-progress`) o por pasos (líneas `pts_time:` del filtro `showinfo`). |
-| `commit_outputs`   | Mueve los ficheros al destino respetando la política de sobrescritura.          |
+| `commit_outputs`   | Mueve los ficheros al destino respetando la política de sobrescritura. Cada movimiento es un renombrado (el temporal está en el destino); si uno falla a mitad, los anteriores no se deshacen. |
 
 Cualquier línea de stdout o stderr cuenta como actividad: el control de bloqueo solo
 salta si ffmpeg deja de escribir por completo.

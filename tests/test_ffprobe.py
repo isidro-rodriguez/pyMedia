@@ -158,6 +158,46 @@ def test_non_dict_streams_are_skipped(
     assert media.video is not None
 
 
+COVER: dict[str, Any] = {
+    "index": 1,
+    "codec_type": "video",
+    "codec_name": "png",
+    "disposition": {"attached_pic": 1},
+}
+
+
+@pytest.mark.parametrize("streams", [(VIDEO, COVER), (COVER, VIDEO)])
+def test_cover_art_is_not_the_video_track(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+    streams: tuple[dict[str, Any], ...],
+) -> None:
+    """La carátula (`attached_pic`) se ignora, esté antes o después del vídeo."""
+    media = _probe(monkeypatch, tmp_path, _data(*streams))
+    assert media.video is not None
+    assert media.video.format.codec == "h264"
+
+
+def test_cover_art_alone_is_not_a_video(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    """Un audio con carátula y sin vídeo real no es un contenedor de vídeo."""
+    audio = {"index": 0, "codec_type": "audio", "codec_name": "mp3"}
+    with pytest.raises(UserError):
+        _probe(monkeypatch, tmp_path, _data(audio, COVER))
+
+
+def test_first_video_track_is_selected(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    """Con varias pistas de vídeo reales se toma la primera (`0:v:0`)."""
+    second = {"index": 1, "codec_type": "video", "codec_name": "hevc"}
+    media = _probe(monkeypatch, tmp_path, _data(VIDEO, second))
+    assert media.video is not None
+    assert media.video.format.codec == "h264"
+    assert media.video.track_index == 0
+
+
 # --- codec_name --------------------------------------------------------------
 
 

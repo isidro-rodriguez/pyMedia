@@ -286,6 +286,36 @@ def video_no_audio(inputs_dir: Path) -> Path:
 
 
 @pytest.fixture(scope="session")
+def video_mp4_cover(inputs_dir: Path, video_mp4_a: Path) -> Path:
+    """Vídeo mp4 con una carátula PNG (`attached_pic`) después del vídeo."""
+    cover = inputs_dir / "cover.png"
+    _run_ffmpeg(
+        ["-f", "lavfi", "-i", "color=red:size=64x64", "-frames:v", "1", str(cover)]
+    )
+    output = inputs_dir / "video_cover.mp4"
+    _run_ffmpeg(
+        [
+            "-i",
+            str(video_mp4_a),
+            "-i",
+            str(cover),
+            "-map",
+            "0",
+            "-map",
+            "1",
+            "-c",
+            "copy",
+            "-c:v:1",
+            "png",
+            "-disposition:v:1",
+            "attached_pic",
+            str(output),
+        ]
+    )
+    return output
+
+
+@pytest.fixture(scope="session")
 def video_scenes(inputs_dir: Path) -> Path:
     """Vídeo mp4 de 3 s con tres bloques de color (dos cortes de escena)."""
     output = inputs_dir / "video_scenes.mp4"

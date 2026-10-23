@@ -18,7 +18,7 @@ pymedia add-subs pelicula.mp4 subs_es.ass --language spa --title "Español"
 | `SUBTITLES_FILE`      | Fichero `.srt`, `.ass` o `.ssa`.                                |
 | `--language`          | **Obligatorio.** Idioma de la pista.                            |
 | `--title`             | Título visible. Por defecto, el nombre nativo del idioma.       |
-| `--strip-disposition` | No copia los metadatos del origen.           |
+| `--strip-metadata`    | No copia los metadatos del origen.           |
 | `-o`, `-ov`           | Ver [opciones comunes](../conceptos.md#opciones-comunes).       |
 
 - ffprobe comprueba que el fichero es realmente de subtítulos y que su formato
@@ -84,7 +84,7 @@ pymedia extract-subs pelicula.mkv --tracks 3,5 -o subs.srt
 | Opción                | Descripción                                              |
 |-----------------------|----------------------------------------------------------|
 | `--tracks`            | **Obligatorio.** Índices de las pistas que extraer.      |
-| `--strip-disposition` | No copia los metadatos del origen.                     |
+| `--strip-metadata`    | No copia los metadatos del origen.                     |
 | `-o`, `-ov`           | Ver [opciones comunes](../conceptos.md#opciones-comunes). |
 
 - Se genera un fichero por pista: `<nombre>_subtitles_track_<N>.<ext>`.

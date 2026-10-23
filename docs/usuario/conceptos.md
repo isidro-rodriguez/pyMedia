@@ -140,7 +140,7 @@ pymedia transcode *.mkv --preset fast --video -d convertidos/
 | `-o`, `--output`      | Todos salvo `info`                              | Ruta del fichero de salida.                                      |
 | `-d`, `--directory`   | `sheet`, `transcode`                            | Directorio de salida para lotes.                                 |
 | `-ov`, `--overwrite`  | Todos salvo `info`                              | `yes`, `no` o `ask`.                                             |
-| `--strip-disposition` | `add-audio`, `add-subs`, `cut`, `extract-audio`, `extract-subs`, `join`, `remux`, `transcode` | No copia los metadatos del origen (`-map_metadata -1`): título, etiquetas y datos de pista como idioma o título. |
+| `--strip-metadata`    | `add-audio`, `add-subs`, `cut`, `extract-audio`, `extract-subs`, `join`, `remux`, `transcode` | No copia los metadatos del origen (`-map_metadata -1`): título, etiquetas e idioma y título de cada pista. Las disposiciones (`default`, `forced`…) se conservan. |
 | `--show-cmd`          | Todos salvo `info`                              | Muestra el comando ffmpeg (o ffplay) y sale sin ejecutarlo.      |
 | `--debug`             | Todos                                           | Log detallado y confirmación antes de ejecutar ffmpeg.           |
 | `--help`              | Todos                                           | Ayuda del comando.                                               |

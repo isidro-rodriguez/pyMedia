@@ -26,6 +26,10 @@ Primera versión estable.
 
 ### Corregido
 
+- `add-audio` y `extract-subs` fallaban con `--strip-metadata`: `-map_metadata -1` se colocaba antes de las entradas. En `extract-audio` y `extract-subs` con varias pistas solo se aplicaba a la primera salida.
+- Una carátula (`attached_pic`) en un MP4 se tomaba como pista de vídeo: `info` mostraba la imagen y `transcode` terminaba con una traza de Python. Ahora se ignora y se usa la primera pista de vídeo real.
+- Un `config.toml` mal formado provocaba una traza de Python al arrancar en lugar del mensaje de error de configuración.
+- `scene` no detectaba las miniaturas existentes a partir de la 1000 y contaba como propias otras imágenes con el mismo prefijo.
 - Los errores de argumentos mostraban `Invalid value…` en inglés aunque la interfaz estuviera en español, y el mensaje salía duplicado sin formato encima del panel.
 - `--show-cmd` preguntaba si sobrescribir la salida aunque no escribe nada.
 - Los errores de `config.toml` se muestran como lista, uno por línea.
@@ -46,6 +50,7 @@ Primera versión estable.
 
 ### Cambiado
 
+- `--strip-disposition` pasa a llamarse `--strip-metadata`: elimina los metadatos del origen (título, etiquetas, idioma y título de cada pista) y conserva las disposiciones, como ya hacía.
 - Versión 1.0.0: estado de desarrollo *Production/Stable*.
 - Los fixtures manuales se generan en `tests/fixtures/`; retirados `local/`, `scripts/backup.py` y `scripts/code_count.py`.
 - `README.md` reducido a una introducción breve con enlaces a `docs/`.

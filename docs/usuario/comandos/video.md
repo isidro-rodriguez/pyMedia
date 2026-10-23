@@ -38,7 +38,7 @@ pymedia transcode *.mkv --preset slow --video -d salida/
 | `--video`           | —                         | —             | Recodifica la pista de vídeo.                        |
 | `--audio`           | `N,M,...`                 | —             | Pistas de audio a recodificar; el resto se copian.   |
 | `--burn-subtitles`  | Ruta `.srt`/`.ass`/`.ssa` | —             | Dibuja los subtítulos en la imagen.                  |
-| `--strip-disposition` | —                       | —             | No copia los metadatos del origen.                 |
+| `--strip-metadata`    | —                       | —             | No copia los metadatos del origen.                 |
 | `-o`, `-d`, `-ov`   |                           |               | Ver [opciones comunes](../conceptos.md#opciones-comunes). |
 | Filtros             |                           |               | `--crop`, `--size`, `--mode`, `--upscale`, `--rotate`, `--hflip`, `--vflip` ([Filtros](../filtros.md)). |
 
@@ -101,7 +101,7 @@ pymedia remux movil.mp4 --rotate 90 -o girado.mp4
 | `--genpts`            | —                     | Regenera marcas de tiempo dañadas (errores de reproducción o de salto). |
 | `--sort-tracks`       | —                     | Ordena las pistas por tipo (vídeo, audio, subtítulos) y, dentro de cada tipo, por código de idioma; las pistas sin idioma van al final en su orden original. |
 | `--rotate`            | `0`, `90`, `180`, `270` | Gira la imagen mediante metadatos de orientación, sin recodificar.    |
-| `--strip-disposition` | —                     | No copia los metadatos del origen.                                    |
+| `--strip-metadata`    | —                     | No copia los metadatos del origen.                                    |
 
 - Se copian todas las pistas de vídeo, audio y subtítulos.
 - Al pasar a MP4, los subtítulos se convierten a `mov_text`, se mueve el índice
@@ -127,7 +127,7 @@ pymedia cut entrada.mp4 --at 10:05,40:30,1:20:00         # cuatro partes
 | `--start`             | Inicio del tramo.                                                   |
 | `--end`               | Fin del tramo.                                                      |
 | `--at`                | Lista de marcas en las que dividir. Excluyente con `--start`/`--end`. |
-| `--strip-disposition` | No copia los metadatos del origen.                                |
+| `--strip-metadata`    | No copia los metadatos del origen.                                |
 | `-o`, `-ov`           | Ver [opciones comunes](../conceptos.md#opciones-comunes).           |
 
 - Con `--at`, N marcas generan N + 1 ficheros: `<nombre>_split_000`, `_001`…
@@ -148,7 +148,7 @@ pymedia join parte1.mp4 parte2.mp4 parte3.mp4 -o completo.mp4
 | Opción                | Descripción                                              |
 |-----------------------|----------------------------------------------------------|
 | `-o`, `--output`      | **Obligatorio.** Fichero de salida.                      |
-| `--strip-disposition` | No copia los metadatos del origen.                     |
+| `--strip-metadata`    | No copia los metadatos del origen.                     |
 | `-ov`                 | Política de sobrescritura.                               |
 
 Antes de unir, pyMedia compara cada vídeo con el primero y aborta con un informe de

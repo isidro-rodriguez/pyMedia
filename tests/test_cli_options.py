@@ -181,30 +181,47 @@ def test_no_arguments_shows_help(pymedia: Invoke, name: str) -> None:
         "add-subs",
     ],
 )
-def test_strip_metadata_composes_map_metadata(
+def test_strip_metadata_runs_with_ffmpeg(
     pymedia: Invoke,
     request: pytest.FixtureRequest,
     name: str,
     tmp_path: Path,
 ) -> None:
-    """`--strip-disposition` propaga la orden de eliminar metadatos a ffmpeg."""
+    """`--strip-metadata` genera un comando que ffmpeg acepta y ejecuta.
+
+    Regresión: en `add-audio` y `extract-subs` la opción de salida
+    `-map_metadata -1` se colocaba antes de `-i` y ffmpeg la rechazaba.
+    """
     cmd = COMMANDS[name]
     output = tmp_path / f"output{cmd.suffix}"
 
     result = pymedia(
-        *build_args(
-            cmd,
-            request,
-            output,
-            "-ov",
-            "yes",
-            "--strip-disposition",
-            "--show-cmd",
-        )
+        *build_args(cmd, request, output, "-ov", "yes", "--strip-metadata")
     )
 
-    assert result.exit_code == 0
-    assert "-map_metadata -1" in result.output
+    assert result.exit_code == 0, result.output
+    assert outputs_of(tmp_path)
+
+
+@pytest.mark.parametrize(
+    ("name", "fixture"),
+    [("extract-audio", "video_mkv_two_audio"), ("extract-subs", "video_mkv_subs")],
+)
+def test_strip_metadata_applies_to_every_output(
+    pymedia: Invoke,
+    request: pytest.FixtureRequest,
+    name: str,
+    fixture: str,
+) -> None:
+    """Con varias pistas, `-map_metadata -1` precede a cada fichero de salida."""
+    media = request.getfixturevalue(fixture)
+
+    result = pymedia(
+        name, str(media), "--tracks", "0,1", "--strip-metadata", "--show-cmd"
+    )
+
+    assert result.exit_code == 0, result.output
+    assert result.output.count("-map_metadata -1") == 2
 
 
 # =============================================================================

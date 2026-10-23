@@ -389,9 +389,12 @@ def get_media_information(media_input: Path, logger: Logger) -> Media:
     logger.debug(msg=_("ffprobe media data: %(data)s"), data=data)
 
     streams = _streams_by_type(data)
+    # Las carátulas (`attached_pic`) son imágenes fijas, no la pista de vídeo:
+    # un MP3 o M4A con portada no es un vídeo.
     videos = [
         _build_video(media_input, stream, i)
         for i, stream in enumerate(streams.get("video", []))
+        if not to_dict(stream.get("disposition")).get("attached_pic")
     ]
     if not videos:
         raise UserError(
@@ -412,8 +415,8 @@ def get_media_information(media_input: Path, logger: Logger) -> Media:
         path=media_input.absolute(),
         duration=to_timedelta(to_float(fmt.get("duration"))),
         format=_build_media_format(fmt=fmt),
-        # Con varias pistas de vídeo (p. ej. carátulas) prevalece la última.
-        video=videos[-1],
+        # Con varias pistas de vídeo se toma la primera, la misma que `0:v:0`.
+        video=videos[0],
         audio=audio or None,
         subtitles=subtitles or None,
         chapters=chapters or None,

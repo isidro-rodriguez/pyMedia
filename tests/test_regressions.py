@@ -5,6 +5,7 @@ Usan la fixture `pymedia`: cada regresión se comprueba como CLI y como binario.
 
 from pathlib import Path
 
+import pytest
 from helpers import Invoke, stream_types
 
 
@@ -118,3 +119,43 @@ def test_scene_ask_detects_existing_files(
 
     assert "Overwrite?" in result.output
     assert first.stat().st_mtime_ns == before
+
+
+@pytest.mark.parametrize(
+    ("existing", "asks"),
+    [("s_1000.jpg", True), ("s_backup.jpg", False), ("s_01.jpg", False)],
+)
+def test_scene_existing_files_pattern(
+    pymedia: Invoke, tmp_path: Path, video_scenes: Path, existing: str, asks: bool
+) -> None:
+    """Regresión: no detectaba `s_1000.jpg` y aceptaba nombres ajenos."""
+    (tmp_path / existing).write_bytes(b"")
+
+    result = pymedia(
+        "scene", str(video_scenes), "-o", str(tmp_path / "s.jpg"), input="n\n"
+    )
+
+    assert ("Overwrite?" in result.output) is asks
+
+
+def test_info_ignores_cover_art(pymedia: Invoke, video_mp4_cover: Path) -> None:
+    """Regresión: la carátula de un MP4 se tomaba como pista de vídeo."""
+    result = pymedia("info", str(video_mp4_cover))
+
+    assert result.exit_code == 0, result.output
+    assert "160×90" in result.output
+    assert "png" not in result.output
+
+
+def test_transcode_with_cover_art(
+    pymedia: Invoke, tmp_path: Path, video_mp4_cover: Path
+) -> None:
+    """Regresión: `transcode` fallaba con `KeyError` en un MP4 con carátula."""
+    output = tmp_path / "out.mp4"
+
+    result = pymedia(
+        "transcode", str(video_mp4_cover), "--video", "-o", str(output), "-ov", "yes"
+    )
+
+    assert result.exit_code == 0, result.output
+    assert output.exists()

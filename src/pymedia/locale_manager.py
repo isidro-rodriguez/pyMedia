@@ -87,7 +87,12 @@ class _LocaleManager:
             return self._normalize(value)
 
         def _read_config_language() -> str:
-            """Lee [app].language del config.toml sin validar."""
+            """Lee [app].language del config.toml sin validar.
+
+            Un fichero ilegible o mal formado no impide arrancar: se usa el
+            idioma del sistema y `Config.load()` informa después del error con
+            su mensaje traducido.
+            """
             path = (
                 Path(
                     platformdirs.user_config_dir(
@@ -96,11 +101,15 @@ class _LocaleManager:
                 )
                 / "config.toml"
             )
-            if not path.exists():
+            try:
+                with path.open("rb") as f:
+                    data = tomllib.load(f)
+            except (OSError, tomllib.TOMLDecodeError):
                 return "system"
-            with path.open("rb") as f:
-                data = tomllib.load(f)
-            return str(data.get("app", {}).get("language", "system"))
+            app = data.get("app")
+            if not isinstance(app, dict):
+                return "system"
+            return str(app.get("language", "system"))
 
         def _detect_system_language() -> str:
             """Detecta el idioma del sistema (POSIX, locale, fallback)."""

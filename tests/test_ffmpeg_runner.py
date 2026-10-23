@@ -190,6 +190,21 @@ def test_stage_outputs_rejects_duplicate_names(tmp_path: Path) -> None:
         )
 
 
+def test_stage_outputs_rejects_outputs_in_different_directories(
+    tmp_path: Path,
+) -> None:
+    """Todas las salidas se publican en el directorio de la principal."""
+    first = tmp_path / "a" / "one.mka"
+    second = tmp_path / "b" / "two.mka"
+
+    with pytest.raises(InvalidParameterError, match="same directory"):
+        stage_outputs(
+            cmd=["ffmpeg", "-i", "in.mkv", str(first), str(second)],
+            outputs=[str(first)],
+            staging=tmp_path / ".pymedia-test",
+        )
+
+
 def test_stage_outputs_returns_a_copy_of_the_command(tmp_path: Path) -> None:
     """El comando y las salidas originales no se mutan."""
     output = tmp_path / "out.mkv"

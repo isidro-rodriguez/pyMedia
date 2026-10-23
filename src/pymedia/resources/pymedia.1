@@ -85,8 +85,8 @@ orders the stream tracks by type and language,
 .B --rotate
 .I 0/90/180/270
 updates the display rotation metadata and
-.B --strip-disposition
-drops the dispositions of the source file. For MP4 output the fast-start
+.B --strip-metadata
+drops the metadata of the source file. For MP4 output the fast-start
 index is moved to the beginning of the file automatically.
 .TP
 .B cut
@@ -297,8 +297,9 @@ Flip the image horizontally or vertically.
 
 The commands that write a new media file also accept:
 .TP
-.B --strip-disposition
-Do not copy the dispositions of the source file. Available in
+.B --strip-metadata
+Do not copy the metadata of the source file (title, tags, and the language
+and title of each track). Dispositions are kept. Available in
 .BR add-audio ", " add-subs ", " cut ", " extract-audio ", " extract-subs ", "
 .BR join ", " remux " and " transcode .
 .SH OUTPUT CONFLICTS

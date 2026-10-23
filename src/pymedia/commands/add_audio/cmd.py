@@ -37,15 +37,21 @@ class AddAudioCmd:
 
         cmd = ["ffmpeg"]
 
-        if self.params.strip_metadata:
-            cmd.extend(self.params.to_strip_metadata_cmd())
-
         cmd.extend(
             [
                 "-i",
                 str(media.path),
                 "-i",
                 str(audio[0].path),
+            ]
+        )
+
+        # `-map_metadata` es opción de salida: va después de las entradas.
+        if self.params.strip_metadata:
+            cmd.extend(self.params.to_strip_metadata_cmd())
+
+        cmd.extend(
+            [
                 "-map",
                 "0",
                 "-map",

@@ -41,6 +41,9 @@ class ExtractAudioCmd:
             for stream in self.params.stream_tracks:
                 final_output = output.with_stem(f"{output.stem}_audio_track_{stream}")
                 output_list.append(final_output)
+                # `-map_metadata` es opción de salida: se repite en cada una.
+                if self.params.strip_metadata:
+                    str_list.extend(self.params.to_strip_metadata_cmd())
                 str_list.extend(
                     [
                         "-map",
@@ -59,9 +62,6 @@ class ExtractAudioCmd:
         cmd = ["ffmpeg"]
 
         cmd.extend(["-i", str(self.params.media.path)])
-
-        if self.params.strip_metadata:
-            cmd.extend(self.params.to_strip_metadata_cmd())
 
         cmd.extend([*_build_streams_list()])
 
