@@ -1,7 +1,12 @@
-# Hooks de pre-commit para pyMedia.
-# Instalación: uv run pre-commit install
-# Ejecución manual sobre todo el repo: uv run pre-commit run --all-files
+# Hooks de git para pyMedia.
+# Instalación (pre-commit y pre-push): uv run pre-commit install
+# Ejecución manual:
+#   uv run pre-commit run --all-files                         # hooks de pre-commit
+#   uv run pre-commit run --all-files --hook-stage pre-push   # hooks de pre-push
+default_install_hook_types: [pre-commit, pre-push]
+
 repos:
+  # ── pre-commit: rápido, en cada commit ──────────────────────────────────
   - repo: local
     hooks:
       - id: ruff-check-fix
@@ -9,18 +14,21 @@ repos:
         entry: uv run ruff check --fix
         language: system
         types: [python]
+        stages: [pre-commit]
 
       - id: ruff-format
         name: Ruff format
         entry: uv run ruff format
         language: system
         types: [python]
+        stages: [pre-commit]
 
       - id: ruff-check
         name: Ruff check (lint)
         entry: uv run ruff check
         language: system
         types: [python]
+        stages: [pre-commit]
 
       - id: ty-check
         name: Ty
@@ -28,10 +36,39 @@ repos:
         language: system
         types: [python]
         pass_filenames: false
+        stages: [pre-commit]
 
       - id: pytest
         name: Pytest
-        entry: uv run pytest
+        entry: uv run pytest -q
         language: system
         types: [python]
         pass_filenames: false
+        stages: [pre-commit]
+
+  # ── pre-push: suite completa antes de publicar ──────────────────────────
+  - repo: local
+    hooks:
+      - id: pytest-cov
+        name: Pytest con cobertura (mínimo 95 %)
+        entry: uv run pytest -q --cov=pymedia --cov-report=term-missing:skip-covered --cov-fail-under=95
+        language: system
+        pass_filenames: false
+        always_run: true
+        stages: [pre-push]
+
+      - id: pytest-locales
+        name: Pytest -m locales
+        entry: uv run pytest -q -m locales
+        language: system
+        pass_filenames: false
+        always_run: true
+        stages: [pre-push]
+
+      - id: pytest-binary
+        name: Pytest -m binary (compila el ejecutable)
+        entry: uv run pytest -q -m binary
+        language: system
+        pass_filenames: false
+        always_run: true
+        stages: [pre-push]

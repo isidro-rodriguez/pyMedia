@@ -93,8 +93,7 @@ class CutParameters(
     TimestampAtMixin,
     TimestampStartEndMixin,
     StripMetadataMixin,
-):
-    ...
+): ...
 ```
 
 | Mixin                                   | Aporta                                                         |

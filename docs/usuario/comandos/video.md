@@ -51,7 +51,7 @@ filtro. Los filtros y `--burn-subtitles` implican recodificar el vídeo.
 |-------------|-----------------------------------------------------------------------------------------|
 | Vídeo       | Con `--video` (o filtros), se recodifica con el códec, CRF y preset del perfil. Si no, se copia. |
 | Audio       | Las pistas de `--audio` se recodifican con el códec y la tasa de bits del perfil; el resto se copian. |
-| Subtítulos  | Se conservan. En MP4, los de texto se convierten a `mov_text` y los gráficos (PGS, VobSub) se descartan porque el contenedor no los admite. |
+| Subtítulos  | Se copian si el contenedor de salida los admite. Si no, pyMedia avisa: los de texto (SRT, ASS, WebVTT, mov_text) puede convertirlos al formato del contenedor (`mov_text` en MP4, `srt` en MKV, `webvtt` en WebM) si confirmas; los gráficos (PGS, VobSub) no se pueden convertir y se descartan. |
 
 ### Códecs del perfil
 
@@ -71,7 +71,17 @@ A menor CRF, más calidad y más tamaño. Un preset más lento comprime mejor co
 calidad, a cambio de tiempo.
 
 En MP4, pyMedia añade `-movflags +faststart` para que el vídeo empiece a reproducirse
-antes de descargarse por completo.
+antes de descargarse por completo y, si el vídeo resultante es H.265, la etiqueta
+`hvc1` que exigen los reproductores de Apple.
+
+Ejemplo de aviso al pasar un MKV con subtítulos SRT a MP4:
+
+```text
+WARNING  Las pistas de subtítulos 0 (subrip) no son compatibles con .mp4.
+¿Convertirlas a un formato de subtítulos compatible? [Y/n]:
+```
+
+Con `--show-cmd` no se pregunta y se muestra el comando con la conversión.
 
 ## `remux`
 
@@ -94,8 +104,9 @@ pymedia remux movil.mp4 --rotate 90 -o girado.mp4
 | `--strip-disposition` | —                     | No copia los metadatos del origen.                                    |
 
 - Se copian todas las pistas de vídeo, audio y subtítulos.
-- Al pasar a MP4, los subtítulos se convierten a `mov_text` y se mueve el índice
-  (`moov`) al principio del fichero (`faststart`).
+- Al pasar a MP4, los subtítulos se convierten a `mov_text`, se mueve el índice
+  (`moov`) al principio del fichero (`faststart`) y el vídeo H.265 se etiqueta como
+  `hvc1` para los reproductores de Apple.
 - Antes de ejecutar, pyMedia comprueba que cada códec se puede copiar de forma segura
   al nuevo contenedor. Si no, el error indica los contenedores válidos y tendrás que
   usar `transcode`.

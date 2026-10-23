@@ -110,6 +110,9 @@ cython_debug/
 # ─── Traducciones ────────────────────────────────────────────
 *.mo
 *.pot
+# Los catálogos de pyMedia se distribuyen con el paquete (wheel y PyInstaller).
+!src/pymedia/locales/*.pot
+!src/pymedia/locales/*/LC_MESSAGES/*.mo
 
 # ─── IDEs y editores ─────────────────────────────────────────
 .idea/

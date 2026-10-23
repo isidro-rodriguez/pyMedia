@@ -58,6 +58,25 @@ class TestCreateFilters:
 
         assert mixin.crop_area == (100, 100, 10, 10)
 
+    @pytest.mark.parametrize(
+        "crop", ["1920,800,0,140", "1920,1080,0,0", "960,1080,960,0"]
+    )
+    def test_crop_reaching_the_frame_edge_is_valid(self, crop: str) -> None:
+        """Un recorte que llega justo al borde del vídeo es válido."""
+        mixin = _mixin()
+
+        mixin.create_filters(logger=Mock(), crop=crop)
+
+        assert mixin.crop_area is not None
+
+    @pytest.mark.parametrize("crop", ["1921,800,0,0", "960,1080,961,0", "100,1081,0,0"])
+    def test_crop_beyond_the_frame_raises(self, crop: str) -> None:
+        """Un recorte que sobresale del vídeo se rechaza."""
+        from pymedia.errors import UserError
+
+        with pytest.raises(UserError):
+            _mixin().create_filters(logger=Mock(), crop=crop)
+
     def test_scale(self) -> None:
         """Comprueba que se crea la dimensión de escalado."""
         mixin = _mixin()

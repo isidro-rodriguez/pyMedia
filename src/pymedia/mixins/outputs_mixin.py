@@ -25,6 +25,9 @@ from pymedia.locales import translate as _
 from pymedia.models.media import Media
 from pymedia.types import MediaType
 
+# Nombres del códec H.265 en la configuración (`h265`) y en ffprobe (`hevc`).
+_H265_CODECS = frozenset({"h265", "hevc"})
+
 
 @dataclass(kw_only=True)
 class AnimatedOutputMixin:
@@ -349,15 +352,28 @@ class MediaOutputMixin:
 
         self.media_output = output
 
-    def to_mp4_cmd_args(self) -> list[str]:
-        """Argumentos específicos de contenedores .mp4."""
+    def to_mp4_cmd_args(self, video_codec: str | None = None) -> list[str]:
+        """Argumentos específicos de contenedores de la familia MP4/MOV.
+
+        Args:
+            video_codec: Códec de vídeo de la salida si se transcodifica; `None`
+                si se copia el de origen.
+
+        Returns:
+            `faststart` y, para H.265, la etiqueta `hvc1` que exigen los
+            reproductores de Apple (ffmpeg usa `hev1` por defecto).
+
+        Raises:
+            MissingParameterError: Si falta el medio o su pista de vídeo.
+        """
         if self.media is None:
             raise MissingParameterError(name="media")
         if self.media.video is None:
             raise MissingParameterError(name="video")
 
         mp4_args = ["-movflags", "+faststart"]
-        if self.media.video.format.codec == "h265":
+        codec = video_codec or self.media.video.format.codec
+        if codec in _H265_CODECS:
             mp4_args.extend(["-tag:v", "hvc1"])
 
         return mp4_args

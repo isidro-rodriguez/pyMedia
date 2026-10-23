@@ -100,7 +100,7 @@ class CropMixin:
                     )
                 )
 
-            if crop_area.width + crop_area.x >= video.format.width:
+            if crop_area.width + crop_area.x > video.format.width:
                 raise UserError(
                     msg=_(
                         "Invalid crop area. Area width (%(area_width)s) and coordinate "

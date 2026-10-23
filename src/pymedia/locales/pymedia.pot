@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-10-23 12:31+0100\n"
+"POT-Creation-Date: 2026-10-23 13:44+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -1154,13 +1154,33 @@ msgid ""
 "    > pymedia transcode source.mp4 --burn-subtitles eng-subs.srt\n"
 msgstr ""
 
-#: pymedia/commands/transcode/service.py:33
+#: pymedia/commands/transcode/service.py:39
 msgid "Transcoding container"
 msgstr ""
 
-#: pymedia/commands/transcode/service.py:39
+#: pymedia/commands/transcode/service.py:45
 #, python-format
 msgid "Container transcoded successfully: %(output)s"
+msgstr ""
+
+#: pymedia/commands/transcode/service.py:70
+#, python-format
+msgid ""
+"Graphic subtitles tracks %(tracks)s are not supported by %(extension)s "
+"and will be discarded."
+msgstr ""
+
+#: pymedia/commands/transcode/service.py:79
+#, python-format
+msgid "Subtitles tracks %(tracks)s are not supported by %(extension)s."
+msgstr ""
+
+#: pymedia/commands/transcode/service.py:85
+msgid "Convert them to a supported subtitles format?"
+msgstr ""
+
+#: pymedia/commands/transcode/service.py:88
+msgid "Incompatible subtitles will be discarded."
 msgstr ""
 
 #: pymedia/mixins/audio_mixin.py:308 pymedia/mixins/streams_mixin.py:87
@@ -1205,24 +1225,24 @@ msgstr ""
 msgid "Image container not supported."
 msgstr ""
 
-#: pymedia/mixins/outputs_mixin.py:479
+#: pymedia/mixins/outputs_mixin.py:495
 #, python-format
 msgid ""
 "Cannot remux %(codec)s to %(extension)s. Safe remux targets: "
 "%(supported)s."
 msgstr ""
 
-#: pymedia/mixins/outputs_mixin.py:503
+#: pymedia/mixins/outputs_mixin.py:519
 #, python-format
 msgid "%(name)s contains invalid characters: < > : \" / \\ | ? *"
 msgstr ""
 
-#: pymedia/mixins/outputs_mixin.py:515
+#: pymedia/mixins/outputs_mixin.py:531
 #, python-format
 msgid "Could not create directory: %(path)s"
 msgstr ""
 
-#: pymedia/mixins/outputs_mixin.py:552
+#: pymedia/mixins/outputs_mixin.py:568
 #, python-format
 msgid "Output file must be different from the input file: %(path)s"
 msgstr ""
@@ -1249,7 +1269,7 @@ msgid "Incorrect stream tracks format. Expected comma separated integers."
 msgstr ""
 
 #: pymedia/mixins/streams_mixin.py:77
-msgid "Stream index must be greater than 0."
+msgid "Stream index must be 0 or greater."
 msgstr ""
 
 #: pymedia/mixins/streams_mixin.py:95 pymedia/mixins/subtitles_mixin.py:351

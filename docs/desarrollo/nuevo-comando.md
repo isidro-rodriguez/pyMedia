@@ -238,6 +238,7 @@ En `src/pymedia/main.py`, dentro de `_build_app()`:
 
 ```python
 from pymedia.commands.clean.cli import clean_cli
+
 ...
 built_app.add_typer(clean_cli)
 ```

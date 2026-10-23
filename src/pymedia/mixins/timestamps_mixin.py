@@ -118,7 +118,7 @@ class TimestampStartEndMixin:
         if start is not None:
             return media_duration - start
         if end is not None:
-            return media_duration - end
+            return end
         return media_duration
 
 

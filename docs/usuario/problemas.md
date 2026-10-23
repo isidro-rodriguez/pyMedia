@@ -53,6 +53,8 @@
 | `No se puede hacer remux del códec ... a ...`            | La copia sin recodificar no es segura. Usa una extensión de la lista o `transcode`. |
 | `Las dimensiones objetivo deben ser pares`               | En vídeo, `--size` necesita ancho y alto pares.                        |
 | `Escala ignorada ... requiere ampliación` (aviso)        | El objetivo es mayor que el origen. Añade `--upscale` si quieres ampliar. |
+| `Las pistas de subtítulos ... no son compatibles con .mp4` (aviso) | `transcode` pregunta si convertirlas. Responde `n` para descartarlas, o usa `-o salida.mkv` para conservarlas tal cual. |
+| `Las pistas de subtítulos gráficos ... se descartarán` (aviso) | PGS/VobSub no caben en MP4 ni se pueden convertir a texto. Usa `.mkv` para conservarlos. |
 
 ### Ejecución de ffmpeg
 

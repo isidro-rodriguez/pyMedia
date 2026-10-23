@@ -2,16 +2,25 @@
 
 from dataclasses import dataclass
 from pathlib import Path
+from types import MappingProxyType
 
 from pymedia.data.audio_codecs import AUDIO_CODECS
+from pymedia.data.subtitles_formats import SUBTITLES_FORMATS
 from pymedia.data.video_codecs import VIDEO_CODECS
 from pymedia.errors import MissingParameterError
 from pymedia.models.config import Transcode
 from pymedia.models.media import Media
+from pymedia.models.subtitles import Subtitles
 from pymedia.utils import to_ffmpeg_value
 
-# Códecs de subtítulos de texto convertibles a `mov_text` (MP4).
+# Códecs de subtítulos de texto, convertibles entre sí.
 _TEXT_SUBTITLES = frozenset({"subrip", "srt", "ass", "ssa", "mov_text", "webvtt"})
+# Nombre de ffprobe → clave de `SUBTITLES_FORMATS`.
+_SUBTITLES_ALIASES = MappingProxyType({"subrip": "srt", "ssa": "ass"})
+# Códec de texto al que se convierten los subtítulos según el contenedor de salida.
+_TEXT_SUBTITLES_TARGET = MappingProxyType(
+    {".mkv": "srt", ".mov": "mov_text", ".mp4": "mov_text", ".webm": "webvtt"}
+)
 
 
 @dataclass(kw_only=True)
@@ -28,6 +37,7 @@ class TranscodeMixin:
     subtitles_input: Path | None = None
     transcode: Transcode
     transcode_video: bool
+    convert_subtitles: bool = True
 
     def to_video_transcode_cmd(self) -> list[str]:
         """Construye la secuencia de argumentos para la transcodificación de vídeo.
@@ -98,35 +108,58 @@ class TranscodeMixin:
                 audio_transcode.append("copy")
         return audio_transcode
 
-    def to_subtitles_copy_cmd(self, container: str) -> list[str]:
-        """Construye los argumentos para conservar las pistas de subtítulos.
+    def incompatible_subtitles(self, container: str) -> list[Subtitles]:
+        """Devuelve las pistas de subtítulos que el contenedor no admite sin convertir.
 
         Args:
             container: Extensión del contenedor de salida (p. ej. `.mp4`).
 
         Returns:
-            Argumentos `-map` y `-c:s` por pista. En MP4 los subtítulos de texto
-            se convierten a `mov_text` y los gráficos se descartan, ya que el
-            contenedor no los soporta.
+            Pistas cuyo códec no se puede copiar al contenedor de salida.
+        """
+        if self.media is None or not self.media.subtitles:
+            return []
+        return [
+            track
+            for track in self.media.subtitles
+            if not _fits_container(track=track, container=container.lower())
+        ]
+
+    def to_subtitles_copy_cmd(self, container: str) -> list[str]:
+        """Construye los argumentos para conservar las pistas de subtítulos.
+
+        Las pistas compatibles con el contenedor se copian. Las de texto
+        incompatibles se convierten al códec de texto del contenedor si
+        `convert_subtitles` es `True`; el resto se descartan.
+
+        Args:
+            container: Extensión del contenedor de salida (p. ej. `.mp4`).
+
+        Returns:
+            Argumentos `-map` y `-c:s` por pista conservada.
+
+        Raises:
+            MissingParameterError: Si falta el medio o sus subtítulos.
         """
         if self.media is None:
             raise MissingParameterError(name="media")
         if self.media.subtitles is None:
             raise MissingParameterError(name="subtitles")
 
-        is_mp4 = container.lower() in {".mp4", ".m4v", ".mov"}
+        container = container.lower()
+        target = _TEXT_SUBTITLES_TARGET.get(container)
         args: list[str] = []
-        output_index = 0
         for track in self.media.subtitles:
-            if is_mp4 and track.format.codec not in _TEXT_SUBTITLES:
+            if _fits_container(track=track, container=container):
+                codec = "copy"
+            elif self.convert_subtitles and target and is_text_subtitles(track):
+                codec = target
+            else:
                 continue
-            codec = (
-                "mov_text" if is_mp4 and track.format.codec != "mov_text" else "copy"
-            )
+            output_index = len(args) // 4
             args.extend(
                 ["-map", f"0:s:{track.track_index}", f"-c:s:{output_index}", codec]
             )
-            output_index += 1
         return args
 
     def to_burn_subtitles_cmd(self) -> str:
@@ -144,3 +177,25 @@ class TranscodeMixin:
             raise MissingParameterError(name="subtitles")
 
         return f"subtitles={to_ffmpeg_value(self.subtitles_input.absolute())}"
+
+
+def is_text_subtitles(track: Subtitles) -> bool:
+    """Indica si la pista de subtítulos es de texto (convertible a otro formato).
+
+    Args:
+        track: Pista de subtítulos a comprobar.
+
+    Returns:
+        `True` si la pista es de texto, `False` si es gráfica o desconocida.
+    """
+    if track.format.is_text_based is not None:
+        return track.format.is_text_based
+    return track.format.codec in _TEXT_SUBTITLES
+
+
+def _fits_container(track: Subtitles, container: str) -> bool:
+    """Indica si el códec de la pista se puede copiar al contenedor."""
+    codec = track.format.codec or ""
+    fmt = SUBTITLES_FORMATS.get(_SUBTITLES_ALIASES.get(codec, codec))
+    # Un códec fuera del catálogo se copia tal cual y ffmpeg decide.
+    return fmt is None or container in fmt.containers

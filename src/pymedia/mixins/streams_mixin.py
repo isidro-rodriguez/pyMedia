@@ -74,7 +74,7 @@ class StreamsMixin:
         if self.media is None:
             raise MissingParameterError(name="media")
         if track < 0:
-            raise UserError(msg=_("Stream index must be greater than 0."))
+            raise UserError(msg=_("Stream index must be 0 or greater."))
 
         match streams_type:
             case StreamsMode.AUDIO:

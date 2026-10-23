@@ -6,14 +6,24 @@ Las versiones se han reconstruido a partir del histórico de
 Las versiones intermedias no registradas (0.2–0.4, 0.6–0.8) se agrupan
 con la sección anterior.
 
-## [Sin publicar]
+## [1.0.0] - 2026-10-23
 
 ### Añadido
 
+- `transcode` avisa de los subtítulos que el contenedor de salida no admite y pregunta si convertir los de texto a su formato (`mov_text`, `srt` o `webvtt`); los gráficos se descartan con aviso.
+- CI de GitHub Actions en Linux y Windows (calidad, cobertura ≥ 95 %, locales y ejecutable) y Dependabot para `uv` y GitHub Actions.
+- Hooks de git separados en `pre-commit` (ruff, ty, pytest) y `pre-push` (cobertura, locales, binario).
+- Fichero `LICENSE` (MIT).
 - Documentación avanzada en `docs/`: guía de usuario (conceptos, referencia de comandos, filtros, configuración, formatos y solución de problemas) y guía de desarrollo (arquitectura, receta para añadir comandos y contribución).
 
 ### Corregido
 
+- `transcode` de MKV con subtítulos SRT a MP4 fallaba: la compatibilidad se evaluaba con el contenedor de entrada.
+- `--crop` rechazaba recortes que llegaban justo al borde derecho del vídeo.
+- La barra de progreso calculaba mal el tramo cuando solo se indicaba `--end`.
+- La etiqueta `hvc1` de MP4 dependía del códec de origen (y no reconocía `hevc`); ahora sigue al códec de salida y también se aplica en `remux`.
+- La wheel no se construía (`force-include` duplicaba `locales/`), lo que rompía `uv tool install .`; el `.gitignore` excluía además los catálogos `.mo`/`.pot`.
+- Traducción de marcas de tiempo inválidas (`>=`) y mensaje de índice de pista (admite 0).
 - Falso "timed out" en comandos sin `-progress` (`remux`, `delete/edit/extract-audio`, `delete/edit/extract-subtitles`): cualquier línea de stderr cuenta ya como actividad.
 - `config.toml` con claves ausentes, sobrantes o TOML mal formado eleva `ConfigError` en vez de `KeyError`/`TOMLDecodeError`.
 - Los errores de pyMedia ya no muestran traza: nuevo punto de entrada `pymedia.main:run`.
@@ -25,6 +35,7 @@ con la sección anterior.
 
 ### Cambiado
 
+- Los fixtures manuales se generan en `tests/fixtures/`; retirados `local/`, `scripts/backup.py` y `scripts/code_count.py`.
 - `README.md` reducido a una introducción breve con enlaces a `docs/`.
 - `AGENTS.md` adaptado a la estructura, herramientas y convenciones de pyMedia.
 - `prepare_command` centraliza `-y`/`-n`, `-progress pipe:1` y `-nostats`; se eliminan de los `cmd.py` (y `--show-cmd` muestra un comando más limpio).
@@ -141,7 +152,7 @@ con la sección anterior.
 ### Cambiado
 
 - Añadida opción `--strip-metadata` para indicar que no se copian los metadatos
-  del fichero origen. Comandos que la implementan: `add-audio`, ``add-subs``, ``cut``, 
+  del fichero origen. Comandos que la implementan: `add-audio`, ``add-subs``, ``cut``,
   ``extract-audio``, ``extract-subs``, ``join``, ``remux``, ``transcode``.
 - Refactorización modelos `Audio` y `Subtitles` separando los métadatos para
   mejor organización.

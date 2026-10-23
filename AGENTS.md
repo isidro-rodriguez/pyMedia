@@ -20,15 +20,17 @@ pyMedia: Typer CLI that wraps `ffmpeg`/`ffprobe` for everyday media tasks. Read
 
 ```bash
 .
-├── .pre-commit-config.yaml # pre-commit hooks (ruff, ty, pytest)
+├── .github/                # CI workflow (Linux + Windows) and Dependabot
+├── .pre-commit-config.yaml # Git hooks: pre-commit (ruff, ty, pytest) and pre-push (cov, locales, binary)
 ├── AGENTS.md               # This file
 ├── CHANGELOG.md            # Keep a Changelog (Spanish)
+├── LICENSE                 # MIT
 ├── README.md               # Short user-facing introduction
 ├── docs/
 │   ├── usuario/            # User guide (commands, config, formats, troubleshooting)
 │   └── desarrollo/         # Developer guide (architecture, new command, contributing)
 ├── pyproject.toml          # Project: deps, build (hatchling), tools (ruff, ty, pytest)
-├── scripts/                # build.py, i18n.py, generate_fixtures.py, backup.py, code_count.py
+├── scripts/                # build.py, i18n.py, generate_fixtures.py (+ fixtures/)
 ├── src/
 │   └── pymedia/
 │       ├── commands/       # One package per command: cli, parameters, cmd, service (+ base/)
@@ -48,7 +50,7 @@ pyMedia: Typer CLI that wraps `ffmpeg`/`ffprobe` for everyday media tasks. Read
 - The project uses `uv` as dependency manager and `hatchling` as build backend.
 - The package version lives in `src/pymedia/__init__.py` (`version = "..."`), not in
   `pyproject.toml`.
-- `local/` (backups, manual fixtures) and `build/` are local-only and must not be committed.
+- `build/` and `tests/fixtures/` (manual fixtures) are git-ignored and must not be committed.
 
 ## Project rules (load-bearing)
 
@@ -178,14 +180,19 @@ def sum_numbers(a: int, b: int) -> int:
 
 ## CI
 
-- Not configured yet. If added: GitHub Actions on `ubuntu-latest` and `windows-latest`,
+- GitHub Actions (`.github/workflows/ci.yml`) on `ubuntu-latest` and `windows-latest`,
   installing ffmpeg and `uv` (`astral-sh/setup-uv`), and running from the root:
-    - `uv sync`
+    - `uv sync --locked`
     - `uv run ruff format --check .`
     - `uv run ruff check .`
     - `uv run ty check`
-    - `uv run pytest`
+    - `uv run pytest --cov=pymedia --cov-fail-under=95` (Python 3.12 and 3.13)
     - `uv run pytest -m locales`
+    - `uv run pytest -m binary` (separate job, uploads the executable)
+- Dependabot (`.github/dependabot.yml`) updates `uv` dependencies and GitHub Actions weekly.
+- Git hooks (`uv run pre-commit install`): `pre-commit` runs ruff, ty and pytest;
+  `pre-push` runs pytest with coverage (≥ 95%), `-m locales` and `-m binary`.
+- Do not weaken CI, hooks or the coverage threshold to make a change pass.
 
 ## Commits
 

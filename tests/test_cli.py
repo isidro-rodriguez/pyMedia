@@ -883,6 +883,36 @@ def test_transcode_success_transcodes_video(
     assert stream_codec_names(output, "video") == ["hevc"]
 
 
+@pytest.mark.parametrize(
+    ("answer", "expected_subs"),
+    [("y\n", ["mov_text", "mov_text"]), ("n\n", [])],
+)
+def test_transcode_mkv_srt_to_mp4_asks_to_convert_subtitles(
+    pymedia: Invoke,
+    video_mkv_subs: Path,
+    tmp_path: Path,
+    answer: str,
+    expected_subs: list[str],
+) -> None:
+    """Regresión: SRT de un MKV a MP4 fallaba; ahora avisa y pregunta."""
+    output = tmp_path / "transcoded.mp4"
+
+    result = pymedia(
+        "transcode",
+        str(video_mkv_subs),
+        "--video",
+        "-o",
+        str(output),
+        "-ov",
+        "yes",
+        input=answer,
+    )
+
+    assert result.exit_code == 0, result.output
+    assert "not supported by .mp4" in result.output
+    assert stream_codec_names(output, "subtitle") == expected_subs
+
+
 def test_transcode_success_burns_subtitles(
     pymedia: Invoke,
     video_mp4_a: Path,

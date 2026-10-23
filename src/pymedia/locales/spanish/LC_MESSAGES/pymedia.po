@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-10-23 12:32+0100\n"
+"POT-Creation-Date: 2026-10-23 13:44+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -1385,14 +1385,36 @@ msgstr ""
 "    Incrusta subtítulos en la pista de vídeo.\n"
 "    > pymedia transcode source.mp4 --burn-subtitles eng-subs.srt\n"
 
-#: pymedia/commands/transcode/service.py:33
+#: pymedia/commands/transcode/service.py:39
 msgid "Transcoding container"
 msgstr "Transcodificando el contenedor"
 
-#: pymedia/commands/transcode/service.py:39
+#: pymedia/commands/transcode/service.py:45
 #, python-format
 msgid "Container transcoded successfully: %(output)s"
 msgstr "Contenedor transcodificado correctamente: %(output)s"
+
+#: pymedia/commands/transcode/service.py:70
+#, python-format
+msgid ""
+"Graphic subtitles tracks %(tracks)s are not supported by %(extension)s "
+"and will be discarded."
+msgstr ""
+"Las pistas de subtítulos gráficos %(tracks)s no son compatibles con "
+"%(extension)s y se descartarán."
+
+#: pymedia/commands/transcode/service.py:79
+#, python-format
+msgid "Subtitles tracks %(tracks)s are not supported by %(extension)s."
+msgstr "Las pistas de subtítulos %(tracks)s no son compatibles con %(extension)s."
+
+#: pymedia/commands/transcode/service.py:85
+msgid "Convert them to a supported subtitles format?"
+msgstr "¿Convertirlas a un formato de subtítulos compatible?"
+
+#: pymedia/commands/transcode/service.py:88
+msgid "Incompatible subtitles will be discarded."
+msgstr "Los subtítulos incompatibles se descartarán."
 
 #: pymedia/mixins/audio_mixin.py:308 pymedia/mixins/streams_mixin.py:87
 msgid "Audio index not included."
@@ -1445,7 +1467,7 @@ msgstr "Parámetro de inversión no válido."
 msgid "Image container not supported."
 msgstr "Contenedor de imagen no soportado."
 
-#: pymedia/mixins/outputs_mixin.py:479
+#: pymedia/mixins/outputs_mixin.py:495
 #, python-format
 msgid ""
 "Cannot remux %(codec)s to %(extension)s. Safe remux targets: "
@@ -1454,17 +1476,17 @@ msgstr ""
 "No se puede hacer remux del códec %(codec)s a %(extension)s. Destinos "
 "seguros para remux: %(supported)s."
 
-#: pymedia/mixins/outputs_mixin.py:503
+#: pymedia/mixins/outputs_mixin.py:519
 #, python-format
 msgid "%(name)s contains invalid characters: < > : \" / \\ | ? *"
 msgstr "%(name)s contiene caracteres no válidos: < > : \" / \\ | ? *"
 
-#: pymedia/mixins/outputs_mixin.py:515
+#: pymedia/mixins/outputs_mixin.py:531
 #, python-format
 msgid "Could not create directory: %(path)s"
 msgstr "No se pudo crear el directorio: %(path)s"
 
-#: pymedia/mixins/outputs_mixin.py:552
+#: pymedia/mixins/outputs_mixin.py:568
 #, python-format
 msgid "Output file must be different from the input file: %(path)s"
 msgstr "El fichero de salida debe ser distinto del de entrada: %(path)s"
@@ -1495,8 +1517,8 @@ msgstr ""
 "comas."
 
 #: pymedia/mixins/streams_mixin.py:77
-msgid "Stream index must be greater than 0."
-msgstr "El índice del stream debe ser mayor que 0."
+msgid "Stream index must be 0 or greater."
+msgstr "El índice del stream debe ser 0 o mayor."
 
 #: pymedia/mixins/streams_mixin.py:95 pymedia/mixins/subtitles_mixin.py:351
 msgid "Subtitles index not included."
@@ -1523,7 +1545,7 @@ msgstr ""
 #: pymedia/mixins/timestamps_mixin.py:65
 #, python-format
 msgid "Invalid timestamps. Start (%(start)s) >= End (%(end)s)."
-msgstr "Marcas de tiempo no válidas. Inicio (%(start)s) => Fin (%(end)s.)"
+msgstr "Marcas de tiempo no válidas. Inicio (%(start)s) >= Fin (%(end)s)."
 
 #: pymedia/mixins/timestamps_mixin.py:160
 #, python-format

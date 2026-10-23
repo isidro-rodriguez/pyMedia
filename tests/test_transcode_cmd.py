@@ -10,6 +10,7 @@ from pymedia.commands.transcode.parameters import TranscodeParameters
 from pymedia.models.audio import AudioMetadata
 from pymedia.models.config import Config, Transcode
 from pymedia.models.media import Audio, Media, Video
+from pymedia.models.video import VideoFormat
 from pymedia.types import OverwriteMode
 from pymedia.utils import to_ffmpeg_value
 
@@ -128,3 +129,41 @@ def test_without_filters_maps_the_input_video(config: Config) -> None:
 
     assert "-filter_complex" not in cmd
     assert cmd[cmd.index("-map") + 1] == "0:v:0"
+
+
+@pytest.mark.parametrize(
+    ("source_codec", "transcode_video", "profile_codec", "tagged"),
+    [
+        ("h264", True, "h265", True),
+        ("hevc", False, "h264", True),
+        ("hevc", True, "h264", False),
+        ("h264", False, "h265", False),
+    ],
+)
+def test_mp4_hvc1_tag_follows_the_output_codec(
+    config: Config,
+    source_codec: str,
+    transcode_video: bool,
+    profile_codec: str,
+    tagged: bool,
+) -> None:
+    """Regresión: `hvc1` dependía solo del códec de origen (y nunca de `hevc`)."""
+    params = _params()
+    params.media_output = Path("/tmp/out.mp4")
+    params.transcode_video = transcode_video
+    params.transcode = Transcode(
+        video_codec=profile_codec,
+        video_preset="medium",
+        video_crf=23,
+        audio_codec="aac",
+        audio_bit_rate="128k",
+    )
+    source = Path("/tmp/input.mkv")
+    params.media = Media(
+        path=source,
+        video=Video(path=source, track_index=0, format=VideoFormat(codec=source_codec)),
+    )
+
+    cmd = TranscodeCmd(params=params, config=config).create()
+
+    assert ("hvc1" in cmd) is tagged

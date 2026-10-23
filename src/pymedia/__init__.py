@@ -4,4 +4,4 @@ Expone la versión pública del paquete y la interfaz CLI vía
 `pymedia.main:run`.
 """
 
-version = "0.21.2-beta.14"
+version = "1.0.0"

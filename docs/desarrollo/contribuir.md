@@ -9,7 +9,7 @@ Requisitos: Python 3.12+, [uv](https://docs.astral.sh/uv/) y ffmpeg/ffprobe en e
 git clone https://github.com/isidro-rodriguez/pyMedia.git
 cd pyMedia
 uv sync                        # un único venv y uv.lock en la raíz, con el grupo dev
-uv run pre-commit install      # hooks locales (opcional, recomendado)
+uv run pre-commit install      # hooks de pre-commit y pre-push (recomendado)
 ```
 
 - Dependencias de ejecución: `uv add <paquete>`. De desarrollo: `uv add --dev <paquete>`.
@@ -39,8 +39,31 @@ uv run pytest
 | ty          | Python 3.12, igualdad y genéricos estrictos.                                 |
 | pytest      | `tests/`, `pythonpath = src`, excluye por defecto las marcas `binary` y `locales`. |
 
-Los hooks de `.pre-commit-config.yaml` ejecutan la misma secuencia (ruff, ty y pytest)
-en cada commit: `uv run pre-commit run --all-files` para lanzarlos a mano.
+### Hooks de git
+
+`.pre-commit-config.yaml` instala dos etapas:
+
+| Etapa        | Hooks                                                                     |
+|--------------|---------------------------------------------------------------------------|
+| `pre-commit` | `ruff check --fix`, `ruff format`, `ruff check`, `ty check`, `pytest`.    |
+| `pre-push`   | `pytest --cov` (mínimo 95 %), `pytest -m locales`, `pytest -m binary`.    |
+
+```bash
+uv run pre-commit run --all-files                         # etapa pre-commit
+uv run pre-commit run --all-files --hook-stage pre-push   # etapa pre-push
+```
+
+### Integración continua
+
+`.github/workflows/ci.yml` se ejecuta en cada push a `main` y en cada pull request:
+
+| Job       | Plataformas                         | Pasos                                                         |
+|-----------|-------------------------------------|---------------------------------------------------------------|
+| `quality` | Ubuntu y Windows × Python 3.12/3.13 | `ruff format --check`, `ruff check`, `ty`, `pytest --cov` (≥ 95 %), `pytest -m locales`. |
+| `binary`  | Ubuntu y Windows                    | `pytest -m binary` y publica el ejecutable como artefacto (7 días). |
+
+`.github/dependabot.yml` revisa cada lunes las dependencias de `uv` (agrupando
+actualizaciones menores) y las versiones de las GitHub Actions.
 
 ## Estilo de código
 
@@ -87,7 +110,7 @@ uv run pytest --cov=pymedia       # cobertura
 
 ### Fixtures manuales
 
-`scripts/generate_fixtures.py` genera en `local/fixtures/` un juego más completo
+`scripts/generate_fixtures.py` genera en `tests/fixtures/` (ignorado por git) un juego más completo
 (varias pistas de audio y subtítulos, vídeos verticales, sin metadatos…) para pruebas
 manuales. No lo usa la suite automática.
 
@@ -128,9 +151,7 @@ uv run pytest -m locales
 |--------------------------------|------------------------------------------------------------------|
 | `scripts/build.py`             | Compila el ejecutable único con PyInstaller en `build/`.         |
 | `scripts/i18n.py`              | Mantenimiento de catálogos gettext (ver arriba).                 |
-| `scripts/generate_fixtures.py` | Genera medios de prueba manual en `local/fixtures/`.             |
-| `scripts/backup.py`            | Comprime `src/`, `tests/`, `scripts/` y ficheros raíz en `local/`. |
-| `scripts/code_count.py`        | Cuenta líneas de código y de docstrings.                         |
+| `scripts/generate_fixtures.py` | Genera medios de prueba manual en `tests/fixtures/`.             |
 
 Todos se ejecutan con `uv run python scripts/<script>.py`.
 

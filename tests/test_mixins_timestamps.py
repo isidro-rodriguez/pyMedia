@@ -188,3 +188,26 @@ def test_fractional_seconds_should_be_allowed(start: str, expected: timedelta) -
     mixin.create_timestamp_start_end(timestamp_start=start, timestamp_end=None)
 
     assert mixin.timestamp_start == expected
+
+
+class TestGetRangeTime:
+    """Pruebas de la duración del tramo usada por la barra de progreso."""
+
+    @pytest.mark.parametrize(
+        ("start", "end", "expected"),
+        [
+            (None, None, timedelta(hours=2)),
+            ("10:00", None, timedelta(hours=1, minutes=50)),
+            (None, "10:00", timedelta(minutes=10)),
+            ("10:00", "30:00", timedelta(minutes=20)),
+        ],
+    )
+    def test_range_duration(
+        self, start: str | None, end: str | None, expected: timedelta
+    ) -> None:
+        """El tramo va de `start` (o el inicio) a `end` (o el final)."""
+        mixin = TimestampStartEndMixin()
+        mixin.media = _media()
+        mixin.create_timestamp_start_end(timestamp_start=start, timestamp_end=end)
+
+        assert mixin.get_range_time() == expected

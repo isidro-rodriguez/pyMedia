@@ -76,8 +76,12 @@ mismo contenedor de entrada, el margen es mayor.
 Regla práctica: **MKV acepta casi todo**. Si una copia falla por compatibilidad,
 prueba primero con `.mkv` (`.mka` para audio suelto).
 
-`remux` y `transcode` hacen una excepción con MP4: convierten los subtítulos de texto a
-`mov_text` en lugar de copiarlos.
+Excepciones con subtítulos:
+
+- `remux` a MP4 convierte siempre los subtítulos a `mov_text`.
+- `transcode` avisa de las pistas que el contenedor de salida no admite y pregunta si
+  convertir las de texto a su formato (`mov_text`, `srt` o `webvtt`). Las gráficas se
+  descartan.
 
 ## Códecs de transcodificación
 

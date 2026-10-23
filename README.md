@@ -1,5 +1,7 @@
 # pyMedia
 
+[![CI](https://github.com/isidro-rodriguez/pyMedia/actions/workflows/ci.yml/badge.svg)](https://github.com/isidro-rodriguez/pyMedia/actions/workflows/ci.yml)
+
 CLI sencilla para `ffmpeg`, pensada para el usuario medio. Analiza, corta, une,
 convierte y edita vídeos, pistas de audio y subtítulos con comandos cortos y
 legibles, sin tener que recordar la sintaxis de ffmpeg.
@@ -89,4 +91,4 @@ Arquitectura, tests, traducciones y flujo de versiones en la
 
 ## Licencia
 
-MIT.
+[MIT](LICENSE).

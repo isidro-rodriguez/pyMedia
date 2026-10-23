@@ -62,7 +62,7 @@ class RemuxCmd:
         )
 
         if is_mov_family:
-            cmd.extend(["-movflags", "+faststart"])
+            cmd.extend(self.params.to_mp4_cmd_args())
 
         if self.params.strip_metadata:
             cmd.extend(self.params.to_strip_metadata_cmd())
