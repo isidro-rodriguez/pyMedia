@@ -1,4 +1,4 @@
-# AGENTS.md
+# CLAUDE.md
 
 pyMedia: Typer CLI that wraps `ffmpeg`/`ffprobe` for everyday media tasks. Read
 `docs/desarrollo/arquitectura.md` before touching code.
@@ -13,7 +13,7 @@ pyMedia: Typer CLI that wraps `ffmpeg`/`ffprobe` for everyday media tasks. Read
   `src/pymedia/locales/spanish/LC_MESSAGES/pymedia.po`. Never hardcode Spanish text in
   messages.
 - Exception names and internal identifiers must be in English.
-- This file, `AGENTS.md`, is written in English so the agent does not need to translate
+- This file, `CLAUDE.md`, is written in English so the agent does not need to translate
   instructions.
 
 ## Project structure
@@ -22,7 +22,7 @@ pyMedia: Typer CLI that wraps `ffmpeg`/`ffprobe` for everyday media tasks. Read
 .
 ├── .github/                # CI and release workflows (Linux + Windows), Dependabot
 ├── .pre-commit-config.yaml # Git hooks: pre-commit (ruff, ty, pytest) and pre-push (cov, locales, binary)
-├── AGENTS.md               # This file
+├── CLAUDE.md               # This file
 ├── CHANGELOG.md            # Keep a Changelog (Spanish)
 ├── LICENSE                 # MIT
 ├── README.md               # Short user-facing introduction
@@ -100,6 +100,10 @@ If `docs/`, `zensical.toml` or `docs_templates/` changed, the build must finish 
 uv run zensical build        # output in site/ (git-ignored)
 ```
 
+Optional shortcuts: `[tool.poe]` in `pyproject.toml` defines Poe the Poet tasks
+(`check`, `fix`, `ci`, `i18n`, `fixtures`, `build`, `serve`, `backup`) for users with `poe` installed globally.
+The `uv run` commands above remain the reference; use them in hooks, CI and as agent.
+
 If a tool is missing, install it in the `dev` group:
 
 ```bash
@@ -108,7 +112,7 @@ uv add --dev <tool>
 
 ## Agent workflow
 
-1. Before changing, read `README.md`, `pyproject.toml`, `AGENTS.md`, the relevant page in
+1. Before changing, read `README.md`, `pyproject.toml`, `CLAUDE.md`, the relevant page in
    `docs/`, and related tests.
 2. Make the smallest necessary change. Do not refactor unrelated code.
 3. If you need a new dependency, justify it. If stdlib solves it, do not add it.
@@ -270,7 +274,7 @@ between PATCH and MINOR, prefer MINOR.
 
 ## Limits
 
-- Do not modify `AGENTS.md` without justified reason.
+- Do not modify `CLAUDE.md` without justified reason.
 - Do not use `pip install` directly.
 - Do not add unnecessary dependencies.
 - Do not change CI, Ruff, ty, pytest config without justification.

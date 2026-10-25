@@ -91,6 +91,10 @@ uv sync
 uv run ruff format . && uv run ruff check . && uv run ty check && uv run pytest
 ```
 
+Con [Poe the Poet](https://poethepoet.natn.io/) instalado (`uv tool install poethepoet`),
+hay atajos opcionales: `poe check`, `poe fix`, `poe ci`, `poe i18n`, `poe fixtures`,
+`poe build`, `poe serve` y `poe backup` (`poe --help` los describe).
+
 Arquitectura, tests, traducciones y flujo de versiones en la
 [guía de desarrollo](https://isidro-rodriguez.github.io/pyMedia/desarrollo/arquitectura/).
 

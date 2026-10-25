@@ -39,6 +39,23 @@ uv run pytest
 | ty          | Python 3.12, igualdad y genéricos estrictos.                                 |
 | pytest      | `tests/`, `pythonpath = src`, excluye por defecto las marcas `binary` y `locales`. |
 
+### Atajos con Poe (opcional)
+
+Quien tenga [Poe the Poet](https://poethepoet.natn.io/) instalado globalmente
+(`uv tool install poethepoet`) dispone de las tareas de `[tool.poe]`. No es dependencia
+del proyecto: los comandos `uv run` siguen siendo la referencia.
+
+| Tarea      | Qué hace                                                                       |
+|------------|--------------------------------------------------------------------------------|
+| `check`    | `ruff format --check`, `ruff check`, `ty check` y `pytest`.                    |
+| `fix`      | `ruff format` y `ruff check --fix`.                                            |
+| `ci`       | Job `quality` del CI: lint, tipos, `pytest --cov` (≥ 95 %) y `pytest -m locales`. |
+| `i18n`     | `extract`, `update`, `compile` y `check` de catálogos, y `pytest -m locales`.  |
+| `fixtures` | Genera los fixtures manuales en `tests/fixtures`.                              |
+| `build`    | Compila el ejecutable con PyInstaller y lo empaqueta.                          |
+| `serve`    | Previsualiza la documentación en `http://localhost:8000`.                      |
+| `backup`   | Copia de seguridad del repositorio con `git bundle`.                           |
+
 ### Hooks de git
 
 `.pre-commit-config.yaml` instala dos etapas:

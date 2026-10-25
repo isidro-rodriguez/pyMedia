@@ -46,6 +46,61 @@ path = "src/pymedia/__init__.py"
 [tool.hatch.build.targets.wheel]
 packages = ["src/pymedia"]
 
+# --- Poe the Poet (opcional) -------------------------------------------------
+# Atajos para quien tenga `poe` instalado globalmente (`uv tool install poethepoet`).
+# No es dependencia del proyecto: todo se puede ejecutar también con `uv run`.
+[tool.poe]
+executor.type = "uv"
+
+[tool.poe.tasks.check]
+help = "Formato, lint, tipos y tests"
+sequence = ["ruff format --check .", "ruff check .", "ty check", "pytest"]
+default_item_type = "cmd"
+
+[tool.poe.tasks.fix]
+help = "Aplica el formato y las correcciones automáticas de Ruff"
+sequence = ["ruff format .", "ruff check --fix ."]
+default_item_type = "cmd"
+
+[tool.poe.tasks.ci]
+help = "Reproduce el job de calidad del CI (sin binary)"
+sequence = [
+    "ruff format --check .",
+    "ruff check .",
+    "ty check",
+    "pytest --cov=pymedia --cov-report=term-missing:skip-covered --cov-fail-under=95",
+    "pytest -m locales",
+]
+default_item_type = "cmd"
+
+[tool.poe.tasks.i18n]
+help = "Extrae, actualiza, compila y valida los catálogos de traducción"
+sequence = [
+    "python scripts/i18n.py extract",
+    "python scripts/i18n.py update -l spanish",
+    "python scripts/i18n.py compile -l spanish",
+    "python scripts/i18n.py check",
+    "pytest -m locales",
+]
+default_item_type = "cmd"
+
+[tool.poe.tasks.fixtures]
+help = "Genera los fixtures manuales en tests/fixtures"
+cmd = "python scripts/generate_fixtures.py"
+
+[tool.poe.tasks.build]
+help = "Compila el ejecutable con PyInstaller y lo empaqueta"
+sequence = ["python scripts/build.py", "python scripts/package.py"]
+default_item_type = "cmd"
+
+[tool.poe.tasks.serve]
+help = "Previsualiza la documentación en http://localhost:8000"
+cmd = "zensical serve"
+
+[tool.poe.tasks.backup]
+help = "Copia de seguridad del repositorio con git bundle"
+cmd = "python scripts/backup.py"
+
 # Configuración de Ruff (Linter + Formatter)
 [tool.ruff]
 line-length = 88
