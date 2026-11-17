@@ -33,7 +33,7 @@ def _english_language(self: object) -> str:
 # instancian la clase directamente, por lo que no les afecta el parche.
 # El parche es a nivel de instancia (no de clase) a propósito: se enlaza
 # explícitamente para que el reemplazo reciba `self` como el método original.
-locale_manager.detect_language = _english_language.__get__(locale_manager)  # type: ignore[method-assign] # ty: ignore[invalid-assignment]
+locale_manager.detect_language = _english_language.__get__(locale_manager)  # type: ignore[method-assign]
 
 ROOT = Path(__file__).resolve().parents[1]
 BUILD_SCRIPT = ROOT / "scripts" / "build.py"
