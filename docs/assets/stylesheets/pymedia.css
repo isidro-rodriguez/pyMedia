@@ -180,10 +180,7 @@
    Tipografía
    ========================================================================== */
 
-.md-typeset {
-  font-size: 0.82rem;
-  line-height: 1.65;
-}
+/* Tamaño, interlineado y fuentes del texto: typography.css (común). */
 
 .md-typeset h1,
 .md-typeset h2,
