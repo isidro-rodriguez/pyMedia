@@ -263,7 +263,7 @@ def to_dict(value: object) -> dict[str, Any]:
     """
     if isinstance(value, dict):
         return cast(dict[str, Any], value)
-    return cast(dict[str, Any], {})
+    return {}
 
 
 def to_dict_list(value: object) -> list[dict[str, Any]]:
@@ -276,7 +276,7 @@ def to_dict_list(value: object) -> list[dict[str, Any]]:
         Los elementos `dict` de `value` si es una lista; una lista vacía en otro caso.
     """
     if not isinstance(value, list):
-        return cast(list[dict[str, Any]], [])
+        return []
     return cast(
         list[dict[str, Any]], [item for item in value if isinstance(item, dict)]
     )
