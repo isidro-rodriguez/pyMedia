@@ -1,37 +1,21 @@
 ---
-title: Inicio
-hide:
-  - toc
+template: home.html
+title: pyMedia
+hero:
+  lead: >-
+    Analiza, corta, une, convierte y edita vídeos, pistas de audio y subtítulos
+    con comandos cortos y legibles, sin recordar la sintaxis de ffmpeg.
+  actions:
+    - title: Instalar pyMedia
+      url: usuario/instalacion/
+      primary: true
+    - title: Ver los comandos
+      url: usuario/comandos/analisis/
+  images:
+    - src: assets/images/sesion.svg
+      alt: >-
+        Ejemplo de sesión: transcode de un MKV a MP4 con conversión de subtítulos
 ---
-
-<div class="pm-hero" markdown>
-
-<div markdown>
-
-# pyMedia
-
-<p class="pm-hero__lead">
-Analiza, corta, une, convierte y edita vídeos, pistas de audio y subtítulos con
-comandos cortos y legibles, sin recordar la sintaxis de ffmpeg.
-</p>
-
-<p class="pm-hero__actions" markdown>
-[Instalar pyMedia](usuario/instalacion.md){ .md-button .md-button--primary }
-[Ver los comandos](usuario/comandos/analisis.md){ .md-button }
-</p>
-
-</div>
-
-<div class="pm-terminal" role="figure" aria-label="Ejemplo de sesión: transcode de un MKV a MP4 con conversión de subtítulos">
-<div class="pm-terminal__bar" aria-hidden="true"><span></span><span></span><span></span></div>
-<pre><span class="p">$</span> <span class="c">pymedia</span> transcode pelicula.mkv <span class="f">--preset</span> fast <span class="f">--video</span>
-<span class="w">▲</span> Las pistas de subtítulos <span class="v">0 (subrip)</span> no son compatibles con <span class="v">.mp4</span>.
-<span class="q">?</span> <b>¿Convertirlas a un formato de subtítulos compatible?</b> <span class="b">[s/n]</span> <span class="m">(s)</span> s
-<span class="ok">✔</span> Transcodificando el contenedor <span class="ok">━━━━━━━━━━━━━━━━━━━━━━━━</span> <span class="b">100%</span> <span class="m">•</span> <span class="m">0:42</span>
-<span class="ok">✔</span> Contenedor transcodificado correctamente: <span class="v">pelicula_transcoded.mp4</span></pre>
-</div>
-
-</div>
 
 pyMedia traduce operaciones habituales a comandos `ffmpeg` seguros: valida las
 entradas con `ffprobe` antes de empezar, muestra el progreso y solo escribe la salida

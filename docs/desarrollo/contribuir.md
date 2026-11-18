@@ -179,11 +179,10 @@ La documentación es un sitio estático generado con [Zensical](https://zensical
 a partir de `docs/` y publicado en GitHub Pages por el workflow `docs.yml` en cada
 push a `main`.
 
-| Ruta                                 | Contenido                                               |
-|--------------------------------------|---------------------------------------------------------|
-| `zensical.toml`                      | Navegación, tema, extensiones de Markdown.              |
-| `docs/assets/stylesheets/pymedia.css`| Colores de la paleta de la CLI (`theme.py`) y estilos.  |
-| `docs_templates/`                    | Plantillas propias: favicons y manifiesto web.          |
+| Ruta                         | Contenido                                                                 |
+|------------------------------|---------------------------------------------------------------------------|
+| `zensical.toml`              | Navegación, extensiones de Markdown y tema: [techsical](https://isidro-rodriguez.github.io/techsical/), con los colores de la CLI (`theme.py`) en `[project.extra.techsical]`. |
+| `docs/assets/`               | Favicons, logo y la sesión de terminal de la portada (`images/sesion.svg`). |
 
 ```bash
 uv run zensical serve        # vista previa con recarga en http://localhost:8000
