@@ -544,8 +544,8 @@ dev = [
     { name = "pytest" },
     { name = "pytest-cov" },
     { name = "ruff" },
+    { name = "techsical" },
     { name = "ty" },
-    { name = "zensical" },
     { name = "zstandard" },
 ]
 
@@ -565,8 +565,8 @@ dev = [
     { name = "pytest", specifier = ">=8.0.0" },
     { name = "pytest-cov", specifier = ">=7.1.0" },
     { name = "ruff", specifier = ">=0.3.0" },
+    { name = "techsical", specifier = ">=0.3.0" },
     { name = "ty", specifier = ">=0.0.84" },
-    { name = "zensical", specifier = ">=0.0.71" },
     { name = "zstandard", specifier = ">=0.25.0" },
 ]
 
@@ -721,6 +721,18 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/58/15/8b3609fd3830ef7b27b655beb4b4e9c62313a4e8da8c676e142cc210d58e/shellingham-1.5.4.tar.gz", hash = "sha256:8dbca0739d487e5bd35ab3ca4b36e11c4078f3a234bfce294b0a0291363404de", size = 10310, upload-time = "2023-10-24T04:13:40.426Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/e0/f9/0595336914c5619e5f28a1fb793285925a8cd4b432c9da0a987836c7f822/shellingham-1.5.4-py2.py3-none-any.whl", hash = "sha256:7ecfff8f2fd72616f7481040475a65b2bf8af90a56c89140852d1120324e8686", size = 9755, upload-time = "2023-10-24T04:13:38.866Z" },
+]
+
+[[package]]
+name = "techsical"
+version = "0.3.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "zensical" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/ca/22/2757d05b3036e0f3197461f51c7b6183c72dbc9adae520968cea72da6485/techsical-0.3.0.tar.gz", hash = "sha256:3b5c11387b39ccbba412a09407c72569f4eb40abb437e3b3e28f52f7eae788a7", size = 439046, upload-time = "2026-11-18T10:00:34.627Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/46/17/42bc6d7273b71c0e39bc512bd3d8a4a0b65b1af00e7ab24d9cd979a2b31d/techsical-0.3.0-py3-none-any.whl", hash = "sha256:8465ac202a31c8e68b5aa8d49261d4a1ab316e09ec08b605d67f4206f6baff3e", size = 447398, upload-time = "2026-11-18T10:00:33.369Z" },
 ]
 
 [[package]]

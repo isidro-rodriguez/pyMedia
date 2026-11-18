@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 208" width="760" height="208" role="img" aria-labelledby="t">
+<title id="t">Ejemplo de sesión: transcode de un MKV a MP4 con conversión de subtítulos</title>
+<!-- Salida real de la CLI con la paleta de src/pymedia/theme.py. -->
+<rect x="0.5" y="0.5" width="759" height="207" rx="8" fill="#0b1628" stroke="#1c3554"/>
+<line x1="0" y1="34.5" x2="760" y2="34.5" stroke="#1c3554"/>
+<circle cx="18" cy="17" r="5" fill="#1c3554"/>
+<circle cx="34" cy="17" r="5" fill="#1c3554"/>
+<circle cx="50" cy="17" r="5" fill="#1c3554"/>
+<g font-family="'JetBrains Mono', 'Cascadia Mono', Consolas, 'DejaVu Sans Mono', monospace" font-size="13.5" xml:space="preserve">
+<text x="20" y="64"><tspan fill="#647d99">$</tspan><tspan fill="#dce7f5"> </tspan><tspan fill="#16a8f5" font-weight="700">pymedia</tspan><tspan fill="#dce7f5"> transcode pelicula.mkv </tspan><tspan fill="#00d9f5">--preset</tspan><tspan fill="#dce7f5"> fast </tspan><tspan fill="#00d9f5">--video</tspan></text>
+<text x="20" y="90"><tspan fill="#ffd21c" font-weight="700">▲</tspan><tspan fill="#dce7f5"> Las pistas de subtítulos </tspan><tspan fill="#43e8f5">0 (subrip)</tspan><tspan fill="#dce7f5"> no son compatibles con </tspan><tspan fill="#43e8f5">.mp4</tspan><tspan fill="#dce7f5">.</tspan></text>
+<text x="20" y="116"><tspan fill="#00cdbb" font-weight="700">?</tspan><tspan fill="#dce7f5"> </tspan><tspan fill="#f4f8ff" font-weight="700">¿Convertirlas a un formato de subtítulos compatible?</tspan><tspan fill="#dce7f5"> </tspan><tspan fill="#16a8f5">[s/n]</tspan><tspan fill="#dce7f5"> </tspan><tspan fill="#647d99">(s)</tspan><tspan fill="#dce7f5"> s</tspan></text>
+<text x="20" y="142"><tspan fill="#00cdbb" font-weight="700">✔</tspan><tspan fill="#dce7f5"> Transcodificando el contenedor </tspan><tspan fill="#00cdbb" font-weight="700">━━━━━━━━━━━━━━━━━━━━━━━━</tspan><tspan fill="#dce7f5"> </tspan><tspan fill="#16a8f5">100%</tspan><tspan fill="#dce7f5"> </tspan><tspan fill="#647d99">•</tspan><tspan fill="#dce7f5"> </tspan><tspan fill="#647d99">0:42</tspan></text>
+<text x="20" y="168"><tspan fill="#00cdbb" font-weight="700">✔</tspan><tspan fill="#dce7f5"> Contenedor transcodificado correctamente: </tspan><tspan fill="#43e8f5">pelicula_transcoded.mp4</tspan></text>
+</g>
+</svg>
