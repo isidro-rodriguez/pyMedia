@@ -25,7 +25,7 @@ sudo apt install ./pymedia_1.0.0_amd64.deb      # Linux (instala ffmpeg como dep
 En Windows, descomprime `pymedia-1.0.0-windows-x64.zip`, añade la carpeta al `PATH` e
 instala [ffmpeg](https://ffmpeg.org/download.html) (`winget install ffmpeg`).
 
-Desde el código fuente (Python 3.12+, [uv](https://docs.astral.sh/uv/) y ffmpeg en el `PATH`):
+Desde el código fuente (Python 3.13+, [uv](https://docs.astral.sh/uv/) y ffmpeg en el `PATH`):
 
 ```bash
 git clone https://github.com/isidro-rodriguez/pyMedia.git

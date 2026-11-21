@@ -1,92 +1,11 @@
 """Utilidades compartidas por los modelos de pyMedia."""
 
-import math
-import re
-from datetime import UTC, datetime, timedelta
-from email.utils import parsedate_to_datetime
+from datetime import timedelta
 from fractions import Fraction
 from pathlib import Path
 from typing import Any, cast
 
-_CLOCK_RE = re.compile(r"(\d+):([0-5]?\d):([0-5]?\d(?:\.\d+)?)")
-# Cota holgada (~31.700 años) para no desbordar timedelta con datos corruptos.
-_MAX_SECONDS = 1e12
-
-
-# Formatos con nombre de mes: no admiten ambigüedad día/mes.
-_NAMED_MONTH_FORMATS = (
-    "%a %b %d %H:%M:%S %Y",
-    "%b %d %H:%M:%S %Y",
-    "%b %d %Y",
-    "%d %b %Y",
-    "%d %B %Y",
-    "%B %d %Y",
-)
-# Formatos numéricos no ISO: año delante, o día antes que mes (convención
-# europea). Se excluye a propósito el orden estadounidense mes/día/año.
-_NUMERIC_FORMATS = ("%Y/%m/%d", "%Y.%m.%d", "%d-%m-%Y", "%d/%m/%Y", "%d.%m.%Y")
-
-
-def parse_date(raw: str | None) -> datetime | None:
-    """Convierte fechas habituales de metadatos multimedia a `datetime`.
-
-    Admite ISO-8601, RFC 2822, formatos con nombre de mes, formatos numéricos
-    con día antes que mes y timestamps Unix en segundos.
-
-    Args:
-        raw: String a ser parseado como fecha.
-
-    Returns:
-        La fecha a medianoche y sin zona horaria, o `None` si la conversión falla.
-    """
-    if not raw:
-        return None
-    dt = (
-        _parse_iso_date(raw)
-        or _parse_rfc2822_date(raw)
-        or _parse_date_formats(raw, _NAMED_MONTH_FORMATS + _NUMERIC_FORMATS)
-        or _parse_unix_date(raw)
-    )
-    return None if dt is None else datetime(dt.year, dt.month, dt.day)
-
-
-def _parse_iso_date(raw: str) -> datetime | None:
-    """Parsea ISO-8601, aceptando el sufijo `Z` como UTC."""
-    if raw.endswith(("Z", "z")):
-        raw = raw[:-1] + "+00:00"
-    try:
-        return datetime.fromisoformat(raw)
-    except ValueError:
-        return None
-
-
-def _parse_rfc2822_date(raw: str) -> datetime | None:
-    """Parsea RFC 2822 / RFC 5322 y formatos similares."""
-    try:
-        return parsedate_to_datetime(raw)
-    except (TypeError, ValueError, OverflowError):
-        return None
-
-
-def _parse_date_formats(raw: str, formats: tuple[str, ...]) -> datetime | None:
-    """Prueba los formatos `strptime` en orden y devuelve el primer acierto."""
-    for fmt in formats:
-        try:
-            return datetime.strptime(raw, fmt)
-        except ValueError:
-            continue
-    return None
-
-
-def _parse_unix_date(raw: str) -> datetime | None:
-    """Parsea un timestamp Unix en segundos con año plausible (1970-2100)."""
-    if not re.fullmatch(r"\d{9,11}", raw):
-        return None
-    try:
-        dt = datetime.fromtimestamp(int(raw), tz=UTC)
-    except (ValueError, OverflowError, OSError):
-        return None
-    return dt if 1970 <= dt.year <= 2100 else None
+from acodo.utils import to_float, to_int, to_timedelta
 
 
 def parse_fraction(value: str | None) -> Fraction | None:
@@ -121,16 +40,13 @@ def parse_duration(value: object) -> timedelta | None:
         return None
 
     text = value.strip()
-    match = _CLOCK_RE.fullmatch(text)
-    if match:
-        hours, minutes, seconds = match.groups()
-        total = int(hours) * 3600 + int(minutes) * 60 + float(seconds)
-    else:
-        total = to_float(text)
-
-    if total is None or total < 0:
+    # ffprobe siempre escribe horas: un reloj `M:SS` no es una duración suya.
+    if text.count(":") == 1:
         return None
-    return to_timedelta(total)
+    duration = to_timedelta(text) if ":" in text else to_timedelta(to_float(text))
+    if duration is None or duration < timedelta(0):
+        return None
+    return duration
 
 
 def parse_r128_gain(value: str | None) -> float | None:
@@ -202,24 +118,6 @@ def parse_size(size_bytes: int, locale: str) -> str:
     if size_bytes > 1024**3:
         return f"{size_gb} GB ({size_bt} bytes)"
     return f"{size_mb} MB ({size_bt} bytes)"
-
-
-def parse_timedelta(time: timedelta) -> str:
-    """Formatea un objeto timedelta a una cadena con formato HH:MM:SS o MM:SS.
-
-    Args:
-        time: Duración a formatear.
-
-    Returns:
-        Texto en formato `H:MM:SS` o `MM:SS`.
-    """
-    total = int(time.total_seconds())
-    hours, remainder = divmod(total, 3600)
-    minutes, secs = divmod(remainder, 60)
-
-    if hours > 0:
-        return f"{hours}:{minutes:02d}:{secs:02d}"
-    return f"{minutes}:{secs:02d}"
 
 
 def ticks_to_timedelta(
@@ -306,65 +204,3 @@ def to_ffmpeg_value(value: str | Path) -> str:
         text = "".join(f"\\{char}" if char in meta_chars else char for char in text)
 
     return text
-
-
-def to_float(value: str | float | None) -> float | None:
-    """Convierte strings numéricos a float.
-
-    Args:
-        value: Valor a convertir (texto numérico o flotante).
-
-    Returns:
-        El número convertido, o `None` si la conversión falla.
-    """
-    if value is None:
-        return None
-
-    try:
-        return float(value)
-    except (ValueError, TypeError):
-        return None
-
-
-def to_int(value: str | int | None) -> int | None:
-    """Convierte strings numéricos a int.
-
-    Args:
-        value: Valor a convertir (texto numérico o entero).
-
-    Returns:
-        El número convertido, o `None` si la conversión falla.
-    """
-    if value is None:
-        return None
-
-    try:
-        return int(value)
-    except (ValueError, TypeError):
-        return None
-
-
-def to_text(value: object) -> str | None:
-    """Devuelve el valor si es un texto no vacío.
-
-    Args:
-        value: Valor a comprobar.
-
-    Returns:
-        El propio `value` si es un `str` no vacío; `None` en otro caso.
-    """
-    return value if isinstance(value, str) and value else None
-
-
-def to_timedelta(seconds: float | None) -> timedelta | None:
-    """Convierte segundos a timedelta.
-
-    Args:
-        seconds: Número de segundos.
-
-    Returns:
-        La duración, o `None` si el valor falta, no es finito o es desmesurado.
-    """
-    if seconds is None or not math.isfinite(seconds) or abs(seconds) > _MAX_SECONDS:
-        return None
-    return timedelta(seconds=seconds)

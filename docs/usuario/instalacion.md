@@ -51,7 +51,7 @@ Junto a cada paquete hay un fichero `.sha256` para verificar la descarga.
 
 | Requisito        | Versión         | Notas                                                        |
 | ---------------- | --------------- | ------------------------------------------------------------ |
-| Python           | 3.12 o superior | Para ejecutar desde el código fuente.                        |
+| Python           | 3.13 o superior | Para ejecutar desde el código fuente.                        |
 | ffmpeg y ffprobe | Reciente        | Deben estar en el `PATH`. pyMedia lo comprueba al arrancar.  |
 | ffplay           | Reciente        | Opcional, solo para `play`. Suele venir junto a ffmpeg.      |
 | uv               | Reciente        | Gestor de dependencias del proyecto.                         |

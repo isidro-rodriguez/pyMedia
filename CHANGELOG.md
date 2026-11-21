@@ -6,6 +6,21 @@ Las versiones se han reconstruido a partir del histórico de
 Las versiones intermedias no registradas (0.2–0.4, 0.6–0.8) se agrupan
 con la sección anterior.
 
+## [Sin publicar]
+
+### Cambiado
+
+- Requiere Python 3.13 o superior (antes 3.12): las utilidades comunes vienen de `acodo`, que
+  necesita 3.13. El CI prueba 3.13 y 3.14.
+- La web usa el tema techsical.
+
+### Interno
+
+- Dependencia `platformdirs` sustituida por `acodo` (`get_config_dir`, misma carpeta de
+  configuración en Linux, macOS y Windows). Las conversiones y el formato de duraciones
+  (`to_int`, `to_float`, `to_str`, `to_timedelta`, `to_datetime`, `parse_timedelta`) también
+  vienen de `acodo`; `pymedia.utils` conserva solo lo propio de ffmpeg/ffprobe.
+
 ## [1.0.0] - 2026-10-23
 
 Primera versión estable.

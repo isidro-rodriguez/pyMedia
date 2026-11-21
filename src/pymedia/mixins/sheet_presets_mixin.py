@@ -5,7 +5,7 @@ from dataclasses import dataclass
 from importlib.resources import files
 from pathlib import Path
 
-import platformdirs
+import acodo.utils
 
 from pymedia.errors import MissingParameterError
 from pymedia.models.sheet_preset import PresetSheet
@@ -126,14 +126,7 @@ class SheetPresetsMixin:
     @staticmethod
     def _resolve_font_asset() -> Path:
         """Devuelve la ruta de la fuente, instalándola en la app si falta."""
-        assets_dir = (
-            Path(
-                platformdirs.user_config_dir(
-                    appname="pymedia", appauthor=False, roaming=True
-                )
-            )
-            / "assets"
-        )
+        assets_dir = acodo.utils.get_config_dir("pymedia") / "assets"
         font_path = assets_dir / _FONT_FILENAME
 
         if not font_path.exists():

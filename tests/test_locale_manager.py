@@ -58,7 +58,7 @@ def test_detect_language_usa_config_toml(tmp_path: Path) -> None:
         {"XDG_CONFIG_HOME": str(tmp_path)},
         clear=False,
     ):
-        with patch("platformdirs.user_config_dir", return_value=str(config_dir)):
+        with patch("acodo.utils.get_config_dir", return_value=config_dir):
             assert mgr.detect_language() == "spanish"
 
 
@@ -78,7 +78,7 @@ def test_detect_language_config_toml_danado(tmp_path: Path, content: str) -> Non
     mgr = _LocaleManager()
     with (
         patch.dict(os.environ, {"PYMEDIA_LANG": ""}, clear=False),
-        patch("platformdirs.user_config_dir", return_value=str(config_dir)),
+        patch("acodo.utils.get_config_dir", return_value=config_dir),
     ):
         assert mgr.detect_language() in mgr.SUPPORTED_LANGUAGES
 
@@ -92,7 +92,7 @@ def test_detect_language_usa_env_var(tmp_path: Path) -> None:
     )
     mgr = _LocaleManager()
     with patch.dict(os.environ, {"PYMEDIA_LANG": "eng"}, clear=False):
-        with patch("platformdirs.user_config_dir", return_value=str(config_dir)):
+        with patch("acodo.utils.get_config_dir", return_value=config_dir):
             assert mgr.detect_language() == "english"
 
 
@@ -119,7 +119,7 @@ def test_detect_language_env_var_ignora_valor_no_soportado(tmp_path: Path) -> No
     )
     mgr = _LocaleManager()
     with patch.dict(os.environ, {"PYMEDIA_LANG": "fr"}, clear=False):
-        with patch("platformdirs.user_config_dir", return_value=str(config_dir)):
+        with patch("acodo.utils.get_config_dir", return_value=config_dir):
             assert mgr.detect_language() == "english"
 
 
@@ -132,7 +132,7 @@ def test_detect_language_env_var_acepta_iso_639_1(tmp_path: Path) -> None:
     )
     mgr = _LocaleManager()
     with patch.dict(os.environ, {"PYMEDIA_LANG": "es"}, clear=False):
-        with patch("platformdirs.user_config_dir", return_value=str(config_dir)):
+        with patch("acodo.utils.get_config_dir", return_value=config_dir):
             assert mgr.detect_language() == "spanish"
 
 

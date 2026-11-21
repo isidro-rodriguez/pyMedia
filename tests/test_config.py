@@ -46,7 +46,7 @@ audio_bit_rate = "256k"
 def _load(text: str, tmp_path: Path) -> Config:
     """Carga `text` como `config.toml` del usuario en un directorio temporal."""
     (tmp_path / "config.toml").write_text(text, encoding="utf-8")
-    with patch("platformdirs.user_config_dir", return_value=str(tmp_path)):
+    with patch("acodo.utils.get_config_dir", return_value=tmp_path):
         return Config.load()
 
 
@@ -66,7 +66,7 @@ def test_load_carga_perfiles_y_valores_por_defecto(tmp_path: Path) -> None:
 
 def test_load_crea_config_por_defecto_si_no_existe(tmp_path: Path) -> None:
     """Sin `config.toml` del usuario, `load` copia la plantilla de `resources`."""
-    with patch("platformdirs.user_config_dir", return_value=str(tmp_path)):
+    with patch("acodo.utils.get_config_dir", return_value=tmp_path):
         config = Config.load()
 
     assert (tmp_path / "config.toml").exists()

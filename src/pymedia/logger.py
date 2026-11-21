@@ -6,10 +6,9 @@ Rich y un handler de fichero en el directorio de configuración del usuario.
 
 import logging
 from logging.handlers import TimedRotatingFileHandler
-from pathlib import Path
 from typing import Any, Self
 
-import platformdirs
+import acodo.utils
 from rich.console import Console, RenderableType
 from rich.highlighter import ReprHighlighter
 from rich.markup import escape
@@ -77,14 +76,7 @@ class Logger:
         root.addHandler(console)
 
         # Ruta del archivo de log
-        log_path = (
-            Path(
-                platformdirs.user_config_dir(
-                    appname="pymedia", appauthor=False, roaming=True
-                )
-            )
-            / "logging.log"
-        )
+        log_path = acodo.utils.get_config_dir("pymedia") / "logging.log"
         log_path.parent.mkdir(parents=True, exist_ok=True)
 
         file_handler = TimedRotatingFileHandler(

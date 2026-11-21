@@ -2,7 +2,7 @@
 
 ## Entorno
 
-Requisitos: Python 3.12+, [uv](https://docs.astral.sh/uv/) y ffmpeg/ffprobe en el
+Requisitos: Python 3.13+, [uv](https://docs.astral.sh/uv/) y ffmpeg/ffprobe en el
 `PATH` (los tests extremo a extremo los usan).
 
 ```bash
@@ -18,7 +18,7 @@ uv run pre-commit install      # hooks de pre-commit y pre-push (recomendado)
 
 | Grupo      | Paquetes                                                                 |
 |------------|--------------------------------------------------------------------------|
-| Ejecución  | `typer`, `rich`, `platformdirs`                                          |
+| Ejecución  | `typer`, `rich`, `acodo`                                                 |
 | Desarrollo | `ruff`, `ty`, `pytest`, `pytest-cov`, `pre-commit`, `babel`, `pyinstaller`, `pdoc`, `zstandard` |
 
 ## Calidad
@@ -36,7 +36,7 @@ uv run pytest
 | Herramienta | Configuración (`pyproject.toml`)                                            |
 |-------------|------------------------------------------------------------------------------|
 | Ruff        | Línea de 88; reglas `E`, `F`, `I`, `UP`, `B`, `D`; docstrings estilo Google. |
-| ty          | Python 3.12, igualdad y genéricos estrictos.                                 |
+| ty          | Python 3.13, igualdad y genéricos estrictos.                                 |
 | pytest      | `tests/`, `pythonpath = src`, excluye por defecto las marcas `binary` y `locales`. |
 
 ### Atajos con Poe (opcional)
@@ -76,7 +76,7 @@ uv run pre-commit run --all-files --hook-stage pre-push   # etapa pre-push
 
 | Job       | Plataformas                         | Pasos                                                         |
 |-----------|-------------------------------------|---------------------------------------------------------------|
-| `quality` | Ubuntu y Windows × Python 3.12/3.13 | `ruff format --check`, `ruff check`, `ty`, `pytest --cov` (≥ 95 %), `pytest -m locales`. |
+| `quality` | Ubuntu y Windows × Python 3.13/3.14 | `ruff format --check`, `ruff check`, `ty`, `pytest --cov` (≥ 95 %), `pytest -m locales`. |
 | `binary`  | Ubuntu y Windows                    | `pytest -m binary` y publica el ejecutable como artefacto (7 días). |
 
 `.github/dependabot.yml` revisa cada lunes las dependencias de `uv` (agrupando

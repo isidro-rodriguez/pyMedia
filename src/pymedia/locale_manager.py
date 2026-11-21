@@ -12,7 +12,7 @@ import os
 import tomllib
 from pathlib import Path
 
-import platformdirs
+import acodo.utils
 
 from pymedia.data.language_codes import resolve_language
 
@@ -93,14 +93,7 @@ class _LocaleManager:
             idioma del sistema y `Config.load()` informa después del error con
             su mensaje traducido.
             """
-            path = (
-                Path(
-                    platformdirs.user_config_dir(
-                        appname="pymedia", appauthor=False, roaming=True
-                    )
-                )
-                / "config.toml"
-            )
+            path = acodo.utils.get_config_dir("pymedia") / "config.toml"
             try:
                 with path.open("rb") as f:
                     data = tomllib.load(f)

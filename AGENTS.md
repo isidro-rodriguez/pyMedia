@@ -92,7 +92,8 @@ docs/                 # Zensical site, Spanish: usuario/, desarrollo/
 scripts/              # build.py, package.py, i18n.py, generate_fixtures.py (+ fixtures/)
 ```
 
-- Runtime dependencies are only `typer`, `rich` and `platformdirs`.
+- Runtime dependencies are only `typer`, `rich` and `acodo` (pure utilities, no dependencies:
+  conversions, durations, config dir).
 - `build/`, `site/` and `tests/fixtures/` (manual fixtures) are git-ignored.
 
 ### Architecture
@@ -144,7 +145,7 @@ as a starting point (`docs/desarrollo/nuevo-comando.md`).
   `tests/test_docs_consistency.py` checks them against each other.
 - Hooks (`uv run pre-commit install`): pre-commit runs ruff, ty and pytest; pre-push runs
   `uv lock --check`, coverage and locales. `poe ci` reproduces the CI quality job.
-- CI (`.github/workflows/ci.yaml`): ubuntu + windows, Python 3.12 and 3.13, with ffmpeg; a
+- CI (`.github/workflows/ci.yaml`): ubuntu + windows, Python 3.13 and 3.14, with ffmpeg; a
   separate job builds the executable and runs `pytest -m binary`.
 
 ### Commit policy

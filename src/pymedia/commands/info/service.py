@@ -3,6 +3,7 @@
 import math
 from dataclasses import astuple
 
+from acodo.utils import parse_timedelta
 from rich import box
 from rich.console import Group, RenderableType
 from rich.panel import Panel
@@ -16,7 +17,7 @@ from pymedia.locale_manager import locale_manager
 from pymedia.locales import translate as _
 from pymedia.models.media import Audio, Media, Subtitles, Video
 from pymedia.ui import console
-from pymedia.utils import parse_quantity, parse_size, parse_timedelta
+from pymedia.utils import parse_quantity, parse_size
 
 _MAX_PANEL_WIDTH = 120
 

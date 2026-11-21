@@ -18,7 +18,7 @@ from pymedia.utils import to_ffmpeg_value
 @pytest.fixture
 def config(tmp_path: Path) -> Config:
     """Config de la plantilla, aislada del `config.toml` del usuario."""
-    with patch("platformdirs.user_config_dir", return_value=str(tmp_path)):
+    with patch("acodo.utils.get_config_dir", return_value=tmp_path):
         return Config.load()
 
 

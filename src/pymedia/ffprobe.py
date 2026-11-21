@@ -6,6 +6,8 @@ from datetime import timedelta
 from pathlib import Path
 from typing import Any
 
+from acodo.utils import to_datetime, to_float, to_int, to_str, to_timedelta
+
 from pymedia.data.subtitles_formats import SUBTITLES_FORMATS, SubtitlesType
 from pymedia.data.video_codecs import VIDEO_CODECS
 from pymedia.errors import FfprobeError, UserError
@@ -33,7 +35,6 @@ from pymedia.models.video import (
     VideoMetadata,
 )
 from pymedia.utils import (
-    parse_date,
     parse_duration,
     parse_fraction,
     parse_r128_gain,
@@ -42,10 +43,6 @@ from pymedia.utils import (
     to_bool,
     to_dict,
     to_dict_list,
-    to_float,
-    to_int,
-    to_text,
-    to_timedelta,
 )
 
 
@@ -143,7 +140,7 @@ def _build_media_metadata(tags: dict[str, Any]) -> MediaMetadata:
         description=_get_tag(tags, "description"),
         synopsis=_get_tag(tags, "synopsis"),
         genre=_get_tag(tags, "genre"),
-        date=parse_date(raw=_get_tag(tags, "date")),
+        date=to_datetime(tag) if (tag := _get_tag(tags, "date")) else None,
         copyright=_get_tag(tags, "copyright"),
         law_rating=_get_tag(tags, "law_rating"),
         artist=_get_tag(tags, "artist"),
@@ -156,7 +153,7 @@ def _build_media_metadata(tags: dict[str, Any]) -> MediaMetadata:
 def _build_audio_format(stream: dict[str, Any]) -> AudioFormat:
     """Construye AudioFormat a partir del stream de audio de ffprobe."""
     return AudioFormat(
-        codec=to_text(stream.get("codec_name")),
+        codec=to_str(stream.get("codec_name")),
         sample_rate=to_int(stream.get("sample_rate")),
         channels=to_int(stream.get("channels")),
         channel_layout=stream.get("channel_layout"),
@@ -208,7 +205,7 @@ def _build_audio_dispositions(disposition: dict[str, Any]) -> AudioDispositions:
 
 def _build_video_format(stream: dict[str, Any]) -> VideoFormat:
     """Construye VideoFormat a partir del stream de vídeo de ffprobe."""
-    codec = to_text(stream.get("codec_name"))
+    codec = to_str(stream.get("codec_name"))
     known = VIDEO_CODECS.get(codec) if codec else None
     return VideoFormat(
         # Un códec ausente del catálogo no invalida el fichero: se usa el nombre crudo.
@@ -249,7 +246,7 @@ def _build_video_dispositions(disposition: dict[str, Any]) -> VideoDispositions:
 
 def _build_subtitles_format(stream: dict[str, Any]) -> SubtitlesFormat:
     """Construye SubtitlesFormat a partir del stream de subtítulos de ffprobe."""
-    codec = to_text(stream.get("codec_name"))
+    codec = to_str(stream.get("codec_name"))
     known = SUBTITLES_FORMATS.get(codec) if codec else None
     mimetype = _get_tag(to_dict(stream.get("tags")), "mimetype") or (
         known.mimetype if known else None
@@ -293,7 +290,7 @@ def _build_subtitles_dispositions(disposition: dict[str, Any]) -> SubtitlesDispo
 def _build_chapter(chapter: dict[str, Any]) -> Chapter:
     """Construye un Chapter a partir de una entrada 'chapters' de ffprobe."""
     tags = to_dict(chapter.get("tags"))
-    time_base = to_text(chapter.get("time_base"))
+    time_base = to_str(chapter.get("time_base"))
     fraction = parse_fraction(time_base)
 
     return Chapter(
@@ -486,7 +483,7 @@ def validate_subtitles_file_codec(subtitles_input: Path, logger: Logger) -> None
     data = _run_ffprobe(["-show_format"], subtitles_input)
     logger.debug(msg=_("ffprobe subtitles file data: %(data)s"), data=data)
 
-    format_name = to_text(to_dict(data.get("format")).get("format_name")) or ""
+    format_name = to_str(to_dict(data.get("format")).get("format_name")) or ""
     detected_codecs: set[str] = {
         token.strip() for token in format_name.split(",") if token.strip()
     }

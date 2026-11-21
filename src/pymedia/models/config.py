@@ -7,7 +7,7 @@ from importlib.resources import files
 from pathlib import Path
 from typing import Any, cast
 
-import platformdirs
+import acodo.utils
 
 from pymedia.data.audio_codecs import AUDIO_CODECS
 from pymedia.data.language_codes import resolve_language
@@ -115,14 +115,7 @@ class Config:
             ConfigError: Si `config.toml` no es un TOML válido, le faltan o sobran
                 claves, o presenta parámetros no válidos.
         """
-        path = (
-            Path(
-                platformdirs.user_config_dir(
-                    appname="pymedia", appauthor=False, roaming=True
-                )
-            )
-            / "config.toml"
-        )
+        path = acodo.utils.get_config_dir("pymedia") / "config.toml"
         if not path.exists():
             cls._create(path)
 
