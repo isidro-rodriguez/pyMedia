@@ -26,9 +26,9 @@ dev = [
     "pyinstaller>=6.22.3",
     "pytest>=8.0.0",
     "pytest-cov>=7.1.0",
-    "ruff>=0.3.0",
+    "ruff>=0.17.6",
     "techsical>=0.3.0",
-    "ty>=0.0.84",
+    "ty>=0.0.107",
     "zstandard>=0.25.0",
 ]
 
